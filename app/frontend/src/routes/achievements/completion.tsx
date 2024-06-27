@@ -12,7 +12,7 @@ import { AchievementTeamExtendedType, AchievementTeamType } from "api/types/Achi
 const EVENT_START = 1718416800000;
 export const EVENT_END = 1719187200000;
 
-function getMyTeam(userId: string | undefined, teams?: Array<AchievementTeamExtendedType | AchievementTeamType>): AchievementTeamExtendedType | null {
+function getMyTeam(userId: number | undefined, teams?: Array<AchievementTeamExtendedType | AchievementTeamType>): AchievementTeamExtendedType | null {
   if (userId === undefined) {
     return null;
   }
