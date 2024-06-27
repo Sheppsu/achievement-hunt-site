@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "jsx": "react-jsx",
+
+    "noEmit": true,
+    "moduleResolution": "bundler",
+    "baseUrl": ".",
+    "paths": {
+      "api/*": ["./src/api/*"],
+      "assets/*": ["./src/assets/*"],
+      "components/*": ["./src/components/*"],
+      "contexts/*": ["./src/contexts/*"],
+      "routes/*": ["./src/routes/*"],
+      "types/*": ["./src/types/*"],
+      "util/*": ["./src/util/*"]
+    },
+    "isolatedModules": true,
+    "useDefineForClassFields": true,
+
+    "strict": true,
+    "allowImportingTsExtensions": true
+  },
+  "include": ["src"]
+}
