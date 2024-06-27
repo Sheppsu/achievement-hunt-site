@@ -1,6 +1,7 @@
 {
   "type": "module",
   "scripts": {
+    "check": "tsc",
     "build": "vite build",
     "build-debug": "vite build -m debug",
     "watch": "vite build --watch -m debug"
