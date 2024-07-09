@@ -67,7 +67,7 @@ type WSAchievementType = {
 type RefreshReturnType = {
     achievements: WSAchievementType[];
     score: number;
-    you: number;
+    player: number;
 }
 
 function onCompletedAchievement(data: RefreshReturnType, state: WebsocketState) {
@@ -80,7 +80,7 @@ function onCompletedAchievement(data: RefreshReturnType, state: WebsocketState) 
 
                 const myTeam = team as AchievementTeamExtendedType;
                 for (const player of myTeam.players) {
-                    if (player.id === data.you) {
+                    if (player.id === data.player) {
                         players.push({
                             ...player,
                             completions: player.completions.concat(data.achievements.map((achievement) => ({
