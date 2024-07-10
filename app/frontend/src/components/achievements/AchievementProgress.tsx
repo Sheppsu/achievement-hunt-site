@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientContext, useQuery } from "@tanstack/react-query";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useGetAchievements } from "api/query";
 import { AchievementPlayerExtendedType } from "api/types/AchievementPlayerType";
 import { AchievementTeamExtendedType, AchievementTeamType } from "api/types/AchievementTeamType";
@@ -160,16 +160,18 @@ export default function AchievementProgress({
     team: AchievementTeamExtendedType | null,
     state: WebsocketState | null,
     setState: React.Dispatch<React.SetStateAction<WebsocketState | null>>
-}) {
+}) {  
     const session = useContext(SessionContext);
     const queryClient = useContext(QueryClientContext) as QueryClient;
     const dispatchEventMsg = useContext(EventContext);
 
     const { data } = useQuery({
         queryKey: ["wsauth"],
-        queryFn: () => fetch("/api/achievements/wsauth/").then((resp) => resp.json())
+        queryFn: () => fetch("/api/wsauth/").then((resp) => resp.json())
     });
     const { data: achievements } = useGetAchievements();
+
+    const [canSubmit, setCanSubmit] = useState(true);
 
     const eventEnded: boolean = Date.now() >= EVENT_END;
 
@@ -194,7 +196,13 @@ export default function AchievementProgress({
         achievementCount += player.completions.length;
     }
     
-    const submitCls = "submit-button" + (state === null || !state.authenticated || eventEnded ? " disabled" : "");
+    const submitCls = "submit-button" + (state === null || !state.authenticated || eventEnded || !canSubmit ? " disabled" : "");
+
+    function onSubmit() {
+        setCanSubmit(false);
+        setTimeout(() => setCanSubmit(true), 5000);
+        sendSubmit(state);
+    }
 
     return (
         <div className="total-achievements-container">
@@ -205,7 +213,7 @@ export default function AchievementProgress({
                     <div className="progress-bar-inner" style={{width: `${achievementCount / achievements.length * 100}%`}}></div>
                 </div>
             </div>
-            <div className={submitCls} onClick={() => sendSubmit(state)}>Submit</div>
+            <div className={submitCls} onClick={onSubmit}>Submit</div>
         </div>
     );
 }
