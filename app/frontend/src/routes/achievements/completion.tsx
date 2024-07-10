@@ -9,8 +9,8 @@ import { SessionContext } from "contexts/SessionContext";
 import { Helmet } from "react-helmet";
 import { AchievementTeamExtendedType, AchievementTeamType } from "api/types/AchievementTeamType";
 
-const EVENT_START = 1718416800000;
-export const EVENT_END = 1719187200000;
+const EVENT_START = 1720573205000;
+export const EVENT_END = 2720600000000;
 
 function getMyTeam(userId: number | undefined, teams?: Array<AchievementTeamExtendedType | AchievementTeamType>): AchievementTeamExtendedType | null {
   if (userId === undefined) {

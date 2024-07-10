@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
     "achievements",
     "frontend"
@@ -168,3 +169,4 @@ OSU_LOGIN_URL = AuthHandler(
 ).get_auth_url()
 
 ACHIEVEMENTS_WS_URI = os.getenv("ACHIEVEMENTS_WS_URI")
+WS_CONNECTION_VALIDATOR = os.getenv("WS_CONNECTION_VALIDATOR")

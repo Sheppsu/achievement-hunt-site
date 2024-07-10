@@ -112,7 +112,7 @@ export function useLeaveTeam(): SpecificUseMutationResult<null> {
       onSuccess: () => {
         // remove players or team
         queryClient?.setQueryData(
-          ["achievements", "teams"],
+          ["teams"],
           (old: Array<AchievementTeamType | AchievementTeamExtendedType>) => {
             const teams = [];
             for (const team of old) {
@@ -152,7 +152,7 @@ export function useJoinTeam(): SpecificUseMutationResult<AchievementTeamExtended
       onSuccess: (data) => {
         // update team data for team being joined
         queryClient?.setQueryData(
-          ["achievements", "teams"],
+          ["teams"],
           (old: AchievementTeamType[]) =>
             old.map((team) => {
               if (team.id === data.id) {
@@ -177,7 +177,7 @@ export function useCreateTeam(): SpecificUseMutationResult<AchievementTeamExtend
       onSuccess: (data) => {
         // add team to team list
         queryClient?.setQueryData(
-          ["achievements", "teams"],
+          ["teams"],
           (old: AchievementTeamType[]) => old.concat([data])
         );
       },
