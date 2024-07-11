@@ -8,15 +8,15 @@ import {
   useMutation,
   useQuery,
 } from "@tanstack/react-query";
-import { AchievementExtendedType } from "./types/AchievementType";
-import {
-  AchievementTeamType,
-  AchievementTeamExtendedType,
-} from "./types/AchievementTeamType";
-import { useContext } from "react";
 import { EventContext, EventStateType } from "contexts/EventContext";
 import { UndefinedInitialDataOptions } from "node_modules/@tanstack/react-query/build/legacy";
+import { useContext } from "react";
 import { AchievementPlayerType } from "./types/AchievementPlayerType";
+import {
+  AchievementTeamExtendedType,
+  AchievementTeamType,
+} from "./types/AchievementTeamType";
+import { AchievementExtendedType } from "./types/AchievementType";
 
 function getUrl(endpoint: string): string {
   endpoint = endpoint.startsWith("/") ? endpoint : "/" + endpoint;
@@ -90,7 +90,7 @@ export function useGetAchievements(
   return useMakeQuery({
     queryKey: ["achievements"],
     enabled,
-    refetchInterval: 60000
+    refetchInterval: 60000,
   });
 }
 
@@ -100,7 +100,7 @@ export function useGetTeams(
   return useMakeQuery({
     queryKey: ["teams"],
     enabled,
-    refetchInterval: 60000
+    refetchInterval: 60000,
   });
 }
 
@@ -151,15 +151,13 @@ export function useJoinTeam(): SpecificUseMutationResult<AchievementTeamExtended
       mutationKey: ["teams", "join"],
       onSuccess: (data) => {
         // update team data for team being joined
-        queryClient?.setQueryData(
-          ["teams"],
-          (old: AchievementTeamType[]) =>
-            old.map((team) => {
-              if (team.id === data.id) {
-                return data;
-              }
-              return team;
-            })
+        queryClient?.setQueryData(["teams"], (old: AchievementTeamType[]) =>
+          old.map((team) => {
+            if (team.id === data.id) {
+              return data;
+            }
+            return team;
+          })
         );
       },
     },
@@ -173,12 +171,11 @@ export function useCreateTeam(): SpecificUseMutationResult<AchievementTeamExtend
   const queryClient = useContext(QueryClientContext);
   return useMakeMutation(
     {
-      mutationKey: ["teams", "new"],
+      mutationKey: ["teams", "create"],
       onSuccess: (data) => {
         // add team to team list
-        queryClient?.setQueryData(
-          ["teams"],
-          (old: AchievementTeamType[]) => old.concat([data])
+        queryClient?.setQueryData(["teams"], (old: AchievementTeamType[]) =>
+          old.concat([data])
         );
       },
     },

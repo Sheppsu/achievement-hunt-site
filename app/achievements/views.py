@@ -1,16 +1,16 @@
+import base64
 import json
-from django.db import connection
-from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
-from django.views.decorators.http import require_POST, require_http_methods
-from django.conf import settings
-from django.contrib.auth import login as do_login
-from django.shortcuts import redirect
-
+import random
 import secrets
 import struct
-import random
-import base64
 import time
+
+from django.conf import settings
+from django.contrib.auth import login as do_login
+from django.db import connection
+from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
+from django.shortcuts import redirect
+from django.views.decorators.http import require_http_methods, require_POST
 from nacl.secret import SecretBox
 
 from .serializers import *
@@ -20,7 +20,8 @@ EVENT_END = 1719187200
 
 
 def event_ended():
-    return time.time() >= EVENT_END - 1 or settings.DEBUG
+    # return time.time() >= EVENT_END - 1 or settings.DEBUG
+    return False
 
 
 def serialize_full_team(team, many=False):
@@ -180,6 +181,7 @@ def leave_team(req):
 
 @require_POST
 def create_team(req):
+    print('hi')
     if event_ended():
         return error("event ended")
 
