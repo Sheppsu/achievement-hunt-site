@@ -13,20 +13,18 @@ import {
   EventStateType,
 } from "contexts/EventContext";
 
-
 import osuLogo from "assets/images/osu.png";
 import "assets/css/main.css";
 
-
 function errorReducer(
   events: EventState[],
-  { type, msg, id }: { type: EventStateType; msg?: string, id?: number }
+  { type, msg, id }: { type: EventStateType; msg?: string; id?: number }
 ) {
   if (type === "expired") {
     for (const [i, event] of events.entries()) {
       if (event.id === id) {
         // TODO: add to some log where it can be accessed by the user to view past events
-        return events.slice(0, i).concat(events.slice(i+1))
+        return events.slice(0, i).concat(events.slice(i + 1));
       }
     }
     return events;
@@ -64,28 +62,28 @@ export default function Header() {
       <div className="header prevent-select">
         <Link to="/" className="header-link">
           <div className="header-link-container">
-            <p className="header-title">OCT</p>
+            <p className="header-title">CTA</p>
           </div>
         </Link>
         <Link to="/achievements" className="header-link">
           <div className="header-link-container">
-            <p className="header-text">OCAH</p>
+            <p className="header-text">CTA</p>
           </div>
         </Link>
         <div style={{ flexGrow: 1 }}></div>
         <div>
           {session.isAuthenticated ? (
             /*<Link to="/dashboard">*/
-              <div className="login-box user-box">
-                <img
-                  src={session.user?.avatar}
-                  alt="avatar"
-                  className="login-pic"
-                />
-                <p className="login-text">{session.user?.username}</p>
-              </div>
-            /*</Link>*/
+            <div className="login-box user-box">
+              <img
+                src={session.user?.avatar}
+                alt="avatar"
+                className="login-pic"
+              />
+              <p className="login-text">{session.user?.username}</p>
+            </div>
           ) : (
+            /*</Link>*/
             <Link to={session.authUrl}>
               <div className="login-box shadow">
                 <img src={osuLogo} alt="osu logo" className="login-pic" />
@@ -101,7 +99,7 @@ export default function Header() {
         <div className="mobile-header header" onClick={onClick}>
           <Link className="header-link" to="/">
             <div className="header-link-container">
-              <h1 className="header-title">OCT</h1>
+              <h1 className="header-title">CTA</h1>
             </div>
           </Link>
           {arrow}
@@ -112,16 +110,14 @@ export default function Header() {
         >
           <div className="dropdown-user-container">
             {session.isAuthenticated ? (
-              /*<Link to="/dashboard">*/
-                <div className="login-box user-box">
-                  <img
-                    src={session.user?.avatar}
-                    alt="avatar"
-                    className="login-pic"
-                  />
-                  <p className="login-text">{session.user?.username}</p>
-                </div>
-              /*</Link>*/
+              <div className="login-box user-box">
+                <img
+                  src={session.user?.avatar}
+                  alt="avatar"
+                  className="login-pic"
+                />
+                <p className="login-text">{session.user?.username}</p>
+              </div>
             ) : (
               <Link to={session.authUrl}>
                 <div className="login-box shadow">
@@ -133,24 +129,9 @@ export default function Header() {
           </div>
           <Link to="/achievements">
             <div className="header-dropdown-item" onClick={onClick}>
-              <p className="header-text dropdown">OCAH</p>
+              <p className="header-text dropdown">CTA</p>
             </div>
           </Link>
-          {/*<Link to="/tournaments">
-            <div className="header-dropdown-item" onClick={onClick}>
-              <p className="header-text dropdown">Tournaments</p>
-            </div>
-          </Link>
-          <Link to="/tournaments/mappool">
-            <div className="header-dropdown-item" onClick={onClick}>
-              <p className="header-text dropdown">Mappool</p>
-            </div>
-          </Link>
-          <Link to="/tournaments/bracket">
-            <div className="header-dropdown-item" onClick={onClick}>
-              <p className="header-text dropdown">Bracket</p>
-            </div>
-          </Link>*/}
         </div>
       </div>
 
