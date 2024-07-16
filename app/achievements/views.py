@@ -121,8 +121,8 @@ def teams(req):
         serialized_teams = map(serialize_full_team, select_teams(many=True))
     else:
         serialized_teams = (
-            serialize_full_team(team)
-            if any(map(lambda p: p.user.id == req.user.id, team.players)) else
+            serialize_full_team(team) 
+            if any(map(lambda p: p.user.id == req.user.id, team.players.all())) else
             TeamSerializer(team).serialize(exclude=["invite"])
             for team in select_teams(many=True)
         )
