@@ -20,18 +20,12 @@ export const routes: RouteObject[] = [
         element: <Logout />,
       },
       {
+        path: "teams",
+        element: <AchievementsIndex />,
+      },
+      {
         path: "achievements",
-        element: <AchievementHeader />,
-        children: [
-          {
-            index: true,
-            element: <AchievementsIndex />,
-          },
-          {
-            path: "completion",
-            element: <AchievementCompletionPage />,
-          },
-        ],
+        element: <AchievementCompletionPage />,
       },
     ],
   },
