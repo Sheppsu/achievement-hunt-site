@@ -1,9 +1,6 @@
-import { Link, Outlet } from "react-router-dom";
+import { Link, NavLink, Outlet } from "react-router-dom";
 import { useContext, useReducer, useState } from "react";
 
-import UpArrow from "./UpArrow";
-import DownArrow from "./DownArrow";
-import Backdrop from "./Backdrop";
 import Footer from "./Footer";
 import ErrorContainer from "./EventContainer";
 import { SessionContext } from "contexts/SessionContext";
@@ -13,7 +10,8 @@ import {
   EventStateType,
 } from "contexts/EventContext";
 
-import osuLogo from "assets/images/osu.png";
+import OsuLogo from "../assets/images/osu.png";
+
 import "assets/css/main.css";
 
 function errorReducer(
@@ -47,96 +45,39 @@ function errorReducer(
 
 export default function Header() {
   const session = useContext(SessionContext);
-  const [useUpArrow, setUseUpArrow] = useState(false);
+  // const [useUpArrow, setUseUpArrow] = useState(false);
   const [errors, dispatchEventMsg] = useReducer(errorReducer, []);
-
-  const arrow = (useUpArrow ? UpArrow : DownArrow)("mobile-header-arrow");
-  const backdrop = Backdrop(useUpArrow, setUseUpArrow);
-
-  function onClick() {
-    setUseUpArrow(!useUpArrow);
-  }
 
   return (
     <>
-      <div className="header prevent-select">
-        <Link to="/" className="header-link">
-          <div className="header-link-container">
-            <p className="header-title">CTA</p>
+      <div className="header-container">
+        <div className="header">
+          <Link to="/">
+            <h1 className="header-title">CTA</h1>
+          </Link>
+          <div className="header-buttons-container">
+            <NavLink to="/teams" className="header-button-link">
+              Teams
+            </NavLink>
+            <NavLink to="/achievements" className="header-button-link">
+              Achievements
+            </NavLink>
           </div>
-        </Link>
-        <Link to="/achievements" className="header-link">
-          <div className="header-link-container">
-            <p className="header-text">CTA</p>
-          </div>
-        </Link>
-        <div style={{ flexGrow: 1 }}></div>
-        <div>
           {session.isAuthenticated ? (
-            /*<Link to="/dashboard">*/
-            <div className="login-box user-box">
-              <img
-                src={session.user?.avatar}
-                alt="avatar"
-                className="login-pic"
-              />
-              <p className="login-text">{session.user?.username}</p>
-            </div>
+            <img
+              src={session.user?.avatar}
+              alt="avatar"
+              className="login-pic"
+            />
           ) : (
-            /*</Link>*/
-            <Link to={session.authUrl}>
-              <div className="login-box shadow">
-                <img src={osuLogo} alt="osu logo" className="login-pic" />
-                <p className="login-text">Log In</p>
-              </div>
-            </Link>
+            <div style={{ height: "100%" }}>
+              <Link to={session.authUrl}>
+                <img src={OsuLogo} alt="osu logo" className="login-pic" />
+              </Link>
+            </div>
           )}
         </div>
       </div>
-
-      {/* Mobile header */}
-      <div className="mobile-header-container">
-        <div className="mobile-header header" onClick={onClick}>
-          <Link className="header-link" to="/">
-            <div className="header-link-container">
-              <h1 className="header-title">CTA</h1>
-            </div>
-          </Link>
-          {arrow}
-        </div>
-        <div
-          className="mobile-header-dropdown header-dropdown"
-          style={{ display: useUpArrow ? "flex" : "none" }}
-        >
-          <div className="dropdown-user-container">
-            {session.isAuthenticated ? (
-              <div className="login-box user-box">
-                <img
-                  src={session.user?.avatar}
-                  alt="avatar"
-                  className="login-pic"
-                />
-                <p className="login-text">{session.user?.username}</p>
-              </div>
-            ) : (
-              <Link to={session.authUrl}>
-                <div className="login-box shadow">
-                  <img src={osuLogo} alt="osu logo" className="login-pic" />
-                  <p className="login-text">Log In</p>
-                </div>
-              </Link>
-            )}
-          </div>
-          <Link to="/achievements">
-            <div className="header-dropdown-item" onClick={onClick}>
-              <p className="header-text dropdown">CTA</p>
-            </div>
-          </Link>
-        </div>
-      </div>
-
-      {backdrop}
-
       <EventContext.Provider value={dispatchEventMsg}>
         <ErrorContainer events={errors} />
         <Outlet />
