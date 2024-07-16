@@ -6,7 +6,7 @@ import struct
 import time
 
 from django.conf import settings
-from django.contrib.auth import login as do_login
+from django.contrib.auth import login as do_login, logout as do_logout
 from django.db import connection
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect
@@ -69,6 +69,12 @@ def login(req):
         do_login(req, user, backend=settings.AUTH_BACKEND)
     state = req.GET.get("state", None)
     return redirect(state or "index")
+
+def logout(req):
+    if req.user.is_authenticated:
+        do_logout(req)
+        return JsonResponse({}, safe=False)
+    return JsonResponse({"error": "not logged in"}, status=403, safe=False)
 
 
 def achievements(req):
