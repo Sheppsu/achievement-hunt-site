@@ -2,7 +2,6 @@ import { type RouteObject } from "react-router-dom";
 import Header from "components/Header";
 import Index from "./index";
 import Logout from "./logout";
-import AchievementHeader from "components/achievements/AchievementHeader";
 import AchievementCompletionPage from "./achievements/completion";
 import AchievementsIndex from "./achievements";
 

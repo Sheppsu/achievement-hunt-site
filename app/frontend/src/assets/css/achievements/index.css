@@ -1,12 +1,6 @@
-body {
-  background-color: var(--bg-color4);
-}
-
 /* Info page stuff */
 
 .index-container {
-  margin-top: 50px;
-
   display: flex;
   flex-direction: row;
   justify-content: center;

@@ -43,10 +43,9 @@ html {
 }
 
 body {
-  margin: 0;
-  margin-bottom: 100px;
+  margin: 100px 0;
+
   overflow-x: hidden;
-  background-color: black;
 }
 
 p {
@@ -182,67 +181,65 @@ hr {
 }
 
 /* header */
-.header-container {
-  width: 100%;
-  height: 100px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--site-background-color);
-}
 
 .header {
   width: 100%;
   max-width: 650px;
   height: 40px;
   padding: 10px 16px;
-  margin: 0px 10px 0px 10px;
+
+  position: absolute;
+  top: 10px;
+  left: 50vw;
+  transform: translateX(-50%);
+
+  border: 2px solid var(--border-color);
   border-radius: 150px;
-  background-color: var(--background-color);
+
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border: 2px solid var(--border-color);
-  transition: all 0.3s;
-  user-select: none;
+
+  background-color: var(--background-color);
+  transition: border 0.3s;
 }
 
 .header:hover {
   border: 2px solid #4a4a4a;
-  transition: all 0.3s;
 }
 
 .header-buttons-container {
-  background-color: var(--background-inset-color);
-  border-radius: 100px;
   height: 80%;
   width: 300px;
+
+  border-radius: 100px;
+  
   display: flex;
   align-items: center;
   justify-content: space-evenly;
-}
 
-.header-buttons-container a {
-  flex-grow: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-}
-
-.header-buttons-container a.active {
-  flex-grow: 1;
-  background-color: #292929;
-  border: 1px solid var(--border-color);
-  border-radius: 100px;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background-color: var(--background-inset-color);
 }
 
 .header-button-link {
+  padding: 0 10px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  text-align: center;
   font-size: large;
+}
+
+.header-button-link.active {
+  flex-grow: 1;
+  height: 100%;
+
+  border: 1px solid var(--border-color);
+  border-radius: 100px;
+
+  background-color: #292929;
 }
 
 .header-link-container {
@@ -352,7 +349,7 @@ hr {
   margin: 0 5px;
 }
 
-/* Error container */
+/* Event container */
 
 .event-container {
   width: calc(50% - 20px);

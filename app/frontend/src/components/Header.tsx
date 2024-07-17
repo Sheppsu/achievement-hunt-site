@@ -50,8 +50,8 @@ export default function Header() {
 
   return (
     <>
-      <div className="header-container">
-        <div className="header">
+      {/* <div className="header-container"> */}
+        <div className="prevent-select header">
           <Link to="/">
             <h1 className="header-title">CTA</h1>
           </Link>
@@ -77,7 +77,7 @@ export default function Header() {
             </div>
           )}
         </div>
-      </div>
+      {/* </div> */}
       <EventContext.Provider value={dispatchEventMsg}>
         <ErrorContainer events={errors} />
         <Outlet />
