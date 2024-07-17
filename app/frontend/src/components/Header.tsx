@@ -4,6 +4,7 @@ import { useContext, useReducer, useState } from "react";
 import Footer from "./Footer";
 import ErrorContainer from "./EventContainer";
 import { SessionContext } from "contexts/SessionContext";
+import { getSessionData } from "util/auth";
 import {
   EventContext,
   EventState,
@@ -78,7 +79,9 @@ export default function Header() {
       </div>
       <EventContext.Provider value={dispatchEventMsg}>
         <ErrorContainer events={errors} />
-        <Outlet />
+        <SessionContext.Provider value={getSessionData()}>
+          <Outlet />
+        </SessionContext.Provider>
       </EventContext.Provider>
 
       <Footer />

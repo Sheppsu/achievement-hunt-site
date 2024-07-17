@@ -3,27 +3,19 @@ import "assets/css/team.css";
 export default function InfoCard() {
   return (
     <div className="info-container">
-      <h1 className="info-title">Offline Chat Achievement Hunt</h1>
-      <p className="info-text">June 15th - June 23rd (UTC Time)</p>
+      <h1 className="info-title">Capture The Achievement</h1>
+      <p className="info-text">Date - Date (UTC Time)</p>
       <p className="info-subtitle">About</p>
       <p className="info-text">
-        Offline Chat Achievement Hunt is a team event with the objective of
-        collecting achievements! Note that "achievement" does <b>not</b> refer
-        to osu's official medals. The event will feature a wide variety of
-        achievements and categories on the site and teams will compete to get as
-        many points as possible before the event ends.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Amet volutpat consequat mauris nunc congue. Placerat vestibulum lectus mauris ultrices eros. Quis commodo odio aenean sed adipiscing diam donec adipiscing. Odio eu feugiat pretium nibh ipsum consequat nisl vel pretium. Magna eget est lorem ipsum dolor sit amet consectetur adipiscing. Faucibus vitae aliquet nec ullamcorper sit amet risus nullam eget. Proin libero nunc consequat interdum varius sit amet mattis. Feugiat nisl pretium fusce id velit ut tortor pretium viverra. Cras sed felis eget velit aliquet sagittis id.
       </p>
       <p className="info-subtitle">Teams</p>
       <p className="info-text">
-        Teams are comprised of 1-5 people. There is a maximum to prevent teams
-        from becoming too large and gaining a sizeable advantage.
+      Lacus sed viverra tellus in hac. Ac odio tempor orci dapibus ultrices in iaculis nunc sed. Metus vulputate eu scelerisque felis imperdiet proin fermentum leo vel. Sed felis eget velit aliquet sagittis id consectetur purus. In egestas erat imperdiet sed euismod.
       </p>
       <p className="info-subtitle">Points</p>
       <p className="info-text">
-        Each achievement gains your team between 10 and 100 points. Achievements
-        have a base of 100 points and decrease depending on how many teams have
-        completed the achievement at a given moment. This means that your points
-        can decrease as other teams complete achievements.
+      Quis imperdiet massa tincidunt nunc pulvinar sapien et. Nunc sed id semper risus in. Morbi blandit cursus risus at ultrices mi. Amet commodo nulla facilisi nullam vehicula ipsum a arcu. Odio morbi quis commodo odio aenean sed. Pretium vulputate sapien nec sagittis aliquam.
       </p>
     </div>
   );

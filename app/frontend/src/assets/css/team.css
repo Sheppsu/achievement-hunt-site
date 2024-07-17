@@ -6,33 +6,12 @@
 
 /* General */
 
-.index-container {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  gap: 20px;
-}
-
-.card-container {
-  width: 100%;
-  max-width: 700px;
-
-  display: flex;
-  flex-direction: column;
-}
-
 .card-container.teams {
   gap: 20px;
 }
 
-div.vertical-divider {
-  width: 2px;
-  
-  background-color: var(--border-color);
-}
-
 .info-container {
-  width: calc(100% - 30px);
+  width: calc(100% - 34px);
   padding: 15px;
   margin: 0;
 
