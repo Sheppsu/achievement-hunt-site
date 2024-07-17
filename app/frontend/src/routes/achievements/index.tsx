@@ -11,6 +11,7 @@ export default function AchievementsIndex() {
         <div className="card-container teams">
           <TeamsCard />
         </div>
+        <div className="card-"></div>
         <div className="card-container info">
           <InfoCard />
         </div>

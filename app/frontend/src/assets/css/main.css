@@ -19,15 +19,6 @@
 }
 
 :root {
-  /* why are these all called bg color */
-  --bg-color1: #438efd;
-  --bg-color2: #e866a0;
-  --bg-color3: #52a1ff;
-  --bg-color4: #e7e7e7;
-  --bg-color5: #454343;
-  --bg-color6: #d7d7d7;
-  --bg-color7: #d0d0d0;
-
   --background-color: #171717;
   --background-inset-color: #060606;
   --border-color: #2f2f2f;
@@ -183,7 +174,7 @@ hr {
 /* header */
 
 .header {
-  width: 100%;
+  width: calc(95% - 36px);
   max-width: 650px;
   height: 40px;
   padding: 10px 16px;
@@ -191,7 +182,7 @@ hr {
   position: absolute;
   top: 10px;
   left: 50vw;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateX(-8px);
 
   border: 2px solid var(--border-color);
   border-radius: 150px;
@@ -223,7 +214,6 @@ hr {
 
 .header-button-link {
   flex-grow: 1;
-  padding: 0 10px;
 
   display: flex;
   justify-content: center;

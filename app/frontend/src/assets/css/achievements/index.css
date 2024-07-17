@@ -12,6 +12,10 @@
   max-width: 700px;
 }
 
+.card-divider {
+  width: 1px;
+}
+
 .info-container {
   width: calc(100% - 30px);
   padding: 15px;
