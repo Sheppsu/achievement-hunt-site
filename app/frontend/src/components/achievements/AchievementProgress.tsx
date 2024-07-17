@@ -6,7 +6,7 @@ import { AchievementTeamExtendedType, AchievementTeamType } from "api/types/Achi
 import { AchievementExtendedType } from "api/types/AchievementType";
 import { EventContext, EventStateType } from "contexts/EventContext";
 import { SessionContext } from "contexts/SessionContext";
-import { EVENT_END } from "routes/achievements/completion";
+import { EVENT_END } from "routes/achievements";
 
 export type WebsocketState = {
     ws: WebSocket;

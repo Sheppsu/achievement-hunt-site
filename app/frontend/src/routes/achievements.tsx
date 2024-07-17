@@ -3,7 +3,7 @@ import AchievementContainer from "components/achievements/AchievementContainer";
 import AchievementLeaderboard from "components/achievements/AchievementLeaderboard";
 import AchievementProgress, { WebsocketState } from "components/achievements/AchievementProgress";
 
-import "assets/css/achievements/completion.css";
+import "assets/css/achievements.css";
 import { useContext, useEffect, useState } from "react";
 import { SessionContext } from "contexts/SessionContext";
 import { Helmet } from "react-helmet";

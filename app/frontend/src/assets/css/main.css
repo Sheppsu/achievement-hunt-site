@@ -20,9 +20,8 @@
 
 :root {
   --background-color: #171717;
-  --background-inset-color: #060606;
   --border-color: #2f2f2f;
-  --site-background-color: #101010;
+  --site-background-color: #060606;
 }
 
 /* element properties */
@@ -30,7 +29,7 @@
 html {
   position: relative;
   min-height: 100%;
-  background-color: black;
+  background-color: var(--site-background-color);
 }
 
 body {
@@ -209,7 +208,7 @@ hr {
   align-items: center;
   justify-content: space-evenly;
 
-  background-color: var(--background-inset-color);
+  background-color: var(--site-background-color);
 }
 
 .header-button-link {

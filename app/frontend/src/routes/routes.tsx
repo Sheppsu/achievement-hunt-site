@@ -2,8 +2,8 @@ import { type RouteObject } from "react-router-dom";
 import Header from "components/Header";
 import Index from "./index";
 import Logout from "./logout";
-import AchievementCompletionPage from "./achievements/completion";
-import AchievementsIndex from "./achievements";
+import AchievementCompletionPage from "./achievements";
+import AchievementsIndex from "./team";
 
 export const routes: RouteObject[] = [
   {

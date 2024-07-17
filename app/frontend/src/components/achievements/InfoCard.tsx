@@ -1,4 +1,4 @@
-import "assets/css/achievements/info.css";
+import "assets/css/team.css";
 
 export default function InfoCard() {
   return (

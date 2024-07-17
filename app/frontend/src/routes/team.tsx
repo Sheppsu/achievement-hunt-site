@@ -1,17 +1,19 @@
 import AnimatedPage from "components/AnimatedPage";
-import InfoCard from "./info";
-import TeamsCard from "./teams";
+import InfoCard from "components/achievements/InfoCard";
+import TeamCard from "components/achievements/TeamCard";
+import PlacementCard from "components/achievements/PlacementCard";
 
-import "assets/css/achievements/index.css";
+import "assets/css/team.css";
 
 export default function AchievementsIndex() {
   return (
     <AnimatedPage>
       <div className="index-container">
         <div className="card-container teams">
-          <TeamsCard />
+          <PlacementCard />
+          <TeamCard />
         </div>
-        <div className="card-"></div>
+        <div className="vertical-divider"></div>
         <div className="card-container info">
           <InfoCard />
         </div>

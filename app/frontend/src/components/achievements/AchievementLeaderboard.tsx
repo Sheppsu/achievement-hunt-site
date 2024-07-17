@@ -1,5 +1,5 @@
 import { useGetTeams } from "api/query";
-import TeamCard from "./TeamCard";
+import TeamCard from "./OldTeamCard";
 
 export default function AchievementLeaderboard() {
   // TODO: check for errors

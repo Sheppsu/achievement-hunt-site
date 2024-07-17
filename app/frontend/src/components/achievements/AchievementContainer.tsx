@@ -1,7 +1,7 @@
 import Achievement from "./Achievement";
 import { useGetAchievements } from "api/query";
 import { AchievementExtendedType } from "api/types/AchievementType";
-import "assets/css/achievements/completion.css";
+import "assets/css/achievements.css";
 
 export default function AchievementContainer() {
   const { data: achievements } = useGetAchievements();
