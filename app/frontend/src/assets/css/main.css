@@ -222,6 +222,7 @@ hr {
 }
 
 .header-button-link {
+  flex-grow: 1;
   padding: 0 10px;
 
   display: flex;
@@ -233,7 +234,6 @@ hr {
 }
 
 .header-button-link.active {
-  flex-grow: 1;
   height: 100%;
 
   border: 1px solid var(--border-color);

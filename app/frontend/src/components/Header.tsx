@@ -50,34 +50,32 @@ export default function Header() {
 
   return (
     <>
-      {/* <div className="header-container"> */}
-        <div className="prevent-select header">
-          <Link to="/">
-            <h1 className="header-title">CTA</h1>
-          </Link>
-          <div className="header-buttons-container">
-            <NavLink to="/teams" className="header-button-link">
-              Teams
-            </NavLink>
-            <NavLink to="/achievements" className="header-button-link">
-              Achievements
-            </NavLink>
-          </div>
-          {session.isAuthenticated ? (
-            <img
-              src={session.user?.avatar}
-              alt="avatar"
-              className="login-pic"
-            />
-          ) : (
-            <div style={{ height: "100%" }}>
-              <Link to={session.authUrl}>
-                <img src={OsuLogo} alt="osu logo" className="login-pic" />
-              </Link>
-            </div>
-          )}
+      <div className="prevent-select header">
+        <Link to="/">
+          <h1 className="header-title">CTA</h1>
+        </Link>
+        <div className="header-buttons-container">
+          <NavLink to="/teams" className="header-button-link">
+            Teams
+          </NavLink>
+          <NavLink to="/achievements" className="header-button-link">
+            Achievements
+          </NavLink>
         </div>
-      {/* </div> */}
+        {session.isAuthenticated ? (
+          <img
+            src={session.user?.avatar}
+            alt="avatar"
+            className="login-pic"
+          />
+        ) : (
+          <div style={{ height: "100%" }}>
+            <Link to={session.authUrl}>
+              <img src={OsuLogo} alt="osu logo" className="login-pic" />
+            </Link>
+          </div>
+        )}
+      </div>
       <EventContext.Provider value={dispatchEventMsg}>
         <ErrorContainer events={errors} />
         <Outlet />
