@@ -19,7 +19,12 @@
   border: solid 2px var(--border-color);
   text-align: center;
 
+  transition: border 0.3s;
   background-color: var(--background-color);
+}
+
+.info-container:hover {
+  border: 2px solid #4a4a4a;
 }
 
 .info-title {
