@@ -8,11 +8,111 @@ import {
 import { Helmet } from "react-helmet";
 
 import "assets/css/team.css";
-import Button from "components/Button";
+import BaseButton from "components/Button";
 
 import { SessionContext } from "contexts/SessionContext";
 import { EventContext } from "contexts/EventContext";
-import { AchievementTeamExtendedType } from "api/types/AchievementTeamType";
+import { AchievementTeamExtendedType, AchievementTeamType } from "api/types/AchievementTeamType";
+import { AchievementPlayerExtendedType } from "api/types/AchievementPlayerType";
+
+function Button({
+  text
+}: {
+  text: string
+}) {
+  return <BaseButton children={text} color="white" textColor="black" width="200px" />
+}
+
+function PlayerCard({
+  player
+}: {
+  player: AchievementPlayerExtendedType
+}) {
+  return (
+    <div className="player-card">
+      <img className="player-card-avatar" src={player.user.avatar}></img>
+      <p className="info-inner-text grow">AAAAAAA AAAAAAA</p>
+    </div>
+  );
+}
+
+function YourTeamContent({
+  ownTeam
+}: {
+  ownTeam: AchievementTeamExtendedType
+}) {
+  return (
+    <>
+      <div className="info-inner-container your-team">
+        <p className="info-inner-text grow">{ownTeam.name}</p>
+        <div className="vertical-divider"></div>
+        <p className="info-inner-text">{ownTeam.points}<span>pts</span></p>
+      </div>
+      <h1 className="info-title">Players</h1>
+      <div className="info-inner-container players">
+        {ownTeam.players.map((player) => <PlayerCard player={player} />)}
+      </div>
+      <div className="info-inner-container buttons">
+        <Button text="Leave team" />
+        <Button text="Invite code" />
+      </div>
+    </>
+  );
+}
+
+function NoTeamContent() {
+  return (
+    <>
+      <div className="info-inner-container your-team">
+        <p className="info-inner-text">No team</p>
+      </div>
+    </>
+  );
+}
+
+function LoadingContent() {
+  return (
+    <div className="info-inner-container your-team">
+      <p className="info-inner-text">Loading...</p>
+    </div>
+  );
+}
+
+function UnauthenticatedContent() {
+  return (
+    <div className="info-inner-container your-team">
+      <p className="info-inner-text">Not authenticated.</p>
+    </div>
+  );
+}
+
+function PlacementCard({
+  placement,
+  numberTeams
+}: {
+  placement: number,
+  numberTeams: number
+}) {
+  return (
+      <div className="info-container">
+          <div className="info-inner-container placement">
+              <div className="placement-section">
+                  <div className="placement-title-container">
+                      <p className="info-title placement">#{placement}</p>
+                  </div>
+                  <p className="info-subtitle">Current placement</p>
+              </div>
+              <div className="vertical-divider"></div>
+              <div className="placement-section">
+                  <div className="placement-title-container">
+                      <p className="info-title placement">{numberTeams}</p>
+                  </div>
+                  <p className="info-subtitle">Registered teams</p>
+              </div>
+          </div>
+      </div>
+  );
+}
 
 export default function TeamCard() {
   const session = useContext(SessionContext);
@@ -95,28 +195,23 @@ export default function TeamCard() {
   };
 
   return (
-    <div className="info-container">
-      <Helmet>
-        <title>CTA Teams + Info</title>
-      </Helmet>
-      <h1 className="info-title">Your team</h1>
-      <div className="info-inner-container your-team">
+    <>
+      { ownTeam === null ? "" : <PlacementCard placement={ownPlacement as number} numberTeams={(teams as Array<any>).length} /> }
+      <div className="info-container">
+        <Helmet>
+          <title>CTA Teams + Info</title>
+        </Helmet>
+        <h1 className="info-title">Your team</h1>
         {session.isAuthenticated == false ? (
-          <p className="info-inner-text">Not authenticated.</p>
+          <UnauthenticatedContent />
         ) : teamsResponse.isLoading ? (
-          <p className="info-inner-text">Loading...</p>
+          <LoadingContent />
         ) : ownTeam === null ? (
-          <p className="info-inner-text">No team</p>
+          <NoTeamContent />
         ) : (
-          <>
-            <p className="info-inner-text grow">{ownTeam.name}</p>
-            <div className="vertical-divider"></div>
-            <p className="info-inner-text">{ownTeam.points}<span>pts</span></p>
-          </>
+          <YourTeamContent ownTeam={ownTeam} />
         )}
       </div>
-      <h1 className="info-title">Players</h1>
-      <div className="info-inner-container"></div>
-    </div>
+    </>
   );
 }

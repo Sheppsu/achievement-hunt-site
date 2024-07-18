@@ -15,12 +15,16 @@
   padding: 15px;
   margin: 0;
 
-  border-radius: 20px;
+  border-radius: var(--border-rounding);
   border: solid 2px var(--border-color);
   text-align: center;
 
   transition: border 0.3s;
   background-color: var(--background-color);
+
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
 .info-container:hover {
@@ -77,6 +81,13 @@
 
 .info-inner-text.grow {
   flex-grow: 1;
+}
+
+.info-inner-container.buttons {
+  justify-content: center;
+  gap: 20px;
+
+  background: none;
 }
 
 /* Team */
@@ -199,15 +210,37 @@
   align-items: center;
 }
 
-.teams-card-player-image {
-  height: 35px;
-  width: 35px;
-  border-radius: 500px;
-  margin-right: 7px;
-}
-
 .teams-card-player-text {
   font-weight: 500;
+}
+
+/* Player */
+
+.info-inner-container.players {
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.player-card {
+  width: 300px;
+  height: 50px;
+  padding: 0 5px;
+
+  border: solid 2px var(--border-color);
+  border-radius: var(--border-rounding);
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+}
+
+.player-card-avatar {
+  height: 35px;
+  width: 35px;
+
+  border-radius: 100%;
 }
 
 /* Placement */
@@ -236,7 +269,7 @@
   padding: 10px;
   margin: 0;
 
-  border-radius: 10px;
+  border-radius: var(--border-rounding);
 
   background-color: var(--site-background-color);
 
@@ -249,14 +282,6 @@
   .index-container {
     flex-direction: column;
     align-items: center;
-  }
-
-  .card-container.info {
-    order: 1;
-  }
-
-  .card-container.teams {
-    order: 2;
   }
 
   .card-divider {

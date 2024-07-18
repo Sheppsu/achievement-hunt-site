@@ -1,7 +1,6 @@
 import AnimatedPage from "components/AnimatedPage";
 import InfoCard from "components/achievements/InfoCard";
 import TeamCard from "components/achievements/TeamCard";
-import PlacementCard from "components/achievements/PlacementCard";
 
 import "assets/css/team.css";
 
@@ -10,7 +9,6 @@ export default function AchievementsIndex() {
     <AnimatedPage>
       <div className="index-container">
         <div className="card-container teams">
-          <PlacementCard />
           <TeamCard />
         </div>
         <div className="vertical-divider"></div>
