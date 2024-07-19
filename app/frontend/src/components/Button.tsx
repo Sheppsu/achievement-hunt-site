@@ -13,8 +13,6 @@ type ButtonProps = {
 
 export default function Button({
   children,
-  color = "#438efd",
-  textColor = "#ffffff",
   unavailable = false,
   onClick,
   width = "inherit",
@@ -24,12 +22,10 @@ export default function Button({
   return (
     <button
       style={{
-        backgroundColor: color,
-        color: textColor,
         width: width,
         height: height,
       }}
-      className={"button " + (unavailable ? "unavailable" : "")}
+      className={"prevent-select button " + (unavailable ? "unavailable" : "")}
       onClick={unavailable ? undefined : onClick}
       type={type}
     >

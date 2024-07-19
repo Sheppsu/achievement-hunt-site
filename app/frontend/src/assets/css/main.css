@@ -365,7 +365,7 @@ div.vertical-divider {
 
   border-radius: 10px;
 
-  background-color: rgb(255, 255, 255);
+  background-color: var(--site-background-color);
 }
 
 .event-entry.error {

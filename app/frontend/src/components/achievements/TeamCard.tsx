@@ -5,22 +5,27 @@ import {
   useJoinTeam,
   useLeaveTeam,
 } from "api/query";
-import { Helmet } from "react-helmet";
 
 import "assets/css/team.css";
 import BaseButton from "components/Button";
 
 import { SessionContext } from "contexts/SessionContext";
-import { EventContext } from "contexts/EventContext";
+import { EventContext, EventDispatch } from "contexts/EventContext";
 import { AchievementTeamExtendedType, AchievementTeamType } from "api/types/AchievementTeamType";
 import { AchievementPlayerExtendedType } from "api/types/AchievementPlayerType";
 
 function Button({
-  text
+  text,
+  onClick
 }: {
-  text: string
+  text: string,
+  onClick: () => void
 }) {
-  return <BaseButton children={text} color="white" textColor="black" width="200px" />
+  return <BaseButton
+    children={text}
+    width="200px"
+    onClick={onClick}
+  />
 }
 
 function PlayerCard({
@@ -31,16 +36,28 @@ function PlayerCard({
   return (
     <div className="player-card">
       <img className="player-card-avatar" src={player.user.avatar}></img>
-      <p className="info-inner-text grow">AAAAAAA AAAAAAA</p>
+      <p className="info-inner-text grow">{player.user.username}</p>
     </div>
   );
 }
 
 function YourTeamContent({
-  ownTeam
+  ownTeam,
+  dispatchEventMsg,
+  leaveTeam
 }: {
-  ownTeam: AchievementTeamExtendedType
+  ownTeam: AchievementTeamExtendedType,
+  dispatchEventMsg: EventDispatch,
+  leaveTeam: () => void
 }) {
+  const copyInvite = () => {
+    navigator.clipboard.writeText((ownTeam as AchievementTeamExtendedType).invite);
+    dispatchEventMsg({
+      type: "info",
+      msg: "Copied team code to clipboard!",
+    });
+  };
+
   return (
     <>
       <div className="info-inner-container your-team">
@@ -50,11 +67,11 @@ function YourTeamContent({
       </div>
       <h1 className="info-title">Players</h1>
       <div className="info-inner-container players">
-        {ownTeam.players.map((player) => <PlayerCard player={player} />)}
+        {ownTeam.players.map((player, i) => <PlayerCard key={i} player={player} />)}
       </div>
       <div className="info-inner-container buttons">
-        <Button text="Leave team" />
-        <Button text="Invite code" />
+        <Button text="Leave team" onClick={leaveTeam} />
+        <Button text="Invite code" onClick={copyInvite} />
       </div>
     </>
   );
@@ -65,6 +82,10 @@ function NoTeamContent() {
     <>
       <div className="info-inner-container your-team">
         <p className="info-inner-text">No team</p>
+      </div>
+      <div className="info-inner-container buttons">
+        <Button text="Create team" onClick={() => {}} />
+        <Button text="Join team" onClick={() => {}} />
       </div>
     </>
   );
@@ -186,21 +207,10 @@ export default function TeamCard() {
     );
   };
 
-  const copyInvite = () => {
-    navigator.clipboard.writeText((ownTeam as AchievementTeamExtendedType).invite);
-    dispatchEventMsg({
-      type: "info",
-      msg: "Copied team code to clipboard!",
-    });
-  };
-
   return (
-    <>
+    <div className="card-container teams">
       { ownTeam === null ? "" : <PlacementCard placement={ownPlacement as number} numberTeams={(teams as Array<any>).length} /> }
       <div className="info-container">
-        <Helmet>
-          <title>CTA Teams + Info</title>
-        </Helmet>
         <h1 className="info-title">Your team</h1>
         {session.isAuthenticated == false ? (
           <UnauthenticatedContent />
@@ -209,9 +219,9 @@ export default function TeamCard() {
         ) : ownTeam === null ? (
           <NoTeamContent />
         ) : (
-          <YourTeamContent ownTeam={ownTeam} />
+          <YourTeamContent ownTeam={ownTeam} dispatchEventMsg={dispatchEventMsg} leaveTeam={onLeaveTeam} />
         )}
       </div>
-    </>
+    </div>
   );
 }

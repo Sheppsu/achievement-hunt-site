@@ -11,4 +11,6 @@ export type EventState = {
     expiresAt: number
 };
 
-export const EventContext = createContext((({ type, msg, id }: { type: EventStateType; msg?: string, id?: number }) => {console.log(type, msg, id)}) as Dispatch<{type: EventStateType, msg?: string, id?: number}>);
+export type EventDispatch = Dispatch<{type: EventStateType, msg?: string, id?: number}>;
+
+export const EventContext = createContext((({ type, msg, id }: { type: EventStateType; msg?: string, id?: number }) => {console.log(type, msg, id)}) as EventDispatch);
