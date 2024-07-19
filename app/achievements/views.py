@@ -171,14 +171,14 @@ def leave_team(req):
     # TODO: maybe make this into a postgresql function
     team = None
     if req.user.is_authenticated:
-        team = Team.prefetch_related("players__user").filter(players__user_id=req.user.id).first()
+        team = Team.objects.prefetch_related("players__user").filter(players__user_id=req.user.id).first()
     if team is None:
         return error("not on team")
 
-    player = next(filter(lambda player: player.user.id == req.user.id, team.players))
+    player = next(filter(lambda player: player.user.id == req.user.id, team.players.all()))
 
     player_count = Player.objects.filter(team_id=team.id).count()
-    if len(player_count) == 1:
+    if player_count == 1:
         team.delete()
     else:
         player.delete()
