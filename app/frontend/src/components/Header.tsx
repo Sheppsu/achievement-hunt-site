@@ -14,6 +14,8 @@ import {
 import OsuLogo from "../assets/images/osu.png";
 
 import "assets/css/main.css";
+import PopupContainer from "./PopupContainer";
+import { PopupContext, PopupState } from "contexts/PopupContext";
 
 function errorReducer(
   events: EventState[],
@@ -48,6 +50,7 @@ export default function Header() {
   const session = useContext(SessionContext);
   // const [useUpArrow, setUseUpArrow] = useState(false);
   const [errors, dispatchEventMsg] = useReducer(errorReducer, []);
+  const [popup, setPopup] = useState<PopupState>(null);
 
   return (
     <>
@@ -64,11 +67,7 @@ export default function Header() {
           </NavLink>
         </div>
         {session.isAuthenticated ? (
-          <img
-            src={session.user?.avatar}
-            alt="avatar"
-            className="login-pic"
-          />
+          <img src={session.user?.avatar} alt="avatar" className="login-pic" />
         ) : (
           <div style={{ height: "100%" }}>
             <Link to={session.authUrl}>
@@ -78,10 +77,13 @@ export default function Header() {
         )}
       </div>
       <EventContext.Provider value={dispatchEventMsg}>
-        <ErrorContainer events={errors} />
-        <SessionContext.Provider value={getSessionData()}>
-          <Outlet />
-        </SessionContext.Provider>
+        <PopupContext.Provider value={{ popup, setPopup }}>
+          <PopupContainer />
+          <ErrorContainer events={errors} />
+          <SessionContext.Provider value={getSessionData()}>
+            <Outlet />
+          </SessionContext.Provider>
+        </PopupContext.Provider>
       </EventContext.Provider>
 
       <Footer />
