@@ -18,8 +18,18 @@ import {
 import { AchievementPlayerExtendedType } from "api/types/AchievementPlayerType";
 import { PopupContext, PopupContextType } from "contexts/PopupContext";
 
-function Button({ text, onClick }: { text: string; onClick: () => void }) {
-  return <BaseButton children={text} width="200px" onClick={onClick} />;
+function Button({
+  text,
+  onClick,
+  type,
+}: {
+  text: string;
+  onClick?: () => void;
+  type?: "submit" | "button" | "reset";
+}) {
+  return (
+    <BaseButton children={text} width="200px" type={type} onClick={onClick} />
+  );
 }
 
 function PlayerCard({ player }: { player: AchievementPlayerExtendedType }) {
@@ -39,7 +49,7 @@ function CreateTeamPopup({
   return (
     <form onSubmit={createTeam}>
       <input type="text" name="name" />
-      <BaseButton type="submit">Submit</BaseButton>
+      <Button type="submit" text="Create Team" />
     </form>
   );
 }
