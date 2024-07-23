@@ -24,6 +24,7 @@ import PopupContainer from "./PopupContainer";
 import { PopupContext, PopupState } from "contexts/PopupContext";
 import { AnimatePresence } from "framer-motion";
 import React from "react";
+import { AnimationContext } from "../contexts/AnimationContext";
 
 function errorReducer(
   events: EventState[],
@@ -70,6 +71,7 @@ export default function Header() {
   // const [useUpArrow, setUseUpArrow] = useState(false);
   const [errors, dispatchEventMsg] = useReducer(errorReducer, []);
   const [popup, setPopup] = useState<PopupState>(null);
+  const [animating, setAnimating] = useState<boolean>(false);
 
   return (
     <>
@@ -100,7 +102,9 @@ export default function Header() {
           <PopupContainer />
           <ErrorContainer events={errors} />
           <SessionContext.Provider value={getSessionData()}>
-            <AnimatedOutlet />
+            <AnimationContext.Provider value={{ animating, setAnimating }}>
+              <AnimatedOutlet />
+            </AnimationContext.Provider>
           </SessionContext.Provider>
         </PopupContext.Provider>
       </EventContext.Provider>
