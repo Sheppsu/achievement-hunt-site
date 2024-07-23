@@ -24,7 +24,10 @@ import PopupContainer from "./PopupContainer";
 import { PopupContext, PopupState } from "contexts/PopupContext";
 import { AnimatePresence } from "framer-motion";
 import React from "react";
-import { AnimationContext } from "../contexts/AnimationContext";
+import {
+  PageTransitionContext,
+  PageTransitionContextType,
+} from "contexts/PageTransitionContext";
 
 function errorReducer(
   events: EventState[],
@@ -68,10 +71,11 @@ function AnimatedOutlet() {
 
 export default function Header() {
   const session = useContext(SessionContext);
-  // const [useUpArrow, setUseUpArrow] = useState(false);
   const [errors, dispatchEventMsg] = useReducer(errorReducer, []);
   const [popup, setPopup] = useState<PopupState>(null);
-  const [animating, setAnimating] = useState<boolean>(false);
+  const { transitioning } = useContext(
+    PageTransitionContext
+  ) as PageTransitionContextType;
 
   return (
     <>
@@ -102,9 +106,7 @@ export default function Header() {
           <PopupContainer />
           <ErrorContainer events={errors} />
           <SessionContext.Provider value={getSessionData()}>
-            <AnimationContext.Provider value={{ animating, setAnimating }}>
-              <AnimatedOutlet />
-            </AnimationContext.Provider>
+            <AnimatedOutlet />
           </SessionContext.Provider>
         </PopupContext.Provider>
       </EventContext.Provider>
