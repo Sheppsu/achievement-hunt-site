@@ -3,8 +3,8 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 
-import { AnimatePresence } from "framer-motion";
 import { routes } from "./routes/routes.tsx";
+import { PageTransitionContextProvider } from "contexts/PageTransitionContext.tsx";
 
 const router = createBrowserRouter(routes);
 
@@ -19,9 +19,9 @@ const queryClient = new QueryClient({
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <AnimatePresence mode="wait">
+      <PageTransitionContextProvider>
         <RouterProvider router={router} />
-      </AnimatePresence>
+      </PageTransitionContextProvider>
     </QueryClientProvider>
   </React.StrictMode>
 );

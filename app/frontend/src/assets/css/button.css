@@ -6,14 +6,18 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
-  user-select: none;
   
   font-size: larger;
+  transition: all 0.3s;
+
+  background-color: #ffffff;
+  color: #000000;
 }
 
 .button:hover {
   cursor: pointer;
+
+  background-color: #d0d0d0;
 }
 
 .button.unavailable {
