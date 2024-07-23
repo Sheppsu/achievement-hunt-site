@@ -19,9 +19,7 @@ const queryClient = new QueryClient({
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <AnimatePresence mode="wait">
-        <RouterProvider router={router} />
-      </AnimatePresence>
+      <RouterProvider router={router} />
     </QueryClientProvider>
   </React.StrictMode>
 );

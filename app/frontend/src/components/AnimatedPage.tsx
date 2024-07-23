@@ -1,22 +1,17 @@
-import { motion, type Variants } from "framer-motion";
-
-const animations: Variants = {
-  initial: { opacity: 0, y: 100 },
-  animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -100 },
-};
-
-const AnimatedPage = ({ children }: { children: React.ReactNode }) => {
+import { AnimatePresence, motion } from "framer-motion";
+export default function AnimatedPage({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <motion.div
-      variants={animations}
-      initial="initial"
-      animate="animate"
-      exit="exit"
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      transition={{ type: "spring", duration: 0.8 }}
     >
       {children}
     </motion.div>
   );
-};
-
-export default AnimatedPage;
+}

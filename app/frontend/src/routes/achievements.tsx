@@ -1,22 +1,31 @@
 import { useGetAchievements, useGetTeams } from "api/query";
 import AchievementContainer from "components/achievements/AchievementContainer";
 import AchievementLeaderboard from "components/achievements/AchievementLeaderboard";
-import AchievementProgress, { WebsocketState } from "components/achievements/AchievementProgress";
+import AchievementProgress, {
+  WebsocketState,
+} from "components/achievements/AchievementProgress";
 
 import "assets/css/achievements.css";
 import { useContext, useEffect, useState } from "react";
 import { SessionContext } from "contexts/SessionContext";
 import { Helmet } from "react-helmet";
-import { AchievementTeamExtendedType, AchievementTeamType } from "api/types/AchievementTeamType";
+import {
+  AchievementTeamExtendedType,
+  AchievementTeamType,
+} from "api/types/AchievementTeamType";
+import AnimatedPage from "components/AnimatedPage";
 
 const EVENT_START = 1720573205000;
 export const EVENT_END = 2720600000000;
 
-function getMyTeam(userId: number | undefined, teams?: Array<AchievementTeamExtendedType | AchievementTeamType>): AchievementTeamExtendedType | null {
+function getMyTeam(
+  userId: number | undefined,
+  teams?: Array<AchievementTeamExtendedType | AchievementTeamType>
+): AchievementTeamExtendedType | null {
   if (userId === undefined) {
     return null;
   }
-  
+
   if (teams !== undefined)
     for (const team of teams) {
       if ("players" in team) {
@@ -26,7 +35,7 @@ function getMyTeam(userId: number | undefined, teams?: Array<AchievementTeamExte
           }
         }
       }
-  }
+    }
 
   return null;
 }
@@ -70,17 +79,15 @@ function LimitedAchievementCompletionPage() {
   );
 }
 
-function FullAchievementCompletionPage(
-  {
-    team,
-    state,
-    setState
-  }:
-  {
-    team: AchievementTeamExtendedType | null,
-    state: WebsocketState | null,
-    setState: React.Dispatch<React.SetStateAction<WebsocketState | null>>
-  }) {
+function FullAchievementCompletionPage({
+  team,
+  state,
+  setState,
+}: {
+  team: AchievementTeamExtendedType | null;
+  state: WebsocketState | null;
+  setState: React.Dispatch<React.SetStateAction<WebsocketState | null>>;
+}) {
   return (
     <div className="page-container">
       <Helmet>
@@ -115,15 +122,23 @@ export default function AchievementCompletionPage() {
   }
 
   return (
-    <>
-    <div style={{ margin: "auto", textAlign: "center", marginTop: "20px" }}>
-      <h1 style={{ fontSize: "3em" }}>{ time < EVENT_END ? `Ends in: ${getTimeStr(EVENT_END - time)}` : "Event ended" }</h1>
-    </div>
-    {
-      team !== null
-        ? <FullAchievementCompletionPage state={state} setState={setState} team={team} />
-        : <LimitedAchievementCompletionPage />
-    }
-    </>
+    <AnimatedPage>
+      <div style={{ margin: "auto", textAlign: "center", marginTop: "20px" }}>
+        <h1 style={{ fontSize: "3em" }}>
+          {time < EVENT_END
+            ? `Ends in: ${getTimeStr(EVENT_END - time)}`
+            : "Event ended"}
+        </h1>
+      </div>
+      {team !== null ? (
+        <FullAchievementCompletionPage
+          state={state}
+          setState={setState}
+          team={team}
+        />
+      ) : (
+        <LimitedAchievementCompletionPage />
+      )}
+    </AnimatedPage>
   );
 }

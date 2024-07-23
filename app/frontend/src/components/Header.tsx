@@ -1,4 +1,10 @@
-import { Link, NavLink, Outlet } from "react-router-dom";
+import {
+  Link,
+  NavLink,
+  Outlet,
+  useLocation,
+  useOutlet,
+} from "react-router-dom";
 import { useContext, useReducer, useState } from "react";
 
 import Footer from "./Footer";
@@ -16,6 +22,8 @@ import OsuLogo from "../assets/images/osu.png";
 import "assets/css/main.css";
 import PopupContainer from "./PopupContainer";
 import { PopupContext, PopupState } from "contexts/PopupContext";
+import { AnimatePresence } from "framer-motion";
+import React from "react";
 
 function errorReducer(
   events: EventState[],
@@ -44,6 +52,17 @@ function errorReducer(
       expiresAt: now + 10000,
     },
   ]);
+}
+
+function AnimatedOutlet() {
+  const location = useLocation();
+  const element = useOutlet();
+
+  return (
+    <AnimatePresence mode="wait" initial={true}>
+      {element && React.cloneElement(element, { key: location.pathname })}
+    </AnimatePresence>
+  );
 }
 
 export default function Header() {
@@ -81,7 +100,7 @@ export default function Header() {
           <PopupContainer />
           <ErrorContainer events={errors} />
           <SessionContext.Provider value={getSessionData()}>
-            <Outlet />
+            <AnimatedOutlet />
           </SessionContext.Provider>
         </PopupContext.Provider>
       </EventContext.Provider>
