@@ -17,6 +17,7 @@ import {
 } from "api/types/AchievementTeamType";
 import { AchievementPlayerExtendedType } from "api/types/AchievementPlayerType";
 import { PopupContext, PopupContextType } from "contexts/PopupContext";
+import { AnimatePresence, motion } from "framer-motion";
 
 function Button({
   text,
@@ -48,7 +49,7 @@ function CreateTeamPopup({
 }) {
   return (
     <form onSubmit={createTeam}>
-      <input type="text" name="name" />
+      <input type="text" name="name" autoComplete="off" />
       <Button type="submit" text="Create Team" />
     </form>
   );
@@ -104,7 +105,7 @@ function NoTeamContent({
 }) {
   const { setPopup } = useContext(PopupContext) as PopupContextType;
   return (
-    <>
+    <motion.div layout>
       <div className="info-inner-container your-team">
         <p className="info-inner-text">No team</p>
       </div>
@@ -120,23 +121,23 @@ function NoTeamContent({
         />
         <Button text="Join team" onClick={() => {}} />
       </div>
-    </>
+    </motion.div>
   );
 }
 
 function LoadingContent() {
   return (
-    <div className="info-inner-container your-team">
+    <motion.div layout className="info-inner-container your-team">
       <p className="info-inner-text">Loading...</p>
-    </div>
+    </motion.div>
   );
 }
 
 function UnauthenticatedContent() {
   return (
-    <div className="info-inner-container your-team">
+    <motion.div layout className="info-inner-container your-team">
       <p className="info-inner-text">Not authenticated.</p>
-    </div>
+    </motion.div>
   );
 }
 
@@ -148,7 +149,13 @@ function PlacementCard({
   numberTeams: number;
 }) {
   return (
-    <div className="info-container">
+    <motion.div
+      className="info-container"
+      layout
+      initial={{ height: 0, opacity: 0 }}
+      animate={{ height: "auto", opacity: 1 }}
+      exit={{ height: 0, opacity: 0 }}
+    >
       <div className="info-inner-container placement">
         <div className="placement-section">
           <div className="placement-title-container">
@@ -164,7 +171,7 @@ function PlacementCard({
           <p className="info-subtitle">Registered teams</p>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -249,16 +256,16 @@ export default function TeamCard() {
   };
 
   return (
-    <div className="card-container teams">
-      {ownTeam === null ? (
-        ""
-      ) : (
-        <PlacementCard
-          placement={ownPlacement as number}
-          numberTeams={(teams as Array<any>).length}
-        />
-      )}
-      <div className="info-container">
+    <motion.div layout className="card-container teams">
+      <AnimatePresence>
+        {ownTeam && (
+          <PlacementCard
+            placement={ownPlacement as number}
+            numberTeams={(teams as Array<any>).length}
+          />
+        )}
+      </AnimatePresence>
+      <motion.div className="info-container" layout>
         <h1 className="info-title">Your team</h1>
         {session.isAuthenticated == false ? (
           <UnauthenticatedContent />
@@ -273,7 +280,7 @@ export default function TeamCard() {
             leaveTeam={onLeaveTeam}
           />
         )}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

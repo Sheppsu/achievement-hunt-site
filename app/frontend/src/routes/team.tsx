@@ -7,15 +7,17 @@ import "assets/css/team.css";
 
 export default function AchievementsIndex() {
   return (
-    <AnimatedPage>
+    <>
       <Helmet>
         <title>CTA Teams</title>
       </Helmet>
-      <div className="index-container">
-        <TeamCard />
-        <div className="vertical-divider"></div>
-        <LeaderboardCard />
-      </div>
-    </AnimatedPage>
+      <AnimatedPage>
+        <div className="index-container">
+          <TeamCard />
+          <div className="vertical-divider"></div>
+          <LeaderboardCard />
+        </div>
+      </AnimatedPage>
+    </>
   );
 }
