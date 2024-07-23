@@ -161,6 +161,7 @@ function PlacementCard({
 export default function TeamCard() {
   const session = useContext(SessionContext);
   const dispatchEventMsg = useContext(EventContext);
+  const { setPopup } = useContext(PopupContext) as PopupContextType;
 
   const teamsResponse = useGetTeams();
   const teams = teamsResponse.data;
@@ -200,6 +201,13 @@ export default function TeamCard() {
         onSuccess: () => createTeam.reset(),
       }
     );
+
+    dispatchEventMsg({
+      type: "info",
+      msg: `Team '${name}' successfully created!`,
+    });
+
+    setPopup(null);
   };
 
   const onJoinTeam = (evt: FormEvent<HTMLFormElement>) => {
