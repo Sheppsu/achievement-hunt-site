@@ -2,6 +2,7 @@ import "assets/css/main.css";
 import ErrorEntry from "./EventEntry";
 import { useEffect, useState } from "react";
 import { EventState } from "contexts/EventContext";
+import { AnimatePresence, motion } from "framer-motion";
 
 export default function EventContainer({ events }: { events: EventState[] }) {
   const [time, setTime] = useState(Date.now());
@@ -13,9 +14,11 @@ export default function EventContainer({ events }: { events: EventState[] }) {
 
   return (
     <div className="event-container">
-      {events.map((event, index) => (
-        <ErrorEntry key={index} event={event} time={time} />
-      ))}
+      <AnimatePresence>
+        {events.map((event) => (
+          <ErrorEntry key={event.id} event={event} time={time} />
+        ))}
+      </AnimatePresence>
     </div>
   );
 }
