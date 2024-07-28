@@ -7,6 +7,7 @@ import {
 } from "api/query";
 
 import "assets/css/team.css";
+import "assets/css/form.css";
 import BaseButton from "components/Button";
 
 import { SessionContext } from "contexts/SessionContext";
@@ -49,8 +50,15 @@ function CreateTeamPopup({
 }) {
   return (
     <form onSubmit={createTeam}>
-      <input type="text" name="name" autoComplete="off" />
-      <Button type="submit" text="Create Team" />
+      <div className="form-container">
+        <div className="input-container">
+          <p>Team name: </p>
+          <input type="text" name="name" autoComplete="off" />
+        </div>
+        <div className="input-container center">
+          <Button type="submit" text="Create Team" />
+        </div>
+      </div>
     </form>
   );
 }

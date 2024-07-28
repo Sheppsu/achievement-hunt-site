@@ -44,10 +44,10 @@ export default function PopupContainer() {
             exit={{ opacity: 0, y: 10, scale: 0.4 }}
           >
             <div className="popup-content" ref={ref}>
-              <div className="popup-heading">
-                <h1>{popup.title}</h1>
-                <div onClick={() => setPopup(null)}>X</div>
-              </div>
+              <h1 className="popup-heading">{popup.title}</h1>
+              <svg viewBox="0 0 1 1" stroke="white" strokeWidth="0.2" className="popup-x" onClick={() => setPopup(null)}>
+                <path  d="M0 0 L1 1 M1 0 L0 1"></path>
+              </svg>
               {popup.content}
             </div>
           </motion.div>
