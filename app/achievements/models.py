@@ -72,6 +72,7 @@ class Achievement(models.Model):
     name = models.CharField(max_length=64)
     category = models.CharField(max_length=32)
     description = models.CharField(max_length=256)
+    tags = models.CharField(max_length=128)
     beatmap = models.ForeignKey(
         BeatmapInfo,
         related_name="achievements",

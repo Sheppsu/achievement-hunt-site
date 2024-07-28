@@ -6,6 +6,7 @@ export type AchievementType = {
     category: string;
     description: string;
     beatmap: BeatmapInfoType | null;
+    tags: string;
 };
 
 export type AchievementExtendedType = {

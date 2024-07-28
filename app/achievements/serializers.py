@@ -11,7 +11,7 @@ class UserSerializer:
 @serializer
 class AchievementSerializer:
     model = Achievement
-    fields = ["id", "name", "category", "description", "beatmap_id"]
+    fields = ["id", "name", "category", "description", "beatmap_id", "tags"]
 
 
 @serializer
