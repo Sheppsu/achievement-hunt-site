@@ -1,3 +1,9 @@
+:root {
+  --background-color: #171717;
+  --border-color: #2f2f2f;
+  --site-background-color: #060606;
+}
+
 .popup,
 .overlay {
   position: fixed;
@@ -12,7 +18,8 @@
 }
 
 .overlay {
-  background: rgba(35, 35, 35, 0.9);
+  background: rgba(35, 35, 35, 0.413);
+  backdrop-filter: blur(6px);
 }
 
 body.active-popup {
@@ -24,10 +31,16 @@ body.active-popup {
   top: 45%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: #141414;
+  background: var(--background-color);
   border-radius: 15px;
   width: 400px;
   padding: 14px;
+  border: 2px solid var(--border-color);
+  transition: border 0.3s;
+}
+
+.popup-content:hover {
+  border: 2px solid #4a4a4a;
 }
 
 .popup-heading {
@@ -38,15 +51,25 @@ body.active-popup {
   justify-content: space-between;
 }
 
-.popup-x {
-  width: 20px;
-  height: 20px;
-  
+.popup-x-container {
+  width: 32px;
+  height: 32px;
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 5px;
+  right: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 100px;
+  transition: background-color 0.15s;
 }
 
-.popup-x:hover {
+.popup-x-container:hover {
   cursor: pointer;
+  background-color: rgba(150, 150, 150, 0.289);
+}
+
+.popup-x {
+  width: 14px;
+  height: 14px;
 }
