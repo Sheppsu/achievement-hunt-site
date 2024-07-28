@@ -13,8 +13,7 @@ import { SessionContext } from "contexts/SessionContext";
 import { getSessionData } from "util/auth";
 import {
   EventContext,
-  EventState,
-  EventStateType,
+  eventReducer
 } from "contexts/EventContext";
 
 import OsuLogo from "../assets/images/osu.png";
@@ -29,35 +28,6 @@ import {
   PageTransitionContextType,
 } from "contexts/PageTransitionContext";
 
-function errorReducer(
-  events: EventState[],
-  { type, msg, id }: { type: EventStateType; msg?: string; id?: number }
-) {
-  if (type === "expired") {
-    for (const [i, event] of events.entries()) {
-      if (event.id === id) {
-        // TODO: add to some log where it can be accessed by the user to view past events
-        return events.slice(0, i).concat(events.slice(i + 1));
-      }
-    }
-    return events;
-  }
-
-  const now = Date.now();
-  if (id === undefined) {
-    id = events.length === 0 ? 1 : events[events.length - 1].id + 1;
-  }
-  return events.concat([
-    {
-      id,
-      type,
-      msg: msg ?? "",
-      createdAt: now,
-      expiresAt: now + 10000,
-    },
-  ]);
-}
-
 function AnimatedOutlet() {
   const location = useLocation();
   const element = useOutlet();
@@ -71,7 +41,7 @@ function AnimatedOutlet() {
 
 export default function Header() {
   const session = useContext(SessionContext);
-  const [errors, dispatchEventMsg] = useReducer(errorReducer, []);
+  const [errors, dispatchEventMsg] = useReducer(eventReducer, []);
   const [popup, setPopup] = useState<PopupState>(null);
   const { transitioning } = useContext(
     PageTransitionContext
