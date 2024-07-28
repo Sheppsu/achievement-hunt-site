@@ -14,7 +14,6 @@ import { SessionContext } from "contexts/SessionContext";
 import { EventContext, EventDispatch } from "contexts/EventContext";
 import {
   AchievementTeamExtendedType,
-  AchievementTeamType,
 } from "api/types/AchievementTeamType";
 import { AchievementPlayerExtendedType } from "api/types/AchievementPlayerType";
 import { PopupContext, PopupContextType } from "contexts/PopupContext";

@@ -3,21 +3,6 @@ import "assets/css/team.css";
 import { useGetTeams } from "api/query";
 import { AchievementTeamType } from "api/types/AchievementTeamType";
 
-function LeaderboardItem({
-  team,
-  placement
-}: {
-  team: AchievementTeamType,
-  placement: number
-}) {
-  return (
-    <div>
-      <p>#{placement}</p>
-      <p>{team.points}pts</p>
-    </div>
-  );
-}
-
 export default function LeaderboardCard() {
   const teamsResp = useGetTeams(true);
 
@@ -32,7 +17,7 @@ export default function LeaderboardCard() {
             ) : teamsResp.data === undefined ? (
               "Error loading leaderboard"
             ) : (
-              teamsResp.data.map((team, i) => <LeaderboardItem key={i} team={team} placement={i+1} />)
+              teamsResp.data.map((team, i) => <p>#{i+1} - {team.points}pts</p>)
             )
           }
         </div>
