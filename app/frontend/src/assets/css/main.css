@@ -366,7 +366,7 @@ div.vertical-divider {
   flex-direction: column;
   justify-content: end;
   gap: 10px;
-  z-index: 15;
+  z-index: 100;
 }
 
 .event-entry {
