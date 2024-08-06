@@ -21,6 +21,7 @@
 :root {
   --background-color: #171717;
   --border-color: #2f2f2f;
+  --border-color-lit: #4a4a4a;
   --site-background-color: #060606;
 }
 
@@ -207,7 +208,7 @@ div.vertical-divider {
 }
 
 .header:hover {
-  border: 2px solid #4a4a4a;
+  border: 2px solid var(--border-color-lit);
 }
 
 .header-buttons-container {

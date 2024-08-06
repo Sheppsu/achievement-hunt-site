@@ -43,7 +43,7 @@ p {
 
   border-radius: var(--border-rounding);
 
-  background-color: var(--bg-color7);
+  background-color: var(--background-color);
 }
 
 .achievement-info-container {
@@ -55,16 +55,22 @@ p {
   align-items: center;
 
   border-radius: var(--border-rounding);
+  border: solid 2px var(--border-color);
+  transition: border-color 0.3s;
 
-  background-color: white;
+  background-color: var(--background-color);
+}
+
+.achievement-info-container:hover {
+  border-color: var(--border-color-lit);
 }
 
 .achievement-info-container.complete {
-  background: linear-gradient(to left, #5afa4b, white 150px);
+  background: linear-gradient(to left, #5afa4b, var(--background-color) 150px);
 }
 
 .achievement-info-container.incomplete {
-  background: linear-gradient(to left, #fa4b4b, white 150px);
+  background: linear-gradient(to left, #fa4b4b, var(--background-color) 150px);
 }
 
 .achievement-category {
@@ -149,7 +155,7 @@ p {
 
   border-radius: var(--border-rounding);
 
-  background-color: var(--bg-color7);
+  background-color: var(--background-color);;
 }
 
 .total-achievements-inner-container {
@@ -161,7 +167,7 @@ p {
 
   border-radius: var(--border-rounding);
 
-  background-color: white;
+  background-color: var(--background-color);;
 }
 
 .progress-bar {
@@ -171,7 +177,7 @@ p {
   border: solid black 2px;
   border-radius: 25px;
 
-  background-color: white;
+  background-color: var(--background-color);;
 }
 
 .progress-bar-inner {
@@ -180,7 +186,7 @@ p {
 
   border-radius: inherit;
 
-  background-color: var(--bg-color1);
+  background-color: white;
 
   transition: width 1s;
 }
@@ -218,7 +224,7 @@ p {
 
   border-radius: var(--border-rounding);
 
-  background-color: white;
+  background-color: var(--background-color);
 }
 
 .leaderboard-entry {
@@ -228,7 +234,7 @@ p {
 
   border-radius: var(--border-rounding-less);
 
-  background-color: var(--bg-color7);
+  background-color: var(--background-color);
 }
 
 .leaderboard-foreground-container {
@@ -242,22 +248,22 @@ p {
   border: solid black 2px;
   border-radius: var(--border-rounding-less);
 
-  background: linear-gradient(to right, #438efd, #438efd 50px, white 50px);
+  background: linear-gradient(to right, #438efd, #438efd 50px, var(--background-color) 50px);
 
   overflow: hidden;
   text-wrap: nowrap;
 }
 
 .leaderboard-foreground-container.n1 {
-  background: linear-gradient(to right, #fcd703, #fcd703 50px, white 50px);
+  background: linear-gradient(to right, #fcd703, #fcd703 50px, var(--background-color) 50px);
 }
 
 .leaderboard-foreground-container.n2 {
-  background: linear-gradient(to right, #e3e3e3, #e3e3e3 50px, white 50px);
+  background: linear-gradient(to right, #e3e3e3, #e3e3e3 50px, var(--background-color) 50px);
 }
 
 .leaderboard-foreground-container.n3 {
-  background: linear-gradient(to right, #8a6500, #8a6500 50px, white 50px);
+  background: linear-gradient(to right, #8a6500, #8a6500 50px, var(--background-color) 50px);
 }
 
 .placement-container {

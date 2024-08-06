@@ -1,6 +1,5 @@
 import { useGetAchievements, useGetTeams } from "api/query";
 import AchievementContainer from "components/achievements/AchievementContainer";
-import AchievementLeaderboard from "components/achievements/AchievementLeaderboard";
 import AchievementProgress, {
   WebsocketState,
 } from "components/achievements/AchievementProgress";
@@ -72,9 +71,6 @@ function LimitedAchievementCompletionPage() {
         <title>OCAH Achievements</title>
       </Helmet>
       <AchievementContainer />
-      <div className="progress-container">
-        <AchievementLeaderboard />
-      </div>
     </div>
   );
 }
@@ -96,7 +92,6 @@ function FullAchievementCompletionPage({
       <AchievementContainer />
       <div className="progress-container">
         <AchievementProgress state={state} setState={setState} team={team} />
-        <AchievementLeaderboard />
       </div>
     </div>
   );

@@ -274,7 +274,7 @@ export default function TeamCard() {
       </AnimatePresence>
       <motion.div className="info-container" layout>
         <h1 className="info-title">Your team</h1>
-        {session.isAuthenticated == false ? (
+        {!session.isAuthenticated ? (
           <UnauthenticatedContent />
         ) : teamsResponse.isLoading ? (
           <LoadingContent />

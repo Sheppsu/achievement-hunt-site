@@ -1,9 +1,3 @@
-:root {
-  --background-color: #171717;
-  --border-color: #2f2f2f;
-  --site-background-color: #060606;
-}
-
 .popup,
 .overlay {
   position: fixed;
