@@ -14,8 +14,8 @@ import {
 } from "api/types/AchievementTeamType";
 import AnimatedPage from "components/AnimatedPage";
 
-const EVENT_START = 1720573205000;
-export const EVENT_END = 2720600000000;
+const EVENT_START = 1724976000000;
+export const EVENT_END = 1724976000000;
 
 function getMyTeam(
   userId: number | undefined,
