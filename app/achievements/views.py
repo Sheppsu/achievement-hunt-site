@@ -90,6 +90,7 @@ def achievements(req):
                 name,
                 category,
                 description,
+                tags,
                 beatmap_id,
                 artist,
                 title,
@@ -109,15 +110,16 @@ def achievements(req):
                 "name": achievement[1],
                 "category": achievement[2],
                 "description": achievement[3],
+                "tags": achievement[4],
                 "beatmap": {
-                    "id": achievement[4],
-                    "artist": achievement[5],
-                    "title": achievement[6],
-                    "version": achievement[7],
-                    "cover": achievement[8],
-                    "star_rating": achievement[9]
-                } if achievement[4] is not None else None,
-                "completions": achievement[10]
+                    "id": achievement[5],
+                    "artist": achievement[6],
+                    "title": achievement[7],
+                    "version": achievement[8],
+                    "cover": achievement[9],
+                    "star_rating": achievement[10]
+                } if achievement[5] is not None else None,
+                "completions": achievement[11]
             } for achievement in cursor.fetchall()]
         )
 
