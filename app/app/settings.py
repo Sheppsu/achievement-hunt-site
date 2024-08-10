@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
-from osu import AuthHandler, Scope
+from osu import AuthHandler, Scope, Client
 
 load_dotenv()
 
@@ -167,6 +167,7 @@ OSU_LOGIN_URL = AuthHandler(
     OSU_REDIRECT_URL,
     Scope.identify()
 ).get_auth_url()
+OSU_CLIENT = Client.from_client_credentials(OSU_CLIENT_ID, OSU_CLIENT_SECRET, OSU_REDIRECT_URL)
 
 ACHIEVEMENTS_WS_URI = os.getenv("ACHIEVEMENTS_WS_URI")
 WS_CONNECTION_VALIDATOR = os.getenv("WS_CONNECTION_VALIDATOR")
