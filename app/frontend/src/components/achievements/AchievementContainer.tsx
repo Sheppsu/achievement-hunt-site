@@ -4,12 +4,14 @@ import { AchievementExtendedType } from "api/types/AchievementType";
 import "assets/css/achievements.css";
 import { WebsocketState } from "./AchievementProgress";
 import { NavItem } from "routes/achievements";
-import { motion } from "framer-motion";
+import { AnimationScope } from "framer-motion";
 
 export default function AchievementContainer({
   state,
+  scope,
 }: {
   state: WebsocketState;
+  scope: AnimationScope;
 }) {
   const { data: achievements } = useGetAchievements();
 
@@ -41,7 +43,7 @@ export default function AchievementContainer({
   }
 
   return (
-    <motion.div layout="size" className="achievements-container">
+    <div ref={scope} className="achievements-container">
       {achievements !== undefined ? (
         Object.keys(sortedAchievements)
           .sort((a, b) => a.localeCompare(b))
@@ -58,6 +60,6 @@ export default function AchievementContainer({
       ) : (
         <div>Loading achievements...</div>
       )}
-    </motion.div>
+    </div>
   );
 }

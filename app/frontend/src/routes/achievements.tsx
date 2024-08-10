@@ -18,6 +18,7 @@ import {
 import AnimatedPage from "components/AnimatedPage";
 import { AchievementExtendedType } from "api/types/AchievementType";
 import { toTitleCase } from "util/helperFunctions";
+import { AnimationScope, useAnimate } from "framer-motion";
 
 const EVENT_START = 1724976000000;
 export const EVENT_END = 1724976000000;
@@ -82,24 +83,28 @@ function HiddenAchievementCompletionPage({
 
 function LimitedAchievementCompletionPage({
   state,
+  scope,
 }: {
   state: WebsocketState;
+  scope: AnimationScope;
 }) {
-  return <AchievementContainer state={state} />;
+  return <AchievementContainer scope={scope} state={state} />;
 }
 
 function FullAchievementCompletionPage({
   team,
   state,
+  scope,
   dispatchState,
 }: {
   team: AchievementTeamExtendedType | null;
   state: WebsocketState;
+  scope: AnimationScope;
   dispatchState: StateDispatch;
 }) {
   return (
     <>
-      <AchievementContainer state={state} />
+      <AchievementContainer scope={scope} state={state} />
       <div className="progress-container">
         <AchievementProgress
           state={state}
@@ -151,11 +156,26 @@ function getDefaultNav(achievements: AchievementExtendedType[]): NavItems {
 
 function AchievementNavigationBar({
   state,
+  animate,
   dispatchState,
 }: {
   state: WebsocketState | null;
+  animate: any; // i have no clue how to put the type for this
   dispatchState: StateDispatch;
 }) {
+  const [animating, setAnimating] = useState(false);
+
+  useEffect(() => {
+    if (animating) {
+      (async () => {
+        await animate("div", { y: 10, opacity: 0 }, { duration: 0.2 });
+        await animate("div", { y: 0, opacity: 100 }, { duration: 0.2 });
+      })();
+
+      setAnimating(false);
+    }
+  }, [animating]);
+
   function onItemClick(category: keyof NavItems, label: string) {
     if (state === null || state?.achievementsFilter === undefined) return;
 
@@ -177,7 +197,11 @@ function AchievementNavigationBar({
         }
       }
     }
-    dispatchState({ id: 5, achievementsFilter: newItems });
+
+    setAnimating(true);
+    setTimeout(() => {
+      dispatchState({ id: 5, achievementsFilter: newItems });
+    }, 225);
   }
 
   return (
@@ -225,6 +249,7 @@ export default function AchievementCompletionPage() {
 
   const [time, setTime] = useState<number>(Date.now());
   const [state, dispatchState] = useReducer(wsReducer, null, defaultState);
+  const [scope, animate] = useAnimate();
 
   if (time < EVENT_START && !session.debug) {
     return <HiddenAchievementCompletionPage time={time} setTime={setTime} />;
@@ -256,6 +281,7 @@ export default function AchievementCompletionPage() {
         {state.achievementsFilter !== undefined ? (
           <AchievementNavigationBar
             state={state}
+            animate={animate}
             dispatchState={dispatchState}
           />
         ) : (
@@ -265,12 +291,13 @@ export default function AchievementCompletionPage() {
         <div className="achievement-content-container">
           {team !== null ? (
             <FullAchievementCompletionPage
+              scope={scope}
               state={state}
               dispatchState={dispatchState}
               team={team}
             />
           ) : (
-            <LimitedAchievementCompletionPage state={state} />
+            <LimitedAchievementCompletionPage state={state} scope={scope} />
           )}
         </div>
       </div>
