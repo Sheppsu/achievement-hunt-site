@@ -2,34 +2,62 @@ import Achievement from "./Achievement";
 import { useGetAchievements } from "api/query";
 import { AchievementExtendedType } from "api/types/AchievementType";
 import "assets/css/achievements.css";
+import { WebsocketState } from "./AchievementProgress";
+import { NavItem } from "routes/achievements";
+import { motion } from "framer-motion";
 
-export default function AchievementContainer() {
+export default function AchievementContainer({
+  state,
+}: {
+  state: WebsocketState;
+}) {
   const { data: achievements } = useGetAchievements();
+
+  const activeCategories = Array.from(
+    getActiveCategories(state.achievementsFilter.categories)
+  );
 
   const sortedAchievements: { [key: string]: AchievementExtendedType[] } = {};
   if (achievements !== undefined) {
     for (const achievement of achievements as AchievementExtendedType[]) {
-      if (!sortedAchievements[achievement.category]) {
-        sortedAchievements[achievement.category] = [];
+      if (
+        activeCategories.includes(achievement.category) ||
+        activeCategories.length == 0
+      ) {
+        if (!sortedAchievements[achievement.category]) {
+          sortedAchievements[achievement.category] = [];
+        }
+        sortedAchievements[achievement.category].push(achievement);
       }
-      sortedAchievements[achievement.category].push(achievement);
+    }
+  }
+
+  function* getActiveCategories(categories: NavItem[]) {
+    for (const category of categories) {
+      if (category.active) {
+        yield category.label;
+      }
     }
   }
 
   return (
-    <div className="achievements-container">
+    <motion.div layout="size" className="achievements-container">
       {achievements !== undefined ? (
-        Object.keys(sortedAchievements).sort((a, b) => a.localeCompare(b)).map((key) => (
-          <>
-            <div className="achievement-category">{key}</div>
-            {sortedAchievements[key].map((achievement, index) => (
-              <Achievement key={index} achievement={achievement} />
-            ))}
-          </>
-        ))
+        Object.keys(sortedAchievements)
+          .sort((a, b) => a.localeCompare(b))
+          .map((key) => {
+            return (
+              <>
+                <div className="achievement-category">{key}</div>
+                {sortedAchievements[key].map((achievement, index) => (
+                  <Achievement key={index} achievement={achievement} />
+                ))}
+              </>
+            );
+          })
       ) : (
         <div>Loading achievements...</div>
       )}
-    </div>
+    </motion.div>
   );
 }
