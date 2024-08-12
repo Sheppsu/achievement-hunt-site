@@ -22,7 +22,20 @@ export default function AchievementContainer({
   const sortedAchievements: { [key: string]: AchievementExtendedType[] } = {};
   if (achievements !== undefined) {
     for (const achievement of achievements as AchievementExtendedType[]) {
-      if (
+      if (state.achievementsSearchFilter != "") {
+        const categoryName = `Search for ${state.achievementsSearchFilter}`;
+        if (!sortedAchievements[categoryName]) {
+          sortedAchievements[categoryName] = [];
+        }
+
+        if (
+          achievement.name
+            .toLowerCase()
+            .includes(state.achievementsSearchFilter.toLowerCase())
+        ) {
+          sortedAchievements[categoryName].push(achievement);
+        }
+      } else if (
         activeCategories.includes(achievement.category) ||
         activeCategories.length == 0
       ) {
@@ -51,9 +64,14 @@ export default function AchievementContainer({
             return (
               <>
                 <div className="achievement-category">{key}</div>
-                {sortedAchievements[key].map((achievement, index) => (
-                  <Achievement key={index} achievement={achievement} />
-                ))}
+                {key.toLowerCase().includes("search") &&
+                sortedAchievements[key].length === 0 ? (
+                  <p>No achievements found!</p>
+                ) : (
+                  sortedAchievements[key].map((achievement, index) => (
+                    <Achievement key={index} achievement={achievement} />
+                  ))
+                )}
               </>
             );
           })

@@ -8,7 +8,14 @@ import AchievementProgress, {
 } from "components/achievements/AchievementProgress";
 
 import "assets/css/achievements.css";
-import { useContext, useEffect, useReducer, useState } from "react";
+import {
+  ChangeEvent,
+  FormEvent,
+  useContext,
+  useEffect,
+  useReducer,
+  useState,
+} from "react";
 import { SessionContext } from "contexts/SessionContext";
 import { Helmet } from "react-helmet";
 import {
@@ -19,6 +26,7 @@ import AnimatedPage from "components/AnimatedPage";
 import { AchievementExtendedType } from "api/types/AchievementType";
 import { toTitleCase } from "util/helperFunctions";
 import { AnimationScope, useAnimate } from "framer-motion";
+import Button from "components/Button";
 
 const EVENT_START = 1724976000000;
 export const EVENT_END = 1724976000000;
@@ -164,6 +172,7 @@ function AchievementNavigationBar({
   dispatchState: StateDispatch;
 }) {
   const [animating, setAnimating] = useState(false);
+  const [searchValue, setSearchValue] = useState<string>("");
 
   useEffect(() => {
     if (animating) {
@@ -175,6 +184,12 @@ function AchievementNavigationBar({
       setAnimating(false);
     }
   }, [animating]);
+
+  function onSearch(event: FormEvent) {
+    event.preventDefault();
+
+    dispatchState({ id: 6, achievementsSearchFilter: searchValue });
+  }
 
   function onItemClick(category: keyof NavItems, label: string) {
     if (state === null || state?.achievementsFilter === undefined) return;
@@ -210,7 +225,14 @@ function AchievementNavigationBar({
         <div>Loading...</div>
       ) : (
         <>
-          <input type="text" placeholder="Search" />
+          <input
+            type="text"
+            placeholder="Search"
+            name="input"
+            onChange={(e) =>
+              dispatchState({ id: 6, achievementsSearchFilter: e.target.value })
+            }
+          />
           {Object.entries(state?.achievementsFilter).map(
             ([category, children]) => (
               <div className="achievement-nav-bar-row" key={category}>

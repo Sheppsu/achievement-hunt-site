@@ -14,6 +14,7 @@ import { AchievementExtendedType } from "api/types/AchievementType";
 import { EventContext, EventStateType } from "contexts/EventContext";
 import { SessionContext } from "contexts/SessionContext";
 import { EVENT_END, NavItems } from "routes/achievements";
+import { Search } from "react-router-dom";
 
 export type WebsocketState = {
   ws: WebSocket | null;
@@ -21,6 +22,7 @@ export type WebsocketState = {
   mode: number;
   submitEnabled: boolean;
   achievementsFilter: NavItems;
+  achievementsSearchFilter: string; // probably put filter stuff in its own reducer
 };
 
 export function defaultState(): WebsocketState {
@@ -39,6 +41,7 @@ export function defaultState(): WebsocketState {
       categories: [{ label: "default", active: false }],
       tags: [{ label: "default", active: false }],
     },
+    achievementsSearchFilter: "",
   };
 }
 
@@ -235,12 +238,18 @@ interface FilterType extends BaseStateActionType {
   achievementsFilter: NavItems;
 }
 
+interface SearchFilterType extends BaseStateActionType {
+  id: 6;
+  achievementsSearchFilter: string;
+}
+
 type StateActionType =
   | ConnectingType
   | AuthType
   | SubmitType
   | ModeType
-  | FilterType;
+  | FilterType
+  | SearchFilterType;
 
 export function wsReducer(
   state: WebsocketState,
@@ -274,6 +283,11 @@ export function wsReducer(
       return {
         ...state,
         achievementsFilter: action.achievementsFilter,
+      };
+    case 6:
+      return {
+        ...state,
+        achievementsSearchFilter: action.achievementsSearchFilter,
       };
   }
 }
