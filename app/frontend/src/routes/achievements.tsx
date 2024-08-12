@@ -172,7 +172,6 @@ function AchievementNavigationBar({
   dispatchState: StateDispatch;
 }) {
   const [animating, setAnimating] = useState(false);
-  const [searchValue, setSearchValue] = useState<string>("");
 
   useEffect(() => {
     if (animating) {
@@ -184,12 +183,6 @@ function AchievementNavigationBar({
       setAnimating(false);
     }
   }, [animating]);
-
-  function onSearch(event: FormEvent) {
-    event.preventDefault();
-
-    dispatchState({ id: 6, achievementsSearchFilter: searchValue });
-  }
 
   function onItemClick(category: keyof NavItems, label: string) {
     if (state === null || state?.achievementsFilter === undefined) return;
@@ -229,6 +222,7 @@ function AchievementNavigationBar({
             type="text"
             placeholder="Search"
             name="input"
+            autoComplete="off"
             onChange={(e) =>
               dispatchState({ id: 6, achievementsSearchFilter: e.target.value })
             }
