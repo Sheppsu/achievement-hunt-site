@@ -402,8 +402,9 @@ p {
 .achievement-nav-bar-children {
   width: 100%;
   display: flex;
-  gap: 15px;
-  overflow-x: scroll;
+  column-gap: 15px;
+  row-gap: 6px;
+  flex-wrap: wrap;
 }
 
 .achievement-nav-bar-item {
