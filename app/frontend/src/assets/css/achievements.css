@@ -348,6 +348,17 @@ p {
   border-color: var(--border-color-lit);
 }
 
+.achievement-nav-bar-input-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.achievement-nav-bar-checkbox {
+  display: flex;
+  gap: 8px;
+}
+
 .achievement-nav-bar-row {
   display: flex;
   flex-direction: row;

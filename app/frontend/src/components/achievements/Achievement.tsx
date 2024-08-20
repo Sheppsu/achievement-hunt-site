@@ -4,12 +4,13 @@ import { AchievementCompletionType } from "api/types/AchievementCompletionType";
 import { AchievementPlayerExtendedType } from "api/types/AchievementPlayerType";
 import { AchievementExtendedType } from "api/types/AchievementType";
 import { SessionContext } from "contexts/SessionContext";
+import { WebsocketState } from "./AchievementProgress";
 
 function timeAgo(timestamp: string) {
   const times: [number, string][] = [
     [60, "minute"],
     [60, "hour"],
-    [24, "day"]
+    [24, "day"],
   ];
   const now = Date.now();
   const completion = Date.parse(timestamp);
@@ -46,12 +47,15 @@ function timeAgo(timestamp: string) {
 
 export default function Achievement({
   achievement,
+  state,
 }: {
   achievement: AchievementExtendedType;
+  state: WebsocketState;
 }) {
   const session = useContext(SessionContext);
   const { data: teams } = useGetTeams();
-  const players: [AchievementPlayerExtendedType, AchievementCompletionType][] = [];
+  const players: [AchievementPlayerExtendedType, AchievementCompletionType][] =
+    [];
   let completed: boolean = false;
 
   // get players with achievement completed and check if team completed
@@ -83,63 +87,82 @@ export default function Achievement({
     }
   }
 
-  const infoCls = "achievement-info-container" + (completed ? " complete" : " incomplete");
+  const infoCls =
+    "achievement-info-container" + (completed ? " complete" : " incomplete");
 
   return (
-    <div className="achievement">
-      <div className={infoCls}>
-        <div className="achievement-info">
-          <h1>{achievement.name}</h1>
-          <p>
-            {achievement.completions} completions | {achievement.description}
-          </p>
-        </div>
-        <h1>{completed ? "Complete" : "Incomplete"}</h1>
-      </div>
-      {achievement.beatmap === null ? (
-        ""
+    <>
+      {state.hideCompletedAchievements && completed ? (
+        <></>
       ) : (
-        <a
-          href={`https://osu.ppy.sh/b/${achievement.beatmap.id}`}
-          target="_blank"
-        >
-          <div className="achievement-details-container">
-            <img
-              className="achievement-details-cover"
-              src={achievement.beatmap.cover}
-            ></img>
-            <div className="achievement-details-beatmap-info">
-              <p className="achievement-details-beatmap-info-text">
-                {achievement.beatmap.artist} - {achievement.beatmap.title}
-              </p>
-              <p className="achievement-details-beatmap-info-text">
-                [{achievement.beatmap.version}]
+        <div className="achievement">
+          <div className={infoCls}>
+            <div className="achievement-info">
+              <h1>{achievement.name}</h1>
+              <p>
+                {achievement.completions} completions |{" "}
+                {achievement.description}
               </p>
             </div>
-            <h1 className="achievement-details-star-rating">
-              {achievement.beatmap.star_rating}*
-            </h1>
+            <h1>{completed ? "Complete" : "Incomplete"}</h1>
           </div>
-        </a>
-      )}
-      { achievement.beatmap === null || players.length === 0 ? "" : <hr/> }
-      { 
-        players.length == 0 ? "" :
-        <div className="achievement-players-container">
-          {
-            players.sort((a, b) => Date.parse(a[1].time_completed) - Date.parse(b[1].time_completed)).map(
-              ([player, completion]) => 
-              <div className="achievement-players-entry">
-                <img className="achievement-players-entry-pfp" src={player.user.avatar}></img>
-                <div>
-                  <p><b>{player.user.username}</b></p>
-                  <p style={{fontSize: "14px"}}>{timeAgo(completion.time_completed)}</p>
+          {achievement.beatmap === null ? (
+            ""
+          ) : (
+            <a
+              href={`https://osu.ppy.sh/b/${achievement.beatmap.id}`}
+              target="_blank"
+            >
+              <div className="achievement-details-container">
+                <img
+                  className="achievement-details-cover"
+                  src={achievement.beatmap.cover}
+                ></img>
+                <div className="achievement-details-beatmap-info">
+                  <p className="achievement-details-beatmap-info-text">
+                    {achievement.beatmap.artist} - {achievement.beatmap.title}
+                  </p>
+                  <p className="achievement-details-beatmap-info-text">
+                    [{achievement.beatmap.version}]
+                  </p>
                 </div>
+                <h1 className="achievement-details-star-rating">
+                  {achievement.beatmap.star_rating}*
+                </h1>
               </div>
-            )
-          }
+            </a>
+          )}
+          {achievement.beatmap === null || players.length === 0 ? "" : <hr />}
+          {players.length == 0 ? (
+            ""
+          ) : (
+            <div className="achievement-players-container">
+              {players
+                .sort(
+                  (a, b) =>
+                    Date.parse(a[1].time_completed) -
+                    Date.parse(b[1].time_completed)
+                )
+                .map(([player, completion]) => (
+                  <div className="achievement-players-entry">
+                    <img
+                      className="achievement-players-entry-pfp"
+                      src={player.user.avatar}
+                    ></img>
+                    <div>
+                      <p>
+                        <b>{player.user.username}</b>
+                      </p>
+                      <p style={{ fontSize: "14px" }}>
+                        {timeAgo(completion.time_completed)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          )}
         </div>
-      }
-    </div>
+      )}
+    </>
   );
 }

@@ -218,15 +218,34 @@ function AchievementNavigationBar({
         <div>Loading...</div>
       ) : (
         <>
-          <input
-            type="text"
-            placeholder="Search"
-            name="input"
-            autoComplete="off"
-            onChange={(e) =>
-              dispatchState({ id: 6, achievementsSearchFilter: e.target.value })
-            }
-          />
+          <div className="achievement-nav-bar-input-row">
+            <input
+              type="text"
+              placeholder="Search"
+              name="input"
+              autoComplete="off"
+              onChange={(e) =>
+                dispatchState({
+                  id: 6,
+                  achievementsSearchFilter: e.target.value,
+                })
+              }
+            />
+            <div className="achievement-nav-bar-checkbox">
+              <input
+                id="hide-completed"
+                type="checkbox"
+                style={{ width: 18 }}
+                onChange={(e) => {
+                  dispatchState({
+                    id: 7,
+                    hideCompletedAchievements: e.target.checked,
+                  });
+                }}
+              />
+              <p>Hide completed achievements</p>
+            </div>
+          </div>
           {Object.entries(state?.achievementsFilter).map(
             ([category, children]) => (
               <div className="achievement-nav-bar-row" key={category}>

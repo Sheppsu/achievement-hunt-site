@@ -69,7 +69,11 @@ export default function AchievementContainer({
                   <p>No achievements found!</p>
                 ) : (
                   sortedAchievements[key].map((achievement, index) => (
-                    <Achievement key={index} achievement={achievement} />
+                    <Achievement
+                      key={index}
+                      achievement={achievement}
+                      state={state}
+                    />
                   ))
                 )}
               </>
