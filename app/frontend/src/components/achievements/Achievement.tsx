@@ -5,6 +5,7 @@ import { AchievementPlayerExtendedType } from "api/types/AchievementPlayerType";
 import { AchievementExtendedType } from "api/types/AchievementType";
 import { SessionContext } from "contexts/SessionContext";
 import { WebsocketState } from "./AchievementProgress";
+import { toTitleCase } from "util/helperFunctions";
 
 function timeAgo(timestamp: string) {
   const times: [number, string][] = [
@@ -57,6 +58,7 @@ export default function Achievement({
   const players: [AchievementPlayerExtendedType, AchievementCompletionType][] =
     [];
   let completed: boolean = false;
+  const tags = achievement.tags.split(",");
 
   // get players with achievement completed and check if team completed
   if (teams !== undefined) {
@@ -103,6 +105,13 @@ export default function Achievement({
                 {achievement.completions} completions |{" "}
                 {achievement.description}
               </p>
+              {tags[0] !== "" && (
+                <div className="achievement-tags-container">
+                  {tags.map((tag) => (
+                    <div className="achievement-tag">{toTitleCase(tag)}</div>
+                  ))}
+                </div>
+              )}
             </div>
             <h1>{completed ? "Complete" : "Incomplete"}</h1>
           </div>
