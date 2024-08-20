@@ -116,6 +116,11 @@ export default function AchievementCompletionPage() {
     return <HiddenAchievementCompletionPage time={time} />;
   }
 
+  useEffect(() => {
+    const intervalId = setInterval(() => setTime(Date.now()), 1000);
+    return () => clearInterval(intervalId);
+  });
+
   return (
     <AnimatedPage>
       <div style={{ margin: "auto", textAlign: "center", marginTop: "20px" }}>
