@@ -157,8 +157,8 @@ function getDefaultNav(achievements: AchievementExtendedType[]): NavItems {
       { label: "mania", active: false },
       { label: "catch", active: false },
     ],
-    categories: categories.map((c) => ({ label: c, active: false })),
-    tags: tags.map((t) => ({ label: t, active: false })),
+    categories: categories.map((c) => ({ label: c, active: true })),
+    tags: tags.map((t) => ({ label: t, active: true })),
   };
 }
 
@@ -185,7 +185,7 @@ function AchievementNavigationBar({
   }, [animating]);
 
   function onItemClick(category: keyof NavItems, label: string) {
-    if (state === null || state?.achievementsFilter === undefined) return;
+    if (state === null || state.achievementsFilter === null) return;
 
     const newItems = { ...state.achievementsFilter };
 
@@ -198,31 +198,31 @@ function AchievementNavigationBar({
         id: 4,
         mode: ["standard", "taiko", "catch", "mania"].indexOf(label),
       });
-    } else if (category === "tags") {
-      if (state.activeTag === label) {
-        setAnimating(true);
-        setTimeout(() => {
-          dispatchState({ id: 8, activeTag: "" });
-        }, 225);
+    // } else if (category === "tags") {
+      // if (state.activeTag === label) {
+      //   setAnimating(true);
+      //   setTimeout(() => {
+      //     dispatchState({ id: 8, activeTag: "" });
+      //   }, 225);
 
-        for (const tag of newItems.tags) {
-          if (tag.label === label) {
-            tag.active = false;
-          }
-        }
-        return;
-      }
-      for (const tag of newItems.tags) {
-        tag.active = tag.label === label;
+      //   for (const tag of newItems.tags) {
+      //     if (tag.label === label) {
+      //       tag.active = false;
+      //     }
+      //   }
+      //   return;
+      // }
+      // for (const tag of newItems.tags) {
+      //   tag.active = tag.label === label;
 
-        setAnimating(true);
-        setTimeout(() => {
-          dispatchState({
-            id: 8,
-            activeTag: label,
-          });
-        }, 225);
-      }
+      //   setAnimating(true);
+      //   setTimeout(() => {
+      //     dispatchState({
+      //       id: 8,
+      //       activeTag: label,
+      //     });
+      //   }, 225);
+      // }
     } else {
       for (const child of newItems[category]) {
         if (child.label === label) {
@@ -274,7 +274,7 @@ function AchievementNavigationBar({
               <p>Hide completed achievements</p>
             </div>
           </div>
-          {Object.entries(state?.achievementsFilter).map(
+          {Object.entries(state.achievementsFilter ?? {}).map(
             ([category, children]) => (
               <div className="achievement-nav-bar-row" key={category}>
                 <p className="achievement-nav-bar-label">
@@ -322,7 +322,7 @@ export default function AchievementCompletionPage() {
 
   const { data: achievements } = useGetAchievements(true);
   if (
-    state.achievementsFilter.mode[0].label === "default" &&
+    state.achievementsFilter === null &&
     achievements !== undefined
   ) {
     dispatchState({ id: 5, achievementsFilter: getDefaultNav(achievements) });

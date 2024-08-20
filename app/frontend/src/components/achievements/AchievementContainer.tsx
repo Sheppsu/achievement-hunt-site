@@ -7,6 +7,33 @@ import { NavItem } from "routes/achievements";
 import { AnimationScope } from "framer-motion";
 import { toTitleCase } from "util/helperFunctions";
 
+function intersects(a: string[], b: string[]): boolean {
+  for (const item of b) {
+    if (a.includes(item)) {
+      return true;
+    } 
+  }
+
+  return false;
+}
+
+function matchesSearch(achievement: AchievementExtendedType, searchFilter: string[]) {
+  for (const word of searchFilter) {
+    const bm = achievement.beatmap;
+    if (
+      word != "" &&
+      !achievement.name.toLowerCase().includes(word) &&
+      !achievement.description.toLowerCase().includes(word) &&
+      !(bm === null ? false : bm.artist.toLowerCase().includes(word)) &&
+      !(bm === null ? false : bm.title.toLowerCase().includes(word)) &&
+      !(bm === null ? false : bm.version.toLowerCase().includes(word))
+    )
+      return false;
+  }
+
+  return true;
+}
+
 export default function AchievementContainer({
   state,
   scope,
@@ -16,64 +43,41 @@ export default function AchievementContainer({
 }) {
   const { data: achievements } = useGetAchievements();
 
-  const activeCategories = Array.from(
-    getActiveCategories(state.achievementsFilter.categories)
-  );
+  if (state.achievementsFilter === null || achievements === undefined)
+    return (
+      <div ref={scope} className="achievements-container">
+        <div>Loading achievements...</div>
+      </div>
+    );
 
-  const activeTags = Array.from(
-    getActiveCategories(state.achievementsFilter.tags)
-  );
+  const activeCategories = state.achievementsFilter.categories
+    .filter((item) => item.active)
+    .map((item) => item.label);
+  const activeTags = state.achievementsFilter.tags
+    .filter((item) => item.active)
+    .map((item) => item.label);
+  const searchFilter = state.achievementsSearchFilter.toLowerCase().split(" ");
 
   const sortedAchievements: { [key: string]: AchievementExtendedType[] } = {};
-  if (achievements !== undefined) {
-    for (const achievement of achievements as AchievementExtendedType[]) {
-      if (state.achievementsSearchFilter != "") {
-        const categoryName = `Search for ${state.achievementsSearchFilter}`;
-        if (!sortedAchievements[categoryName]) {
-          sortedAchievements[categoryName] = [];
-        }
 
-        if (
-          achievement.name
-            .toLowerCase()
-            .includes(state.achievementsSearchFilter.toLowerCase())
-        ) {
-          sortedAchievements[categoryName].push(achievement);
-        }
-      } else if (state.activeTag != "") {
-        const categoryName = `Achievements with "${toTitleCase(
-          state.activeTag
-        )}"`;
-        if (!sortedAchievements[categoryName]) {
-          sortedAchievements[categoryName] = [];
-        }
+  for (const achievement of achievements as AchievementExtendedType[]) {
+    if (!matchesSearch(achievement, searchFilter))
+      continue;
 
-        if (achievement.tags.includes(state.activeTag)) {
-          sortedAchievements[categoryName].push(achievement);
-        }
-      } else if (
-        activeCategories.includes(achievement.category) ||
-        activeCategories.length == 0
-      ) {
-        if (!sortedAchievements[achievement.category]) {
-          sortedAchievements[achievement.category] = [];
-        }
-        sortedAchievements[achievement.category].push(achievement);
-      }
-    }
-  }
+    if (!activeCategories.includes(achievement.category))
+      continue;
 
-  function* getActiveCategories(categories: NavItem[]) {
-    for (const category of categories) {
-      if (category.active) {
-        yield category.label;
-      }
-    }
+    if (!intersects(activeTags, achievement.tags.split(",")))
+      continue;
+
+    if (!sortedAchievements[achievement.category])
+      sortedAchievements[achievement.category] = [];
+    sortedAchievements[achievement.category].push(achievement);
   }
 
   return (
     <div ref={scope} className="achievements-container">
-      {achievements !== undefined ? (
+      {
         Object.keys(sortedAchievements)
           .sort((a, b) => a.localeCompare(b))
           .map((key) => {
@@ -95,9 +99,7 @@ export default function AchievementContainer({
               </>
             );
           })
-      ) : (
-        <div>Loading achievements...</div>
-      )}
+      }
     </div>
   );
 }
