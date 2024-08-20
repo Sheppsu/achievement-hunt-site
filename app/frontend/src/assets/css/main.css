@@ -149,6 +149,16 @@ hr {
   text-decoration: none;
 }
 
+.footer-text-link {
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+.footer-text-link:hover {
+  color: #b3b3b3;
+  cursor: pointer;
+}
+
 /* misc */
 
 .prevent-select {
