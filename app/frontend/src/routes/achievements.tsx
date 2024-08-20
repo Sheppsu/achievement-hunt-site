@@ -237,10 +237,13 @@ function AchievementNavigationBar({
                 type="checkbox"
                 style={{ width: 18 }}
                 onChange={(e) => {
-                  dispatchState({
-                    id: 7,
-                    hideCompletedAchievements: e.target.checked,
-                  });
+                  setAnimating(true);
+                  setTimeout(() => {
+                    dispatchState({
+                      id: 7,
+                      hideCompletedAchievements: e.target.checked,
+                    });
+                  }, 225);
                 }}
               />
               <p>Hide completed achievements</p>
