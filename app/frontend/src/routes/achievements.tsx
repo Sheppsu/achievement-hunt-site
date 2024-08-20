@@ -342,16 +342,12 @@ export default function AchievementCompletionPage() {
               : "Event ended"}
           </h1>
         </div>
-
-        {state.achievementsFilter !== undefined ? (
-          <AchievementNavigationBar
-            state={state}
-            animate={animate}
-            dispatchState={dispatchState}
-          />
-        ) : (
-          ""
-        )}
+        
+        <AchievementNavigationBar
+          state={state}
+          animate={animate}
+          dispatchState={dispatchState}
+        />
 
         <div className="achievement-content-container">
           {team !== null ? (
