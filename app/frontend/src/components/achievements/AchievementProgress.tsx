@@ -24,6 +24,7 @@ export type WebsocketState = {
   achievementsFilter: NavItems;
   achievementsSearchFilter: string; // probably put filter stuff in its own reducer
   hideCompletedAchievements: boolean;
+  activeTag: string;
 };
 
 export function defaultState(): WebsocketState {
@@ -44,6 +45,7 @@ export function defaultState(): WebsocketState {
     },
     achievementsSearchFilter: "",
     hideCompletedAchievements: false,
+    activeTag: "",
   };
 }
 
@@ -250,6 +252,11 @@ interface CheckboxType extends BaseStateActionType {
   hideCompletedAchievements: boolean;
 }
 
+interface TagType extends BaseStateActionType {
+  id: 8;
+  activeTag: string;
+}
+
 type StateActionType =
   | ConnectingType
   | AuthType
@@ -257,7 +264,8 @@ type StateActionType =
   | ModeType
   | FilterType
   | SearchFilterType
-  | CheckboxType;
+  | CheckboxType
+  | TagType;
 
 export function wsReducer(
   state: WebsocketState,
@@ -301,6 +309,11 @@ export function wsReducer(
       return {
         ...state,
         hideCompletedAchievements: action.hideCompletedAchievements,
+      };
+    case 8:
+      return {
+        ...state,
+        activeTag: action.activeTag,
       };
   }
 }

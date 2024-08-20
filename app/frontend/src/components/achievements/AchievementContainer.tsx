@@ -5,6 +5,7 @@ import "assets/css/achievements.css";
 import { WebsocketState } from "./AchievementProgress";
 import { NavItem } from "routes/achievements";
 import { AnimationScope } from "framer-motion";
+import { toTitleCase } from "util/helperFunctions";
 
 export default function AchievementContainer({
   state,
@@ -17,6 +18,10 @@ export default function AchievementContainer({
 
   const activeCategories = Array.from(
     getActiveCategories(state.achievementsFilter.categories)
+  );
+
+  const activeTags = Array.from(
+    getActiveCategories(state.achievementsFilter.tags)
   );
 
   const sortedAchievements: { [key: string]: AchievementExtendedType[] } = {};
@@ -33,6 +38,17 @@ export default function AchievementContainer({
             .toLowerCase()
             .includes(state.achievementsSearchFilter.toLowerCase())
         ) {
+          sortedAchievements[categoryName].push(achievement);
+        }
+      } else if (state.activeTag != "") {
+        const categoryName = `Achievements with "${toTitleCase(
+          state.activeTag
+        )}"`;
+        if (!sortedAchievements[categoryName]) {
+          sortedAchievements[categoryName] = [];
+        }
+
+        if (achievement.tags.includes(state.activeTag)) {
           sortedAchievements[categoryName].push(achievement);
         }
       } else if (

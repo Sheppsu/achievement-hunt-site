@@ -198,6 +198,31 @@ function AchievementNavigationBar({
         id: 4,
         mode: ["standard", "taiko", "catch", "mania"].indexOf(label),
       });
+    } else if (category === "tags") {
+      if (state.activeTag === label) {
+        setAnimating(true);
+        setTimeout(() => {
+          dispatchState({ id: 8, activeTag: "" });
+        }, 225);
+
+        for (const tag of newItems.tags) {
+          if (tag.label === label) {
+            tag.active = false;
+          }
+        }
+        return;
+      }
+      for (const tag of newItems.tags) {
+        tag.active = tag.label === label;
+
+        setAnimating(true);
+        setTimeout(() => {
+          dispatchState({
+            id: 8,
+            activeTag: label,
+          });
+        }, 225);
+      }
     } else {
       for (const child of newItems[category]) {
         if (child.label === label) {
@@ -255,20 +280,22 @@ function AchievementNavigationBar({
                 <p className="achievement-nav-bar-label">
                   {toTitleCase(category)}
                 </p>
-                {children.map((item) => (
-                  <p
-                    key={item.label}
-                    className={
-                      "achievement-nav-bar-item" +
-                      (item.active ? " active" : "")
-                    }
-                    onClick={() =>
-                      onItemClick(category as keyof NavItems, item.label)
-                    }
-                  >
-                    {toTitleCase(item.label)}
-                  </p>
-                ))}
+                <div className="achievement-nav-bar-children">
+                  {children.map((item) => (
+                    <p
+                      key={item.label}
+                      className={
+                        "achievement-nav-bar-item" +
+                        (item.active ? " active" : "")
+                      }
+                      onClick={() =>
+                        onItemClick(category as keyof NavItems, item.label)
+                      }
+                    >
+                      {toTitleCase(item.label)}
+                    </p>
+                  ))}
+                </div>
               </div>
             )
           )}

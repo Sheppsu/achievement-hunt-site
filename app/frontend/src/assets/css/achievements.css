@@ -399,9 +399,17 @@ p {
   margin: 0 10px;
 }
 
+.achievement-nav-bar-children {
+  width: 100%;
+  display: flex;
+  gap: 15px;
+  overflow-x: scroll;
+}
+
 .achievement-nav-bar-item {
   color: #787878;
   transition: color 0.3s;
+  text-wrap: nowrap;
 }
 
 .achievement-nav-bar-item:hover {
