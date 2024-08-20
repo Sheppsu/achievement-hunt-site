@@ -284,12 +284,11 @@ export function wsReducer(
         authenticated: action.auth,
         submitEnabled: action.auth,
       };
-    case 3: {
+    case 3:
       return {
         ...state,
         submitEnabled: !action.disable,
       };
-    }
     case 4:
       return {
         ...state,
