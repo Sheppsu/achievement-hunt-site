@@ -174,6 +174,7 @@ function AchievementNavigationBar({
   achievements: AchievementExtendedType[] | undefined;
 }) {
   const [animating, setAnimating] = useState(false);
+  const [searchField, setSearchField] = useState<string>("");
 
   useEffect(() => {
     if (animating) {
@@ -192,6 +193,8 @@ function AchievementNavigationBar({
     setAnimating(true);
     setTimeout(() => {
       dispatchState({ id: 5, achievementsFilter: getDefaultNav(achievements) });
+      dispatchState({ id: 6, achievementsSearchFilter: "" });
+      setSearchField("");
     }, 225);
   }
 
@@ -260,12 +263,14 @@ function AchievementNavigationBar({
               placeholder="Search"
               name="input"
               autoComplete="off"
-              onChange={(e) =>
+              value={searchField}
+              onChange={(e) => {
+                setSearchField(e.target.value);
                 dispatchState({
                   id: 6,
                   achievementsSearchFilter: e.target.value,
-                })
-              }
+                });
+              }}
             />
             <div className="achievement-nav-bar-checkbox">
               <input
