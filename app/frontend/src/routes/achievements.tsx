@@ -166,10 +166,12 @@ function AchievementNavigationBar({
   state,
   animate,
   dispatchState,
+  achievements,
 }: {
   state: WebsocketState | null;
   animate: any; // i have no clue how to put the type for this
   dispatchState: StateDispatch;
+  achievements: AchievementExtendedType[] | undefined;
 }) {
   const [animating, setAnimating] = useState(false);
 
@@ -183,6 +185,15 @@ function AchievementNavigationBar({
       setAnimating(false);
     }
   }, [animating]);
+
+  function onReset() {
+    if (!achievements) return;
+
+    setAnimating(true);
+    setTimeout(() => {
+      dispatchState({ id: 5, achievementsFilter: getDefaultNav(achievements) });
+    }, 225);
+  }
 
   function onItemClick(category: keyof NavItems, label: string) {
     if (state === null || state.achievementsFilter === null) return;
@@ -198,7 +209,7 @@ function AchievementNavigationBar({
         id: 4,
         mode: ["standard", "taiko", "catch", "mania"].indexOf(label),
       });
-    // } else if (category === "tags") {
+      // } else if (category === "tags") {
       // if (state.activeTag === label) {
       //   setAnimating(true);
       //   setTimeout(() => {
@@ -299,6 +310,7 @@ function AchievementNavigationBar({
               </div>
             )
           )}
+          <Button onClick={() => onReset()}>Reset to Default</Button>
         </>
       )}
     </div>
@@ -321,10 +333,7 @@ export default function AchievementCompletionPage() {
   }
 
   const { data: achievements } = useGetAchievements(true);
-  if (
-    state.achievementsFilter === null &&
-    achievements !== undefined
-  ) {
+  if (state.achievementsFilter === null && achievements !== undefined) {
     dispatchState({ id: 5, achievementsFilter: getDefaultNav(achievements) });
   }
 
@@ -342,11 +351,12 @@ export default function AchievementCompletionPage() {
               : "Event ended"}
           </h1>
         </div>
-        
+
         <AchievementNavigationBar
           state={state}
           animate={animate}
           dispatchState={dispatchState}
+          achievements={achievements}
         />
 
         <div className="achievement-content-container">
