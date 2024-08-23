@@ -212,31 +212,6 @@ function AchievementNavigationBar({
         id: 4,
         mode: ["standard", "taiko", "catch", "mania"].indexOf(label),
       });
-      // } else if (category === "tags") {
-      // if (state.activeTag === label) {
-      //   setAnimating(true);
-      //   setTimeout(() => {
-      //     dispatchState({ id: 8, activeTag: "" });
-      //   }, 225);
-
-      //   for (const tag of newItems.tags) {
-      //     if (tag.label === label) {
-      //       tag.active = false;
-      //     }
-      //   }
-      //   return;
-      // }
-      // for (const tag of newItems.tags) {
-      //   tag.active = tag.label === label;
-
-      //   setAnimating(true);
-      //   setTimeout(() => {
-      //     dispatchState({
-      //       id: 8,
-      //       activeTag: label,
-      //     });
-      //   }, 225);
-      // }
     } else {
       for (const child of newItems[category]) {
         if (child.label === label) {
