@@ -17,13 +17,25 @@ p {
 
 .page-container {
   width: calc(100% - 40px);
+  max-width: 1200px;
+  margin: auto;
   padding: 0 20px;
   padding-top: 50px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.achievement-content-container {
+  width: 100%;
 
   display: flex;
   flex-direction: row;
   gap: 30px;
 }
+
+/* Achievement list */
 
 .achievements-container {
   flex-grow: 1;
@@ -71,6 +83,41 @@ p {
 
 .achievement-info-container.incomplete {
   background: linear-gradient(to left, #fa4b4b, var(--background-color) 150px);
+}
+
+.achievement-tags-container {
+  width: 100%;
+  height: 40px;
+
+  padding-top: 6px;
+
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  overflow-x: scroll;
+}
+
+.achievement-tags-container::-webkit-scrollbar {
+  display: none;
+}
+
+.achievement-tag {
+  height: 80%;
+  padding: 0px 10px 0px 10px;
+  
+  border-radius: 100px;
+  border: solid 2px var(--border-color);
+  
+  display: flex;
+  align-items: center;
+
+  transition: border-color 0.3s;
+  background-color: var(--background-color);
+}
+
+.achievement-tag:hover {
+  border-color: var(--border-color-lit);
 }
 
 .achievement-category {
@@ -138,6 +185,8 @@ p {
   border-radius: 100%;
 }
 
+/* Progress container */
+
 .progress-container {
   min-width: 400px;
 
@@ -155,7 +204,7 @@ p {
 
   border-radius: var(--border-rounding);
 
-  background-color: var(--background-color);;
+  background-color: var(--background-color);
 }
 
 .total-achievements-inner-container {
@@ -167,7 +216,7 @@ p {
 
   border-radius: var(--border-rounding);
 
-  background-color: var(--background-color);;
+  background-color: var(--background-color);
 }
 
 .progress-bar {
@@ -177,7 +226,7 @@ p {
   border: solid black 2px;
   border-radius: 25px;
 
-  background-color: var(--background-color);;
+  background-color: var(--background-color);
 }
 
 .progress-bar-inner {
@@ -215,6 +264,8 @@ p {
   background-color: var(--button-color-disabled);
 }
 
+/* Leaderboard */
+
 .leaderboard {
   padding: 10px;
 
@@ -248,22 +299,42 @@ p {
   border: solid black 2px;
   border-radius: var(--border-rounding-less);
 
-  background: linear-gradient(to right, #438efd, #438efd 50px, var(--background-color) 50px);
+  background: linear-gradient(
+    to right,
+    #438efd,
+    #438efd 50px,
+    var(--background-color) 50px
+  );
 
   overflow: hidden;
   text-wrap: nowrap;
 }
 
 .leaderboard-foreground-container.n1 {
-  background: linear-gradient(to right, #fcd703, #fcd703 50px, var(--background-color) 50px);
+  background: linear-gradient(
+    to right,
+    #fcd703,
+    #fcd703 50px,
+    var(--background-color) 50px
+  );
 }
 
 .leaderboard-foreground-container.n2 {
-  background: linear-gradient(to right, #e3e3e3, #e3e3e3 50px, var(--background-color) 50px);
+  background: linear-gradient(
+    to right,
+    #e3e3e3,
+    #e3e3e3 50px,
+    var(--background-color) 50px
+  );
 }
 
 .leaderboard-foreground-container.n3 {
-  background: linear-gradient(to right, #8a6500, #8a6500 50px, var(--background-color) 50px);
+  background: linear-gradient(
+    to right,
+    #8a6500,
+    #8a6500 50px,
+    var(--background-color) 50px
+  );
 }
 
 .placement-container {
@@ -292,8 +363,74 @@ p {
   text-align: center;
 }
 
-@media (max-width: 1350px) {
-  .page-container {
+/* Achievement navigation bar */
+
+.achievement-nav-bar {
+  padding: 10px;
+
+  border: solid 2px var(--border-color);
+  border-radius: var(--border-rounding);
+  transition: border-color 0.3s;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  background-color: var(--background-color);
+}
+
+.achievement-nav-bar:hover {
+  border-color: var(--border-color-lit);
+}
+
+.achievement-nav-bar-input-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.achievement-nav-bar-checkbox {
+  display: flex;
+  gap: 8px;
+}
+
+.achievement-nav-bar-row {
+  display: flex;
+  flex-direction: row;
+  gap: 15px;
+}
+
+.achievement-nav-bar-label {
+  width: 100px;
+  margin: 0 10px;
+}
+
+.achievement-nav-bar-children {
+  width: 100%;
+  display: flex;
+  column-gap: 15px;
+  row-gap: 6px;
+  flex-wrap: wrap;
+}
+
+.achievement-nav-bar-item {
+  color: #787878;
+  transition: color 0.3s;
+  text-wrap: nowrap;
+}
+
+.achievement-nav-bar-item:hover {
+  cursor: pointer;
+  text-decoration: underline;
+  color: #c6d3f9;
+}
+
+.achievement-nav-bar-item.active {
+  color: #ffffff;
+}
+
+@media (max-width: 1260px) {
+  .achievement-content-container {
     flex-direction: column;
   }
 
