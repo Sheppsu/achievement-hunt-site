@@ -102,26 +102,59 @@ def achievements(req):
             LEFT JOIN achievements_achievementcompletion ON (achievements_achievementcompletion.achievement_id = achievements_achievement.id)
             LEFT JOIN achievements_beatmapinfo ON (achievements_beatmapinfo.id = achievements_achievement.beatmap_id)
             GROUP BY achievements_achievement.id, achievements_beatmapinfo.id
+            ORDER BY achievements_achievement.id DESC
             """
         )
-        return success(
-            [{
-                "id": int(achievement[0]),
-                "name": achievement[1],
-                "category": achievement[2],
-                "description": achievement[3],
-                "tags": achievement[4],
-                "beatmap": {
-                    "id": achievement[5],
-                    "artist": achievement[6],
-                    "title": achievement[7],
-                    "version": achievement[8],
-                    "cover": achievement[9],
-                    "star_rating": achievement[10]
-                } if achievement[5] is not None else None,
-                "completions": achievement[11]
-            } for achievement in cursor.fetchall()]
+
+        achievements = [{
+            "id": int(achievement[0]),
+            "name": achievement[1],
+            "category": achievement[2],
+            "description": achievement[3],
+            "tags": achievement[4],
+            "beatmap": {
+                "id": achievement[5],
+                "artist": achievement[6],
+                "title": achievement[7],
+                "version": achievement[8],
+                "cover": achievement[9],
+                "star_rating": achievement[10]
+            } if achievement[5] is not None else None,
+            "completions": achievement[11]
+        } for achievement in cursor.fetchall()]
+
+        cursor.execute(
+            """
+            SELECT
+                achievements_achievementcompletion.achievement_id,
+                value,
+                is_float
+            FROM achievements_achievementcompletionplacement
+            LEFT JOIN achievements_achievementcompletion ON (achievements_achievementcompletion.placement_id = achievements_achievementcompletionplacement.id)
+            ORDER BY achievements_achievementcompletion.achievement_id DESC, value DESC
+            """
         )
+
+        placements = cursor.fetchall()
+
+        i = 0
+        for achievement in achievements:
+            a = False
+            while len(placements) > i and (placement := placements[i])[0] == achievement["id"]:
+                placement_value = placement[1] / (10**6) if placement[2] else placement[1]
+
+                if not a:
+                    achievement["placements"] = [placement_value]
+                    a = True
+                else:
+                    achievement["placements"].append(placement_value)
+
+                i += 1
+
+            if len(placements) == i:
+                break
+
+        return success(achievements)
 
 
 def teams(req):

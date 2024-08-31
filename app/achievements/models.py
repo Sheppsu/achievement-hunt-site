@@ -81,10 +81,16 @@ class Achievement(models.Model):
     )
 
 
+class AchievementCompletionPlacement(models.Model):
+    value = models.BigIntegerField()
+    is_float = models.BooleanField()
+
+
 class AchievementCompletion(models.Model):
     player = models.ForeignKey("Player", on_delete=models.RESTRICT, related_name="completions")
     achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE, related_name="completions")
     time_completed = models.DateTimeField()
+    placement = models.ForeignKey(AchievementCompletionPlacement, on_delete=models.CASCADE, null=True)
 
 
 class Team(models.Model):
