@@ -8,7 +8,7 @@ import {
   useMutation,
   useQuery,
 } from "@tanstack/react-query";
-import { EventContext, EventStateType } from "contexts/EventContext";
+import { EventContext, EventType } from "contexts/EventContext";
 import { UndefinedInitialDataOptions } from "node_modules/@tanstack/react-query/build/legacy";
 import { useContext } from "react";
 import { AchievementPlayerType } from "./types/AchievementPlayerType";
@@ -26,7 +26,7 @@ function getUrl(endpoint: string): string {
 
 async function doFetch<T>(
   dispatchEventMsg: React.Dispatch<{
-    type: EventStateType;
+    type: EventType;
     msg?: string | undefined;
     id?: number | undefined;
   }>,
