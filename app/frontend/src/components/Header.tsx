@@ -68,13 +68,13 @@ export default function Header() {
             </NavLink>
           </div>
           <div className="header-login-container">
-            <div className="header-notification-button-container">
-              <IoIosNotifications
-                size={24}
-                onClick={() => {
-                  setShowNotifications(!showNotifications);
-                }}
-              />
+            <div
+              className="header-notification-button-container"
+              onClick={() => {
+                setShowNotifications(!showNotifications);
+              }}
+            >
+              <IoIosNotifications size={24} />
               {showNotifications && (
                 <motion.div
                   className="notification-container"
