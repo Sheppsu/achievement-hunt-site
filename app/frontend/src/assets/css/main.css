@@ -313,6 +313,12 @@ div.vertical-divider {
   align-items: center;
   justify-content: space-between;
   padding: 0px 25px 0px 25px;
+  position: sticky;
+}
+
+.notifications-header p {
+  font: bold;
+  font-size: x-large;
 }
 
 .notifications-clear-all-button {
@@ -324,11 +330,6 @@ div.vertical-divider {
   border-radius: 6px;
   font-size: medium;
   cursor: pointer;
-}
-
-.notifications-header p {
-  font: bold;
-  font-size: x-large;
 }
 
 .notification-container {
@@ -344,12 +345,16 @@ div.vertical-divider {
   gap: 5px;
   align-items: center;
   padding: 8px;
-  overflow-y: scroll;
+  overflow: hidden;
 
   position: absolute;
   z-index: 100;
   top: 180%;
   right: 1%;
+}
+
+.notification-scroll-container {
+  overflow-y: scroll;
 }
 
 .header-notification-button-container:hover {

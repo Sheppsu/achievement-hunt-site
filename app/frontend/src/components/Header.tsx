@@ -94,9 +94,11 @@ export default function Header() {
                       Clear All
                     </button>
                   </div>
-                  {eventsState.pastEvents.map((event) => (
-                    <NotificationEventEntry event={event} />
-                  ))}
+                  <div className="notification-scroll-container">
+                    {eventsState.pastEvents.map((event) => (
+                      <NotificationEventEntry event={event} />
+                    ))}
+                  </div>
                 </motion.div>
               )}
             </div>
