@@ -365,7 +365,7 @@ div.vertical-divider {
 
 .event-container {
   width: calc(50% - 20px);
-  max-width: 280px;
+  max-width: 340px;
   padding: 10px;
 
   position: fixed;
@@ -382,21 +382,65 @@ div.vertical-divider {
 
 .event-entry {
   width: calc(100% - 10px);
-  padding: 5px;
+  height: 80px;
 
-  border-radius: 10px;
+  display: flex;
+  align-items: center; /* Vertically center content */
 
-  background-color: var(--site-background-color);
+  border-radius: 5px;
+  border: 2.5px solid var(--border-color);
+
+  background-color: var(--background-color);
 }
 
-.event-entry.error {
-  border: 2px solid rgb(212, 112, 112);
-  box-shadow: 0px 0px 30px 0px rgba(235, 77, 77, 0.3);
+.event-status-icon {
+  height: 100%;
+  width: 65px;
+  flex-shrink: 0;
+  border-radius: 3px;
+
+  background-color: #454343;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.event-entry.info {
-  border: 2px solid rgb(126, 161, 248);
-  box-shadow: 0px 0px 30px 0px rgba(56, 163, 235, 0.3);
+.event-dismiss {
+  height: 100%;
+  width: 30px;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: background-color 0.15s;
+}
+
+.event-dismiss:hover {
+  background-color: var(--border-color);
+  cursor: pointer;
+}
+
+.event-status-icon.error {
+  background-color: rgb(150, 78, 78);
+}
+
+.event-status-icon.info {
+  background-color: rgb(42, 54, 86);
+}
+
+.event-text-container {
+  height: 100%;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 20px 8px 20px 8px;
 }
 
 .event-text {
