@@ -1,7 +1,7 @@
 import { createContext } from "react";
 import { Dispatch } from "react";
 
-export type EventType = "error" | "info" | "expired";
+export type EventType = "error" | "info" | "expired" | "removed" | "clearall";
 
 export type Event = {
   id: number;
@@ -37,9 +37,20 @@ export const EventContext = createContext((({
 export function eventReducer(
   state: EventState,
   { type, msg, id }: { type: EventType; msg?: string; id?: number }
-) {
+): EventState {
   const events = state.events;
   const pastEvents = state.pastEvents;
+
+  if (type === "removed") {
+    for (const [i, event] of pastEvents.entries()) {
+      if (event.id === id) {
+        return {
+          events: events,
+          pastEvents: pastEvents.slice(0, i).concat(pastEvents.slice(i + 1)),
+        };
+      }
+    }
+  }
 
   if (type === "expired") {
     for (const [i, event] of events.entries()) {
@@ -51,6 +62,13 @@ export function eventReducer(
       }
     }
     return state;
+  }
+
+  if (type === "clearall") {
+    return {
+      events: events,
+      pastEvents: [],
+    };
   }
 
   const now = Date.now();

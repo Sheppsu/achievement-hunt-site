@@ -3,7 +3,7 @@ import AnimatedPage from "./AnimatedPage";
 import { EventContext, Event } from "contexts/EventContext";
 import { motion } from "framer-motion";
 import { IoIosWarning, IoMdInformationCircle } from "react-icons/io";
-import { IoClose } from "react-icons/io5";
+import { IoCheckmarkSharp, IoClose } from "react-icons/io5";
 
 export default function EventEntry({
   event,
@@ -48,7 +48,7 @@ export default function EventEntry({
         ></div>
       </div>
       <div className="event-dismiss" onClick={() => (event.expiresAt = time)}>
-        <IoClose size={20} />
+        <IoCheckmarkSharp size={16} />
       </div>
     </motion.div>
   );
