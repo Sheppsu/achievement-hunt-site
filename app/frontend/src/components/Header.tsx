@@ -11,10 +11,7 @@ import Footer from "./Footer";
 import ErrorContainer from "./EventContainer";
 import { SessionContext } from "contexts/SessionContext";
 import { getSessionData } from "util/auth";
-import {
-  EventContext,
-  eventReducer
-} from "contexts/EventContext";
+import { EventContext, eventReducer } from "contexts/EventContext";
 
 import OsuLogo from "../assets/images/osu.png";
 
@@ -41,7 +38,10 @@ function AnimatedOutlet() {
 
 export default function Header() {
   const session = useContext(SessionContext);
-  const [errors, dispatchEventMsg] = useReducer(eventReducer, []);
+  const [eventsState, dispatchEventMsg] = useReducer(eventReducer, {
+    events: [],
+    pastEvents: [],
+  });
   const [popup, setPopup] = useState<PopupState>(null);
   const { transitioning } = useContext(
     PageTransitionContext
@@ -74,7 +74,7 @@ export default function Header() {
       <EventContext.Provider value={dispatchEventMsg}>
         <PopupContext.Provider value={{ popup, setPopup }}>
           <PopupContainer />
-          <ErrorContainer events={errors} />
+          <ErrorContainer events={eventsState.events} />
           <SessionContext.Provider value={getSessionData()}>
             <AnimatedOutlet />
           </SessionContext.Provider>

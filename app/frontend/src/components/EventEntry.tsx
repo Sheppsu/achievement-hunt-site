@@ -1,6 +1,6 @@
 import { useContext, useEffect } from "react";
 import AnimatedPage from "./AnimatedPage";
-import { EventContext, EventState } from "contexts/EventContext";
+import { EventContext, Event } from "contexts/EventContext";
 import { motion } from "framer-motion";
 import { IoIosWarning, IoMdInformationCircle } from "react-icons/io";
 import { IoClose } from "react-icons/io5";
@@ -9,7 +9,7 @@ export default function EventEntry({
   event,
   time,
 }: {
-  event: EventState;
+  event: Event;
   time: number;
 }) {
   const eventLength = event.expiresAt - event.createdAt;
