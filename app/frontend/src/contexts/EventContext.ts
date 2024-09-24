@@ -1,39 +1,82 @@
 import { createContext } from "react";
 import { Dispatch } from "react";
 
-export type EventStateType = "error" | "info" | "expired";
+export type EventType = "error" | "info" | "expired" | "removed" | "clearall";
 
-export type EventState = {
-    id: number,
-    type: EventStateType,
-    msg: string,
-    createdAt: number,
-    expiresAt: number
+export type Event = {
+  id: number;
+  type: EventType;
+  msg: string;
+  createdAt: number;
+  expiresAt: number;
 };
 
-export type EventDispatch = Dispatch<{type: EventStateType, msg?: string, id?: number}>;
+export type EventState = {
+  events: Event[];
+  pastEvents: Event[];
+};
 
-export const EventContext = createContext((({ type, msg, id }: { type: EventStateType; msg?: string, id?: number }) => {console.log(type, msg, id)}) as EventDispatch);
+export type EventDispatch = Dispatch<{
+  type: EventType;
+  msg?: string;
+  id?: number;
+}>;
+
+export const EventContext = createContext((({
+  type,
+  msg,
+  id,
+}: {
+  type: EventType;
+  msg?: string;
+  id?: number;
+}) => {
+  console.log(type, msg, id);
+}) as EventDispatch);
 
 export function eventReducer(
-    events: EventState[],
-    { type, msg, id }: { type: EventStateType; msg?: string; id?: number }
-  ) {
-    if (type === "expired") {
-      for (const [i, event] of events.entries()) {
-        if (event.id === id) {
-          // TODO: add to some log where it can be accessed by the user to view past events
-          return events.slice(0, i).concat(events.slice(i + 1));
-        }
+  state: EventState,
+  { type, msg, id }: { type: EventType; msg?: string; id?: number }
+): EventState {
+  const events = state.events;
+  const pastEvents = state.pastEvents;
+
+  if (type === "removed") {
+    for (const [i, event] of pastEvents.entries()) {
+      if (event.id === id) {
+        return {
+          events: events,
+          pastEvents: pastEvents.slice(0, i).concat(pastEvents.slice(i + 1)),
+        };
       }
-      return events;
     }
-  
-    const now = Date.now();
-    if (id === undefined) {
-      id = events.length === 0 ? 1 : events[events.length - 1].id + 1;
+  }
+
+  if (type === "expired") {
+    for (const [i, event] of events.entries()) {
+      if (event.id === id) {
+        return {
+          events: events.slice(0, i).concat(events.slice(i + 1)),
+          pastEvents: [...pastEvents, event],
+        };
+      }
     }
-    return events.concat([
+    return state;
+  }
+
+  if (type === "clearall") {
+    return {
+      events: events,
+      pastEvents: [],
+    };
+  }
+
+  const now = Date.now();
+  if (id === undefined) {
+    id = events.length === 0 ? 1 : events[events.length - 1].id + 1;
+  }
+  return {
+    events: events.concat([
       {
         id,
         type,
@@ -41,5 +84,7 @@ export function eventReducer(
         createdAt: now,
         expiresAt: now + 10000,
       },
-    ]);
-  }
+    ]),
+    pastEvents: pastEvents,
+  };
+}

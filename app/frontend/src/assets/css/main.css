@@ -285,6 +285,83 @@ div.vertical-divider {
   letter-spacing: 2px;
 }
 
+.header-login-container {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-notification-button-container {
+  height: 36px;
+  width: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+
+  border-radius: 100px;
+
+  transition: background-color 0.15s;
+}
+
+.notifications-header {
+  width: 100%;
+  height: 40px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0px 25px 0px 25px;
+  position: sticky;
+}
+
+.notifications-header p {
+  font: bold;
+  font-size: x-large;
+}
+
+.notifications-clear-all-button {
+  background-color: white;
+  border: none;
+  height: 32px;
+  padding-left: 12px;
+  padding-right: 12px;
+  border-radius: 6px;
+  font-size: medium;
+  cursor: pointer;
+}
+
+.notification-container {
+  width: 325px;
+  height: 550px;
+  cursor: default;
+
+  background-color: var(--background-color);
+  border: 2px solid var(--border-color);
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: center;
+  padding: 8px;
+  overflow: hidden;
+
+  position: absolute;
+  z-index: 100;
+  top: 180%;
+  right: 1%;
+}
+
+.notification-scroll-container {
+  overflow-y: scroll;
+}
+
+.header-notification-button-container:hover {
+  background-color: #2f2f2f;
+  cursor: pointer;
+}
+
 .login-box {
   height: 50px;
   border-radius: 50px;
@@ -365,7 +442,7 @@ div.vertical-divider {
 
 .event-container {
   width: calc(50% - 20px);
-  max-width: 280px;
+  max-width: 340px;
   padding: 10px;
 
   position: fixed;
@@ -382,21 +459,65 @@ div.vertical-divider {
 
 .event-entry {
   width: calc(100% - 10px);
-  padding: 5px;
+  height: 80px;
 
-  border-radius: 10px;
+  display: flex;
+  align-items: center; /* Vertically center content */
 
-  background-color: var(--site-background-color);
+  border-radius: 5px;
+  border: 2.5px solid var(--border-color);
+
+  background-color: var(--background-color);
 }
 
-.event-entry.error {
-  border: 2px solid rgb(212, 112, 112);
-  box-shadow: 0px 0px 30px 0px rgba(235, 77, 77, 0.3);
+.event-status-icon {
+  height: 100%;
+  width: 65px;
+  flex-shrink: 0;
+  border-radius: 3px;
+
+  background-color: #454343;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.event-entry.info {
-  border: 2px solid rgb(126, 161, 248);
-  box-shadow: 0px 0px 30px 0px rgba(56, 163, 235, 0.3);
+.event-dismiss {
+  height: 100%;
+  width: 30px;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: background-color 0.15s;
+}
+
+.event-dismiss:hover {
+  background-color: var(--border-color);
+  cursor: pointer;
+}
+
+.event-status-icon.error {
+  background-color: rgb(150, 78, 78);
+}
+
+.event-status-icon.info {
+  background-color: rgb(42, 54, 86);
+}
+
+.event-text-container {
+  height: 100%;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 20px 8px 20px 8px;
 }
 
 .event-text {

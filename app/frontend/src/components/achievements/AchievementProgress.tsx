@@ -11,7 +11,7 @@ import {
   AchievementTeamType,
 } from "api/types/AchievementTeamType";
 import { AchievementExtendedType } from "api/types/AchievementType";
-import { EventContext, EventStateType } from "contexts/EventContext";
+import { EventContext, EventType } from "contexts/EventContext";
 import { SessionContext } from "contexts/SessionContext";
 import { EVENT_END, NavItems } from "routes/achievements";
 import { Search } from "react-router-dom";
@@ -34,7 +34,7 @@ export function defaultState(): WebsocketState {
     submitEnabled: false,
     achievementsFilter: null,
     achievementsSearchFilter: "",
-    hideCompletedAchievements: false
+    hideCompletedAchievements: false,
   };
 }
 
@@ -118,7 +118,7 @@ function onCompletedAchievement(
 
 function handleMessage(
   evt: MessageEvent<string>,
-  dispatchEventMsg: React.Dispatch<{ type: EventStateType; msg: string }>,
+  dispatchEventMsg: React.Dispatch<{ type: EventType; msg: string }>,
   dispatchState: React.Dispatch<StateActionType>,
   queryClient: QueryClient
 ) {
@@ -161,7 +161,7 @@ function handleMessage(
 
 function connect(
   uri: string,
-  dispatchEventMsg: React.Dispatch<{ type: EventStateType; msg: string }>,
+  dispatchEventMsg: React.Dispatch<{ type: EventType; msg: string }>,
   dispatchState: StateDispatch,
   queryClient: QueryClient,
   data: object
