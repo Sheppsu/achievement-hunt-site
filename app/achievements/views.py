@@ -8,7 +8,6 @@ import time
 from django.conf import settings
 from django.contrib.auth import login as do_login, logout as do_logout
 
-from django.db import models
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect
 from django.views.decorators.http import require_http_methods, require_POST

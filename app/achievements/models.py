@@ -86,10 +86,19 @@ class Achievement(SerializableModel):
         FIELDS = ["id", "name", "category", "description", "tags", "beatmap"]
 
 
+class AchievementCompletionPlacement(SerializableModel):
+    value = models.BigIntegerField()
+    is_float = models.BooleanField()
+
+    class Serialization:
+        FIELDS = ["value", "is_float"]
+
+
 class AchievementCompletion(SerializableModel):
     player = models.ForeignKey("Player", on_delete=models.RESTRICT, related_name="completions")
     achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE, related_name="completions")
     time_completed = models.DateTimeField()
+    placement = models.ForeignKey(AchievementCompletionPlacement, on_delete=models.CASCADE, null=True)
 
     class Serialization:
         FIELDS = ["id", "time_completed"]
