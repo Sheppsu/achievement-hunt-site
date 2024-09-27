@@ -2,12 +2,8 @@ from django.db import models
 
 import requests
 from osu import Client
-from typing import TYPE_CHECKING
 
-from common import create_auth_handler  # type: ignore
-
-if TYPE_CHECKING:
-    from ..common import create_auth_handler
+from common import create_auth_handler, SerializableModel
 
 
 class UserManager(models.Manager):
@@ -37,7 +33,7 @@ class UserManager(models.Manager):
             return
 
 
-class User(models.Model):
+class User(SerializableModel):
     is_anonymous = False
     is_authenticated = True
 
@@ -55,11 +51,14 @@ class User(models.Model):
     USERNAME_FIELD = "id"
     objects = UserManager()
 
+    class Serialization:
+        FIELDS = ["id", "username", "avatar", "cover", "is_admin", "is_achievement_creator"]
+
     def __str__(self):
         return self.username
 
 
-class BeatmapInfo(models.Model):
+class BeatmapInfo(SerializableModel):
     id = models.PositiveIntegerField(primary_key=True)
     artist = models.CharField()
     version = models.CharField()
@@ -67,8 +66,11 @@ class BeatmapInfo(models.Model):
     cover = models.CharField()
     star_rating = models.FloatField()
 
+    class Serialization:
+        FIELDS = ["id", "artist", "version", "title", "cover", "star_rating"]
 
-class Achievement(models.Model):
+
+class Achievement(SerializableModel):
     name = models.CharField(max_length=64)
     category = models.CharField(max_length=32)
     description = models.CharField(max_length=256)
@@ -80,21 +82,30 @@ class Achievement(models.Model):
         null=True
     )
 
+    class Serialization:
+        FIELDS = ["id", "name", "category", "description", "tags", "beatmap"]
 
-class AchievementCompletion(models.Model):
+
+class AchievementCompletion(SerializableModel):
     player = models.ForeignKey("Player", on_delete=models.RESTRICT, related_name="completions")
     achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE, related_name="completions")
     time_completed = models.DateTimeField()
 
+    class Serialization:
+        FIELDS = ["id", "time_completed"]
 
-class Team(models.Model):
+
+class Team(SerializableModel):
     name = models.CharField(max_length=32, unique=True)
     icon = models.CharField(max_length=64, null=True)
     invite = models.CharField(max_length=16)
     points = models.PositiveIntegerField(default=0)
 
+    class Serialization:
+        FIELDS = ["id", "name", "icon", "invite", "points"]
 
-class Player(models.Model):
+
+class Player(SerializableModel):
     user = models.ForeignKey(User, on_delete=models.RESTRICT)
     team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name="players")
     completed_achievements = models.ManyToManyField(
@@ -102,3 +113,6 @@ class Player(models.Model):
         through=AchievementCompletion,
         related_name="players_completed"
     )
+
+    class Serialization:
+        FIELDS = ["id"]
