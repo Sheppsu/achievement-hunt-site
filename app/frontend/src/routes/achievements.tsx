@@ -29,7 +29,7 @@ import { AnimationScope, useAnimate } from "framer-motion";
 import Button from "components/Button";
 
 const EVENT_START = 1724976000000;
-export const EVENT_END = 1724976000000;
+export const EVENT_END = 1725940800000;
 
 function getMyTeam(
   userId: number | undefined,

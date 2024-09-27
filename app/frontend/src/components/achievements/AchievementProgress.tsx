@@ -3,7 +3,7 @@ import {
   QueryClientContext,
   useQuery,
 } from "@tanstack/react-query";
-import { useContext, useEffect, useReducer, useState } from "react";
+import { useContext } from "react";
 import { useGetAchievements } from "api/query";
 import { AchievementPlayerExtendedType } from "api/types/AchievementPlayerType";
 import {
@@ -11,19 +11,19 @@ import {
   AchievementTeamType,
 } from "api/types/AchievementTeamType";
 import { AchievementExtendedType } from "api/types/AchievementType";
-import { EventContext, EventStateType } from "contexts/EventContext";
+import { EventContext, EventType } from "contexts/EventContext";
 import { SessionContext } from "contexts/SessionContext";
 import { EVENT_END, NavItems } from "routes/achievements";
-import { Search } from "react-router-dom";
 
 export type WebsocketState = {
-  ws: WebSocket | null;
+  ws: WebSocket | null | undefined;
   authenticated: boolean;
   mode: number;
   submitEnabled: boolean;
   achievementsFilter: NavItems | null;
   achievementsSearchFilter: string; // probably put filter stuff in its own reducer
   hideCompletedAchievements: boolean;
+  lastDisconnect: number;
 };
 
 export function defaultState(): WebsocketState {
@@ -34,7 +34,8 @@ export function defaultState(): WebsocketState {
     submitEnabled: false,
     achievementsFilter: null,
     achievementsSearchFilter: "",
-    hideCompletedAchievements: false
+    hideCompletedAchievements: false,
+    lastDisconnect: 0
   };
 }
 
@@ -43,12 +44,21 @@ type WSAchievementType = {
   name: string;
   category: string;
   time: string;
+  value: number | null;
 };
 type RefreshReturnType = {
   achievements: WSAchievementType[];
   score: number;
   player: number;
 };
+
+function * insertValue(arr: number[], value: number) {
+  for (const item of arr) {
+    if (value > item)
+      yield item;
+    yield item;
+  }
+}
 
 function onCompletedAchievement(
   data: RefreshReturnType,
@@ -94,18 +104,21 @@ function onCompletedAchievement(
     }
   );
 
-  const completedIds = data.achievements.map((a) => a.id);
   queryClient.setQueryData(
     ["achievements"],
     (oldAchievements: AchievementExtendedType[]) => {
       const achievements = [];
       for (const achievement of oldAchievements) {
-        if (completedIds.includes(achievement.id)) {
-          achievements.push({
-            ...achievement,
-            completions: achievement.completions + 1,
-          });
-          continue;
+        for (const completion of data.achievements) {
+          if (completion.id === achievement.id) {
+            achievements.push({
+              ...achievement,
+              completions: achievement.completion_count + 1,
+              placements: achievement.placements === undefined ? undefined : (
+                Array.from(insertValue(achievement.placements, completion.value!))
+              )
+            });
+          }
         }
 
         achievements.push(achievement);
@@ -118,7 +131,7 @@ function onCompletedAchievement(
 
 function handleMessage(
   evt: MessageEvent<string>,
-  dispatchEventMsg: React.Dispatch<{ type: EventStateType; msg: string }>,
+  dispatchEventMsg: React.Dispatch<{ type: EventType; msg: string }>,
   dispatchState: React.Dispatch<StateActionType>,
   queryClient: QueryClient
 ) {
@@ -133,7 +146,7 @@ function handleMessage(
 
   switch (data.code) {
     case 0: {
-      dispatchState({ id: 2, auth: true });
+      dispatchState({ id: 2 });
       dispatchEventMsg({
         type: "info",
         msg: "You are now authenticated with the submission server",
@@ -161,28 +174,27 @@ function handleMessage(
 
 function connect(
   uri: string,
-  dispatchEventMsg: React.Dispatch<{ type: EventStateType; msg: string }>,
+  dispatchEventMsg: React.Dispatch<{ type: EventType; msg: string }>,
   dispatchState: StateDispatch,
   queryClient: QueryClient,
   data: object
 ): WebSocket {
   const ws = new WebSocket(uri);
 
-  ws.addEventListener("open", (evt) => {
+  dispatchEventMsg({
+    type: "info",
+    msg: "Connecting to submission server..."
+  });
+
+  ws.addEventListener("open", (_) => {
     ws.send(JSON.stringify(data));
   });
-  ws.addEventListener("close", (evt) => {
+  ws.addEventListener("close", (_) => {
     dispatchEventMsg({
       type: "error",
-      msg: "Connection to submissions server unexpectedly closed; reconnecting...",
+      msg: "Connection to submissions server failed or unexpectedly closed; reconnecting in 3 seconds...",
     });
-    dispatchState({ id: 2, auth: false });
-  });
-  ws.addEventListener("error", (evt) => {
-    dispatchEventMsg({
-      type: "error",
-      msg: "Submission server returned an unexpected error",
-    });
+    dispatchState({ id: 8 });
   });
   ws.addEventListener("message", (evt) => {
     handleMessage(evt, dispatchEventMsg, dispatchState, queryClient);
@@ -192,7 +204,7 @@ function connect(
 }
 
 function sendSubmit(state: WebsocketState, dispatchState: StateDispatch) {
-  if (state.ws === null || !state.authenticated) {
+  if (state.ws === null || state.ws === undefined || !state.authenticated) {
     return;
   }
 
@@ -208,12 +220,11 @@ interface BaseStateActionType {
 
 interface ConnectingType extends BaseStateActionType {
   id: 1;
-  ws: WebSocket;
+  ws: WebSocket | undefined;
 }
 
 interface AuthType extends BaseStateActionType {
   id: 2;
-  auth: boolean;
 }
 
 interface SubmitType extends BaseStateActionType {
@@ -241,6 +252,10 @@ interface CheckboxType extends BaseStateActionType {
   hideCompletedAchievements: boolean;
 }
 
+interface DisconnectionType extends BaseStateActionType {
+  id: 8
+}
+
 type StateActionType =
   | ConnectingType
   | AuthType
@@ -248,49 +263,57 @@ type StateActionType =
   | ModeType
   | FilterType
   | SearchFilterType
-  | CheckboxType;
+  | CheckboxType
+  | DisconnectionType;
 
 export function wsReducer(
   state: WebsocketState,
   action: StateActionType
 ): WebsocketState {
   switch (action.id) {
-    case 1:
+    case 1: // connection
       return {
         ...state,
         ws: action.ws,
       };
-    case 2:
+    case 2: // auth or disconnection
       return {
         ...state,
-        ws: action.auth ? state.ws : null,
-        authenticated: action.auth,
-        submitEnabled: action.auth,
+        authenticated: true,
+        submitEnabled: true
       };
-    case 3:
+    case 3: // submission
       return {
         ...state,
         submitEnabled: !action.disable,
       };
-    case 4:
+    case 4: // mode change
       return {
         ...state,
         mode: action.mode,
       };
-    case 5:
+    case 5: // filter change
       return {
         ...state,
         achievementsFilter: action.achievementsFilter,
       };
-    case 6:
+    case 6: // search change
       return {
         ...state,
         achievementsSearchFilter: action.achievementsSearchFilter,
       };
-    case 7:
+    case 7: // hide achievements
       return {
         ...state,
         hideCompletedAchievements: action.hideCompletedAchievements,
+      };
+    case 8: // disconnection
+      return {
+        ...state,
+        ws: null,
+        authenticated: false,
+        submitEnabled: false,
+        lastDisconnect: Date.now()
       };
   }
 }
@@ -319,14 +342,19 @@ export default function AchievementProgress({
   const eventEnded: boolean = Date.now() >= EVENT_END;
 
   if (authData !== undefined && state.ws === null) {
-    const ws = connect(
-      session.wsUri,
-      dispatchEventMsg,
-      dispatchState,
-      queryClient,
-      authData
-    );
-    dispatchState({ id: 1, ws });
+    // mark connecting
+    dispatchState({id: 1, ws: undefined});
+
+    setTimeout(() => {
+      const ws = connect(
+          session.wsUri,
+          dispatchEventMsg,
+          dispatchState,
+          queryClient,
+          authData
+      );
+      dispatchState({id: 1, ws});
+    }, Math.max(0, 3000 - (Date.now() - state.lastDisconnect)))
   }
 
   if (team === null || achievements === undefined) {
@@ -338,7 +366,6 @@ export default function AchievementProgress({
     achievementCount += player.completions.length;
   }
 
-  console.log(state.ws, state.authenticated, eventEnded, state.submitEnabled);
   const submitDisabled =
     state.ws === null ||
     !state.authenticated ||

@@ -7,25 +7,26 @@ import time
 
 from django.conf import settings
 from django.contrib.auth import login as do_login, logout as do_logout
-from django.db import connection
+
+from django.db import models
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect
 from django.views.decorators.http import require_http_methods, require_POST
 from nacl.secret import SecretBox
 
-from .serializers import *
+from .models import *
+
 
 EVENT_START = 1718416800
-EVENT_END = 1719187200
+EVENT_END = 1725940800
+
+
+def serialize_team(team: Team):
+    return team.serialize(includes=["players__user", "players__completions__achievement_id"])
 
 
 def event_ended():
-    # return time.time() >= EVENT_END - 1 or settings.DEBUG
     return False
-
-
-def serialize_full_team(team, many=False):
-    return TeamSerializer(team, many).serialize(include=["players.user", "players.completions.achievement_id"])
 
 
 def select_teams(many=False, **kwargs):
@@ -70,6 +71,7 @@ def login(req):
     state = req.GET.get("state", None)
     return redirect(state or "index")
 
+
 def logout(req):
     if req.user.is_authenticated:
         do_logout(req)
@@ -78,93 +80,25 @@ def logout(req):
 
 
 def achievements(req):
-    # -1 to be sure no one requests right before
+    # -1 to be sure no one somehow requests right before
     if time.time() < (EVENT_START - 1) and not settings.DEBUG:
         return error("cannot get achievements before event starts")
 
-    with connection.cursor() as cursor:
-        cursor.execute(
-            """
-            SELECT
-                achievements_achievement.id,
-                name,
-                category,
-                description,
-                tags,
-                beatmap_id,
-                artist,
-                title,
-                version,
-                cover,
-                star_rating,
-            	COUNT(achievements_achievementcompletion.achievement_id)
-            FROM achievements_achievement
-            LEFT JOIN achievements_achievementcompletion ON (achievements_achievementcompletion.achievement_id = achievements_achievement.id)
-            LEFT JOIN achievements_beatmapinfo ON (achievements_beatmapinfo.id = achievements_achievement.beatmap_id)
-            GROUP BY achievements_achievement.id, achievements_beatmapinfo.id
-            ORDER BY achievements_achievement.id DESC
-            """
-        )
-
-        achievements = [{
-            "id": int(achievement[0]),
-            "name": achievement[1],
-            "category": achievement[2],
-            "description": achievement[3],
-            "tags": achievement[4],
-            "beatmap": {
-                "id": achievement[5],
-                "artist": achievement[6],
-                "title": achievement[7],
-                "version": achievement[8],
-                "cover": achievement[9],
-                "star_rating": achievement[10]
-            } if achievement[5] is not None else None,
-            "completions": achievement[11]
-        } for achievement in cursor.fetchall()]
-
-        cursor.execute(
-            """
-            SELECT
-                achievements_achievementcompletion.achievement_id,
-                value,
-                is_float
-            FROM achievements_achievementcompletionplacement
-            LEFT JOIN achievements_achievementcompletion ON (achievements_achievementcompletion.placement_id = achievements_achievementcompletionplacement.id)
-            ORDER BY achievements_achievementcompletion.achievement_id DESC, value DESC
-            """
-        )
-
-        placements = cursor.fetchall()
-
-        i = 0
-        for achievement in achievements:
-            a = False
-            while len(placements) > i and (placement := placements[i])[0] == achievement["id"]:
-                placement_value = placement[1] / (10**6) if placement[2] else placement[1]
-
-                if not a:
-                    achievement["placements"] = [placement_value]
-                    a = True
-                else:
-                    achievement["placements"].append(placement_value)
-
-                i += 1
-
-            if len(placements) == i:
-                break
-
-        return success(achievements)
+    return success(list(map(Achievement.serialize, Achievement.objects.select_related(
+        "beatmap"
+    ).annotate(
+        completion_count=models.Count("completions")
+    ).all())))
 
 
 def teams(req):
     if event_ended() or (req.user.is_authenticated and req.user.is_admin):
-        serialized_teams = map(serialize_full_team, select_teams(many=True))
+        serialized_teams = map(serialize_team, select_teams(many=True))
     else:
         serialized_teams = (
-            serialize_full_team(team) 
+            serialize_team(team)
             if any(map(lambda p: p.user.id == req.user.id, team.players.all())) else
-            TeamSerializer(team).serialize(exclude=["invite"])
+            team.serialize(exclude=["invite"])
             for team in select_teams(many=True)
         )
     sorted_teams = sorted(serialized_teams, key=lambda t: t['points'], reverse=True)
@@ -195,7 +129,8 @@ def join_team(req):
     player = Player(user=req.user, team_id=team.id)
     player.save()
     team.players.append(player)
-    return success(serialize_full_team(team))
+
+    return success(serialize_team(team))
 
 
 @require_http_methods(["DELETE"])
@@ -244,8 +179,8 @@ def create_team(req):
     player = Player(user=req.user, team_id=team.id)
     player.save()
 
-    team = TeamSerializer(team).serialize()
-    player = PlayerSerializer(player).serialize(include=["user"])
+    team = team.serialize()
+    player = player.serialize(includes=["user"])
     player["completions"] = []
     team["players"] = [player]
     return success(team)
