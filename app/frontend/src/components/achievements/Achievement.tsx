@@ -102,7 +102,7 @@ export default function Achievement({
             <div className="achievement-info">
               <h1>{achievement.name}</h1>
               <p>
-                {achievement.completions} completions |{" "}
+                {achievement.completion_count} completions |{" "}
                 {achievement.description}
               </p>
               {tags[0] !== "" && (

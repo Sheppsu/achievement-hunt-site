@@ -10,5 +10,5 @@ export type AchievementType = {
 };
 
 export type AchievementExtendedType = {
-    completions: number;
+    completion_count: number;
 } & AchievementType;

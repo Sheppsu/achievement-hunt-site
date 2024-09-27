@@ -103,7 +103,7 @@ function onCompletedAchievement(
         if (completedIds.includes(achievement.id)) {
           achievements.push({
             ...achievement,
-            completions: achievement.completions + 1,
+            completions: achievement.completion_count + 1,
           });
           continue;
         }
