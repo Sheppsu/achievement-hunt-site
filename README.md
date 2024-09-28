@@ -3,6 +3,7 @@
 - `npm install` in app/frontend
 - Setup a local postgresql database
 - Make a copy of template.env as .env and fill it in
+- `py manage.py migrate` or `python3 manage.py migrate`
 
 # Running
 - `py manage.py runserver` or `python3 manage.py runserver` or whatever your python cmd is

@@ -4,5 +4,6 @@ dist/
 node_modules/
 staticfiles/
 venv/
+ahsite/
 .vscode/
 .DS_Store
