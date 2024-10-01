@@ -4,5 +4,6 @@ export type BeatmapInfoType = {
     title: string;
     version: string;
     cover: string;
+    audio: string;
     star_rating: number;
 };

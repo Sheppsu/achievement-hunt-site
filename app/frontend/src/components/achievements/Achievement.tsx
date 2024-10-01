@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useEffect, useState, useRef } from "react";
 import { useGetTeams } from "api/query";
 import { AchievementCompletionType } from "api/types/AchievementCompletionType";
 import { AchievementPlayerExtendedType } from "api/types/AchievementPlayerType";
@@ -6,6 +6,8 @@ import { AchievementExtendedType } from "api/types/AchievementType";
 import { SessionContext } from "contexts/SessionContext";
 import { WebsocketState } from "./AchievementProgress";
 import { toTitleCase } from "util/helperFunctions";
+import { Player } from '../audio/Player';
+import { GiConsoleController } from "react-icons/gi";
 
 function timeAgo(timestamp: string) {
   const times: [number, string][] = [
@@ -89,6 +91,32 @@ export default function Achievement({
     }
   }
 
+
+  //Audio Setup
+
+  /*
+    Currently figuring out audio playback not working when pointing to db data. Might change approach.
+  */
+
+  const [isPlaying, setIsPlaying] = useState(false);
+  //const [currentSong, setCurrentSong] = useState();
+  const audioElem = useRef();
+
+  useEffect(()=> {
+    if(isPlaying){
+      audioElem.current.play();
+    }else{
+      audioElem.current.pause();
+    }
+  }, [isPlaying])
+  
+  const onPlaying = ()=> {
+    const duration = audioElem.current.duration;
+    const ct = audioElem.current.currentTime;
+  }
+  
+
+
   const infoCls =
     "achievement-info-container" + (completed ? " complete" : " incomplete");
 
@@ -115,6 +143,19 @@ export default function Achievement({
             </div>
             <h1>{completed ? "Complete" : "Incomplete"}</h1>
           </div>
+          {achievement.beatmap?.audio === null ? (
+            ""
+          ) : (
+            <a
+              //href={`https://rinne0333.s-ul.eu/smsYlSTh`}
+              target="_blank"
+            >
+              <div className="AudioPlayer">
+                <audio src={"https://rinne0333.s-ul.eu/smsYlSTh"} ref={audioElem} onTimeUpdate={onPlaying}/>
+                <Player isPlaying={isPlaying} setIsPlaying={setIsPlaying} audioElem={audioElem}/>
+              </div>
+            </a>
+          )}
           {achievement.beatmap === null ? (
             ""
           ) : (
