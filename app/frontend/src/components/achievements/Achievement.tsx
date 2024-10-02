@@ -6,8 +6,8 @@ import { AchievementExtendedType } from "api/types/AchievementType";
 import { SessionContext } from "contexts/SessionContext";
 import { WebsocketState } from "./AchievementProgress";
 import { toTitleCase } from "util/helperFunctions";
-import { Player } from '../audio/Player';
 import { GiConsoleController } from "react-icons/gi";
+import AudioPlayer from "components/audio/AudioPlayer";
 
 function timeAgo(timestamp: string) {
   const times: [number, string][] = [
@@ -92,12 +92,13 @@ export default function Achievement({
   }
 
 
-  //Audio Setup
+  //Audio Setup 
 
   /*
-    Currently figuring out audio playback not working when pointing to db data. Might change approach.
+    Currently figuring out audio playback not working when pointing to db data. Might change approach. 
+    Old parts
   */
-
+  /*
   const [isPlaying, setIsPlaying] = useState(false);
   //const [currentSong, setCurrentSong] = useState();
   const audioElem = useRef();
@@ -114,6 +115,15 @@ export default function Achievement({
     const duration = audioElem.current.duration;
     const ct = audioElem.current.currentTime;
   }
+
+
+  <div className="AudioPlayer">
+    <audio src={"https://rinne0333.s-ul.eu/smsYlSTh"} ref={audioElem} onTimeUpdate={onPlaying}/>
+    <Player isPlaying={isPlaying} setIsPlaying={setIsPlaying} audioElem={audioElem}/>
+  </div>
+
+
+  */
   
 
 
@@ -150,10 +160,9 @@ export default function Achievement({
               //href={`https://rinne0333.s-ul.eu/smsYlSTh`}
               target="_blank"
             >
-              <div className="AudioPlayer">
-                <audio src={"https://rinne0333.s-ul.eu/smsYlSTh"} ref={audioElem} onTimeUpdate={onPlaying}/>
-                <Player isPlaying={isPlaying} setIsPlaying={setIsPlaying} audioElem={audioElem}/>
-              </div>
+              <AudioPlayer
+                currentSong={"https://rinne0333.s-ul.eu/smsYlSTh"}
+              />  
             </a>
           )}
           {achievement.beatmap === null ? (

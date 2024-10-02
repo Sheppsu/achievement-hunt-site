@@ -1,3 +1,4 @@
+/* Unused code might fall back to this in case new approach doesnt work
 import {BsPlayFill, BsPauseFill, BsFillVolumeUpFill} from 'react-icons/bs'
 
 
@@ -22,3 +23,4 @@ export const Player = ({audioElem, isPlaying, setIsPlaying})=> {
     </div>
   )
 }
+*/
