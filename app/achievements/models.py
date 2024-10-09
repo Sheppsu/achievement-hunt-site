@@ -58,23 +58,23 @@ class User(SerializableModel):
         return self.username
 
 
-    class BeatmapInfo(SerializableModel):
-        id = models.PositiveIntegerField(primary_key=True)
-        artist = models.CharField()
-        version = models.CharField()
-        title = models.CharField()
-        cover = models.CharField()
-        audio = models.CharField()
-        star_rating = models.FloatField()
+class BeatmapInfo(SerializableModel):
+    id = models.PositiveIntegerField(primary_key=True)
+    artist = models.CharField()
+    version = models.CharField()
+    title = models.CharField()
+    cover = models.CharField()
+    star_rating = models.FloatField()
 
-        class Serialization:
-            FIELDS = ["id", "artist", "version", "title", "cover", "audio", "star_rating"]
+    class Serialization:
+        FIELDS = ["id", "artist", "version", "title", "cover", "star_rating"]
 
 
 class Achievement(SerializableModel):
     name = models.CharField(max_length=64)
     category = models.CharField(max_length=32)
     description = models.CharField(max_length=256)
+    audio = models.CharField()
     tags = models.CharField(max_length=128)
     beatmap = models.ForeignKey(
         BeatmapInfo,
@@ -84,7 +84,7 @@ class Achievement(SerializableModel):
     )
 
     class Serialization:
-        FIELDS = ["id", "name", "category", "description", "tags", "beatmap"]
+        FIELDS = ["id", "name", "category", "description", "audio", "tags", "beatmap"]
 
 
 class AchievementCompletion(SerializableModel):

@@ -6,7 +6,6 @@ import { AchievementExtendedType } from "api/types/AchievementType";
 import { SessionContext } from "contexts/SessionContext";
 import { WebsocketState } from "./AchievementProgress";
 import { toTitleCase } from "util/helperFunctions";
-import { GiConsoleController } from "react-icons/gi";
 import AudioPlayer from "components/audio/AudioPlayer";
 
 function timeAgo(timestamp: string) {
@@ -119,11 +118,18 @@ export default function Achievement({
             </div>
             <h1>{completed ? "Complete" : "Incomplete"}</h1>
           </div>
-          
+
+          {achievement.audio === null ? (
+            ""
+            ) : (
+            <AudioPlayer
+               currentSong={achievement.audio}
+            />
+          )}  
+
           {achievement.beatmap === null ? (
             ""
           ) : (
-            achievement.beatmap.audio === null ? ( 
               <a
               href={`https://osu.ppy.sh/b/${achievement.beatmap.id}`}
               target="_blank"
@@ -145,13 +151,9 @@ export default function Achievement({
                   {achievement.beatmap.star_rating}*
                 </h1>
               </div>
-            </a>  
-            ) : (
-              <AudioPlayer
-                currentSong={achievement.beatmap.audio}
-              />
-            )
+            </a>
           )}
+
           {achievement.beatmap === null || players.length === 0 ? "" : <hr />}
           {players.length == 0 ? (
             ""
