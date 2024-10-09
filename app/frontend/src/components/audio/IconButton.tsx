@@ -9,10 +9,6 @@ interface IconButtonProps extends React.ComponentPropsWithoutRef<'button'> {
   size?: Size;
 }
 
-const colorMap: Record<Intent, string> = {
-  primary: 'bg-amber-600 text-white',
-  secondary: 'bg-slate-800 text-slate-400',
-};
 
 const sizeMap: Record<Size, string> = {
   sm: 'h-8 w-8',
