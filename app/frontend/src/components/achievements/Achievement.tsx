@@ -91,45 +91,11 @@ export default function Achievement({
     }
   }
 
-
-  //Audio Setup 
-
-  /*
-    Currently figuring out audio playback not working when pointing to db data. Might change approach. 
-    Old parts
-  */
-  /*
-  const [isPlaying, setIsPlaying] = useState(false);
-  //const [currentSong, setCurrentSong] = useState();
-  const audioElem = useRef();
-
-  useEffect(()=> {
-    if(isPlaying){
-      audioElem.current.play();
-    }else{
-      audioElem.current.pause();
-    }
-  }, [isPlaying])
-  
-  const onPlaying = ()=> {
-    const duration = audioElem.current.duration;
-    const ct = audioElem.current.currentTime;
-  }
-
-
-  <div className="AudioPlayer">
-    <audio src={"https://rinne0333.s-ul.eu/smsYlSTh"} ref={audioElem} onTimeUpdate={onPlaying}/>
-    <Player isPlaying={isPlaying} setIsPlaying={setIsPlaying} audioElem={audioElem}/>
-  </div>
-
-
-  */
-  
-
-
   const infoCls =
     "achievement-info-container" + (completed ? " complete" : " incomplete");
 
+              
+  console.log(achievement.beatmap)
   return (
     <>
       {state.hideCompletedAchievements && completed ? (
@@ -153,22 +119,12 @@ export default function Achievement({
             </div>
             <h1>{completed ? "Complete" : "Incomplete"}</h1>
           </div>
-          {achievement.beatmap?.audio === null ? (
-            ""
-          ) : (
-            <a
-              //href={`https://rinne0333.s-ul.eu/smsYlSTh`}
-              target="_blank"
-            >
-              <AudioPlayer
-                currentSong={"https://rinne0333.s-ul.eu/smsYlSTh"}
-              />  
-            </a>
-          )}
+          
           {achievement.beatmap === null ? (
             ""
           ) : (
-            <a
+            achievement.beatmap.audio === null ? ( 
+              <a
               href={`https://osu.ppy.sh/b/${achievement.beatmap.id}`}
               target="_blank"
             >
@@ -189,7 +145,12 @@ export default function Achievement({
                   {achievement.beatmap.star_rating}*
                 </h1>
               </div>
-            </a>
+            </a>  
+            ) : (
+              <AudioPlayer
+                currentSong={achievement.beatmap.audio}
+              />
+            )
           )}
           {achievement.beatmap === null || players.length === 0 ? "" : <hr />}
           {players.length == 0 ? (

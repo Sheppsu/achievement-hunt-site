@@ -58,16 +58,17 @@ class User(SerializableModel):
         return self.username
 
 
-class BeatmapInfo(SerializableModel):
-    id = models.PositiveIntegerField(primary_key=True)
-    artist = models.CharField()
-    version = models.CharField()
-    title = models.CharField()
-    cover = models.CharField()
-    star_rating = models.FloatField()
+    class BeatmapInfo(SerializableModel):
+        id = models.PositiveIntegerField(primary_key=True)
+        artist = models.CharField()
+        version = models.CharField()
+        title = models.CharField()
+        cover = models.CharField()
+        audio = models.CharField()
+        star_rating = models.FloatField()
 
-    class Serialization:
-        FIELDS = ["id", "artist", "version", "title", "cover", "star_rating"]
+        class Serialization:
+            FIELDS = ["id", "artist", "version", "title", "cover", "audio", "star_rating"]
 
 
 class Achievement(SerializableModel):

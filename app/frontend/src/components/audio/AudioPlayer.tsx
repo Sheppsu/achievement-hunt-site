@@ -128,7 +128,7 @@ export default function AudioPlayer({
         >
           {!isReady && currentSong ? (
             <CgSpinner size={24} className="animate-spin" />
-          ) : isPlaying ? (
+          ) : isPlaying ? ( 
             <MdPause size={30} />
           ) : (
             <MdPlayArrow size={30} />
