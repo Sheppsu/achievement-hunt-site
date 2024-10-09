@@ -1,6 +1,4 @@
-import {
-  AchievementPlayerExtendedType
-} from "./AchievementPlayerType";
+import {AchievementPlayerType} from "api/types/AchievementPlayerType.ts";
 
 export type AchievementTeamType = {
   id: number;
@@ -11,6 +9,6 @@ export type AchievementTeamType = {
 
 export type AchievementTeamExtendedType = {
   // includes player with list of completed achievements
-  players: AchievementPlayerExtendedType[];
+  players: AchievementPlayerType[];
   invite: string;
 } & AchievementTeamType;

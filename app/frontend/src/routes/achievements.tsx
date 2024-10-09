@@ -9,8 +9,6 @@ import AchievementProgress, {
 
 import "assets/css/achievements.css";
 import {
-  ChangeEvent,
-  FormEvent,
   useContext,
   useEffect,
   useReducer,
@@ -24,54 +22,30 @@ import {
 } from "api/types/AchievementTeamType";
 import AnimatedPage from "components/AnimatedPage";
 import { AchievementExtendedType } from "api/types/AchievementType";
-import { toTitleCase } from "util/helperFunctions";
+import {getMyTeam, toTitleCase} from "util/helperFunctions";
 import { AnimationScope, useAnimate } from "framer-motion";
 import Button from "components/Button";
-
-const EVENT_START = 1724976000000;
-export const EVENT_END = 1725940800000;
-
-function getMyTeam(
-  userId: number | undefined,
-  teams?: Array<AchievementTeamExtendedType | AchievementTeamType>
-): AchievementTeamExtendedType | null {
-  if (userId === undefined) {
-    return null;
-  }
-
-  if (teams !== undefined)
-    for (const team of teams) {
-      if ("players" in team) {
-        for (const player of team.players) {
-          if (player.user.id === userId) {
-            return team as AchievementTeamExtendedType;
-          }
-        }
-      }
-    }
-
-  return null;
-}
 
 function getTimeStr(delta: number) {
   const days = Math.floor((delta / (1000 * 60 * 60 * 24)) % 60);
   const hours = Math.floor((delta / (1000 * 60 * 60)) % 24);
   const minutes = Math.floor((delta / (1000 * 60)) % 60);
   const seconds = Math.floor((delta / 1000) % 60);
-  const timeString = [days, hours, minutes, seconds]
+  return [days, hours, minutes, seconds]
     .map((n) => (n < 10 ? "0" + n : "" + n))
     .join(":");
-  return timeString;
 }
 
 function HiddenAchievementCompletionPage({
   time,
   setTime,
+  eventStart,
 }: {
   time: number;
   setTime: React.Dispatch<React.SetStateAction<number>>;
+  eventStart: number;
 }) {
-  const delta = EVENT_START - time;
+  const delta = eventStart - time;
   const timeString = getTimeStr(delta);
 
   useEffect(() => {
@@ -299,6 +273,8 @@ function AchievementNavigationBar({
 
 export default function AchievementCompletionPage() {
   const session = useContext(SessionContext);
+  const eventStart = session.eventStart;
+  const eventEnd = session.eventEnd;
 
   useGetAchievements(false);
   const { data: teams } = useGetTeams();
@@ -308,8 +284,8 @@ export default function AchievementCompletionPage() {
   const [state, dispatchState] = useReducer(wsReducer, null, defaultState);
   const [scope, animate] = useAnimate();
 
-  if (time < EVENT_START && !session.debug) {
-    return <HiddenAchievementCompletionPage time={time} setTime={setTime} />;
+  if (time < eventStart && !session.debug) {
+    return <HiddenAchievementCompletionPage time={time} setTime={setTime} eventStart={eventStart} />;
   }
 
   const { data: achievements } = useGetAchievements(true);
@@ -331,8 +307,8 @@ export default function AchievementCompletionPage() {
       <div className="page-container">
         <div style={{ margin: "auto", textAlign: "center", marginTop: "20px" }}>
           <h1 style={{ fontSize: "3em" }}>
-            {time < EVENT_END
-              ? `Ends in: ${getTimeStr(EVENT_END - time)}`
+            {time < eventEnd
+              ? `Ends in: ${getTimeStr(eventEnd - time)}`
               : "Event ended"}
           </h1>
         </div>

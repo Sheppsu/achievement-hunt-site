@@ -5,15 +5,14 @@ import {
 } from "@tanstack/react-query";
 import { useContext } from "react";
 import { useGetAchievements } from "api/query";
-import { AchievementPlayerExtendedType } from "api/types/AchievementPlayerType";
 import {
-  AchievementTeamExtendedType,
-  AchievementTeamType,
+  AchievementTeamExtendedType
 } from "api/types/AchievementTeamType";
 import { AchievementExtendedType } from "api/types/AchievementType";
 import { EventContext, EventType } from "contexts/EventContext";
 import { SessionContext } from "contexts/SessionContext";
-import { EVENT_END, NavItems } from "routes/achievements";
+import { NavItems } from "routes/achievements";
+import {AchievementPlayerType} from "api/types/AchievementPlayerType.ts";
 
 export type WebsocketState = {
   ws: WebSocket | null | undefined;
@@ -49,79 +48,30 @@ type WSAchievementType = {
 type RefreshReturnType = {
   achievements: WSAchievementType[];
   score: number;
-  player: number;
+  player: AchievementPlayerType;
 };
-
-function * insertValue(arr: number[], value: number) {
-  for (const item of arr) {
-    if (value > item)
-      yield item;
-    yield item;
-  }
-}
 
 function onCompletedAchievement(
   data: RefreshReturnType,
   queryClient: QueryClient
 ) {
-  queryClient.setQueryData(
-    ["achievements", "teams"],
-    (oldTeams: Array<AchievementTeamExtendedType | AchievementTeamType>) => {
-      const teams = [];
-
-      for (const team of oldTeams) {
-        if ("invite" in team) {
-          const players: AchievementPlayerExtendedType[] = [];
-
-          const myTeam = team as AchievementTeamExtendedType;
-          for (const player of myTeam.players) {
-            if (player.id === data.player) {
-              players.push({
-                ...player,
-                completions: player.completions.concat(
-                  data.achievements.map((achievement) => ({
-                    achievement_id: achievement.id,
-                    time_completed: achievement.time,
-                  }))
-                ),
-              });
-
-              myTeam.points = data.score;
-
-              continue;
-            }
-            players.push(player);
-          }
-
-          myTeam.players = players;
-          teams.push(myTeam);
-          continue;
-        }
-        teams.push(team);
-      }
-
-      return teams;
-    }
-  );
-
+  // add completions to achievements
   queryClient.setQueryData(
     ["achievements"],
-    (oldAchievements: AchievementExtendedType[]) => {
-      const achievements = [];
-      for (const achievement of oldAchievements) {
-        for (const completion of data.achievements) {
-          if (completion.id === achievement.id) {
-            achievements.push({
-              ...achievement,
-              completions: achievement.completion_count + 1,
-              placements: achievement.placements === undefined ? undefined : (
-                Array.from(insertValue(achievement.placements, completion.value!))
-              )
+    (achievements: AchievementExtendedType[]) => {
+      for (const completed of data.achievements) {
+        for (const achievement of achievements) {
+          if (achievement.id === completed.id) {
+            achievement.completion_count += 1;
+            achievement.completions.push({
+              time_completed: completed.time,
+              player: data.player,
+              placement: completed.value !== null ? { value: completed.value } : undefined
             });
+
+            break;
           }
         }
-
-        achievements.push(achievement);
       }
 
       return achievements;
@@ -339,7 +289,7 @@ export default function AchievementProgress({
   });
   const { data: achievements } = useGetAchievements();
 
-  const eventEnded: boolean = Date.now() >= EVENT_END;
+  const eventEnded: boolean = Date.now() >= session.eventEnd;
 
   if (authData !== undefined && state.ws === null) {
     // mark connecting
@@ -362,8 +312,15 @@ export default function AchievementProgress({
   }
 
   let achievementCount = 0;
-  for (const player of team.players) {
-    achievementCount += player.completions.length;
+  for (const achievement of achievements) {
+    for (const completion of achievement.completions) {
+      for (const player of team.players) {
+        if (completion.player.id === player.id) {
+          achievementCount += 1;
+          break;
+        }
+      }
+    }
   }
 
   const submitDisabled =

@@ -5,7 +5,3 @@ export type AchievementPlayerType = {
     id: number;
     user: UserType;
 };
-
-export type AchievementPlayerExtendedType = {
-    completions: AchievementCompletionType[];
-} & AchievementPlayerType;
