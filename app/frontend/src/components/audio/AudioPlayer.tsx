@@ -1,9 +1,10 @@
 import * as React from "react";
-import { MdPlayArrow, MdPause, MdVolumeOff, MdVolumeUp } from "react-icons/md";
+import { BsPlayFill, BsPauseFill, BsVolumeOffFill , BsVolumeUpFill } from "react-icons/bs";
 import { CgSpinner } from 'react-icons/cg';
 import IconButton from "./IconButton";
 import VolumeInput from "./VolumeInput";
 import AudioProgressBar from "./AudioProgressBar";
+import './../../assets/css/audioPlayer.css'
 
 interface AudioPlayerProps {
   currentSong: string;
@@ -81,70 +82,75 @@ export default function AudioPlayer({
   };
 
   return (
-    <div className="bg-slate-900 text-slate-400 p-3 relative">
-        
-        {currentSong && (
-        <audio
-          ref={audioRef} preload="metadata"
-          onDurationChange={(e) => setDuration(e.currentTarget.duration)}
-          onCanPlay={(e) => {
-              e.currentTarget.volume = volume;
-              setIsReady(true);
-          }}
-          onPlaying={() => setIsPlaying(true)}
-          onPause={() => setIsPlaying(false)}
-          onTimeUpdate={(e) => {
-              setCurrrentProgress(e.currentTarget.currentTime);
-              handleBufferProgress(e);
-          }}
-          onProgress={handleBufferProgress}
-          onVolumeChange={(e) => setVolume(e.currentTarget.volume)}
-        >
-            
-          <source type="audio/mpeg" src={currentSong} />
-        </audio>
-      )}
-      <AudioProgressBar
-          duration={duration}
-          currentProgress={currrentProgress}
-          buffered={buffered}
-          onChange={(e) => {
-            if (!audioRef.current) return;
-        
-            audioRef.current.currentTime = e.currentTarget.valueAsNumber;
-        
-            setCurrrentProgress(e.currentTarget.valueAsNumber);
-          }}
-      />
-      <span className="text-xs">
-        {elapsedDisplay} / {durationDisplay}
-      </span>
-      <div className="flex items-center gap-3 justify-self-center">
-        <IconButton
-          disabled={!isReady}
-          onClick={togglePlayPause}
-          aria-label={isPlaying ? "Pause" : "Play"}
-          size="lg"
-        >
-          {!isReady && currentSong ? (
-            <CgSpinner size={24} className="animate-spin" />
-          ) : isPlaying ? ( 
-            <MdPause size={30} />
-          ) : (
-            <MdPlayArrow size={30} />
-          )}
-        </IconButton>
-      </div>
-      <div className="flex gap-3 items-center md:justify-self-end">
-          <IconButton
-            intent="secondary"
-            size="sm"
-            onClick={handleMuteUnmute}
-            aria-label={volume === 0 ? "unmute" : "mute"}
+    <div className="audio-player-container">
+          <div className="audio-player">
+          
+          {currentSong && (
+          <audio
+            ref={audioRef} preload="metadata"
+            onDurationChange={(e) => setDuration(e.currentTarget.duration)}
+            onCanPlay={(e) => {
+                e.currentTarget.volume = volume;
+                setIsReady(true);
+            }}
+            onPlaying={() => setIsPlaying(true)}
+            onPause={() => setIsPlaying(false)}
+            onTimeUpdate={(e) => {
+                setCurrrentProgress(e.currentTarget.currentTime);
+                handleBufferProgress(e);
+            }}
+            onProgress={handleBufferProgress}
+            onVolumeChange={(e) => setVolume(e.currentTarget.volume)}
           >
-            {volume === 0 ? <MdVolumeOff size={20} /> : <MdVolumeUp size={20} />}
-        </IconButton>
-          <VolumeInput volume={volume} onVolumeChange={handleVolumeChange} />
+              
+            <source type="audio/mpeg" src={currentSong} />
+          </audio>
+        )}
+        <div className="">
+          <IconButton
+            disabled={!isReady}
+            onClick={togglePlayPause}
+            aria-label={isPlaying ? "Pause" : "Play"}
+            className="audio-icon"
+            size="lg"
+          >
+            {!isReady && currentSong ? (
+              <CgSpinner className="audio-icon" />
+            ) : isPlaying ? ( 
+              <BsPauseFill className="audio-icon"/>
+            ) : (
+              <BsPlayFill className="audio-icon"/>
+            )}
+          </IconButton>
+        </div>
+        <AudioProgressBar
+            duration={duration}
+            currentProgress={currrentProgress}
+            buffered={buffered}
+            className="audio-progress"
+            onChange={(e) => {
+              if (!audioRef.current) return;
+          
+              audioRef.current.currentTime = e.currentTarget.valueAsNumber;
+          
+              setCurrrentProgress(e.currentTarget.valueAsNumber);
+            }}
+        />
+        <span className="text-xs">
+          {elapsedDisplay} / {durationDisplay}
+        </span>
+        <div className="audio-player">
+            <IconButton
+              intent="secondary"
+              size="sm"
+              onClick={handleMuteUnmute}
+              aria-label={volume === 0 ? "unmute" : "mute"}
+              className="audio-icon"
+            >
+              {volume === 0 ? <BsVolumeOffFill className="audio-icon"/> : <BsVolumeUpFill className="audio-icon"/>}
+          </IconButton>
+            <VolumeInput volume={volume} onVolumeChange={handleVolumeChange} />
+        </div>
       </div>
     </div>
   );

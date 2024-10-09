@@ -29,7 +29,6 @@ export default function IconButton({
   const colorClass = colorMap[intent];
   const sizeClass = sizeMap[size];
   const classes = cn(
-    'rounded-full flex items-center justify-center ring-offset-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:ring-offset-2 disabled:opacity-60',
     colorClass,
     sizeClass,
     className
