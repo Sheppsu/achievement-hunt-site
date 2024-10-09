@@ -6,6 +6,7 @@ import { AchievementExtendedType } from "api/types/AchievementType";
 import { SessionContext } from "contexts/SessionContext";
 import { WebsocketState } from "./AchievementProgress";
 import { toTitleCase } from "util/helperFunctions";
+import "assets/css/main.css";
 import AudioPlayer from "components/audio/AudioPlayer";
 
 function timeAgo(timestamp: string) {
