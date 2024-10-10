@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useEffect, useState, useRef } from "react";
 import { useGetTeams } from "api/query";
 import { AchievementCompletionType } from "api/types/AchievementCompletionType";
 import { AchievementPlayerExtendedType } from "api/types/AchievementPlayerType";
@@ -6,6 +6,8 @@ import { AchievementExtendedType } from "api/types/AchievementType";
 import { SessionContext } from "contexts/SessionContext";
 import { WebsocketState } from "./AchievementProgress";
 import { toTitleCase } from "util/helperFunctions";
+import "assets/css/main.css";     
+import AudioPlayer from "components/audio/AudioPlayer";
 
 function timeAgo(timestamp: string) {
   const times: [number, string][] = [
@@ -92,6 +94,7 @@ export default function Achievement({
   const infoCls =
     "achievement-info-container" + (completed ? " complete" : " incomplete");
 
+    
   return (
     <>
       {state.hideCompletedAchievements && completed ? (
@@ -115,10 +118,19 @@ export default function Achievement({
             </div>
             <h1>{completed ? "Complete" : "Incomplete"}</h1>
           </div>
+
+          {achievement.audio === null ? (
+            ""
+            ) : (
+            <AudioPlayer
+               currentSong={achievement.audio}
+            />
+          )}  
+
           {achievement.beatmap === null ? (
             ""
           ) : (
-            <a
+              <a
               href={`https://osu.ppy.sh/b/${achievement.beatmap.id}`}
               target="_blank"
             >
@@ -141,6 +153,7 @@ export default function Achievement({
               </div>
             </a>
           )}
+
           {achievement.beatmap === null || players.length === 0 ? "" : <hr />}
           {players.length == 0 ? (
             ""
