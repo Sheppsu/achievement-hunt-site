@@ -3,6 +3,7 @@ import { WebsocketState } from "./AchievementProgress";
 import { toTitleCase } from "util/helperFunctions";
 import AchievementCompletionEntry from "components/achievements/AchievementCompletionEntry.tsx";
 import {AchievementCompletionType} from "api/types/AchievementCompletionType.ts";
+import AudioPlayer from "components/audio/AudioPlayer.tsx";
 
 export default function Achievement({
   achievement,
@@ -42,6 +43,15 @@ export default function Achievement({
             </div>
             <h1>{completed ? "Complete" : "Incomplete"}</h1>
           </div>
+
+          {achievement.audio === null ? (
+            ""
+            ) : (
+            <AudioPlayer
+               currentSong={achievement.audio}
+            />
+          )}
+
           {achievement.beatmap === null ? (
             ""
           ) : (
