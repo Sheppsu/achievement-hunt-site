@@ -89,13 +89,14 @@ class Achievement(SerializableModel):
 class AchievementCompletionPlacement(SerializableModel):
     value = models.BigIntegerField()
     is_float = models.BooleanField()
+    place = models.PositiveSmallIntegerField()
 
     class Serialization:
-        FIELDS = ["value", "is_float"]
+        FIELDS = ["value", "is_float", "place"]
 
     def serialize(self, *args, **kwargs):
         data = super().serialize(*args, **kwargs)
-        return {"value": data["value"] / (10**6) if data["is_float"] else data["value"]}
+        return {"value": data["value"] / (10**6) if data["is_float"] else data["value"], "place": data["place"]}
 
 
 class AchievementCompletion(SerializableModel):
@@ -103,6 +104,11 @@ class AchievementCompletion(SerializableModel):
     achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE, related_name="completions")
     time_completed = models.DateTimeField()
     placement = models.ForeignKey(AchievementCompletionPlacement, on_delete=models.CASCADE, null=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["player", "achievement"], name="unique_achievement"),
+        ]
 
     class Serialization:
         FIELDS = ["time_completed"]

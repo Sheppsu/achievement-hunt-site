@@ -117,6 +117,7 @@ def achievements(req):
                 "completion_count",
                 SerializableField(
                     "completions",
+                    filter=lambda c: c.placement is None or c.placement.place <= 5 or team_completion(c),
                     post_serial_filter=lambda c: len(c) > 0
                 ),
                 SerializableField(

@@ -13,6 +13,7 @@ import { EventContext, EventType } from "contexts/EventContext";
 import { SessionContext } from "contexts/SessionContext";
 import { NavItems } from "routes/achievements";
 import {AchievementPlayerType} from "api/types/AchievementPlayerType.ts";
+import {AchievementCompletionPlacementType} from "api/types/AchievementCompletionType.ts";
 
 export type WebsocketState = {
   ws: WebSocket | null | undefined;
@@ -43,7 +44,7 @@ type WSAchievementType = {
   name: string;
   category: string;
   time: string;
-  value: number | null;
+  placement: AchievementCompletionPlacementType | null;
 };
 type RefreshReturnType = {
   achievements: WSAchievementType[];
@@ -62,11 +63,16 @@ function onCompletedAchievement(
       for (const completed of data.achievements) {
         for (const achievement of achievements) {
           if (achievement.id === completed.id) {
+            // remove existing entry (for competition achievements)
+            achievement.completions = achievement.completions.filter(
+              (c) => !("player" in c)
+            );
+
             achievement.completion_count += 1;
             achievement.completions.push({
               time_completed: completed.time,
               player: data.player,
-              placement: completed.value !== null ? { value: completed.value } : undefined
+              placement: completed.placement ?? undefined
             });
 
             break;

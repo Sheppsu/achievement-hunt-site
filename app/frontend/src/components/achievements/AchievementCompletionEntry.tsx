@@ -31,7 +31,7 @@ export default function AchievementCompletionEntry({
   return (
     <div className="achievement-players-entry">
       {
-        "placement" in completion ? <p>{completion.placement!.value}</p> : ""
+        "placement" in completion ? <p>{completion.placement!.place}. {completion.placement!.value}</p> : ""
       }
       {
         "player" in completion ? <PlayerElement completion={completion} /> : ""

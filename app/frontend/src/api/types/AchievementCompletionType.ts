@@ -12,4 +12,5 @@ export type AnonymousAchievementCompletionType = {
 
 export type AchievementCompletionPlacementType = {
     value: number;
+    place: number;
 }
