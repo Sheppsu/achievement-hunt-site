@@ -94,8 +94,7 @@ export default function Achievement({
   const infoCls =
     "achievement-info-container" + (completed ? " complete" : " incomplete");
 
-              
-  console.log(achievement.audio )
+    
   return (
     <>
       {state.hideCompletedAchievements && completed ? (
