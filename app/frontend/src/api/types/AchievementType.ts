@@ -1,5 +1,5 @@
 import { BeatmapInfoType } from "./BeatmapInfoType";
-import {UserType} from "api/types/UserType.ts";
+import {AchievementCompletionType, AnonymousAchievementCompletionType} from "api/types/AchievementCompletionType.ts";
 
 export type AchievementType = {
     id: number;
@@ -12,11 +12,5 @@ export type AchievementType = {
 
 export type AchievementExtendedType = {
     completion_count: number;
-    completions: AchievementCompletionType[];
+    completions: (AchievementCompletionType | AnonymousAchievementCompletionType)[];
 } & AchievementType;
-
-export type AchievementCompletionType = {
-    time_completed: string;
-    player: { id: number, user: UserType };
-    placement?: { value: number }
-};

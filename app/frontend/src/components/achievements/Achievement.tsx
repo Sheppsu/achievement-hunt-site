@@ -1,11 +1,8 @@
-import { useContext } from "react";
-import { useGetTeams } from "api/query";
-import { AchievementCompletionType } from "api/types/AchievementCompletionType";
 import { AchievementExtendedType } from "api/types/AchievementType";
-import { SessionContext } from "contexts/SessionContext";
 import { WebsocketState } from "./AchievementProgress";
 import { toTitleCase } from "util/helperFunctions";
 import AchievementCompletionEntry from "components/achievements/AchievementCompletionEntry.tsx";
+import {AchievementCompletionType} from "api/types/AchievementCompletionType.ts";
 
 export default function Achievement({
   achievement,
@@ -56,6 +53,7 @@ export default function Achievement({
                 <img
                   className="achievement-details-cover"
                   src={achievement.beatmap.cover}
+                  alt=""
                 ></img>
                 <div className="achievement-details-beatmap-info">
                   <p className="achievement-details-beatmap-info-text">
@@ -80,11 +78,11 @@ export default function Achievement({
                 .sort(
                   (a, b) =>
                     a.placement === undefined ? (
-                      Date.parse(a.time_completed) -
-                      Date.parse(b.time_completed)
+                      Date.parse((a as AchievementCompletionType).time_completed) -
+                      Date.parse((b as AchievementCompletionType).time_completed)
                     ) : (
-                      a.placement.value -
-                      b.placement!.value
+                      b.placement!.value -
+                      a.placement.value
                     )
                 )
                 .map((

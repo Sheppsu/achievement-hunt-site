@@ -65,7 +65,7 @@ export default function AchievementContainer({
     const teamUserIds = myTeam.players.map((p) => p.user.id);
     for (const achievement of achievements) {
       achievement.completed = achievement.completions.filter(
-        (c) => teamUserIds.includes(c.player.user.id)
+        (c) => "player" in c && teamUserIds.includes(c.player.user.id)
       ).length > 0;
     }
   }

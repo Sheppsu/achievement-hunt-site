@@ -1,17 +1,15 @@
-import {AchievementCompletionType} from "api/types/AchievementType.ts";
 import {timeAgo} from "util/helperFunctions.ts";
+import { AnonymousAchievementCompletionType, AchievementCompletionType } from "api/types/AchievementCompletionType.ts";
 
-export default function AchievementCompletionEntry({
-  completion
-}: {
-  completion: AchievementCompletionType
-}) {
+function PlayerElement({completion}: {completion: AchievementCompletionType}) {
   const player = completion.player;
+
   return (
-    <div className="achievement-players-entry">
+    <>
       <img
         className="achievement-players-entry-pfp"
         src={player.user.avatar}
+        alt=""
       ></img>
       <div>
         <p>
@@ -21,6 +19,23 @@ export default function AchievementCompletionEntry({
           {timeAgo(completion.time_completed)}
         </p>
       </div>
+    </>
+  );
+}
+
+export default function AchievementCompletionEntry({
+  completion
+}: {
+  completion: AchievementCompletionType | AnonymousAchievementCompletionType
+}) {
+  return (
+    <div className="achievement-players-entry">
+      {
+        "placement" in completion ? <p>{completion.placement!.value}</p> : ""
+      }
+      {
+        "player" in completion ? <PlayerElement completion={completion} /> : ""
+      }
     </div>
   );
 }

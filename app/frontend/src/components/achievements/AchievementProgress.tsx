@@ -311,11 +311,12 @@ export default function AchievementProgress({
     return <div>Loading team progress...</div>;
   }
 
+  // count number of completed achievements
   let achievementCount = 0;
   for (const achievement of achievements) {
     for (const completion of achievement.completions) {
       for (const player of team.players) {
-        if (completion.player.id === player.id) {
+        if ("player" in completion && completion.player.id === player.id) {
           achievementCount += 1;
           break;
         }
