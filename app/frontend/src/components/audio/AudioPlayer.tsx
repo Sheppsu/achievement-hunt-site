@@ -40,8 +40,6 @@ export default function AudioPlayer({
   const elapsedDisplay = formatDurationDisplay(currrentProgress);
 
   const togglePlayPause = () => {
-
-    if (!isPlaying) return null;
     
     if (isPlaying) {
       audioRef.current?.pause();    
