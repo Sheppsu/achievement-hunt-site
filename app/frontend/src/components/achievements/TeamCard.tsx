@@ -15,7 +15,7 @@ import { EventContext, EventDispatch } from "contexts/EventContext";
 import {
   AchievementTeamExtendedType,
 } from "api/types/AchievementTeamType";
-import { AchievementPlayerExtendedType } from "api/types/AchievementPlayerType";
+import { AchievementPlayerType } from "api/types/AchievementPlayerType";
 import { PopupContext, PopupContextType } from "contexts/PopupContext";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -33,7 +33,7 @@ function Button({
   );
 }
 
-function PlayerCard({ player }: { player: AchievementPlayerExtendedType }) {
+function PlayerCard({ player }: { player: AchievementPlayerType }) {
   return (
     <div className="player-card">
       <img className="player-card-avatar" src={player.user.avatar}></img>
