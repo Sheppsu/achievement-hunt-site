@@ -19,13 +19,21 @@ export default function Footer() {
           >
             sheppsu
           </a>{" "}
-          and{" "}
+          ,{" "}
           <a
             href="https://github.com/hrfarmer"
             target="_blank"
             className="footer-text-link"
           >
             aychar
+          </a>{" "}
+          and{" "}
+          <a
+            href="https://github.com/Rinne0333"
+            target="_blank"
+            className="footer-text-link"
+          >
+            Rinne
           </a>
         </p>
       </div>

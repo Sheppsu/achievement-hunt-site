@@ -6,6 +6,7 @@ export type AchievementType = {
     name: string;
     category: string;
     description: string;
+    audio: string;
     beatmap: BeatmapInfoType | null;
     tags: string;
 };
