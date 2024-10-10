@@ -95,7 +95,7 @@ export default function Achievement({
     "achievement-info-container" + (completed ? " complete" : " incomplete");
 
               
-  console.log(achievement.beatmap)
+  console.log(achievement.audio )
   return (
     <>
       {state.hideCompletedAchievements && completed ? (

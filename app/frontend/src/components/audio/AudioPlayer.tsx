@@ -34,6 +34,7 @@ export default function AudioPlayer({
   const [volume, setVolume] = React.useState(0.2); // set to 0.2, max is 1.
   const [currrentProgress, setCurrrentProgress] = React.useState(0);
   const [buffered, setBuffered] = React.useState(0);
+  const [mute, setMute] = React.useState(0);
 
   const durationDisplay = formatDurationDisplay(duration);
   const elapsedDisplay = formatDurationDisplay(currrentProgress);
@@ -43,7 +44,7 @@ export default function AudioPlayer({
     if (!isPlaying) return null;
     
     if (isPlaying) {
-      audioRef.current?.pause();
+      audioRef.current?.pause();    
       setIsPlaying(false);
     } else {
       audioRef.current?.play();
@@ -60,9 +61,10 @@ export default function AudioPlayer({
     if (!audioRef.current) return;
 
     if (audioRef.current.volume !== 0) {
+        setMute(audioRef.current.volume)
         audioRef.current.volume = 0;
     } else {
-        audioRef.current.volume = 1;
+        audioRef.current.volume = mute;
     }
   };
 
