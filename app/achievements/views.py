@@ -7,28 +7,43 @@ import time
 
 from django.conf import settings
 from django.contrib.auth import login as do_login, logout as do_logout
+
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect
 from django.views.decorators.http import require_http_methods, require_POST
 from nacl.secret import SecretBox
 
 from .models import *
+from common.serializer import SerializableField
 
 
-EVENT_START = 1718416800
-EVENT_END = 1719187200
+EVENT_START, EVENT_END = settings.EVENT_START, settings.EVENT_END
+
+
+def before_event(func):
+    def wrapper(*args, **kwargs):
+        if event_ended():
+            return error("event ended")
+
+        return func(*args, **kwargs)
+
+    return wrapper
 
 
 def serialize_team(team: Team):
-    return team.serialize(includes=["players__user", "players__completions__achievement_id"])
+    return team.serialize(includes=["players__user"])
 
 
 def event_ended():
-    return False
+    return time.time() >= EVENT_END
 
 
-def select_teams(many=False, **kwargs):
-    teams = Team.objects.prefetch_related("players__user", "players__completions").filter(**kwargs)
+def event_started():
+    return time.time() >= EVENT_START-1
+
+
+def select_teams(many=False, **kwargs) -> list[Team] | Team | None:
+    teams = Team.objects.prefetch_related("players__user").filter(**kwargs)
     if many:
         return teams
     if len(teams) == 0:
@@ -69,6 +84,7 @@ def login(req):
     state = req.GET.get("state", None)
     return redirect(state or "index")
 
+
 def logout(req):
     if req.user.is_authenticated:
         do_logout(req)
@@ -77,15 +93,54 @@ def logout(req):
 
 
 def achievements(req):
-    # -1 to be sure no one requests right before
-    if time.time() < (EVENT_START - 1) and not settings.DEBUG:
+    if not event_started() and not settings.DEBUG:
         return error("cannot get achievements before event starts")
 
-    return success(list(map(Achievement.serialize, Achievement.objects.select_related(
-        "beatmap"
-    ).annotate(
-        completion_count=models.Count("completions")
-    ).all())))
+    team = (
+        Team.objects.prefetch_related("players").filter(players__user=req.user).first()
+        if req.user.is_authenticated else None
+    )
+
+    def team_completion(c) -> bool:
+        return (
+            any((player.id == c.player.id for player in team.players.all()))
+            if team is not None else
+            False
+        )
+
+    return success([
+        achievement.serialize(
+            ["beatmap", "completion_count", "completions__player__user", "completions__placement"]
+            if event_ended() else
+            [
+                "beatmap",
+                "completion_count",
+                SerializableField(
+                    "completions",
+                    filter=lambda c: c.placement is None or c.placement.place <= 5 or team_completion(c),
+                    post_serial_filter=lambda c: len(c) > 0
+                ),
+                SerializableField(
+                    "completions__player",
+                    condition=team_completion
+                ),
+                SerializableField(
+                    "completions__time_completed",
+                    condition=team_completion
+                ),
+                "completions__player__user",
+                "completions__placement" if "competition" in achievement.tags.lower().split() else None
+            ],
+        )
+        for achievement in Achievement.objects.select_related(
+            "beatmap"
+        ).prefetch_related(
+            "completions__player__user",
+            "completions__placement",
+        ).annotate(
+            completion_count=models.Count("completions"),
+        ).all()
+    ])
 
 
 def teams(req):
@@ -95,7 +150,7 @@ def teams(req):
         serialized_teams = (
             serialize_team(team)
             if any(map(lambda p: p.user.id == req.user.id, team.players.all())) else
-            team.serialize(exclude=["invite"])
+            team.serialize(excludes=["invite"])
             for team in select_teams(many=True)
         )
     sorted_teams = sorted(serialized_teams, key=lambda t: t['points'], reverse=True)
@@ -104,6 +159,7 @@ def teams(req):
 
 
 @require_POST
+@before_event
 def join_team(req):
     if event_ended():
         return error("event ended")
@@ -131,6 +187,7 @@ def join_team(req):
 
 
 @require_http_methods(["DELETE"])
+@before_event
 def leave_team(req):
     if event_ended():
         return error("event ended")
@@ -153,6 +210,7 @@ def leave_team(req):
 
 
 @require_POST
+@before_event
 def create_team(req):
     print('hi')
     if event_ended():

@@ -1,100 +1,25 @@
-import { useContext, useEffect, useState, useRef } from "react";
-import { useGetTeams } from "api/query";
-import { AchievementCompletionType } from "api/types/AchievementCompletionType";
-import { AchievementPlayerExtendedType } from "api/types/AchievementPlayerType";
 import { AchievementExtendedType } from "api/types/AchievementType";
-import { SessionContext } from "contexts/SessionContext";
 import { WebsocketState } from "./AchievementProgress";
 import { toTitleCase } from "util/helperFunctions";
-import "assets/css/main.css";     
-import AudioPlayer from "components/audio/AudioPlayer";
-
-function timeAgo(timestamp: string) {
-  const times: [number, string][] = [
-    [60, "minute"],
-    [60, "hour"],
-    [24, "day"],
-  ];
-  const now = Date.now();
-  const completion = Date.parse(timestamp);
-
-  let leftover1 = Math.round((now - completion) / 1000);
-  let label1 = "second";
-  let leftover2: number | null = null;
-  let label2: string | null = null;
-  for (const [div, label] of times) {
-    if (leftover1 < div) {
-      break;
-    }
-
-    leftover2 = leftover1 % div;
-    label2 = label1;
-    leftover1 = Math.floor(leftover1 / div);
-    label1 = label;
-  }
-
-  if (leftover1 !== 1) {
-    label1 += "s";
-  }
-
-  if (leftover2 === null) {
-    return `${leftover1} ${label1} ago`;
-  }
-
-  if (leftover2 !== 1) {
-    label2 += "s";
-  }
-
-  return `${leftover1} ${label1} ${leftover2} ${label2} ago`;
-}
+import AchievementCompletionEntry from "components/achievements/AchievementCompletionEntry.tsx";
+import {AchievementCompletionType} from "api/types/AchievementCompletionType.ts";
+import AudioPlayer from "components/audio/AudioPlayer.tsx";
 
 export default function Achievement({
   achievement,
+  completed,
   state,
 }: {
   achievement: AchievementExtendedType;
+  completed: boolean;
   state: WebsocketState;
 }) {
-  const session = useContext(SessionContext);
-  const { data: teams } = useGetTeams();
-  const players: [AchievementPlayerExtendedType, AchievementCompletionType][] =
-    [];
-  let completed: boolean = false;
   const tags = achievement.tags.split(",");
-
-  // get players with achievement completed and check if team completed
-  if (teams !== undefined) {
-    for (const team of teams) {
-      if (!("players" in team)) {
-        continue;
-      }
-
-      let teamCompleted = false;
-      let sameTeam = false;
-      for (const player of team.players) {
-        if (player.user.id === session.user?.id) {
-          sameTeam = true;
-        }
-
-        for (const completion of player.completions) {
-          if (completion.achievement_id === achievement.id) {
-            players.push([player, completion]);
-            teamCompleted = true;
-            break;
-          }
-        }
-      }
-
-      if (teamCompleted && sameTeam) {
-        completed = true;
-      }
-    }
-  }
+  const completions = achievement.completions;
 
   const infoCls =
     "achievement-info-container" + (completed ? " complete" : " incomplete");
 
-    
   return (
     <>
       {state.hideCompletedAchievements && completed ? (
@@ -125,12 +50,12 @@ export default function Achievement({
             <AudioPlayer
                currentSong={achievement.audio}
             />
-          )}  
+          )}
 
           {achievement.beatmap === null ? (
             ""
           ) : (
-              <a
+            <a
               href={`https://osu.ppy.sh/b/${achievement.beatmap.id}`}
               target="_blank"
             >
@@ -138,6 +63,7 @@ export default function Achievement({
                 <img
                   className="achievement-details-cover"
                   src={achievement.beatmap.cover}
+                  alt=""
                 ></img>
                 <div className="achievement-details-beatmap-info">
                   <p className="achievement-details-beatmap-info-text">
@@ -153,34 +79,26 @@ export default function Achievement({
               </div>
             </a>
           )}
-
-          {achievement.beatmap === null || players.length === 0 ? "" : <hr />}
-          {players.length == 0 ? (
+          {achievement.beatmap === null || completions.length === 0 ? "" : <hr />}
+          {completions.length == 0 ? (
             ""
           ) : (
             <div className="achievement-players-container">
-              {players
+              {completions
                 .sort(
                   (a, b) =>
-                    Date.parse(a[1].time_completed) -
-                    Date.parse(b[1].time_completed)
+                    a.placement === undefined ? (
+                      Date.parse((a as AchievementCompletionType).time_completed) -
+                      Date.parse((b as AchievementCompletionType).time_completed)
+                    ) : (
+                      b.placement!.value -
+                      a.placement.value
+                    )
                 )
-                .map(([player, completion]) => (
-                  <div className="achievement-players-entry">
-                    <img
-                      className="achievement-players-entry-pfp"
-                      src={player.user.avatar}
-                    ></img>
-                    <div>
-                      <p>
-                        <b>{player.user.username}</b>
-                      </p>
-                      <p style={{ fontSize: "14px" }}>
-                        {timeAgo(completion.time_completed)}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+                .map((
+                    completion,
+                    i
+                ) => <AchievementCompletionEntry key={i} completion={completion} />)}
             </div>
           )}
         </div>

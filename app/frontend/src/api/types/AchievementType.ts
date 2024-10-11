@@ -1,4 +1,5 @@
 import { BeatmapInfoType } from "./BeatmapInfoType";
+import {AchievementCompletionType, AnonymousAchievementCompletionType} from "api/types/AchievementCompletionType.ts";
 
 export type AchievementType = {
     id: number;
@@ -12,4 +13,5 @@ export type AchievementType = {
 
 export type AchievementExtendedType = {
     completion_count: number;
+    completions: (AchievementCompletionType | AnonymousAchievementCompletionType)[];
 } & AchievementType;
