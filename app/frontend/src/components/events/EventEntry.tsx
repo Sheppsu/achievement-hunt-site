@@ -1,6 +1,6 @@
 import { useContext, useEffect } from "react";
-import AnimatedPage from "./AnimatedPage";
-import { EventContext, Event } from "contexts/EventContext";
+import AnimatedPage from "../AnimatedPage.tsx";
+import { EventContext, Event } from "contexts/EventContext.ts";
 import { motion } from "framer-motion";
 import { IoIosWarning, IoMdInformationCircle } from "react-icons/io";
 import { IoCheckmarkSharp, IoClose } from "react-icons/io5";

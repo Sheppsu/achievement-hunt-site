@@ -1,4 +1,4 @@
-import { FormEvent, ReactNode, useContext } from "react";
+import { FormEvent, useContext } from "react";
 import {
   useCreateTeam,
   useGetTeams,
@@ -18,47 +18,30 @@ import {
 import { AchievementPlayerType } from "api/types/AchievementPlayerType";
 import { PopupContext, PopupContextType } from "contexts/PopupContext";
 import { AnimatePresence, motion } from "framer-motion";
+import {SimplePromptPopup} from "components/popups/PopupContent.tsx";
 
 function Button({
   text,
   onClick,
   type,
+  disabled
 }: {
   text: string;
   onClick?: () => void;
   type?: "submit" | "button" | "reset";
+  disabled?: boolean;
 }) {
   return (
-    <BaseButton children={text} width="200px" type={type} onClick={onClick} />
+    <BaseButton children={text} width="200px" type={type} onClick={onClick} unavailable={disabled ?? false} />
   );
 }
 
 function PlayerCard({ player }: { player: AchievementPlayerType }) {
   return (
     <div className="player-card">
-      <img className="player-card-avatar" src={player.user.avatar}></img>
+      <img className="player-card-avatar" src={player.user.avatar} alt=""></img>
       <p className="info-inner-text grow">{player.user.username}</p>
     </div>
-  );
-}
-
-function CreateTeamPopup({
-  createTeam,
-}: {
-  createTeam: (evt: FormEvent<HTMLFormElement>) => void;
-}) {
-  return (
-    <form onSubmit={createTeam}>
-      <div className="form-container">
-        <div className="input-container">
-          <p>Team name: </p>
-          <input type="text" name="name" autoComplete="off" />
-        </div>
-        <div className="input-container center">
-          <Button type="submit" text="Create Team" />
-        </div>
-      </div>
-    </form>
   );
 }
 
@@ -107,10 +90,30 @@ function YourTeamContent({
 
 function NoTeamContent({
   createTeam,
+  joinTeam
 }: {
-  createTeam: (evt: FormEvent<HTMLFormElement>) => void;
+  createTeam: (evt: FormEvent<HTMLFormElement>) => void,
+  joinTeam: (evt: FormEvent<HTMLFormElement>) => void
 }) {
   const { setPopup } = useContext(PopupContext) as PopupContextType;
+  const session = useContext(SessionContext);
+
+  const eventEnded = Date.now() >= session.eventEnd;
+
+  const createTeamPopup = () => {
+    setPopup({
+      title: "Create Team",
+      content: <SimplePromptPopup prompt="Team name" onSubmit={createTeam} />,
+    });
+  };
+
+  const joinTeamPopup = () => {
+    setPopup({
+      title: "Join team",
+      content: <SimplePromptPopup prompt="Invite code" onSubmit={joinTeam} />
+    })
+  };
+
   return (
     <motion.div layout>
       <div className="info-inner-container your-team">
@@ -119,14 +122,10 @@ function NoTeamContent({
       <div className="info-inner-container buttons">
         <Button
           text="Create team"
-          onClick={() => {
-            setPopup({
-              title: "Create Team",
-              content: <CreateTeamPopup createTeam={createTeam} />,
-            });
-          }}
+          onClick={createTeamPopup}
+          disabled={eventEnded}
         />
-        <Button text="Join team" onClick={() => {}} />
+        <Button text="Join team" onClick={joinTeamPopup} disabled={eventEnded} />
       </div>
     </motion.div>
   );
@@ -279,7 +278,7 @@ export default function TeamCard() {
         ) : teamsResponse.isLoading ? (
           <LoadingContent />
         ) : ownTeam === null ? (
-          <NoTeamContent createTeam={onCreateTeam} />
+          <NoTeamContent createTeam={onCreateTeam} joinTeam={onJoinTeam} />
         ) : (
           <YourTeamContent
             ownTeam={ownTeam}

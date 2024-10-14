@@ -1,14 +1,8 @@
-import {
-  Link,
-  NavLink,
-  Outlet,
-  useLocation,
-  useOutlet,
-} from "react-router-dom";
+import { Link, NavLink, useLocation, useOutlet } from "react-router-dom";
 import { useContext, useReducer, useState } from "react";
 
 import Footer from "./Footer";
-import EventContainer from "./EventContainer";
+import EventContainer from "./events/EventContainer.tsx";
 import { SessionContext } from "contexts/SessionContext";
 import { getSessionData } from "util/auth";
 import { EventContext, eventReducer } from "contexts/EventContext";
@@ -16,18 +10,12 @@ import { EventContext, eventReducer } from "contexts/EventContext";
 import OsuLogo from "../assets/images/osu.png";
 
 import "assets/css/main.css";
-import PopupContainer from "./PopupContainer";
+import PopupContainer from "./popups/PopupContainer.tsx";
 import { PopupContext, PopupState } from "contexts/PopupContext";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import React from "react";
-import {
-  PageTransitionContext,
-  PageTransitionContextType,
-} from "contexts/PageTransitionContext";
 import { IoIosNotifications } from "react-icons/io";
-import EventEntry from "./EventEntry";
-import NotificationEventEntry from "./NotificationEventEntry";
-import Button from "./Button";
+import NotificationContainer from "components/notifications/NotificationContainer.tsx";
 
 function AnimatedOutlet() {
   const location = useLocation();
@@ -48,9 +36,6 @@ export default function Header() {
   });
   const [popup, setPopup] = useState<PopupState>(null);
   const [showNotifications, setShowNotifications] = useState<boolean>(false);
-  const { transitioning } = useContext(
-    PageTransitionContext
-  ) as PageTransitionContextType;
 
   return (
     <>
@@ -75,32 +60,6 @@ export default function Header() {
               }}
             >
               <IoIosNotifications size={24} />
-              {showNotifications && (
-                <motion.div
-                  className="notification-container"
-                  id="notification-popup"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  transition={{ duration: 0.1 }}
-                  layout
-                >
-                  <div className="notifications-header">
-                    <p>Notifications</p>
-                    <button
-                      className="notifications-clear-all-button"
-                      onClick={() => dispatchEventMsg({ type: "clearall" })}
-                    >
-                      Clear All
-                    </button>
-                  </div>
-                  <div className="notification-scroll-container">
-                    {eventsState.pastEvents.map((event) => (
-                      <NotificationEventEntry event={event} />
-                    ))}
-                  </div>
-                </motion.div>
-              )}
             </div>
             {session.isAuthenticated ? (
               <img
@@ -117,6 +76,11 @@ export default function Header() {
             )}
           </div>
         </div>
+
+        <NotificationContainer
+          eventsState={eventsState}
+          display={showNotifications}
+        />
 
         <PopupContext.Provider value={{ popup, setPopup }}>
           <PopupContainer />
