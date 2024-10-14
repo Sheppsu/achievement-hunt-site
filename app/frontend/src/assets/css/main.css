@@ -71,7 +71,7 @@ footer {
   left: 0;
   bottom: 0;
 
-  background-color: var(--bg-color1);
+  background-color: var(--background-color);
   overflow: hidden;
 }
 
@@ -140,7 +140,7 @@ hr {
   gap: 18px;
 }
 
-.footer-link {
+.footer-img-link {
   height: 100%;
   display: flex;
   align-items: center;
@@ -149,12 +149,12 @@ hr {
   text-decoration: none;
 }
 
-.footer-text-link {
+.external-link {
   text-decoration: underline;
   transition: color 0.2s;
 }
 
-.footer-text-link:hover {
+.external-link:hover {
   color: #b3b3b3;
   cursor: pointer;
 }
@@ -177,6 +177,23 @@ hr {
   flex-direction: row;
   justify-content: center;
   gap: 20px;
+}
+
+.info-container {
+  width: calc(100% - 34px);
+  padding: 15px;
+  margin: 0;
+
+  border-radius: var(--border-rounding);
+  border: solid 2px var(--border-color);
+  text-align: center;
+
+  transition: border 0.3s;
+  background-color: var(--background-color);
+
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
 .card-container {
@@ -312,12 +329,11 @@ div.vertical-divider {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0px 25px 0px 25px;
+  padding: 0 25px 0 25px;
   position: sticky;
 }
 
 .notifications-header p {
-  font: bold;
   font-size: x-large;
 }
 
@@ -368,7 +384,6 @@ div.vertical-divider {
 
   display: flex;
   align-items: center;
-  background-color: var(--bg-color2);
   color: white;
 }
 
@@ -391,52 +406,6 @@ div.vertical-divider {
   height: 100%;
   border-radius: 100%;
 }
-
-/* Popup */
-
-/* .popup-background {
-  width: 100vw;
-  height: 100vh;
-  position: fixed;
-  left: 0;
-  top: 0;
-
-  background-color: black;
-  opacity: 0;
-  transition: opacity 0.2s ease-out;
-  z-index: -1;
-}
-
-.popup-background.show {
-  z-index: 8;
-  opacity: 0.5;
-}
-
-#popup {
-  width: 380px;
-
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  margin: auto;
-  margin-top: 30vh;
-  padding: 10px;
-
-  background-color: white;
-  border-radius: 15px;
-  z-index: 11;
-  text-align: center;
-}
-
-#popup-title {
-  font-size: 20px;
-  margin: 10px 0;
-}
-
-.popup-button {
-  margin: 0 5px;
-} */
 
 /* Event container */
 

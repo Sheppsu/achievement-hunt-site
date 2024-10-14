@@ -4,6 +4,7 @@ import Index from "./index";
 import Logout from "./logout";
 import AchievementCompletionPage from "./achievements";
 import AchievementsIndex from "./team";
+import StaffPage from "routes/staff.tsx";
 
 export const routes: RouteObject[] = [
   {
@@ -26,6 +27,10 @@ export const routes: RouteObject[] = [
         path: "achievements",
         element: <AchievementCompletionPage />,
       },
+      {
+        path: "staff",
+        element: <StaffPage />
+      }
     ],
   },
 ];
