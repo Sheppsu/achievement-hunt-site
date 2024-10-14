@@ -1,5 +1,5 @@
 import "assets/css/popup.css";
-import { PopupContext, PopupContextType } from "contexts/PopupContext";
+import { PopupContext, PopupContextType } from "contexts/PopupContext.ts";
 import { AnimatePresence, motion } from "framer-motion";
 import { useContext, useEffect, useRef } from "react";
 

@@ -1,31 +1,34 @@
-.audio-player-container{
-  flex-direction: row;
+.audio-player-container {
   display: flex;
+  flex-direction: row;
   align-items: center;
 }
 
-.audio-player{
+.audio-player {
   display: flex;
   flex-direction: row;
-  flex-wrap: nowrap;
   align-items: center;
+  flex-wrap: nowrap;
+
+  border-radius: 12%;
+
   background: #171717;
   stroke: #2F2F2F;
-  border-radius: 12%;
 }
 
 .audio-player > * {
   margin: 0.5em;
 }
 
-.audio-icon{
+.audio-icon {
+  width: auto;
+  height: 2em;
+
   background-color: transparent;
   color: white;
-  height: 2em;
-  width: auto;
 }
 
-.audio-progress{
+.audio-progress {
   width: 55em;
   height: 20px;
 }

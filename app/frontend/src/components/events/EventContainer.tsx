@@ -1,7 +1,7 @@
 import "assets/css/main.css";
-import EventEntry from "./EventEntry";
+import EventEntry from "./EventEntry.tsx";
 import { useEffect, useState } from "react";
-import { Event } from "contexts/EventContext";
+import { Event } from "contexts/EventContext.ts";
 import { AnimatePresence, motion } from "framer-motion";
 
 export default function EventContainer({ events }: { events: Event[] }) {

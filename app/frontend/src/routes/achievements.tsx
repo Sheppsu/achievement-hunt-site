@@ -8,21 +8,13 @@ import AchievementProgress, {
 } from "components/achievements/AchievementProgress";
 
 import "assets/css/achievements.css";
-import {
-  useContext,
-  useEffect,
-  useReducer,
-  useState,
-} from "react";
+import { useContext, useEffect, useReducer, useState } from "react";
 import { SessionContext } from "contexts/SessionContext";
 import { Helmet } from "react-helmet";
-import {
-  AchievementTeamExtendedType,
-  AchievementTeamType,
-} from "api/types/AchievementTeamType";
+import { AchievementTeamExtendedType } from "api/types/AchievementTeamType";
 import AnimatedPage from "components/AnimatedPage";
 import { AchievementExtendedType } from "api/types/AchievementType";
-import {getMyTeam, toTitleCase} from "util/helperFunctions";
+import { getMyTeam, toTitleCase } from "util/helperFunctions";
 import { AnimationScope, useAnimate } from "framer-motion";
 import Button from "components/Button";
 
@@ -262,7 +254,7 @@ function AchievementNavigationBar({
                   ))}
                 </div>
               </div>
-            )
+            ),
           )}
           <Button onClick={() => onReset()}>Reset to Default</Button>
         </>
@@ -285,7 +277,13 @@ export default function AchievementCompletionPage() {
   const [scope, animate] = useAnimate();
 
   if (time < eventStart && !session.debug) {
-    return <HiddenAchievementCompletionPage time={time} setTime={setTime} eventStart={eventStart} />;
+    return (
+      <HiddenAchievementCompletionPage
+        time={time}
+        setTime={setTime}
+        eventStart={eventStart}
+      />
+    );
   }
 
   const { data: achievements } = useGetAchievements(true);

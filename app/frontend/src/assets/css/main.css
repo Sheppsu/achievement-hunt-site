@@ -167,9 +167,8 @@ hr {
   user-select: none; /* Standard syntax */
 }
 
-.hidden {
-  opacity: 0;
-  transform: translateY(20px);
+.hide {
+  display: none !important;
 }
 
 .index-container {
@@ -218,7 +217,7 @@ div.vertical-divider {
   height: 40px;
   padding: 10px 16px;
 
-  position: absolute;
+  position: fixed;
   top: 10px;
   left: 50vw;
   transform: translateX(-50%) translateX(-8px);
@@ -349,24 +348,36 @@ div.vertical-divider {
 }
 
 .notification-container {
-  width: 325px;
+  width: calc(84vw - 16px);
+  max-width: 325px;
   height: 550px;
-  cursor: default;
+  padding: 8px;
 
-  background-color: var(--background-color);
-  border: 2px solid var(--border-color);
-  border-radius: 5px;
+  position: absolute;
+  top: 80px;
+  right: calc(50vw - 300px);
+
   display: flex;
   flex-direction: column;
   gap: 5px;
   align-items: center;
-  padding: 8px;
+
+  background-color: var(--background-color);
+
+  border: 2px solid var(--border-color);
+  border-radius: 5px;
+
+  z-index: 100;
+
   overflow: hidden;
 
-  position: absolute;
-  z-index: 100;
-  top: 180%;
-  right: 1%;
+  cursor: default;
+}
+
+@media (max-width: 720px) {
+  .notification-container {
+    right: 8vw;
+  }
 }
 
 .notification-scroll-container {
