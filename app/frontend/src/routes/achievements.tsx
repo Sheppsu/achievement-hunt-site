@@ -1,14 +1,6 @@
 import { useGetAchievements, useGetTeams } from "api/query";
 import AchievementContainer from "components/achievements/AchievementContainer";
-import AchievementProgress, {
-  defaultState,
-  StateDispatch,
-  WebsocketState,
-  wsReducer,
-} from "components/achievements/AchievementProgress";
-
-import "assets/css/achievements.css";
-import { useContext, useEffect, useReducer, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { SessionContext } from "contexts/SessionContext";
 import { Helmet } from "react-helmet";
 import { AchievementTeamExtendedType } from "api/types/AchievementTeamType";
@@ -17,6 +9,14 @@ import { AchievementExtendedType } from "api/types/AchievementType";
 import { getMyTeam, toTitleCase } from "util/helperFunctions";
 import { AnimationScope, useAnimate } from "framer-motion";
 import Button from "components/Button";
+import { WebsocketState } from "types/WebsocketStateType.ts";
+import {
+  StateDispatch,
+  useDispatchStateContext,
+  useStateContext,
+} from "contexts/StateContext.ts";
+import "assets/css/achievements.css";
+import AchievementProgress from "components/achievements/AchievementProgress.tsx";
 
 function getTimeStr(delta: number) {
   const days = Math.floor((delta / (1000 * 60 * 60 * 24)) % 60);
@@ -273,8 +273,10 @@ export default function AchievementCompletionPage() {
   const team = getMyTeam(session.user?.id, teams);
 
   const [time, setTime] = useState<number>(Date.now());
-  const [state, dispatchState] = useReducer(wsReducer, null, defaultState);
   const [scope, animate] = useAnimate();
+
+  const state = useStateContext();
+  const dispatchState = useDispatchStateContext();
 
   if (time < eventStart && !session.debug) {
     return (

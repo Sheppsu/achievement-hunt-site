@@ -16,6 +16,12 @@ import { AnimatePresence } from "framer-motion";
 import React from "react";
 import { IoIosNotifications } from "react-icons/io";
 import NotificationContainer from "components/notifications/NotificationContainer.tsx";
+import {
+  StateContext,
+  StateDispatchContext,
+  wsReducer,
+} from "contexts/StateContext.ts";
+import { defaultState } from "types/WebsocketStateType.ts";
 
 function AnimatedOutlet() {
   const location = useLocation();
@@ -34,6 +40,7 @@ export default function Header() {
     events: [],
     pastEvents: [],
   });
+  const [wsState, dispatchWsState] = useReducer(wsReducer, null, defaultState);
   const [popup, setPopup] = useState<PopupState>(null);
   const [showNotifications, setShowNotifications] = useState<boolean>(false);
 
@@ -86,7 +93,11 @@ export default function Header() {
           <PopupContainer />
           <EventContainer events={eventsState.events} />
           <SessionContext.Provider value={getSessionData()}>
-            <AnimatedOutlet />
+            <StateContext.Provider value={wsState}>
+              <StateDispatchContext.Provider value={dispatchWsState}>
+                <AnimatedOutlet />
+              </StateDispatchContext.Provider>
+            </StateContext.Provider>
           </SessionContext.Provider>
         </PopupContext.Provider>
       </EventContext.Provider>

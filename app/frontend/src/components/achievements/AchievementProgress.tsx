@@ -5,39 +5,14 @@ import {
 } from "@tanstack/react-query";
 import { useContext } from "react";
 import { useGetAchievements } from "api/query";
-import {
-  AchievementTeamExtendedType
-} from "api/types/AchievementTeamType";
+import { AchievementTeamExtendedType } from "api/types/AchievementTeamType";
 import { AchievementExtendedType } from "api/types/AchievementType";
 import { EventContext, EventType } from "contexts/EventContext";
 import { SessionContext } from "contexts/SessionContext";
-import { NavItems } from "routes/achievements";
-import {AchievementPlayerType} from "api/types/AchievementPlayerType.ts";
-import {AchievementCompletionPlacementType} from "api/types/AchievementCompletionType.ts";
-
-export type WebsocketState = {
-  ws: WebSocket | null | undefined;
-  authenticated: boolean;
-  mode: number;
-  submitEnabled: boolean;
-  achievementsFilter: NavItems | null;
-  achievementsSearchFilter: string; // probably put filter stuff in its own reducer
-  hideCompletedAchievements: boolean;
-  lastDisconnect: number;
-};
-
-export function defaultState(): WebsocketState {
-  return {
-    ws: null,
-    authenticated: false,
-    mode: 0,
-    submitEnabled: false,
-    achievementsFilter: null,
-    achievementsSearchFilter: "",
-    hideCompletedAchievements: false,
-    lastDisconnect: 0
-  };
-}
+import { AchievementPlayerType } from "api/types/AchievementPlayerType.ts";
+import { AchievementCompletionPlacementType } from "api/types/AchievementCompletionType.ts";
+import { WebsocketState } from "types/WebsocketStateType.ts";
+import { StateDispatch } from "contexts/StateContext.ts";
 
 type WSAchievementType = {
   id: number;
@@ -54,7 +29,7 @@ type RefreshReturnType = {
 
 function onCompletedAchievement(
   data: RefreshReturnType,
-  queryClient: QueryClient
+  queryClient: QueryClient,
 ) {
   // add completions to achievements
   queryClient.setQueryData(
@@ -65,14 +40,14 @@ function onCompletedAchievement(
           if (achievement.id === completed.id) {
             // remove existing entry (for competition achievements)
             achievement.completions = achievement.completions.filter(
-              (c) => !("player" in c)
+              (c) => !("player" in c),
             );
 
             achievement.completion_count += 1;
             achievement.completions.push({
               time_completed: completed.time,
               player: data.player,
-              placement: completed.placement ?? undefined
+              placement: completed.placement ?? undefined,
             });
 
             break;
@@ -81,15 +56,15 @@ function onCompletedAchievement(
       }
 
       return achievements;
-    }
+    },
   );
 }
 
 function handleMessage(
   evt: MessageEvent<string>,
   dispatchEventMsg: React.Dispatch<{ type: EventType; msg: string }>,
-  dispatchState: React.Dispatch<StateActionType>,
-  queryClient: QueryClient
+  dispatchState: StateDispatch,
+  queryClient: QueryClient,
 ) {
   const data = JSON.parse(evt.data);
   if (data.error !== undefined) {
@@ -133,13 +108,13 @@ function connect(
   dispatchEventMsg: React.Dispatch<{ type: EventType; msg: string }>,
   dispatchState: StateDispatch,
   queryClient: QueryClient,
-  data: object
+  data: object,
 ): WebSocket {
   const ws = new WebSocket(uri);
 
   dispatchEventMsg({
     type: "info",
-    msg: "Connecting to submission server..."
+    msg: "Connecting to submission server...",
   });
 
   ws.addEventListener("open", (_) => {
@@ -170,112 +145,6 @@ function sendSubmit(state: WebsocketState, dispatchState: StateDispatch) {
   setTimeout(() => dispatchState({ id: 3, disable: false }), 5000);
 }
 
-interface BaseStateActionType {
-  id: number;
-}
-
-interface ConnectingType extends BaseStateActionType {
-  id: 1;
-  ws: WebSocket | undefined;
-}
-
-interface AuthType extends BaseStateActionType {
-  id: 2;
-}
-
-interface SubmitType extends BaseStateActionType {
-  id: 3;
-  disable: boolean;
-}
-
-interface ModeType extends BaseStateActionType {
-  id: 4;
-  mode: number;
-}
-
-interface FilterType extends BaseStateActionType {
-  id: 5;
-  achievementsFilter: NavItems;
-}
-
-interface SearchFilterType extends BaseStateActionType {
-  id: 6;
-  achievementsSearchFilter: string;
-}
-
-interface CheckboxType extends BaseStateActionType {
-  id: 7;
-  hideCompletedAchievements: boolean;
-}
-
-interface DisconnectionType extends BaseStateActionType {
-  id: 8
-}
-
-type StateActionType =
-  | ConnectingType
-  | AuthType
-  | SubmitType
-  | ModeType
-  | FilterType
-  | SearchFilterType
-  | CheckboxType
-  | DisconnectionType;
-
-export function wsReducer(
-  state: WebsocketState,
-  action: StateActionType
-): WebsocketState {
-  switch (action.id) {
-    case 1: // connection
-      return {
-        ...state,
-        ws: action.ws,
-      };
-    case 2: // auth or disconnection
-      return {
-        ...state,
-        authenticated: true,
-        submitEnabled: true
-      };
-    case 3: // submission
-      return {
-        ...state,
-        submitEnabled: !action.disable,
-      };
-    case 4: // mode change
-      return {
-        ...state,
-        mode: action.mode,
-      };
-    case 5: // filter change
-      return {
-        ...state,
-        achievementsFilter: action.achievementsFilter,
-      };
-    case 6: // search change
-      return {
-        ...state,
-        achievementsSearchFilter: action.achievementsSearchFilter,
-      };
-    case 7: // hide achievements
-      return {
-        ...state,
-        hideCompletedAchievements: action.hideCompletedAchievements,
-      };
-    case 8: // disconnection
-      return {
-        ...state,
-        ws: null,
-        authenticated: false,
-        submitEnabled: false,
-        lastDisconnect: Date.now()
-      };
-  }
-}
-
-export type StateDispatch = React.Dispatch<StateActionType>;
-
 export default function AchievementProgress({
   team,
   state,
@@ -299,18 +168,21 @@ export default function AchievementProgress({
 
   if (authData !== undefined && state.ws === null) {
     // mark connecting
-    dispatchState({id: 1, ws: undefined});
+    dispatchState({ id: 1, ws: undefined });
 
-    setTimeout(() => {
-      const ws = connect(
+    setTimeout(
+      () => {
+        const ws = connect(
           session.wsUri,
           dispatchEventMsg,
           dispatchState,
           queryClient,
-          authData
-      );
-      dispatchState({id: 1, ws});
-    }, Math.max(0, 3000 - (Date.now() - state.lastDisconnect)))
+          authData,
+        );
+        dispatchState({ id: 1, ws });
+      },
+      Math.max(0, 3000 - (Date.now() - state.lastDisconnect)),
+    );
   }
 
   if (team === null || achievements === undefined) {
