@@ -1,9 +1,9 @@
 import { AchievementExtendedType } from "api/types/AchievementType";
-import { WebsocketState } from "./AchievementProgress";
 import { toTitleCase } from "util/helperFunctions";
 import AchievementCompletionEntry from "components/achievements/AchievementCompletionEntry.tsx";
-import {AchievementCompletionType} from "api/types/AchievementCompletionType.ts";
+import { AchievementCompletionType } from "api/types/AchievementCompletionType.ts";
 import AudioPlayer from "components/audio/AudioPlayer.tsx";
+import { WebsocketState } from "types/WebsocketStateType.ts";
 
 export default function Achievement({
   achievement,
@@ -46,10 +46,8 @@ export default function Achievement({
 
           {achievement.audio === null ? (
             ""
-            ) : (
-            <AudioPlayer
-               currentSong={achievement.audio}
-            />
+          ) : (
+            <AudioPlayer currentSong={achievement.audio} />
           )}
 
           {achievement.beatmap === null ? (
@@ -79,26 +77,29 @@ export default function Achievement({
               </div>
             </a>
           )}
-          {achievement.beatmap === null || completions.length === 0 ? "" : <hr />}
+          {achievement.beatmap === null || completions.length === 0 ? (
+            ""
+          ) : (
+            <hr />
+          )}
           {completions.length == 0 ? (
             ""
           ) : (
             <div className="achievement-players-container">
               {completions
-                .sort(
-                  (a, b) =>
-                    a.placement === undefined ? (
-                      Date.parse((a as AchievementCompletionType).time_completed) -
-                      Date.parse((b as AchievementCompletionType).time_completed)
-                    ) : (
-                      b.placement!.value -
-                      a.placement.value
-                    )
+                .sort((a, b) =>
+                  a.placement === undefined
+                    ? Date.parse(
+                        (a as AchievementCompletionType).time_completed,
+                      ) -
+                      Date.parse(
+                        (b as AchievementCompletionType).time_completed,
+                      )
+                    : b.placement!.value - a.placement.value,
                 )
-                .map((
-                    completion,
-                    i
-                ) => <AchievementCompletionEntry key={i} completion={completion} />)}
+                .map((completion, i) => (
+                  <AchievementCompletionEntry key={i} completion={completion} />
+                ))}
             </div>
           )}
         </div>

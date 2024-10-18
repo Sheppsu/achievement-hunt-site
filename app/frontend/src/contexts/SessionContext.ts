@@ -1,6 +1,6 @@
 import { createContext } from "react";
 import { getSessionData } from "util/auth";
-import { WebsocketState } from "components/achievements/AchievementProgress.tsx";
+import { WebsocketState } from "types/WebsocketStateType.ts";
 
 function defaultState(): WebsocketState {
   return {
