@@ -1,24 +1,27 @@
 import Achievement from "./Achievement";
-import {useGetAchievements, useGetTeams} from "api/query";
+import { useGetAchievements, useGetTeams } from "api/query";
 import { AchievementExtendedType } from "api/types/AchievementType";
 import "assets/css/achievements.css";
-import { WebsocketState } from "./AchievementProgress";
 import { AnimationScope } from "framer-motion";
-import {getMyTeam} from "util/helperFunctions.ts";
-import {useContext} from "react";
-import {SessionContext} from "contexts/SessionContext.ts";
+import { getMyTeam } from "util/helperFunctions.ts";
+import { useContext } from "react";
+import { SessionContext } from "contexts/SessionContext.ts";
+import { WebsocketState } from "types/WebsocketStateType.ts";
 
 function intersects(a: string[], b: string[]): boolean {
   for (const item of b) {
     if (a.includes(item)) {
       return true;
-    } 
+    }
   }
 
   return false;
 }
 
-function matchesSearch(achievement: AchievementExtendedType, searchFilter: string[]) {
+function matchesSearch(
+  achievement: AchievementExtendedType,
+  searchFilter: string[],
+) {
   for (const word of searchFilter) {
     const bm = achievement.beatmap;
     if (
@@ -35,7 +38,9 @@ function matchesSearch(achievement: AchievementExtendedType, searchFilter: strin
   return true;
 }
 
-type CompletedAchievementType = AchievementExtendedType & { completed: boolean };
+type CompletedAchievementType = AchievementExtendedType & {
+  completed: boolean;
+};
 
 export default function AchievementContainer({
   state,
@@ -46,9 +51,13 @@ export default function AchievementContainer({
 }) {
   const session = useContext(SessionContext);
   const { data: baseAchievements } = useGetAchievements();
-  const { data: teams } = useGetTeams()
+  const { data: teams } = useGetTeams();
 
-  if (state.achievementsFilter === null || baseAchievements === undefined || teams === undefined)
+  if (
+    state.achievementsFilter === null ||
+    baseAchievements === undefined ||
+    teams === undefined
+  )
     return (
       <div ref={scope} className="achievements-container">
         <div>Loading achievements...</div>
@@ -56,17 +65,19 @@ export default function AchievementContainer({
     );
 
   const achievements: CompletedAchievementType[] = baseAchievements.map(
-    (a) => ({...a, completed: false})
+    (a) => ({ ...a, completed: false }),
   );
 
-  const myTeam = session.user === null ? null : getMyTeam(session.user.id, teams);
+  const myTeam =
+    session.user === null ? null : getMyTeam(session.user.id, teams);
 
   if (myTeam !== null) {
     const teamUserIds = myTeam.players.map((p) => p.user.id);
     for (const achievement of achievements) {
-      achievement.completed = achievement.completions.filter(
-        (c) => "player" in c && teamUserIds.includes(c.player.user.id)
-      ).length > 0;
+      achievement.completed =
+        achievement.completions.filter(
+          (c) => "player" in c && teamUserIds.includes(c.player.user.id),
+        ).length > 0;
     }
   }
 
@@ -81,17 +92,13 @@ export default function AchievementContainer({
   const sortedAchievements: { [key: string]: CompletedAchievementType[] } = {};
 
   for (const achievement of achievements) {
-    if (!matchesSearch(achievement, searchFilter))
-      continue;
+    if (!matchesSearch(achievement, searchFilter)) continue;
 
-    if (!activeCategories.includes(achievement.category))
-      continue;
+    if (!activeCategories.includes(achievement.category)) continue;
 
-    if (!intersects(activeTags, achievement.tags.split(",")))
-      continue;
+    if (!intersects(activeTags, achievement.tags.split(","))) continue;
 
-    if (state.hideCompletedAchievements && achievement.completed)
-      continue;
+    if (state.hideCompletedAchievements && achievement.completed) continue;
 
     if (!sortedAchievements[achievement.category])
       sortedAchievements[achievement.category] = [];
@@ -100,30 +107,28 @@ export default function AchievementContainer({
 
   return (
     <div ref={scope} className="achievements-container">
-      {
-        Object.keys(sortedAchievements)
-          .sort((a, b) => a.localeCompare(b))
-          .map((key) => {
-            return (
-              <>
-                <div className="achievement-category">{key}</div>
-                {key.toLowerCase().includes("search") &&
-                sortedAchievements[key].length === 0 ? (
-                  <p>No achievements found!</p>
-                ) : (
-                  sortedAchievements[key].map((achievement, index) => (
-                    <Achievement
-                      key={index}
-                      achievement={achievement}
-                      completed={achievement.completed}
-                      state={state}
-                    />
-                  ))
-                )}
-              </>
-            );
-          })
-      }
+      {Object.keys(sortedAchievements)
+        .sort((a, b) => a.localeCompare(b))
+        .map((key) => {
+          return (
+            <>
+              <div className="achievement-category">{key}</div>
+              {key.toLowerCase().includes("search") &&
+              sortedAchievements[key].length === 0 ? (
+                <p>No achievements found!</p>
+              ) : (
+                sortedAchievements[key].map((achievement, index) => (
+                  <Achievement
+                    key={index}
+                    achievement={achievement}
+                    completed={achievement.completed}
+                    state={state}
+                  />
+                ))
+              )}
+            </>
+          );
+        })}
     </div>
   );
 }
