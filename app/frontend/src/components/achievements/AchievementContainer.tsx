@@ -38,6 +38,18 @@ function matchesSearch(
   return true;
 }
 
+function matchesMode(
+  achievement: AchievementExtendedType,
+  mode: number,
+): boolean {
+  for (const tag of achievement.tags.split(",")) {
+    if (tag.startsWith("mode-"))
+      return ["o", "t", "f", "m"].indexOf(tag[tag.length - 1]) == mode;
+  }
+
+  return true;
+}
+
 type CompletedAchievementType = AchievementExtendedType & {
   completed: boolean;
 };
@@ -92,6 +104,8 @@ export default function AchievementContainer({
   const sortedAchievements: { [key: string]: CompletedAchievementType[] } = {};
 
   for (const achievement of achievements) {
+    if (!matchesMode(achievement, state.mode)) continue;
+
     if (!matchesSearch(achievement, searchFilter)) continue;
 
     if (!activeCategories.includes(achievement.category)) continue;

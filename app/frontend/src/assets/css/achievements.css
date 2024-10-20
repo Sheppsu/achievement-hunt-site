@@ -48,8 +48,6 @@ p {
 }
 
 .achievement {
-  width: 100%;
-
   display: flex;
   flex-direction: column;
 
@@ -86,7 +84,6 @@ p {
 }
 
 .achievement-tags-container {
-  width: 100%;
   height: 40px;
 
   padding-top: 6px;
@@ -189,6 +186,7 @@ p {
 
 .progress-container {
   min-width: 400px;
+  flex-basis: 400px;
 
   display: flex;
   flex-direction: column;
@@ -440,5 +438,11 @@ p {
 
   .progress-container {
     order: 1;
+  }
+}
+
+@media (min-width: 1261px) {
+  .achievement {
+    max-width: 760px;
   }
 }
