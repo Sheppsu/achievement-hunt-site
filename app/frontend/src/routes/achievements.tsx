@@ -110,6 +110,8 @@ function getDefaultNav(achievements: AchievementExtendedType[]): NavItems {
     }
 
     for (const tag of achievement.tags.split(",")) {
+      if (tag.startsWith("mode-")) continue;
+
       if (!tags.includes(tag)) {
         tags.push(tag);
       }

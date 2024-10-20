@@ -14,8 +14,30 @@ export default function Achievement({
   completed: boolean;
   state: WebsocketState;
 }) {
-  const tags = achievement.tags.split(",");
+  const rawTags = achievement.tags.split(",");
   const completions = achievement.completions;
+
+  const modeMap: { [_k: string]: string } = {
+    "mode-o": "standard",
+    "mode-t": "taiko",
+    "mode-f": "catch",
+    "mode-m": "mania",
+  };
+
+  let mode: string | null = null;
+  const filteredTags: string[] = [];
+  for (const tag of rawTags) {
+    if (tag === "") continue;
+
+    if (tag.startsWith("mode-")) {
+      mode = modeMap[tag];
+      continue;
+    }
+
+    filteredTags.push(tag);
+  }
+
+  const tags = [`Mode: ${mode ?? "any"}`].concat(filteredTags);
 
   const infoCls =
     "achievement-info-container" + (completed ? " complete" : " incomplete");
@@ -33,18 +55,16 @@ export default function Achievement({
                 {achievement.completion_count} completions |{" "}
                 {achievement.description}
               </p>
-              {tags[0] !== "" && (
-                <div className="achievement-tags-container">
-                  {tags.map((tag) => (
-                    <div className="achievement-tag">{toTitleCase(tag)}</div>
-                  ))}
-                </div>
-              )}
+              <div className="achievement-tags-container">
+                {tags.map((tag) => (
+                  <div className="achievement-tag">{toTitleCase(tag)}</div>
+                ))}
+              </div>
             </div>
             <h1>{completed ? "Complete" : "Incomplete"}</h1>
           </div>
 
-          {achievement.audio === null ? (
+          {achievement.audio === null || achievement.audio === "" ? (
             ""
           ) : (
             <AudioPlayer currentSong={achievement.audio} />
