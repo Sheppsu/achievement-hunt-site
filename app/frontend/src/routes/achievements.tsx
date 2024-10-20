@@ -50,7 +50,7 @@ function HiddenAchievementCompletionPage({
       <Helmet>
         <title>CTA - Starts in {timeString}</title>
       </Helmet>
-      <h1 style={{ fontSize: "1em" }}>Starts in {timeString}</h1>
+      <h1 style={{ fontSize: "3em" }}>Starts in {timeString}</h1>
     </div>
   );
 }
