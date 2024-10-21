@@ -10,6 +10,10 @@ export function defaultState(): WebsocketState {
     achievementsSearchFilter: "",
     hideCompletedAchievements: false,
     lastDisconnect: 0,
+    volume: {
+      value: parseFloat(localStorage.getItem("volume") ?? "0.5"),
+      isMuted: localStorage.getItem("isMuted") === "t",
+    },
   };
 }
 
@@ -22,4 +26,8 @@ export type WebsocketState = {
   achievementsSearchFilter: string; // probably put filter stuff in its own reducer
   hideCompletedAchievements: boolean;
   lastDisconnect: number;
+  volume: {
+    value: number;
+    isMuted: boolean;
+  };
 };
