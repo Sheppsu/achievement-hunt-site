@@ -71,11 +71,8 @@ function YourTeamContent({
   return (
     <>
       <div className="info-inner-container your-team">
-        <p className="info-inner-text grow">{ownTeam.name}</p>
-        <div className="vertical-divider"></div>
-        <p className="info-inner-text">
-          {ownTeam.points}
-          <span>pts</span>
+        <p className="info-inner-text center grow">
+          {ownTeam.name} - {ownTeam.points}pts
         </p>
       </div>
       <h1 className="info-title">Players</h1>
