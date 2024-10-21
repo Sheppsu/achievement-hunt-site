@@ -1,5 +1,5 @@
 from django.urls import re_path
-from django.shortcuts import render
+from django.shortcuts import render, Http404
 from django.conf import settings
 
 
@@ -17,6 +17,11 @@ def index_view(req):
     return render(req, 'index.html', {"data": data})
 
 
+def invalid_static(req):
+    raise Http404()
+
+
 urlpatterns = [
+    re_path(r"static/.*", invalid_static),
     re_path(r".*", index_view, name="index")
 ]

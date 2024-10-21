@@ -145,8 +145,13 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles' if not DEBUG else BASE_DIR / "frontend" / "dist"
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static")
+]
 if not DEBUG:
-    STATICFILES_DIRS = [os.path.join(BASE_DIR, "frontend", "dist")]
+    STATICFILES_DIRS.append(
+        os.path.join(BASE_DIR, "frontend", "dist")
+    )
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

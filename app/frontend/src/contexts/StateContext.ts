@@ -44,6 +44,12 @@ interface DisconnectionType extends BaseStateActionType {
   id: 8;
 }
 
+interface AdjustAudioType extends BaseStateActionType {
+  id: 9;
+  value: number;
+  isMuted: boolean;
+}
+
 type StateActionType =
   | ConnectingType
   | AuthType
@@ -52,7 +58,8 @@ type StateActionType =
   | FilterType
   | SearchFilterType
   | CheckboxType
-  | DisconnectionType;
+  | DisconnectionType
+  | AdjustAudioType;
 
 export function wsReducer(
   state: WebsocketState,
@@ -103,6 +110,18 @@ export function wsReducer(
         submitEnabled: false,
         lastDisconnect: Date.now(),
       };
+    case 9: {
+      // audio adjustment
+      localStorage.setItem("volume", action.value.toString());
+      localStorage.setItem("isMuted", action.isMuted ? "t" : "f");
+      return {
+        ...state,
+        volume: {
+          value: action.value,
+          isMuted: action.isMuted,
+        },
+      };
+    }
   }
 }
 
