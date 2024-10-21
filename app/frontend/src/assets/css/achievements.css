@@ -186,7 +186,6 @@ p {
 
 .progress-container {
   min-width: 400px;
-  flex-basis: 400px;
 
   display: flex;
   flex-direction: column;
