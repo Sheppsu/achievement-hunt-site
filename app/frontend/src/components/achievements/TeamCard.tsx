@@ -12,19 +12,17 @@ import BaseButton from "components/Button";
 
 import { SessionContext } from "contexts/SessionContext";
 import { EventContext, EventDispatch } from "contexts/EventContext";
-import {
-  AchievementTeamExtendedType,
-} from "api/types/AchievementTeamType";
+import { AchievementTeamExtendedType } from "api/types/AchievementTeamType";
 import { AchievementPlayerType } from "api/types/AchievementPlayerType";
 import { PopupContext, PopupContextType } from "contexts/PopupContext";
 import { AnimatePresence, motion } from "framer-motion";
-import {SimplePromptPopup} from "components/popups/PopupContent.tsx";
+import { SimplePromptPopup } from "components/popups/PopupContent.tsx";
 
 function Button({
   text,
   onClick,
   type,
-  disabled
+  disabled,
 }: {
   text: string;
   onClick?: () => void;
@@ -32,7 +30,13 @@ function Button({
   disabled?: boolean;
 }) {
   return (
-    <BaseButton children={text} width="200px" type={type} onClick={onClick} unavailable={disabled ?? false} />
+    <BaseButton
+      children={text}
+      width="200px"
+      type={type}
+      onClick={onClick}
+      unavailable={disabled ?? false}
+    />
   );
 }
 
@@ -56,7 +60,7 @@ function YourTeamContent({
 }) {
   const copyInvite = () => {
     navigator.clipboard.writeText(
-      (ownTeam as AchievementTeamExtendedType).invite
+      (ownTeam as AchievementTeamExtendedType).invite,
     );
     dispatchEventMsg({
       type: "info",
@@ -90,10 +94,10 @@ function YourTeamContent({
 
 function NoTeamContent({
   createTeam,
-  joinTeam
+  joinTeam,
 }: {
-  createTeam: (evt: FormEvent<HTMLFormElement>) => void,
-  joinTeam: (evt: FormEvent<HTMLFormElement>) => void
+  createTeam: (evt: FormEvent<HTMLFormElement>) => void;
+  joinTeam: (evt: FormEvent<HTMLFormElement>) => void;
 }) {
   const { setPopup } = useContext(PopupContext) as PopupContextType;
   const session = useContext(SessionContext);
@@ -110,8 +114,8 @@ function NoTeamContent({
   const joinTeamPopup = () => {
     setPopup({
       title: "Join team",
-      content: <SimplePromptPopup prompt="Invite code" onSubmit={joinTeam} />
-    })
+      content: <SimplePromptPopup prompt="Invite code" onSubmit={joinTeam} />,
+    });
   };
 
   return (
@@ -125,7 +129,11 @@ function NoTeamContent({
           onClick={createTeamPopup}
           disabled={eventEnded}
         />
-        <Button text="Join team" onClick={joinTeamPopup} disabled={eventEnded} />
+        <Button
+          text="Join team"
+          onClick={joinTeamPopup}
+          disabled={eventEnded}
+        />
       </div>
     </motion.div>
   );
@@ -210,7 +218,7 @@ export default function TeamCard() {
   const onCreateTeam = (evt: FormEvent<HTMLFormElement>) => {
     evt.preventDefault();
 
-    const name = new FormData(evt.currentTarget).get("name") as string;
+    const name = new FormData(evt.currentTarget).get("prompt-value") as string;
     if (name.length < 1 || name.length > 32) {
       return dispatchEventMsg({
         type: "error",
@@ -222,7 +230,7 @@ export default function TeamCard() {
       { name },
       {
         onSuccess: () => createTeam.reset(),
-      }
+      },
     );
 
     dispatchEventMsg({
@@ -236,7 +244,9 @@ export default function TeamCard() {
   const onJoinTeam = (evt: FormEvent<HTMLFormElement>) => {
     evt.preventDefault();
 
-    const invite = new FormData(evt.currentTarget).get("code") as string;
+    const invite = new FormData(evt.currentTarget).get(
+      "prompt-value",
+    ) as string;
     if (invite === "") {
       return dispatchEventMsg({
         type: "error",
@@ -248,8 +258,10 @@ export default function TeamCard() {
       { invite },
       {
         onSuccess: () => joinTeam.reset(),
-      }
+      },
     );
+
+    setPopup(null);
   };
 
   const onLeaveTeam = () => {
@@ -257,7 +269,7 @@ export default function TeamCard() {
       {},
       {
         onSuccess: () => leaveTeam.reset(),
-      }
+      },
     );
   };
 
