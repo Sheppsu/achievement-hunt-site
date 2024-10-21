@@ -172,7 +172,7 @@ def join_team(req):
     if team is None:
         return error("invalid invite")
 
-    if len(team.players) == 5:
+    if len(team.players.all()) == 5:
         return error("That team is already full")
 
     player = Player.objects.filter(user_id=req.user.id).first()
@@ -181,7 +181,7 @@ def join_team(req):
 
     player = Player(user=req.user, team_id=team.id)
     player.save()
-    team.players.append(player)
+    team.players.add(player)
 
     return success(serialize_team(team))
 
