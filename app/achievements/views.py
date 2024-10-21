@@ -129,7 +129,7 @@ def achievements(req):
                     condition=team_completion
                 ),
                 "completions__player__user",
-                "completions__placement" if "competition" in achievement.tags.lower().split() else None
+                "completions__placement" if "competition" in achievement.tags.lower().split(",") else None
             ],
         )
         for achievement in Achievement.objects.select_related(
