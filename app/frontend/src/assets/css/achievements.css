@@ -130,6 +130,10 @@ p {
   flex-direction: column;
 }
 
+.achievement-info-description {
+  word-break: break-all;
+}
+
 .achievement-details-container {
   width: calc(100% - 20px);
   padding: 10px;

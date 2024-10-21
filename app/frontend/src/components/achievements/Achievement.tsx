@@ -51,7 +51,7 @@ export default function Achievement({
           <div className={infoCls}>
             <div className="achievement-info">
               <h1>{achievement.name}</h1>
-              <p>
+              <p className="achievement-info-description">
                 {achievement.completion_count} completions |{" "}
                 {achievement.description}
               </p>
