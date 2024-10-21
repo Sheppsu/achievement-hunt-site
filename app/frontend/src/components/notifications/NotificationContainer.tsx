@@ -33,9 +33,9 @@ export default function NotificationContainer({
         </button>
       </div>
       <div className="notification-scroll-container">
-        {eventsState.pastEvents.map((event) => (
-          <NotificationEventEntry event={event} />
-        ))}
+        {eventsState.pastEvents
+          .map((event, i) => <NotificationEventEntry key={i} event={event} />)
+          .reverse()}
       </div>
     </motion.div>
   );

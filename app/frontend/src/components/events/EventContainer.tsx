@@ -15,7 +15,7 @@ export default function EventContainer({ events }: { events: Event[] }) {
   return (
     <div className="event-container">
       <AnimatePresence>
-        {events.reverse().map((event) => (
+        {events.map((event) => (
           <EventEntry key={event.id} event={event} time={time} />
         ))}
       </AnimatePresence>
