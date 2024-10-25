@@ -108,9 +108,17 @@ export default function AchievementContainer({
 
     if (!matchesSearch(achievement, searchFilter)) continue;
 
-    if (!activeCategories.includes(achievement.category)) continue;
+    if (
+      activeCategories.length != 0 &&
+      !activeCategories.includes(achievement.category)
+    )
+      continue;
 
-    if (!intersects(activeTags, achievement.tags.split(","))) continue;
+    if (
+      activeTags.length != 0 &&
+      !intersects(activeTags, achievement.tags.split(","))
+    )
+      continue;
 
     if (state.hideCompletedAchievements && achievement.completed) continue;
 

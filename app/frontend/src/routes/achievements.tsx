@@ -110,6 +110,7 @@ function getDefaultNav(achievements: AchievementExtendedType[]): NavItems {
     }
 
     for (const tag of achievement.tags.split(",")) {
+      if (tag === "") continue;
       if (tag.startsWith("mode-")) continue;
 
       if (!tags.includes(tag)) {
@@ -125,8 +126,8 @@ function getDefaultNav(achievements: AchievementExtendedType[]): NavItems {
       { label: "mania", active: false },
       { label: "catch", active: false },
     ],
-    categories: categories.map((c) => ({ label: c, active: true })),
-    tags: tags.map((t) => ({ label: t, active: true })),
+    categories: categories.map((c) => ({ label: c, active: false })),
+    tags: tags.map((t) => ({ label: t, active: false })),
   };
 }
 
