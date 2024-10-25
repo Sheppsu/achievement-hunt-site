@@ -214,6 +214,15 @@ export default function AchievementProgress({
     sendSubmit(state, dispatchState);
   }
 
+  const progressPercent = (achievementCount / achievements.length) * 100;
+  const progressStyle = `linear-gradient(
+    to right,
+    #fff,
+    #fff ${progressPercent}%,
+    var(--background-color) ${progressPercent}%,
+    var(--background-color) 100%
+  )`;
+
   return (
     <div className="total-achievements-container">
       <div className="total-achievements-inner-container">
@@ -221,13 +230,13 @@ export default function AchievementProgress({
         <h1>{`${achievementCount}/${
           (achievements as AchievementExtendedType[]).length
         }`}</h1>
-        <div className="progress-bar">
-          <div
-            className="progress-bar-inner"
-            style={{
-              width: `${(achievementCount / achievements.length) * 100}%`,
-            }}
-          ></div>
+        <div
+          className="progress-bar"
+          style={{
+            background: progressStyle,
+          }}
+        >
+          <div className="progress-bar-inner"></div>
         </div>
       </div>
       <div className={submitCls} onClick={onSubmit}>
