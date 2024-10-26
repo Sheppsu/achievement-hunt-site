@@ -1,7 +1,17 @@
-import {AchievementTeamExtendedType, AchievementTeamType} from "api/types/AchievementTeamType.ts";
+import {
+  AchievementTeamExtendedType,
+  AchievementTeamType,
+} from "api/types/AchievementTeamType.ts";
 
 export function toTitleCase(str: string) {
-  return str.toLowerCase().replace(/\b\w/g, (s) => s.toUpperCase());
+  switch (str) {
+    case "pfc":
+      return "PFC";
+    case "pp":
+      return "PP";
+    default:
+      return str.toLowerCase().replace(/\b\w/g, (s) => s.toUpperCase());
+  }
 }
 
 export function timeAgo(timestamp: string) {
@@ -45,7 +55,7 @@ export function timeAgo(timestamp: string) {
 
 export function getMyTeam(
   userId: number | undefined,
-  teams?: Array<AchievementTeamExtendedType | AchievementTeamType>
+  teams?: Array<AchievementTeamExtendedType | AchievementTeamType>,
 ): AchievementTeamExtendedType | null {
   if (userId === undefined) {
     return null;
