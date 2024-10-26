@@ -71,16 +71,14 @@ p {
   background-color: var(--background-color);
 }
 
-/*.achievement-info-container:hover {*/
-/*  border-color: var(--border-color-lit);*/
-/*}*/
-
 .achievement-info-container.complete {
   border-color: #5afa4b;
+  box-shadow: 0 0 5px 1px #5afa4b;
 }
 
 .achievement-info-container.incomplete {
   border-color: #fa4b4b;
+  box-shadow: 0 0 5px 1px #fa4b4b;
 }
 
 .achievement-tags-container {
