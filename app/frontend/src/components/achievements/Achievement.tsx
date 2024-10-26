@@ -61,7 +61,6 @@ export default function Achievement({
                 ))}
               </div>
             </div>
-            <h1>{completed ? "Complete" : "Incomplete"}</h1>
           </div>
 
           {achievement.audio === null || achievement.audio === "" ? (
