@@ -1,4 +1,4 @@
-import { NavItems } from "routes/achievements.tsx";
+import { NavItems } from "components/achievements/AchievementNavigationBar.tsx";
 
 export function defaultState(): WebsocketState {
   return {

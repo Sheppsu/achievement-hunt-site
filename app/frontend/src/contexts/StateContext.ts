@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react";
 import { WebsocketState } from "types/WebsocketStateType.ts";
-import { NavItems } from "routes/achievements.tsx";
+import { NavItems } from "components/achievements/AchievementNavigationBar.tsx";
 
 interface BaseStateActionType {
   id: number;

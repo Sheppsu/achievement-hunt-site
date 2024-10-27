@@ -386,10 +386,13 @@ p {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
-.achievement-nav-bar-checkbox {
+.achievement-nav-bar-input-group {
   display: flex;
+  align-items: center;
   gap: 8px;
 }
 
