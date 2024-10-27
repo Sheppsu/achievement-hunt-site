@@ -93,7 +93,7 @@ function getGrouping(
 
   switch (sort) {
     case "category":
-      return [["*"], (a) => a.category, (a, b) => a.name.localeCompare(b.name)];
+      return [["*"], (a) => a.category, (a, b) => b.name.localeCompare(a.name)];
     case "completions":
       return [
         ["1+ completion(s)", "No completions"],
@@ -107,7 +107,7 @@ function getGrouping(
           a.completed
             ? getMyCompletion(a.completions)!.player.user.username
             : "Not completed",
-        (a, b) => a.name.localeCompare(b.name),
+        (a, b) => b.name.localeCompare(a.name),
       ];
     case "date completed":
       return [
@@ -205,7 +205,7 @@ export default function AchievementContainer({
     // insert into group sorted
     let i = 0;
     const items = sortedAchievements[group];
-    while (i < items.length && sortFunc(achievement, items[i]) > 0) {
+    while (i < items.length && sortFunc(achievement, items[i]) < 0) {
       i += 1;
     }
     sortedAchievements[group] = items
