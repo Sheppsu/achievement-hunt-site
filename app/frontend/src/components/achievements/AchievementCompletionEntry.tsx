@@ -1,7 +1,14 @@
-import {timeAgo} from "util/helperFunctions.ts";
-import { AnonymousAchievementCompletionType, AchievementCompletionType } from "api/types/AchievementCompletionType.ts";
+import { timeAgo } from "util/helperFunctions.ts";
+import {
+  AnonymousAchievementCompletionType,
+  AchievementCompletionType,
+} from "api/types/AchievementCompletionType.ts";
 
-function PlayerElement({completion}: {completion: AchievementCompletionType}) {
+function PlayerElement({
+  completion,
+}: {
+  completion: AchievementCompletionType;
+}) {
   const player = completion.player;
 
   return (
@@ -15,27 +22,27 @@ function PlayerElement({completion}: {completion: AchievementCompletionType}) {
         <p>
           <b>{player.user.username}</b>
         </p>
-        <p style={{fontSize: "14px"}}>
-          {timeAgo(completion.time_completed)}
-        </p>
+        <p style={{ fontSize: "14px" }}>{timeAgo(completion.time_completed)}</p>
       </div>
     </>
   );
 }
 
 export default function AchievementCompletionEntry({
-  completion
+  completion,
 }: {
-  completion: AchievementCompletionType | AnonymousAchievementCompletionType
+  completion: AchievementCompletionType | AnonymousAchievementCompletionType;
 }) {
   return (
     <div className="achievement-players-entry">
-      {
-        "placement" in completion ? <p>{completion.placement!.place}. {completion.placement!.value}</p> : ""
-      }
-      {
-        "player" in completion ? <PlayerElement completion={completion} /> : ""
-      }
+      {"placement" in completion && completion.placement !== null ? (
+        <p>
+          {completion.placement!.place}. {completion.placement!.value}
+        </p>
+      ) : (
+        ""
+      )}
+      {"player" in completion ? <PlayerElement completion={completion} /> : ""}
     </div>
   );
 }
