@@ -139,7 +139,9 @@ function extendAchievementData(
 
     achievement.points = calculateScore(
       nTeams,
-      completion === null || completion.placement === undefined
+      completion === null ||
+        completion.placement === undefined ||
+        completion.placement === null
         ? achievement.completion_count
         : completion.placement.place,
       achievement.completed,

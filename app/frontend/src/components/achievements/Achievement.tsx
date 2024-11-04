@@ -115,7 +115,7 @@ export default function Achievement({
             <div className="achievement-players-container">
               {completions
                 .sort((a, b) =>
-                  a.placement === undefined
+                  a.placement === undefined || a.placement === null
                     ? Date.parse(
                         (a as AchievementCompletionType).time_completed,
                       ) -

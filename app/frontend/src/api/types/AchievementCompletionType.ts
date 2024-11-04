@@ -1,16 +1,16 @@
-import {UserType} from "api/types/UserType.ts";
+import { UserType } from "api/types/UserType.ts";
 
 export type AchievementCompletionType = {
-    time_completed: string;
-    player: { id: number, user: UserType };
-    placement?: AchievementCompletionPlacementType
+  time_completed: string;
+  player: { id: number; user: UserType };
+  placement?: AchievementCompletionPlacementType | null;
 };
 
 export type AnonymousAchievementCompletionType = {
-    placement: AchievementCompletionPlacementType
+  placement: AchievementCompletionPlacementType;
 };
 
 export type AchievementCompletionPlacementType = {
-    value: number;
-    place: number;
-}
+  value: number;
+  place: number;
+};
