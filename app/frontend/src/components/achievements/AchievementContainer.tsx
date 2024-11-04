@@ -12,6 +12,7 @@ import {
   AchievementCompletionType,
   AnonymousAchievementCompletionType,
 } from "api/types/AchievementCompletionType.ts";
+import { AchievementTeamExtendedType } from "api/types/AchievementTeamType.ts";
 
 function intersects(a: string[], b: string[]): boolean {
   for (const item of b) {
@@ -57,9 +58,14 @@ function matchesMode(
 
 function getMyCompletion(
   cs: (AchievementCompletionType | AnonymousAchievementCompletionType)[],
+  myTeam: AchievementTeamExtendedType | null,
 ) {
+  if (myTeam === null) return null;
+
+  const playerIds = myTeam.players.map((p) => p.user.id);
+
   for (const c of cs) {
-    if ("player" in c) {
+    if ("player" in c && playerIds.includes(c.player.user.id)) {
       return c;
     }
   }
@@ -69,6 +75,7 @@ function getMyCompletion(
 
 function getGrouping(
   sort: string,
+  myTeam: AchievementTeamExtendedType | null,
 ): [
   string[],
   (a: CompletedAchievementType) => string,
@@ -77,7 +84,7 @@ function getGrouping(
   const getTimestamp = (
     cs: (AchievementCompletionType | AnonymousAchievementCompletionType)[],
   ): number => {
-    const c = getMyCompletion(cs);
+    const c = getMyCompletion(cs, myTeam);
     return c === null ? 0 : Date.parse(c.time_completed);
   };
 
@@ -105,7 +112,7 @@ function getGrouping(
         ["*", "Not completed"],
         (a) =>
           a.completed
-            ? getMyCompletion(a.completions)!.player.user.username
+            ? getMyCompletion(a.completions, myTeam)!.player.user.username
             : "Not completed",
         (a, b) => b.name.localeCompare(a.name),
       ];
@@ -125,9 +132,10 @@ function getGrouping(
 function extendAchievementData(
   achievements: CompletedAchievementType[],
   nTeams: number,
+  myTeam: AchievementTeamExtendedType | null,
 ) {
   for (const achievement of achievements) {
-    const completion = getMyCompletion(achievement.completions);
+    const completion = getMyCompletion(achievement.completions, myTeam);
 
     achievement.completed = completion !== null;
 
@@ -190,7 +198,7 @@ export default function AchievementContainer({
   const myTeam =
     session.user === null ? null : getMyTeam(session.user.id, teams);
 
-  extendAchievementData(achievements, nTeams);
+  extendAchievementData(achievements, nTeams, myTeam);
 
   const activeCategories = filters.categories
     .filter((item) => item.active)
@@ -201,7 +209,7 @@ export default function AchievementContainer({
   const searchFilter = state.achievementsSearchFilter.toLowerCase().split(" ");
 
   const sort = filters.sort.filter((i) => i.active)[0].label;
-  const [groupSort, groupFunc, sortFunc] = getGrouping(sort);
+  const [groupSort, groupFunc, sortFunc] = getGrouping(sort, myTeam);
   const sortedAchievements: { [key: string]: CompletedAchievementType[] } = {};
 
   for (const achievement of achievements) {
