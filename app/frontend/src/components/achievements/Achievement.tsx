@@ -8,10 +8,12 @@ import { WebsocketState } from "types/WebsocketStateType.ts";
 export default function Achievement({
   achievement,
   completed,
+  points,
   state,
 }: {
   achievement: AchievementExtendedType;
   completed: boolean;
+  points: number | null;
   state: WebsocketState;
 }) {
   const rawTags = achievement.tags.split(",");
@@ -50,7 +52,13 @@ export default function Achievement({
         <div className="achievement">
           <div className={infoCls}>
             <div className="achievement-info">
-              <h1>{achievement.name}</h1>
+              <div style={{ display: "flex" }}>
+                <h1 style={{ flexGrow: "1" }}>{achievement.name}</h1>
+                <div style={{ flexBasis: "100px" }}></div>
+              </div>
+              <p className="achievement-points-label">
+                {points === null ? "" : `${points}pts`}
+              </p>
               <p className="achievement-info-description">
                 {achievement.completion_count} completions |{" "}
                 {achievement.description}

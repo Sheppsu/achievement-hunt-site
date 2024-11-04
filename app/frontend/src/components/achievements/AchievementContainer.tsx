@@ -3,7 +3,7 @@ import { useGetAchievements, useGetTeams } from "api/query";
 import { AchievementExtendedType } from "api/types/AchievementType";
 import "assets/css/achievements.css";
 import { AnimationScope } from "framer-motion";
-import { getMyTeam } from "util/helperFunctions.ts";
+import { calculateScore, getMyTeam } from "util/helperFunctions.ts";
 import { useContext } from "react";
 import { SessionContext } from "contexts/SessionContext.ts";
 import { WebsocketState } from "types/WebsocketStateType.ts";
@@ -55,6 +55,18 @@ function matchesMode(
   return true;
 }
 
+function getMyCompletion(
+  cs: (AchievementCompletionType | AnonymousAchievementCompletionType)[],
+) {
+  for (const c of cs) {
+    if ("player" in c) {
+      return c;
+    }
+  }
+
+  return null;
+}
+
 function getGrouping(
   sort: string,
 ): [
@@ -62,18 +74,6 @@ function getGrouping(
   (a: CompletedAchievementType) => string,
   (a: CompletedAchievementType, b: CompletedAchievementType) => number,
 ] {
-  const getMyCompletion = (
-    cs: (AchievementCompletionType | AnonymousAchievementCompletionType)[],
-  ) => {
-    for (const c of cs) {
-      if ("player" in c) {
-        return c;
-      }
-    }
-
-    return null;
-  };
-
   const getTimestamp = (
     cs: (AchievementCompletionType | AnonymousAchievementCompletionType)[],
   ): number => {
@@ -122,8 +122,34 @@ function getGrouping(
   }
 }
 
+function extendAchievementData(
+  achievements: CompletedAchievementType[],
+  nTeams: number,
+) {
+  for (const achievement of achievements) {
+    const completion = getMyCompletion(achievement.completions);
+
+    achievement.completed = completion !== null;
+
+    if (
+      achievement.tags.split(",").includes("competition") &&
+      completion === null
+    )
+      continue;
+
+    achievement.points = calculateScore(
+      nTeams,
+      completion === null || completion.placement === undefined
+        ? achievement.completion_count
+        : completion.placement.place,
+      achievement.completed,
+    );
+  }
+}
+
 type CompletedAchievementType = AchievementExtendedType & {
   completed: boolean;
+  points: number | null;
 };
 
 export default function AchievementContainer({
@@ -150,22 +176,19 @@ export default function AchievementContainer({
 
   const filters = state.achievementsFilter as NavItems;
 
+  const nTeams = teams.filter((t) => t.points > 0).length;
   const achievements: CompletedAchievementType[] = baseAchievements.map(
-    (a) => ({ ...a, completed: false }),
+    (a) => ({
+      ...a,
+      completed: false,
+      points: null,
+    }),
   );
 
   const myTeam =
     session.user === null ? null : getMyTeam(session.user.id, teams);
 
-  if (myTeam !== null) {
-    const teamUserIds = myTeam.players.map((p) => p.user.id);
-    for (const achievement of achievements) {
-      achievement.completed =
-        achievement.completions.filter(
-          (c) => "player" in c && teamUserIds.includes(c.player.user.id),
-        ).length > 0;
-    }
-  }
+  extendAchievementData(achievements, nTeams);
 
   const activeCategories = filters.categories
     .filter((item) => item.active)
@@ -241,6 +264,7 @@ export default function AchievementContainer({
                     key={index}
                     achievement={achievement}
                     completed={achievement.completed}
+                    points={achievement.points}
                     state={state}
                   />
                 ))

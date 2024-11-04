@@ -99,7 +99,7 @@ p {
 
 .achievement-tag {
   height: 80%;
-  padding: 0px 10px 0px 10px;
+  padding: 0 10px 0 10px;
   
   border-radius: 100px;
   border: solid 2px var(--border-color);
@@ -118,7 +118,7 @@ p {
 .achievement-category {
   font-weight: bold;
   font-size: 45px;
-  padding: 5px 0px 5px 0px;
+  padding: 5px 0 5px 0;
 }
 
 .achievement-info {
@@ -126,6 +126,8 @@ p {
 
   display: flex;
   flex-direction: column;
+
+  position: relative;
 }
 
 .achievement-info-description {
@@ -182,6 +184,12 @@ p {
 .achievement-players-entry-pfp {
   height: 50px;
   border-radius: 100%;
+}
+
+.achievement-points-label {
+  position: absolute;
+  top: 0;
+  right: 0;
 }
 
 /* Progress container */

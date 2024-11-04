@@ -74,3 +74,13 @@ export function getMyTeam(
 
   return null;
 }
+
+export function calculateScore(
+  teams: number,
+  completions: number,
+  isCompleted: boolean,
+) {
+  if (teams == 1) return 100;
+  if (!isCompleted) completions += 1;
+  return Math.round((90.0 / (1.0 - teams)) * (completions - 1)) + 100;
+}
