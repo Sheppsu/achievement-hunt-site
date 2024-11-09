@@ -32,7 +32,11 @@ export default function InfoCard() {
         achievements have a different score calculation; the same concept is
         applied but using the player's placement on the achievement to determine
         rewarded score. Score scales linearly{" "}
-        <a href="https://www.desmos.com/calculator/rop2ggjdgw" target="_blank">
+        <a
+          className="external-link"
+          href="https://www.desmos.com/calculator/tjq7lcnyo5"
+          target="_blank"
+        >
           (desmos graph)
         </a>
         .

@@ -12,7 +12,10 @@ import {
   AchievementCompletionType,
   AnonymousAchievementCompletionType,
 } from "api/types/AchievementCompletionType.ts";
-import { AchievementTeamExtendedType } from "api/types/AchievementTeamType.ts";
+import {
+  AchievementTeamExtendedType,
+  AchievementTeamType,
+} from "api/types/AchievementTeamType.ts";
 
 function intersects(a: string[], b: string[]): boolean {
   for (const item of b) {
@@ -195,8 +198,7 @@ export default function AchievementContainer({
     }),
   );
 
-  const myTeam =
-    session.user === null ? null : getMyTeam(session.user.id, teams);
+  const myTeam = getMyTeam(session.user?.id ?? undefined, teams);
 
   extendAchievementData(achievements, nTeams, myTeam);
 
