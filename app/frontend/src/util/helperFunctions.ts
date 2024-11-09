@@ -81,6 +81,14 @@ export function calculateScore(
   isCompleted: boolean,
 ) {
   if (teams == 1) return 100;
-  if (!isCompleted) completions += 1;
-  return Math.round((90.0 / (1.0 - teams)) * (completions - 1)) + 100;
+  if (isCompleted) completions -= 1;
+
+  const c0 = -Math.atanh(0.7);
+  const c1 = Math.atanh(0.97);
+
+  const a = (x: number) => (1 - Math.tanh(x)) / 2;
+  const b = (x: number) => (a((c1 - c0) * x + c0) - a(c1)) / (a(c0) - a(c1));
+  const f = (x: number) => 10 + 90 * b(x / (teams - 1));
+
+  return Math.round(Math.max(f(completions), f(teams - 1)));
 }
