@@ -231,6 +231,8 @@ div.vertical-divider {
 
   background-color: var(--background-color);
   transition: border 0.3s;
+
+  z-index: 1;
 }
 
 .header:hover {
@@ -353,7 +355,7 @@ div.vertical-divider {
   height: 550px;
   padding: 8px;
 
-  position: absolute;
+  position: fixed;
   top: 80px;
   right: calc(50vw - 300px);
 
