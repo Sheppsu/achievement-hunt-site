@@ -175,6 +175,8 @@ p {
 }
 
 .achievement-players-entry {
+  height: 50px;
+
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -360,6 +362,18 @@ p {
   border-radius: 40px;
 
   object-fit: cover;
+}
+
+.placement-text {
+  text-align: center;
+}
+
+.placement-text.place {
+  flex-basis: 50px;
+}
+
+.placement-text.value {
+  flex-basis: 80px;
 }
 
 .points {
