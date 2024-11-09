@@ -65,11 +65,10 @@ function getMyCompletion(
 ) {
   if (myTeam === null) return null;
 
+  const playerIds = myTeam.players.map((p) => p.user.id);
+
   for (const c of cs) {
-    if (
-      "player" in c &&
-      myTeam.players.filter((p) => p.user.id === c.player.user.id).length > 0
-    ) {
+    if ("player" in c && playerIds.includes(c.player.user.id)) {
       return c;
     }
   }
