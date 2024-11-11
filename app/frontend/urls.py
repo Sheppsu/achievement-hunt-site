@@ -9,7 +9,7 @@ def index_view(req):
         "user": req.user.serialize() if req.user.is_authenticated else None,
         "authUrl": settings.OSU_LOGIN_URL,
         "wsUri": settings.ACHIEVEMENTS_WS_URI,
-        "debug": settings.DEBUG,
+        "debug": False, # settings.DEBUG,
         "eventStart": settings.EVENT_START * 1000,
         "eventEnd": settings.EVENT_END * 1000,
     }
