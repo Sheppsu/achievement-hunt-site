@@ -19,11 +19,25 @@ export default function InfoCard() {
       </p>
       <p className="info-subtitle">Teams</p>
       <p className="info-text">
-        Teams are limited to 5 players maximum. The limitation is to keep it
-        fair between teams and encourage diversifying your team's skills. During
-        the event, you will not be able to see team names in an effort to
-        prevent "profile stalking" (more on that below). However, after the
-        event, they will be revealed along with the players.
+        You can create/join a team anytime before or during the event. Teams are
+        limited to 5 players maximum. The limitation is to keep it fair between
+        teams and encourage diversifying your team's skills. During the event,
+        you will not be able to see team names in an effort to prevent "profile
+        stalking" (more on that below). However, after the event, they will be
+        revealed along with the players.
+      </p>
+      <p className="info-subtitle">Achievements</p>
+      <p className="info-text">
+        There will be 100 achievements in total, with the first day having 30,
+        and 10 more being released every 24 hours. I will try to release a
+        relatively balanced number of easy, difficult, and types of
+        achievements. There is a possibility of having bugged achievements, but
+        there will be tests in place to hopefully avoid having any. In the case
+        that an explicit achievement doesn't award a completion, you can make a
+        post in the "feedback-and-bugs" forum channel on the discord server. If
+        you believe a secret or knowledge achievement is bugged, you may post in
+        the forum channel, but <b>do not</b> mention what you tried (to avoid
+        giving away the solution).
       </p>
       <p className="info-subtitle">Scoring</p>
       <p className="info-text">
