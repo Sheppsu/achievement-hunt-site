@@ -4,7 +4,9 @@ export default function InfoCard() {
   return (
     <div className="info-container">
       <h1 className="info-title">Capture The Achievement</h1>
-      <p className="info-text">Date TBD</p>
+      <p className="info-text">
+        Starts November 16th - Ends November 25th (0:00 UTC)
+      </p>
       <p className="info-subtitle">About</p>
       <p className="info-text">
         CTA is a 9-day event that combines medal hunting and competition into a

@@ -23,7 +23,7 @@ export default function StaffPage() {
                 Sheppsu
               </a>
             </div>
-            <h1 className="staff-header">Graphics</h1>
+            <h1 className="staff-header">Banner graphic</h1>
             <div className="staff-container">
               <a
                 href="https://osu.ppy.sh/users/18607342"
