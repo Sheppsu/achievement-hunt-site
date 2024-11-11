@@ -12,10 +12,7 @@ import {
   AchievementCompletionType,
   AnonymousAchievementCompletionType,
 } from "api/types/AchievementCompletionType.ts";
-import {
-  AchievementTeamExtendedType,
-  AchievementTeamType,
-} from "api/types/AchievementTeamType.ts";
+import { AchievementTeamExtendedType } from "api/types/AchievementTeamType.ts";
 
 function intersects(a: string[], b: string[]): boolean {
   for (const item of b) {
@@ -202,15 +199,15 @@ export default function AchievementContainer({
 
   extendAchievementData(achievements, nTeams, myTeam);
 
-  const activeCategories = filters.categories
+  const activeCategories = filters.categories.items
     .filter((item) => item.active)
     .map((item) => item.label);
-  const activeTags = filters.tags
+  const activeTags = filters.tags.items
     .filter((item) => item.active)
     .map((item) => item.label);
   const searchFilter = state.achievementsSearchFilter.toLowerCase().split(" ");
 
-  const sort = filters.sort.filter((i) => i.active)[0].label;
+  const sort = filters.sort.items.filter((i) => i.active)[0].label;
   const [groupSort, groupFunc, sortFunc] = getGrouping(sort, myTeam);
   const sortedAchievements: { [key: string]: CompletedAchievementType[] } = {};
 
@@ -237,10 +234,19 @@ export default function AchievementContainer({
     const group = groupFunc(achievement);
     if (!(group in sortedAchievements)) sortedAchievements[group] = [];
 
-    // insert into group sorted
+    // create sort function based on current sort direction
+    const directionalSortFunc: (
+      a: CompletedAchievementType,
+      b: CompletedAchievementType,
+    ) => boolean =
+      filters.sort.sort === "desc"
+        ? (a, b) => sortFunc(a, b) < 0
+        : (a, b) => sortFunc(a, b) > 0;
+
+    // insert achievements into groups sorted
     let i = 0;
     const items = sortedAchievements[group];
-    while (i < items.length && sortFunc(achievement, items[i]) < 0) {
+    while (i < items.length && directionalSortFunc(achievement, items[i])) {
       i += 1;
     }
     sortedAchievements[group] = items
@@ -249,14 +255,16 @@ export default function AchievementContainer({
   }
 
   const getGroupIndex = (group: string) => {
-    const i = groupSort.indexOf(group);
+    let i = groupSort.indexOf(group);
     return i == -1 ? groupSort.indexOf("*") : i;
   };
 
   const sortGroups = (g1: string, g2: string) => {
     const i1 = getGroupIndex(g1);
     const i2 = getGroupIndex(g2);
-    return i1 == i2 ? g1.localeCompare(g2) : i1 - i2;
+    if (filters.sort.sort === "desc")
+      return i1 == i2 ? g1.localeCompare(g2) : i1 - i2;
+    return i1 == i2 ? g2.localeCompare(g1) : i2 - i1;
   };
 
   return (
