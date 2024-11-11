@@ -31,20 +31,13 @@ function getTimeStr(delta: number) {
 
 function HiddenAchievementCompletionPage({
   time,
-  setTime,
   eventStart,
 }: {
   time: number;
-  setTime: React.Dispatch<React.SetStateAction<number>>;
   eventStart: number;
 }) {
   const delta = eventStart - time;
   const timeString = getTimeStr(delta);
-
-  useEffect(() => {
-    const intervalId = setInterval(() => setTime(Date.now()), 1000);
-    return () => clearInterval(intervalId);
-  });
 
   return (
     <div style={{ margin: "auto", textAlign: "center", marginTop: "20px" }}>
@@ -96,35 +89,32 @@ export default function AchievementCompletionPage() {
   const eventStart = session.eventStart;
   const eventEnd = session.eventEnd;
 
-  useGetAchievements(false);
-  const { data: teams } = useGetTeams();
-  const team = getMyTeam(session.user?.id, teams);
-
   const [time, setTime] = useState<number>(Date.now());
   const [scope, animate] = useAnimate();
-
-  const state = useStateContext();
-  const dispatchState = useDispatchStateContext();
-
-  if (time < eventStart && !session.debug) {
-    return (
-      <HiddenAchievementCompletionPage
-        time={time}
-        setTime={setTime}
-        eventStart={eventStart}
-      />
-    );
-  }
-
-  const { data: achievements } = useGetAchievements(true);
-  if (state.achievementsFilter === null && achievements !== undefined) {
-    dispatchState({ id: 5, achievementsFilter: getDefaultNav(achievements) });
-  }
 
   useEffect(() => {
     const intervalId = setInterval(() => setTime(Date.now()), 1000);
     return () => clearInterval(intervalId);
   });
+
+  const isHidden = time < eventStart && !session.debug;
+
+  const { data: achievements } = useGetAchievements(!isHidden);
+  const { data: teams } = useGetTeams();
+  const team = getMyTeam(session.user?.id, teams);
+
+  const state = useStateContext();
+  const dispatchState = useDispatchStateContext();
+
+  if (isHidden) {
+    return (
+      <HiddenAchievementCompletionPage time={time} eventStart={eventStart} />
+    );
+  }
+
+  if (state.achievementsFilter === null && achievements !== undefined) {
+    dispatchState({ id: 5, achievementsFilter: getDefaultNav(achievements) });
+  }
 
   return (
     <AnimatedPage>
