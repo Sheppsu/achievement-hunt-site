@@ -4,17 +4,26 @@ import { AchievementExtendedType } from "api/types/AchievementType.ts";
 import { useEffect, useState } from "react";
 import { toTitleCase } from "util/helperFunctions.ts";
 import Button from "components/Button.tsx";
+import classNames from "classnames";
 
 export type NavItem = {
   label: string;
   active: boolean;
 };
 
+export type NavRowItems = {
+  items: NavItem[];
+};
+
+export type SortedNavRowItems = {
+  sort: "desc" | "asc";
+} & NavRowItems;
+
 export type NavItems = {
-  mode: NavItem[];
-  categories: NavItem[];
-  tags: NavItem[];
-  sort: NavItem[];
+  mode: NavRowItems;
+  categories: NavRowItems;
+  tags: NavRowItems;
+  sort: SortedNavRowItems;
 };
 
 export function getDefaultNav(
@@ -38,35 +47,58 @@ export function getDefaultNav(
   }
 
   return {
-    mode: [
-      { label: "standard", active: true },
-      { label: "taiko", active: false },
-      { label: "mania", active: false },
-      { label: "catch", active: false },
-    ],
-    categories: categories.map((c) => ({ label: c, active: false })),
-    tags: tags.map((t) => ({ label: t, active: false })),
-    sort: [
-      { label: "category", active: true },
-      { label: "completions", active: false },
-      { label: "player", active: false },
-      { label: "date completed", active: false },
-    ],
+    mode: {
+      items: [
+        { label: "standard", active: true },
+        { label: "taiko", active: false },
+        { label: "mania", active: false },
+        { label: "catch", active: false },
+      ],
+    },
+    categories: { items: categories.map((c) => ({ label: c, active: false })) },
+    tags: { items: tags.map((t) => ({ label: t, active: false })) },
+    sort: {
+      items: [
+        { label: "category", active: true },
+        { label: "completions", active: false },
+        { label: "player", active: false },
+        { label: "date completed", active: false },
+      ],
+      sort: "desc",
+    },
   };
 }
 
 function AchievementNavigationBarRow({
   label,
+  sort,
   children,
   onItemClick,
+  onLabelClick,
 }: {
   label: string;
+  sort: string | undefined;
   children: NavItem[];
   onItemClick: (label: keyof NavItems, itemLabel: string) => void;
+  onLabelClick: (label: keyof NavItems) => void;
 }) {
+  const isSorted = sort !== undefined;
+
+  let labelText = toTitleCase(label);
+  if (isSorted) labelText += sort === "desc" ? " ↓" : " ↑";
+
   return (
-    <div className="achievement-nav-bar-row" key={label}>
-      <p className="achievement-nav-bar-label">{toTitleCase(label)}</p>
+    <div className="achievement-nav-bar-row prevent-select" key={label}>
+      <p
+        className={classNames("achievement-nav-bar-label", {
+          "sort-type": isSorted,
+        })}
+        onClick={
+          isSorted ? () => onLabelClick(label as keyof NavItems) : undefined
+        }
+      >
+        {labelText}
+      </p>
       <div className="achievement-nav-bar-children">
         {children.map((item) => (
           <p
@@ -123,31 +155,24 @@ export default function AchievementNavigationBar({
   function onItemClick(label: keyof NavItems, itemLabel: string) {
     if (state === null || state.achievementsFilter === null) return;
 
-    const newItems = { ...state.achievementsFilter };
+    dispatchState({
+      id: 10,
+      label: label,
+      item: itemLabel,
+      multiSelect: label !== "mode" && label !== "sort",
+    });
 
-    if (label === "mode" || label === "sort") {
-      for (const child of newItems[label]) {
-        child.active = child.label === itemLabel;
-      }
-
-      // tell websocket to submit under this mode now
-      if (label === "mode")
-        dispatchState({
-          id: 4,
-          mode: ["standard", "taiko", "catch", "mania"].indexOf(itemLabel),
-        });
-    } else {
-      for (const child of newItems[label]) {
-        if (child.label === itemLabel) {
-          child.active = !child.active;
-        }
-      }
-    }
+    if (label === "mode")
+      dispatchState({
+        id: 4,
+        mode: ["standard", "taiko", "catch", "mania"].indexOf(itemLabel),
+      });
 
     setAnimating(true);
-    setTimeout(() => {
-      dispatchState({ id: 5, achievementsFilter: newItems });
-    }, 225);
+  }
+
+  function onLabelClick(label: keyof NavItems) {
+    dispatchState({ id: 11, label });
   }
 
   function onSearchChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -197,8 +222,10 @@ export default function AchievementNavigationBar({
             ([label, children]) => (
               <AchievementNavigationBarRow
                 label={label}
-                children={children}
+                sort={"sort" in children ? children.sort : undefined}
+                children={children.items}
                 onItemClick={onItemClick}
+                onLabelClick={onLabelClick}
               />
             ),
           )}

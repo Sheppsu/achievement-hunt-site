@@ -431,6 +431,11 @@ p {
   flex-shrink: 0;
 }
 
+.achievement-nav-bar-label.sort-type:hover {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
 .achievement-nav-bar-children {
   display: flex;
   flex-grow: 1;

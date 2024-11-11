@@ -1,6 +1,9 @@
 import { createContext, useContext } from "react";
 import { WebsocketState } from "types/WebsocketStateType.ts";
-import { NavItems } from "components/achievements/AchievementNavigationBar.tsx";
+import {
+  NavItems,
+  SortedNavRowItems,
+} from "components/achievements/AchievementNavigationBar.tsx";
 
 interface BaseStateActionType {
   id: number;
@@ -50,6 +53,18 @@ interface AdjustAudioType extends BaseStateActionType {
   isMuted: boolean;
 }
 
+interface ActivateNavItem extends BaseStateActionType {
+  id: 10;
+  label: keyof NavItems;
+  item: string;
+  multiSelect: boolean;
+}
+
+interface SwitchNavItemSort extends BaseStateActionType {
+  id: 11;
+  label: keyof NavItems;
+}
+
 type StateActionType =
   | ConnectingType
   | AuthType
@@ -59,7 +74,9 @@ type StateActionType =
   | SearchFilterType
   | CheckboxType
   | DisconnectionType
-  | AdjustAudioType;
+  | AdjustAudioType
+  | ActivateNavItem
+  | SwitchNavItemSort;
 
 export function wsReducer(
   state: WebsocketState,
@@ -120,6 +137,34 @@ export function wsReducer(
           value: action.value,
           isMuted: action.isMuted,
         },
+      };
+    }
+    case 10: {
+      const newFilter = { ...state.achievementsFilter! };
+
+      if (action.multiSelect) {
+        for (const item of newFilter[action.label].items) {
+          if (item.label === action.item) item.active = !item.active;
+        }
+      } else {
+        for (const item of newFilter[action.label].items)
+          item.active = item.label === action.item;
+      }
+
+      return {
+        ...state,
+        achievementsFilter: newFilter,
+      };
+    }
+    case 11: {
+      const newFilter = { ...state.achievementsFilter! };
+
+      const row = newFilter[action.label] as SortedNavRowItems;
+      row.sort = row.sort === "desc" ? "asc" : "desc";
+
+      return {
+        ...state,
+        achievementsFilter: newFilter,
       };
     }
   }
