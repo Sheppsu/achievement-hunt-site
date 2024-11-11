@@ -323,6 +323,18 @@ div.vertical-divider {
   transition: background-color 0.15s;
 }
 
+@media(max-width: 560px) {
+  .login-pic {
+    display: none;
+  }
+}
+
+@media(max-width: 500px) {
+  .header-title {
+    display: none;
+  }
+}
+
 .notifications-header {
   width: 100%;
   height: 40px;
