@@ -7,10 +7,11 @@ import time
 
 from django.conf import settings
 from django.contrib.auth import login as do_login, logout as do_logout
-
+from django.db.models.deletion import RestrictedError
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect
 from django.views.decorators.http import require_http_methods, require_POST
+
 from nacl.secret import SecretBox
 
 from .models import *
@@ -202,17 +203,19 @@ def leave_team(req):
     player = next(filter(lambda player: player.user.id == req.user.id, team.players.all()))
 
     player_count = Player.objects.filter(team_id=team.id).count()
-    if player_count == 1:
-        team.delete()
-    else:
-        player.delete()
+    try:
+        if player_count == 1:
+            team.delete()
+        else:
+            player.delete()
+    except RestrictedError:
+        return error("Cannot leave a team after completing an achievement")
     return success(None)
 
 
 @require_POST
 @before_event
 def create_team(req):
-    print('hi')
     if event_ended():
         return error("event ended")
 
