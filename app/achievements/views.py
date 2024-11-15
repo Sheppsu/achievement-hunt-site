@@ -151,7 +151,7 @@ def teams(req):
         serialized_teams = (
             serialize_team(team)
             if any(map(lambda p: p.user.id == req.user.id, team.players.all())) else
-            team.serialize(excludes=["invite"])
+            team.serialize(excludes=["invite", "icon", "name"])
             for team in select_teams(many=True)
         )
     sorted_teams = sorted(serialized_teams, key=lambda t: t['points'], reverse=True)
