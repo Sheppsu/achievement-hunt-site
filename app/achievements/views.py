@@ -109,10 +109,12 @@ def achievements(req):
             False
         )
 
+    is_admin = req.user.is_authenticated and req.user.is_admin
+
     return success([
         achievement.serialize(
             ["beatmap", "completion_count", "completions__player__user", "completions__placement"]
-            if event_ended() else
+            if event_ended() or is_admin else
             [
                 "beatmap",
                 "completion_count",
