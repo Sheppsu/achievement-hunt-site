@@ -5,7 +5,10 @@ import {
 } from "@tanstack/react-query";
 import { useContext } from "react";
 import { useGetAchievements } from "api/query";
-import { AchievementTeamExtendedType } from "api/types/AchievementTeamType";
+import {
+  AchievementTeamExtendedType,
+  AchievementTeamType,
+} from "api/types/AchievementTeamType";
 import { AchievementExtendedType } from "api/types/AchievementType";
 import { EventContext, EventType } from "contexts/EventContext";
 import { SessionContext } from "contexts/SessionContext";
@@ -58,6 +61,33 @@ function onCompletedAchievement(
       }
 
       return achievements;
+    },
+  );
+
+  // update score
+  queryClient.setQueryData(
+    ["teams"],
+    (teams: (AchievementTeamType | AchievementTeamExtendedType)[]) => {
+      const newTeams = [];
+
+      for (const team of teams) {
+        if (!("players" in team)) {
+          newTeams.push(team);
+          continue;
+        }
+
+        let added = false;
+
+        for (const player of team.players) {
+          if (player.id === data.player.id) {
+            newTeams.push({ ...team, points: data.score });
+            added = true;
+            break;
+          }
+        }
+
+        if (!added) newTeams.push(team);
+      }
     },
   );
 }
