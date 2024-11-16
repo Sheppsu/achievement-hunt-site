@@ -1,4 +1,4 @@
-import { FormEvent, useContext } from "react";
+import { FormEvent, useContext, useState } from "react";
 import {
   useCreateTeam,
   useGetTeams,
@@ -17,6 +17,7 @@ import { AchievementPlayerType } from "api/types/AchievementPlayerType";
 import { PopupContext, PopupContextType } from "contexts/PopupContext";
 import { AnimatePresence, motion } from "framer-motion";
 import { SimplePromptPopup } from "components/popups/PopupContent.tsx";
+import { getAnonName } from "util/helperFunctions";
 
 function Button({
   text,
@@ -72,7 +73,7 @@ function YourTeamContent({
     <>
       <div className="info-inner-container your-team">
         <p className="info-inner-text center grow">
-          {ownTeam.name} - {ownTeam.points}pts
+          {ownTeam.name} | {getAnonName(ownTeam.id)} - {ownTeam.points}pts
         </p>
       </div>
       <h1 className="info-title">Players</h1>
@@ -152,6 +153,32 @@ function UnauthenticatedContent() {
   );
 }
 
+function AdminAllTeams({
+  teams,
+}: {
+  teams: AchievementTeamExtendedType[] | undefined;
+}) {
+  if (!teams) return;
+
+  return (
+    <div className="info-container">
+      <p className="info-title center">ADMIN: All Teams</p>
+      {teams.map((team, idx) => (
+        <div key={idx}>
+          <p className="info-subtitle">
+            {team.name} | {getAnonName(team.id)}
+          </p>
+          <div className="info-inner-container players">
+            {team.players.map((player, i) => (
+              <PlayerCard key={i} player={player} />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function PlacementCard({
   placement,
   numberTeams,
@@ -190,6 +217,7 @@ export default function TeamCard() {
   const session = useContext(SessionContext);
   const dispatchEventMsg = useContext(EventContext);
   const { setPopup } = useContext(PopupContext) as PopupContextType;
+  const [adminShowTeams, setAdminShowTeams] = useState<boolean>(false);
 
   const teamsResponse = useGetTeams();
   const teams = teamsResponse.data;
@@ -296,6 +324,15 @@ export default function TeamCard() {
           />
         )}
       </motion.div>
+      {session.user?.is_admin && (
+        <Button
+          text="Toggle Teams List"
+          onClick={() => setAdminShowTeams((s) => !s)}
+        />
+      )}
+      {adminShowTeams && (
+        <AdminAllTeams teams={teams as AchievementTeamExtendedType[]} />
+      )}
     </motion.div>
   );
 }
