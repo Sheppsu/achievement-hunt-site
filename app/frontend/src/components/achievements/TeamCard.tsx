@@ -331,7 +331,9 @@ export default function TeamCard() {
         />
       )}
       {adminShowTeams && (
-        <AdminAllTeams teams={teams as AchievementTeamExtendedType[]} />
+        <AdminAllTeams
+          teams={teams as AchievementTeamExtendedType[] | undefined}
+        />
       )}
     </motion.div>
   );
