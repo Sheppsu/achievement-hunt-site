@@ -35,6 +35,7 @@ type RefreshReturnType = {
 function onCompletedAchievement(
   data: RefreshReturnType,
   queryClient: QueryClient,
+  dispatchEventMsg: React.Dispatch<{ type: EventType; msg: string }>,
 ) {
   // add completions to achievements
   queryClient.setQueryData(
@@ -80,6 +81,8 @@ function onCompletedAchievement(
 
         for (const player of team.players) {
           if (player.id === data.player.id) {
+            const scoreDiff = data.score - team.points;
+            dispatchEventMsg({ type: "info", msg: `+${scoreDiff} points` });
             newTeams.push({ ...team, points: data.score });
             added = true;
             break;
@@ -130,7 +133,7 @@ function handleMessage(
       dispatchEventMsg({ type: "info", msg: msg });
 
       if (achievements.length > 0) {
-        onCompletedAchievement(data, queryClient);
+        onCompletedAchievement(data, queryClient, dispatchEventMsg);
       }
 
       break;
