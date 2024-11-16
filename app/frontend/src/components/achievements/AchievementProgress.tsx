@@ -13,6 +13,7 @@ import { AchievementPlayerType } from "api/types/AchievementPlayerType.ts";
 import { AchievementCompletionPlacementType } from "api/types/AchievementCompletionType.ts";
 import { WebsocketState } from "types/WebsocketStateType.ts";
 import { StateDispatch } from "contexts/StateContext.ts";
+import { timeAgo } from "util/helperFunctions.ts";
 
 type WSAchievementType = {
   id: number;
@@ -25,6 +26,7 @@ type RefreshReturnType = {
   achievements: WSAchievementType[];
   score: number;
   player: AchievementPlayerType;
+  last_score: string;
 };
 
 function onCompletedAchievement(
@@ -86,12 +88,15 @@ function handleMessage(
     }
     case 1: {
       const achievements = data.achievements as WSAchievementType[];
-      const msg =
+      let msg =
         achievements.length === 0
-          ? "No achievements completed"
+          ? "No achievements completed."
           : `You completed ${achievements.length} achievement(s)! ${achievements
               .map((achievement) => achievement.name)
-              .join(", ")}`;
+              .join(", ")}.`;
+      msg +=
+        " Last score: " +
+        (data.last_score === null ? "no scores" : timeAgo(data.last_score));
       dispatchEventMsg({ type: "info", msg: msg });
 
       if (achievements.length > 0) {
