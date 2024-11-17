@@ -168,15 +168,15 @@ OSU_CLIENT_SECRET = os.getenv("OSU_CLIENT_SECRET")
 OSU_REDIRECT_URL = os.getenv("OSU_REDIRECT_URL")
 OSU_DEV_SERVER = bool(int(os.getenv("OSU_DEV_SERVER")))
 
-AUTH = AuthHandler(
+auth = AuthHandler(
     OSU_CLIENT_ID,
     OSU_CLIENT_SECRET,
     OSU_REDIRECT_URL,
     Scope.identify()
 )
 if OSU_DEV_SERVER:
-    AUTH.set_domain("dev.ppy.sh")
-OSU_LOGIN_URL = AUTH.get_auth_url()
+    auth.set_domain("dev.ppy.sh")
+OSU_LOGIN_URL = auth.get_auth_url()
 
 OSU_CLIENT = Client.from_client_credentials(OSU_CLIENT_ID, OSU_CLIENT_SECRET, OSU_REDIRECT_URL)
 if OSU_DEV_SERVER:
