@@ -180,6 +180,7 @@ OSU_LOGIN_URL = auth.get_auth_url()
 
 OSU_CLIENT = Client.from_client_credentials(OSU_CLIENT_ID, OSU_CLIENT_SECRET, OSU_REDIRECT_URL)
 if OSU_DEV_SERVER:
+    OSU_CLIENT.set_domain("dev.ppy.sh")
     OSU_CLIENT.auth.set_domain("dev.ppy.sh")
 
 ACHIEVEMENTS_WS_URI = os.getenv("ACHIEVEMENTS_WS_URI")
