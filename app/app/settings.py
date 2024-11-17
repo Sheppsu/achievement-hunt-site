@@ -166,13 +166,22 @@ AUTH_BACKEND = "django.contrib.auth.backends.ModelBackend"
 OSU_CLIENT_ID = int(os.getenv("OSU_CLIENT_ID"))
 OSU_CLIENT_SECRET = os.getenv("OSU_CLIENT_SECRET")
 OSU_REDIRECT_URL = os.getenv("OSU_REDIRECT_URL")
-OSU_LOGIN_URL = AuthHandler(
+OSU_DEV_SERVER = bool(int(os.getenv("OSU_DEV_SERVER")))
+
+AUTH = AuthHandler(
     OSU_CLIENT_ID,
     OSU_CLIENT_SECRET,
     OSU_REDIRECT_URL,
     Scope.identify()
-).get_auth_url()
-OSU_CLIENT = Client.from_client_credentials(OSU_CLIENT_ID, OSU_CLIENT_SECRET, OSU_REDIRECT_URL)
+)
+if OSU_DEV_SERVER:
+    AUTH.set_domain("dev.ppy.sh")
+OSU_LOGIN_URL = AUTH.get_auth_url()
+
+CLIENT = Client.from_client_credentials(OSU_CLIENT_ID, OSU_CLIENT_SECRET, OSU_REDIRECT_URL)
+if OSU_DEV_SERVER:
+    CLIENT.set_domain("dev.ppy.sh")
+OSU_CLIENT = CLIENT
 
 ACHIEVEMENTS_WS_URI = os.getenv("ACHIEVEMENTS_WS_URI")
 WS_CONNECTION_VALIDATOR = os.getenv("WS_CONNECTION_VALIDATOR")

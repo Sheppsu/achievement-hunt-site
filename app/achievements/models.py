@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 
 import requests
 from osu import Client
@@ -12,19 +13,21 @@ class UserManager(models.Manager):
             auth = create_auth_handler()
             auth.get_auth_token(code)
             client = Client(auth)
+            if settings.OSU_DEV_SERVER:
+                client.set_domain("dev.ppy.sh")
             user = client.get_own_data()
 
             try:
                 user_obj = self.get(id=user.id)
                 user_obj.username = user.username
                 user_obj.avatar = user.avatar_url
-                user_obj.cover = user.cover.url
+                user_obj.cover = user.cover.url or ""
             except User.DoesNotExist:
                 user_obj = User(
                     user.id,
                     user.username,
                     user.avatar_url,
-                    user.cover.url
+                    user.cover.url or ""
                 )
             user_obj.save()
 
