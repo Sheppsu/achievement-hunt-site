@@ -13,8 +13,6 @@ class UserManager(models.Manager):
             auth = create_auth_handler()
             auth.get_auth_token(code)
             client = Client(auth)
-            if settings.OSU_DEV_SERVER:
-                client.set_domain("dev.ppy.sh")
             user = client.get_own_data()
 
             try:
