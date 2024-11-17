@@ -71,7 +71,7 @@ class BeatmapInfo(SerializableModel):
 
 
 class Achievement(SerializableModel):
-    name = models.CharField(max_length=64)
+    name = models.CharField(max_length=128)
     category = models.CharField(max_length=32)
     description = models.CharField(max_length=2096)
     audio = models.CharField(default="")

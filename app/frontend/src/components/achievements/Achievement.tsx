@@ -53,7 +53,10 @@ export default function Achievement({
           <div className={infoCls}>
             <div className="achievement-info">
               <div style={{ display: "flex" }}>
-                <h1 style={{ flexGrow: "1" }}>{achievement.name}</h1>
+                <h1
+                  style={{ flexGrow: "1" }}
+                  dangerouslySetInnerHTML={{ __html: achievement.name }}
+                ></h1>
                 <div style={{ flexBasis: "100px" }}></div>
               </div>
               <p className="achievement-points-label">
