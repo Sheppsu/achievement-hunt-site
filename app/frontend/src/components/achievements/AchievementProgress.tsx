@@ -30,6 +30,7 @@ type RefreshReturnType = {
   score: number;
   player: AchievementPlayerType;
   last_score: string;
+  score_gain: number;
 };
 
 function onCompletedAchievement(
@@ -81,8 +82,10 @@ function onCompletedAchievement(
 
         for (const player of team.players) {
           if (player.id === data.player.id) {
-            const scoreDiff = data.score - team.points;
-            dispatchEventMsg({ type: "info", msg: `+${scoreDiff} points` });
+            dispatchEventMsg({
+              type: "info",
+              msg: `+${data.score_gain}pts`,
+            });
             newTeams.push({ ...team, points: data.score });
             added = true;
             break;
