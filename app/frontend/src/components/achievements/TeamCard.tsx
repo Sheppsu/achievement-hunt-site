@@ -217,7 +217,7 @@ function YourTeamContent({
         <Button
           text="Leave team"
           onClick={leaveTeam}
-          disabled={user?.team_admin}
+          disabled={user?.team_admin && ownTeam.players.length > 1}
         />
         <Button text="Invite code" onClick={copyInvite} />
       </div>
