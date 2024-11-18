@@ -4,11 +4,13 @@ import {
   useGetTeams,
   useJoinTeam,
   useLeaveTeam,
+  useRenameTeam,
 } from "api/query";
 
 import "assets/css/team.css";
 import "assets/css/form.css";
 import BaseButton from "components/Button";
+import { FaCrown } from "react-icons/fa6";
 
 import { SessionContext } from "contexts/SessionContext";
 import { EventContext, EventDispatch } from "contexts/EventContext";
@@ -46,6 +48,7 @@ function PlayerCard({ player }: { player: AchievementPlayerType }) {
     <div className="player-card">
       <img className="player-card-avatar" src={player.user.avatar} alt=""></img>
       <p className="info-inner-text grow">{player.user.username}</p>
+      {player.team_admin && <FaCrown color="yellow" />}
     </div>
   );
 }
@@ -59,14 +62,53 @@ function YourTeamContent({
   dispatchEventMsg: EventDispatch;
   leaveTeam: () => void;
 }) {
+  const session = useContext(SessionContext);
+  const { setPopup } = useContext(PopupContext) as PopupContextType;
+  const renameTeam = useRenameTeam();
+  const user = ownTeam.players.find(
+    (player) => player.user.id === session.user?.id,
+  );
   const copyInvite = () => {
-    navigator.clipboard.writeText(
-      (ownTeam as AchievementTeamExtendedType).invite,
-    );
+    navigator.clipboard.writeText(ownTeam.invite);
     dispatchEventMsg({
       type: "info",
       msg: "Copied team code to clipboard!",
     });
+  };
+
+  const renameTeamPopup = () => {
+    setPopup({
+      title: "Rename Team",
+      content: (
+        <SimplePromptPopup prompt="New team name" onSubmit={onRenameTeam} />
+      ),
+    });
+  };
+
+  const onRenameTeam = (evt: FormEvent<HTMLFormElement>) => {
+    evt.preventDefault();
+
+    const name = new FormData(evt.currentTarget).get("prompt-value") as string;
+    if (name.length < 1 || name.length > 32) {
+      return dispatchEventMsg({
+        type: "error",
+        msg: "Team name must be between 1 and 32 characters",
+      });
+    }
+
+    renameTeam.mutate(
+      { name },
+      {
+        onSuccess: () => renameTeam.reset(),
+      },
+    );
+
+    dispatchEventMsg({
+      type: "info",
+      msg: `Team ${ownTeam.name} successfully renamed to ${name}`,
+    });
+
+    setPopup(null);
   };
 
   return (
@@ -86,6 +128,12 @@ function YourTeamContent({
         <Button text="Leave team" onClick={leaveTeam} />
         <Button text="Invite code" onClick={copyInvite} />
       </div>
+      {user?.team_admin && (
+        <div className="info-inner-container buttons">
+          <Button text="Rename Team" onClick={renameTeamPopup} />
+          <Button text="Transfer Admin" />
+        </div>
+      )}
     </>
   );
 }

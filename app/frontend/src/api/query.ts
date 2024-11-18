@@ -31,7 +31,7 @@ async function doFetch<T>(
     id?: number | undefined;
   }>,
   endpoint: string,
-  init?: RequestInit
+  init?: RequestInit,
 ): Promise<T> {
   const resp = await fetch(getUrl(endpoint), init);
 
@@ -56,7 +56,7 @@ async function doFetch<T>(
 
 export function useMakeQuery<T>(
   query: UndefinedInitialDataOptions<T>,
-  init?: RequestInit
+  init?: RequestInit,
 ): UseQueryResult<T> {
   const dispatchEventMsg = useContext(EventContext);
   const endpoint = query.queryKey.join("/");
@@ -70,7 +70,7 @@ type SpecificUseMutationResult<T> = UseMutationResult<T, Error, object>;
 
 export function useMakeMutation<T>(
   mutation: UseMutationOptions<T, Error, object, unknown>,
-  init?: RequestInit
+  init?: RequestInit,
 ): SpecificUseMutationResult<T> {
   const dispatchEventMsg = useContext(EventContext);
   const endpoint = (mutation.mutationKey as MutationKey).join("/");
@@ -85,7 +85,7 @@ export function useMakeMutation<T>(
 }
 
 export function useGetAchievements(
-  enabled: boolean = true
+  enabled: boolean = true,
 ): UseQueryResult<AchievementExtendedType[]> {
   return useMakeQuery({
     queryKey: ["achievements"],
@@ -95,7 +95,7 @@ export function useGetAchievements(
 }
 
 export function useGetTeams(
-  enabled: boolean = true
+  enabled: boolean = true,
 ): UseQueryResult<Array<AchievementTeamType | AchievementTeamExtendedType>> {
   return useMakeQuery({
     queryKey: ["teams"],
@@ -104,7 +104,9 @@ export function useGetTeams(
   });
 }
 
-function onLeaveTeam(teams: (AchievementTeamType | AchievementTeamExtendedType)[]) {
+function onLeaveTeam(
+  teams: (AchievementTeamType | AchievementTeamExtendedType)[],
+) {
   const newTeams = [];
 
   for (const team of teams) {
@@ -116,16 +118,53 @@ function onLeaveTeam(teams: (AchievementTeamType | AchievementTeamExtendedType)[
           id: team.id,
           name: team.name,
           icon: team.icon,
-          points: team.points
+          points: team.points,
         });
 
       continue;
     }
 
-    newTeams.push(team)
+    newTeams.push(team);
   }
 
   return newTeams;
+}
+
+function onRenameTeam(
+  teams: (AchievementTeamType | AchievementTeamExtendedType)[],
+  newTeamName: string,
+) {
+  const newTeams = [];
+
+  for (const team of teams) {
+    // team to rename
+    if ("invite" in team) {
+      team.name = newTeamName;
+      newTeams.push(team);
+      continue;
+    }
+
+    newTeams.push(team);
+  }
+
+  return newTeams;
+}
+
+export function useRenameTeam(): SpecificUseMutationResult<string> {
+  const queryClient = useContext(QueryClientContext);
+  return useMakeMutation(
+    {
+      mutationKey: ["teams", "rename"],
+      onSuccess: (newTeamName) => {
+        queryClient?.setQueryData(
+          ["teams"],
+          (teams: (AchievementTeamType | AchievementTeamExtendedType)[]) =>
+            onRenameTeam(teams, newTeamName),
+        );
+      },
+    },
+    { method: "PATCH" },
+  );
 }
 
 export function useLeaveTeam(): SpecificUseMutationResult<null> {
@@ -135,22 +174,20 @@ export function useLeaveTeam(): SpecificUseMutationResult<null> {
       mutationKey: ["teams", "leave"],
       onSuccess: () => {
         // remove players or team
-        queryClient?.setQueryData(
-          ["teams"],
-          onLeaveTeam
-        );
+        queryClient?.setQueryData(["teams"], onLeaveTeam);
       },
     },
     {
       method: "DELETE",
-    }
+    },
   );
 }
 
-function onJoinTeam(joinedTeam: AchievementTeamExtendedType, teams: AchievementTeamType[]) {
-  return teams.map(
-    (team) => team.id == joinedTeam.id ? joinedTeam : team
-  );
+function onJoinTeam(
+  joinedTeam: AchievementTeamExtendedType,
+  teams: AchievementTeamType[],
+) {
+  return teams.map((team) => (team.id == joinedTeam.id ? joinedTeam : team));
 }
 
 export function useJoinTeam(): SpecificUseMutationResult<AchievementTeamExtendedType> {
@@ -160,15 +197,14 @@ export function useJoinTeam(): SpecificUseMutationResult<AchievementTeamExtended
       mutationKey: ["teams", "join"],
       onSuccess: (joinedTeam) => {
         // update team data for team being joined
-        queryClient?.setQueryData(
-          ["teams"],
-          (teams: AchievementTeamType[]) => onJoinTeam(joinedTeam, teams)
+        queryClient?.setQueryData(["teams"], (teams: AchievementTeamType[]) =>
+          onJoinTeam(joinedTeam, teams),
         );
       },
     },
     {
       method: "POST",
-    }
+    },
   );
 }
 
@@ -179,14 +215,13 @@ export function useCreateTeam(): SpecificUseMutationResult<AchievementTeamExtend
       mutationKey: ["teams", "create"],
       onSuccess: (newTeam) => {
         // add team to team list
-        queryClient?.setQueryData(
-          ["teams"],
-          (teams: AchievementTeamType[]) => teams.concat([newTeam])
+        queryClient?.setQueryData(["teams"], (teams: AchievementTeamType[]) =>
+          teams.concat([newTeam]),
         );
       },
     },
     {
       method: "POST",
-    }
+    },
   );
 }

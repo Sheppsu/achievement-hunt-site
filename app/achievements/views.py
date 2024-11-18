@@ -32,7 +32,7 @@ def before_event(func):
 
 
 def serialize_team(team: Team):
-    return team.serialize(includes=["players__user"])
+    return team.serialize(includes=["players__user", "players__team_admin"])
 
 
 def event_ended():
@@ -235,7 +235,7 @@ def create_team(req):
     except:
         return error("team name taken")
 
-    player = Player(user=req.user, team_id=team.id)
+    player = Player(user=req.user, team_id=team.id, team_admin=True)
     player.save()
 
     team = team.serialize()
@@ -244,6 +244,27 @@ def create_team(req):
     team["players"] = [player]
     return success(team)
 
+@require_http_methods(["PATCH"])
+def rename_team(req):
+    if event_ended():
+        return error("event ended")
+
+    data = parse_body(req.body, ("name",))
+    if data is None or (name := data["name"]) is None or len(name) == 0 or len(name) > 32:
+        return error("invalid name")
+
+    player = Player.objects.filter(user_id=req.user.id).first()
+    if player is None or not player.team_admin:
+        return error("not on a team or not admin")
+
+    try:
+        team = player.team
+        team.name = name
+        team.save()
+    except:
+        return error("team name taken")
+    
+    return success(name)
 
 def get_auth_packet(req):
     if not req.user.is_authenticated:

@@ -99,7 +99,7 @@
 .player-card {
   width: 300px;
   height: 50px;
-  padding: 0 5px;
+  padding: 0 10px;
 
   border: solid 2px var(--border-color);
   border-radius: var(--border-rounding);
@@ -115,6 +115,7 @@
   width: 35px;
 
   border-radius: 100%;
+  margin-right: 5px;
 }
 
 /* Placement */
@@ -126,7 +127,7 @@
 
 .placement-section {
   flex-grow: 1;
-  
+
   display: flex;
   flex-direction: column;
   gap: 10px;
