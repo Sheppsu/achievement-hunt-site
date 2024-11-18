@@ -167,6 +167,54 @@ export function useRenameTeam(): SpecificUseMutationResult<string> {
   );
 }
 
+type TransferTeamAdminType = {
+  prevAdminId: number;
+  newAdminId: number;
+};
+
+function onTransferTeamAdmin(
+  data: TransferTeamAdminType,
+  teams: (AchievementTeamType | AchievementTeamExtendedType)[],
+) {
+  const newTeams = [];
+
+  for (const team of teams) {
+    // team to switch admin
+    if ("invite" in team) {
+      for (const player of team.players) {
+        if (player.user.id === data.prevAdminId) {
+          player.team_admin = false;
+        } else if (player.user.id === data.newAdminId) {
+          player.team_admin = true;
+        }
+      }
+      newTeams.push(team);
+
+      continue;
+    }
+
+    newTeams.push(team);
+  }
+
+  return newTeams;
+}
+export function useTransferTeamAdmin(): SpecificUseMutationResult<TransferTeamAdminType> {
+  const queryClient = useContext(QueryClientContext);
+  return useMakeMutation(
+    {
+      mutationKey: ["teams", "transfer"],
+      onSuccess: (data) => {
+        queryClient?.setQueryData(
+          ["teams"],
+          (teams: (AchievementTeamType | AchievementTeamExtendedType)[]) =>
+            onTransferTeamAdmin(data, teams),
+        );
+      },
+    },
+    { method: "PATCH" },
+  );
+}
+
 export function useLeaveTeam(): SpecificUseMutationResult<null> {
   const queryClient = useContext(QueryClientContext);
   return useMakeMutation(

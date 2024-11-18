@@ -1,10 +1,11 @@
-import { FormEvent, useContext, useState } from "react";
+import { FormEvent, SetStateAction, useContext, useState } from "react";
 import {
   useCreateTeam,
   useGetTeams,
   useJoinTeam,
   useLeaveTeam,
   useRenameTeam,
+  useTransferTeamAdmin,
 } from "api/query";
 
 import "assets/css/team.css";
@@ -43,12 +44,85 @@ function Button({
   );
 }
 
-function PlayerCard({ player }: { player: AchievementPlayerType }) {
+function PlayerCard({
+  player,
+  selectedPlayer,
+  setSelectedPlayer,
+}: {
+  player: AchievementPlayerType;
+  selectedPlayer?: AchievementPlayerType;
+  setSelectedPlayer?: React.Dispatch<
+    SetStateAction<AchievementPlayerType | undefined>
+  >;
+}) {
   return (
-    <div className="player-card">
+    <div
+      className={
+        "player-card " +
+        (setSelectedPlayer ? "player-card-selectable " : "") +
+        (selectedPlayer === player ? "player-card-selected" : "")
+      }
+      onClick={() => setSelectedPlayer && setSelectedPlayer(player)}
+    >
       <img className="player-card-avatar" src={player.user.avatar} alt=""></img>
       <p className="info-inner-text grow">{player.user.username}</p>
       {player.team_admin && <FaCrown color="yellow" />}
+    </div>
+  );
+}
+
+function TransferTeamAdminComponent({
+  ownTeam,
+  dispatchEventMsg,
+}: {
+  ownTeam: AchievementTeamExtendedType;
+  dispatchEventMsg: EventDispatch;
+}) {
+  const session = useContext(SessionContext);
+  const { setPopup } = useContext(PopupContext) as PopupContextType;
+  const transferTeamAdmin = useTransferTeamAdmin();
+  const [selectedPlayer, setSelectedPlayer] = useState<
+    AchievementPlayerType | undefined
+  >(undefined);
+
+  const playerList = ownTeam.players.filter(
+    (player) => player.user.id !== session.user?.id,
+  );
+
+  const onTransferTeamAdmin = (newUserId: number) => {
+    transferTeamAdmin.mutate(
+      { prevAdminId: session.user?.id, newAdminId: newUserId },
+      {
+        onSuccess: () => {
+          transferTeamAdmin.reset();
+          dispatchEventMsg({
+            type: "info",
+            msg: "Team admin transferred!",
+          });
+          setPopup(null);
+        },
+      },
+    );
+  };
+
+  return (
+    <div>
+      <p>Select the player to transfer admin to: </p>
+      <div className="info-inner-container players">
+        {playerList.map((player, i) => (
+          <PlayerCard
+            key={i}
+            player={player}
+            selectedPlayer={selectedPlayer}
+            setSelectedPlayer={setSelectedPlayer}
+          />
+        ))}
+      </div>
+      <Button
+        text="Submit"
+        disabled={selectedPlayer === undefined}
+        onClick={() => onTransferTeamAdmin(selectedPlayer?.user.id as number)}
+      />
     </div>
   );
 }
@@ -64,7 +138,9 @@ function YourTeamContent({
 }) {
   const session = useContext(SessionContext);
   const { setPopup } = useContext(PopupContext) as PopupContextType;
+
   const renameTeam = useRenameTeam();
+
   const user = ownTeam.players.find(
     (player) => player.user.id === session.user?.id,
   );
@@ -85,6 +161,18 @@ function YourTeamContent({
     });
   };
 
+  const transferTeamAdminPopup = () => {
+    setPopup({
+      title: "Transfer admin",
+      content: (
+        <TransferTeamAdminComponent
+          ownTeam={ownTeam}
+          dispatchEventMsg={dispatchEventMsg}
+        />
+      ),
+    });
+  };
+
   const onRenameTeam = (evt: FormEvent<HTMLFormElement>) => {
     evt.preventDefault();
 
@@ -99,14 +187,15 @@ function YourTeamContent({
     renameTeam.mutate(
       { name },
       {
-        onSuccess: () => renameTeam.reset(),
+        onSuccess: () => {
+          renameTeam.reset();
+          dispatchEventMsg({
+            type: "info",
+            msg: `Team ${ownTeam.name} successfully renamed to ${name}`,
+          });
+        },
       },
     );
-
-    dispatchEventMsg({
-      type: "info",
-      msg: `Team ${ownTeam.name} successfully renamed to ${name}`,
-    });
 
     setPopup(null);
   };
@@ -125,13 +214,17 @@ function YourTeamContent({
         ))}
       </div>
       <div className="info-inner-container buttons">
-        <Button text="Leave team" onClick={leaveTeam} />
+        <Button
+          text="Leave team"
+          onClick={leaveTeam}
+          disabled={user?.team_admin}
+        />
         <Button text="Invite code" onClick={copyInvite} />
       </div>
       {user?.team_admin && (
         <div className="info-inner-container buttons">
           <Button text="Rename Team" onClick={renameTeamPopup} />
-          <Button text="Transfer Admin" />
+          <Button text="Transfer Admin" onClick={transferTeamAdminPopup} />
         </div>
       )}
     </>

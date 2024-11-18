@@ -245,6 +245,32 @@ def create_team(req):
     return success(team)
 
 @require_http_methods(["PATCH"])
+def transfer_admin(req):
+    if event_ended():
+        return error("event ended")
+    
+    data = parse_body(req.body, ("newAdminId",))
+    if data is None or (userId := data["newAdminId"]) is None:
+        return error("invalid user id")
+    
+    currentAdmin = Player.objects.filter(user_id=req.user.id).first()
+    if currentAdmin is None or not currentAdmin.team_admin:
+        return error("not on a team or not admin")
+    
+    newAdmin = Player.objects.filter(user_id=userId).first()
+    if newAdmin is None or currentAdmin.team_id != newAdmin.team_id:
+        return error("users not on the same team")
+    
+    currentAdmin.team_admin = False
+    currentAdmin.save()
+
+    newAdmin.team_admin = True
+    newAdmin.save()
+
+    return success({"prevAdminId": currentAdmin.user.id, "newAdminId": newAdmin.user.id})
+
+
+@require_http_methods(["PATCH"])
 def rename_team(req):
     if event_ended():
         return error("event ended")
