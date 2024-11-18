@@ -201,7 +201,9 @@ def leave_team(req):
     if team is None:
         return error("not on team")
 
-    player = next(filter(lambda player: player.user.id == req.user.id, team.players.all()))
+    player: Player = next(filter(lambda player: player.user.id == req.user.id, team.players.all()))
+    if player.team_admin:
+        return error("team admin can't leave team without transferring")
 
     player_count = Player.objects.filter(team_id=team.id).count()
     try:
