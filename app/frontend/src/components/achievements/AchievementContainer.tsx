@@ -122,6 +122,12 @@ function getGrouping(
         (a) => (a.completed ? getTimeGroup(a) : "Not completed"),
         (a, b) => getTimestamp(a.completions) - getTimestamp(b.completions),
       ];
+    case "batch":
+      return [
+        [1, 2, 3, 4, 5, 6, 7, 8].map((n) => `Batch ${n}`),
+        (a) => `Batch ${Math.ceil(Math.max(0, a.id - 30) / 10) + 1}`,
+        (a, b) => a.id - b.id,
+      ];
     default:
       throw new Error(
         "unexpected sort type, was there a typo? missing a sort type?",

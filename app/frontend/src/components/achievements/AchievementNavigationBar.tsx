@@ -63,6 +63,7 @@ export function getDefaultNav(
         { label: "completions", active: false },
         { label: "player", active: false },
         { label: "date completed", active: false },
+        { label: "batch", active: false },
       ],
       sort: "desc",
     },
