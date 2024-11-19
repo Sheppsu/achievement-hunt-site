@@ -137,4 +137,4 @@ class Player(SerializableModel):
     )
 
     class Serialization:
-        FIELDS = ["id", "user_id"]
+        FIELDS = ["id", "user_id", "team_admin"]

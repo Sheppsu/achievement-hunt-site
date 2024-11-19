@@ -32,7 +32,7 @@ def before_event(func):
 
 
 def serialize_team(team: Team):
-    return team.serialize(includes=["players__user", "players__team_admin"])
+    return team.serialize(includes=["players__user"])
 
 
 def event_ended():
