@@ -56,6 +56,7 @@ function onCompletedAchievement(
               player: data.player,
               placement:
                 completed.placement === null ||
+                completed.placement === undefined ||
                 completed.placement.value === null
                   ? undefined
                   : completed.placement,
