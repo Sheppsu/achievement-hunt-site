@@ -1,14 +1,17 @@
-import { FormEvent, useContext, useState } from "react";
+import { FormEvent, SetStateAction, useContext, useState } from "react";
 import {
   useCreateTeam,
   useGetTeams,
   useJoinTeam,
   useLeaveTeam,
+  useRenameTeam,
+  useTransferTeamAdmin,
 } from "api/query";
 
 import "assets/css/team.css";
 import "assets/css/form.css";
 import BaseButton from "components/Button";
+import { FaCrown } from "react-icons/fa6";
 
 import { SessionContext } from "contexts/SessionContext";
 import { EventContext, EventDispatch } from "contexts/EventContext";
@@ -41,11 +44,85 @@ function Button({
   );
 }
 
-function PlayerCard({ player }: { player: AchievementPlayerType }) {
+function PlayerCard({
+  player,
+  selectedPlayer,
+  setSelectedPlayer,
+}: {
+  player: AchievementPlayerType;
+  selectedPlayer?: AchievementPlayerType;
+  setSelectedPlayer?: React.Dispatch<
+    SetStateAction<AchievementPlayerType | undefined>
+  >;
+}) {
   return (
-    <div className="player-card">
+    <div
+      className={
+        "player-card " +
+        (setSelectedPlayer ? "player-card-selectable " : "") +
+        (selectedPlayer === player ? "player-card-selected" : "")
+      }
+      onClick={() => setSelectedPlayer && setSelectedPlayer(player)}
+    >
       <img className="player-card-avatar" src={player.user.avatar} alt=""></img>
       <p className="info-inner-text grow">{player.user.username}</p>
+      {player.team_admin && <FaCrown color="yellow" />}
+    </div>
+  );
+}
+
+function TransferTeamAdminComponent({
+  ownTeam,
+  dispatchEventMsg,
+}: {
+  ownTeam: AchievementTeamExtendedType;
+  dispatchEventMsg: EventDispatch;
+}) {
+  const session = useContext(SessionContext);
+  const { setPopup } = useContext(PopupContext) as PopupContextType;
+  const transferTeamAdmin = useTransferTeamAdmin();
+  const [selectedPlayer, setSelectedPlayer] = useState<
+    AchievementPlayerType | undefined
+  >(undefined);
+
+  const playerList = ownTeam.players.filter(
+    (player) => player.user.id !== session.user?.id,
+  );
+
+  const onTransferTeamAdmin = (newUserId: number) => {
+    transferTeamAdmin.mutate(
+      { prevAdminId: session.user?.id, newAdminId: newUserId },
+      {
+        onSuccess: () => {
+          transferTeamAdmin.reset();
+          dispatchEventMsg({
+            type: "info",
+            msg: "Team admin transferred!",
+          });
+          setPopup(null);
+        },
+      },
+    );
+  };
+
+  return (
+    <div>
+      <p>Select the player to transfer admin to: </p>
+      <div className="info-inner-container players">
+        {playerList.map((player, i) => (
+          <PlayerCard
+            key={i}
+            player={player}
+            selectedPlayer={selectedPlayer}
+            setSelectedPlayer={setSelectedPlayer}
+          />
+        ))}
+      </div>
+      <Button
+        text="Submit"
+        disabled={selectedPlayer === undefined}
+        onClick={() => onTransferTeamAdmin(selectedPlayer?.user.id as number)}
+      />
     </div>
   );
 }
@@ -59,14 +136,68 @@ function YourTeamContent({
   dispatchEventMsg: EventDispatch;
   leaveTeam: () => void;
 }) {
+  const session = useContext(SessionContext);
+  const { setPopup } = useContext(PopupContext) as PopupContextType;
+
+  const renameTeam = useRenameTeam();
+
+  const user = ownTeam.players.find(
+    (player) => player.user.id === session.user?.id,
+  );
   const copyInvite = () => {
-    navigator.clipboard.writeText(
-      (ownTeam as AchievementTeamExtendedType).invite,
-    );
+    navigator.clipboard.writeText(ownTeam.invite);
     dispatchEventMsg({
       type: "info",
       msg: "Copied team code to clipboard!",
     });
+  };
+
+  const renameTeamPopup = () => {
+    setPopup({
+      title: "Rename Team",
+      content: (
+        <SimplePromptPopup prompt="New team name" onSubmit={onRenameTeam} />
+      ),
+    });
+  };
+
+  const transferTeamAdminPopup = () => {
+    setPopup({
+      title: "Transfer admin",
+      content: (
+        <TransferTeamAdminComponent
+          ownTeam={ownTeam}
+          dispatchEventMsg={dispatchEventMsg}
+        />
+      ),
+    });
+  };
+
+  const onRenameTeam = (evt: FormEvent<HTMLFormElement>) => {
+    evt.preventDefault();
+
+    const name = new FormData(evt.currentTarget).get("prompt-value") as string;
+    if (name.length < 1 || name.length > 32) {
+      return dispatchEventMsg({
+        type: "error",
+        msg: "Team name must be between 1 and 32 characters",
+      });
+    }
+
+    renameTeam.mutate(
+      { name },
+      {
+        onSuccess: () => {
+          renameTeam.reset();
+          dispatchEventMsg({
+            type: "info",
+            msg: `Team ${ownTeam.name} successfully renamed to ${name}`,
+          });
+        },
+      },
+    );
+
+    setPopup(null);
   };
 
   return (
@@ -83,9 +214,19 @@ function YourTeamContent({
         ))}
       </div>
       <div className="info-inner-container buttons">
-        <Button text="Leave team" onClick={leaveTeam} />
+        <Button
+          text="Leave team"
+          onClick={leaveTeam}
+          disabled={user?.team_admin && ownTeam.players.length > 1}
+        />
         <Button text="Invite code" onClick={copyInvite} />
       </div>
+      {user?.team_admin && (
+        <div className="info-inner-container buttons">
+          <Button text="Rename Team" onClick={renameTeamPopup} />
+          <Button text="Transfer Admin" onClick={transferTeamAdminPopup} />
+        </div>
+      )}
     </>
   );
 }

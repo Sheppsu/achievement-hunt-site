@@ -10,5 +10,7 @@ urlpatterns = [
     path("teams/join/", views.join_team),
     path("teams/leave/", views.leave_team),
     path("teams/create/", views.create_team),
+    path("teams/rename/", views.rename_team),
+    path("teams/transfer/", views.transfer_admin),
     path("wsauth/", views.get_auth_packet)
 ]

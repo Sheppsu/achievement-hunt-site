@@ -129,6 +129,7 @@ class Team(SerializableModel):
 class Player(SerializableModel):
     user = models.ForeignKey(User, on_delete=models.RESTRICT)
     team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name="players")
+    team_admin = models.BooleanField(default=False)
     completed_achievements = models.ManyToManyField(
         Achievement,
         through=AchievementCompletion,
@@ -136,4 +137,4 @@ class Player(SerializableModel):
     )
 
     class Serialization:
-        FIELDS = ["id", "user_id"]
+        FIELDS = ["id", "user_id", "team_admin"]
