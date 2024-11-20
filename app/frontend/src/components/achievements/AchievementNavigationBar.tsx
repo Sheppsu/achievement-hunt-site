@@ -131,26 +131,25 @@ export default function AchievementNavigationBar({
   const [animating, setAnimating] = useState(false);
   const [searchField, setSearchField] = useState<string>("");
 
-  useEffect(() => {
-    if (animating) {
-      (async () => {
-        await animate("div", { y: 10, opacity: 0 }, { duration: 0.2 });
-        await animate("div", { y: 0, opacity: 100 }, { duration: 0.2 });
-      })();
+  async function doAnimation() {
+    if (animating) return;
 
-      setAnimating(false);
-    }
-  }, [animating]);
+    setAnimating(true);
+
+    await animate("div", { y: 10, opacity: 0 }, { duration: 0.2 });
+    await animate("div", { y: 0, opacity: 100 }, { duration: 0.2 });
+
+    setAnimating(false);
+  }
 
   function onReset() {
     if (!achievements) return;
 
-    setAnimating(true);
-    setTimeout(() => {
-      dispatchState({ id: 5, achievementsFilter: getDefaultNav(achievements) });
-      dispatchState({ id: 6, achievementsSearchFilter: "" });
-      setSearchField("");
-    }, 225);
+    dispatchState({ id: 5, achievementsFilter: getDefaultNav(achievements) });
+    dispatchState({ id: 6, achievementsSearchFilter: "" });
+    setSearchField("");
+
+    doAnimation();
   }
 
   function onItemClick(label: keyof NavItems, itemLabel: string) {
@@ -169,7 +168,7 @@ export default function AchievementNavigationBar({
         mode: ["standard", "taiko", "catch", "mania"].indexOf(itemLabel),
       });
 
-    setAnimating(true);
+    doAnimation();
   }
 
   function onLabelClick(label: keyof NavItems) {
@@ -185,13 +184,12 @@ export default function AchievementNavigationBar({
   }
 
   function onHideCompletedChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setAnimating(true);
-    setTimeout(() => {
-      dispatchState({
-        id: 7,
-        hideCompletedAchievements: e.target.checked,
-      });
-    }, 225);
+    dispatchState({
+      id: 7,
+      hideCompletedAchievements: e.target.checked,
+    });
+
+    doAnimation();
   }
 
   return (
@@ -215,6 +213,7 @@ export default function AchievementNavigationBar({
                 type="checkbox"
                 style={{ width: 18 }}
                 onChange={onHideCompletedChange}
+                checked={state.hideCompletedAchievements}
               />
               <p>Hide completed achievements</p>
             </div>
