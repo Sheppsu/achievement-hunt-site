@@ -108,6 +108,13 @@ export default function StaffPage() {
               >
                 Rinne
               </a>
+              <a
+                href="https://osu.ppy.sh/users/1699875"
+                target="_blank"
+                className="external-link staff"
+              >
+                Remyria
+              </a>
             </div>
           </div>
         </div>
