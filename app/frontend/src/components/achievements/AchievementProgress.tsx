@@ -54,7 +54,11 @@ function onCompletedAchievement(
             achievement.completions.push({
               time_completed: completed.time,
               player: data.player,
-              placement: completed.placement ?? undefined,
+              placement:
+                completed.placement === null ||
+                completed.placement.value === null
+                  ? undefined
+                  : completed.placement,
             });
 
             break;
