@@ -88,7 +88,7 @@ create("Secret", "😛🐸", "Yup. Teto thinks that green is in fact the best co
 create("Secret", "The Secret to Top Performance", "0.5L of orange juice, 5 bananas, 1 tablespoon of hemp seeds, and 1 table spoon of chia seeds")
 create("Secret", "Dictionary", "Rumors Indicate Various Established Rules: First Letters Of Written Sentence, Leave One Victor Enlighted (Not Only To Ease)", tags=[])
 create("Skill", "Astronomical", "Set an A or S rank pass on this map with NM or HD", tags=["streams", "mode-o", "pass"], beatmap_id=1949106)
-create("Skill", "360 No Scope", "Compete for the highest star rating PFC on a ranked map using lazer's No Scope mod (and only this mod).", tags=["competition", "lazer", "mode-o"])
+create("Skill", "Re-learning to Read", "Compete for the highest star rating PFC on a ranked map using lazer's Depth mod (and only this mod) on default settings.", tags=["competition", "lazer", "mode-o"])
 create("Skill", "Biggest Fan", "PFC a ranked 10+ minute map with the word \"Compilation\" in its title", tags=["consistency", "marathon"])
 create("Skill", "4 Hands", "Pass this map with NM or HD only", tags=["mode-m", "pass"], beatmap_id=4275754)
 create("Skill", "Ascendant", "Pass Xeroa [Exceed] with NM or HD only", tags=["pass"], beatmap_id=4437056)
