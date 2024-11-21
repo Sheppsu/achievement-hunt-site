@@ -141,7 +141,7 @@ create("Skill", "PeepoArrive", "Pass this map with at least 88% accuracy using H
 # Day 5 (70)
 create("Secret", "Kisaragi", "You dont find the song, the song finds you. Can you hide from it behind those blinds?", tags=["lazer"])
 create("Secret", "Gotta Go Fast", "You're Too Slow!", tags=["lazer"])
-create("Secret", "imgur.com/a/W53QqkY", "It isn't even that small, right? 6.5 is also just perfect.", tags=[])
+create("Secret", "imgur.com/a/W53QqkY", "It isn't even that small, right? 6.5 is also just perfect.", tags=["mode-o"])
 create("Secret", "To be or not to be..", "...an apple?", tags=[])
 create("Knowledge", "He cannot hit that", "Can you?", tags=["mode-o", "lazer"])
 create("Knowledge", "Know your OWC player #3", "Submit a score on the top play of this OWC player with the same mod combo they used (NF allowed). Stats exclude OWC 2024 | Country: Located in Northern Europe, Account created: between 2014-2016, Best OWC placement: 9-12th place,  Appearences: played in 4 OWC, Playstyle: Mouse", tags=["mode-o"])
