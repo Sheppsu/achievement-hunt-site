@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-os.environ["DJANGO_SETTINGS_MODULE"] = "..app.settings"
+os.environ["DJANGO_SETTINGS_MODULE"] = "app.settings"
 django.setup()
 
 
