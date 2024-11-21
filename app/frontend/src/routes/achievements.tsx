@@ -112,8 +112,12 @@ export default function AchievementCompletionPage() {
     );
   }
 
-  if (state.achievementsFilter === null && achievements !== undefined) {
+  if (
+    (state.achievementsFilter === null && achievements !== undefined) ||
+    (state.currentAchievements !== achievements && achievements !== undefined)
+  ) {
     dispatchState({ id: 5, achievementsFilter: getDefaultNav(achievements) });
+    dispatchState({ id: 12, currentAchievements: achievements });
   }
 
   return (

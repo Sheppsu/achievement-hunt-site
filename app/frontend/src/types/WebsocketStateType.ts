@@ -1,3 +1,4 @@
+import { AchievementExtendedType } from "api/types/AchievementType";
 import { NavItems } from "components/achievements/AchievementNavigationBar.tsx";
 
 export function defaultState(): WebsocketState {
@@ -14,6 +15,7 @@ export function defaultState(): WebsocketState {
       value: parseFloat(localStorage.getItem("volume") ?? "0.5"),
       isMuted: localStorage.getItem("isMuted") === "t",
     },
+    currentAchievements: [],
   };
 }
 
@@ -30,4 +32,5 @@ export type WebsocketState = {
     value: number;
     isMuted: boolean;
   };
+  currentAchievements: AchievementExtendedType[];
 };

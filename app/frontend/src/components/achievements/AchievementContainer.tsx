@@ -14,6 +14,10 @@ import {
 } from "api/types/AchievementCompletionType.ts";
 import { AchievementTeamExtendedType } from "api/types/AchievementTeamType.ts";
 import Button from "components/Button";
+import {
+  useDispatchStateContext,
+  useStateContext,
+} from "contexts/StateContext";
 
 function intersects(a: string[], b: string[]): boolean {
   for (const item of b) {
