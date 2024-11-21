@@ -151,7 +151,7 @@ create("Skill", "Slow and Steady", "Set a play on this map worth at least 200pp 
 create("Skill", "K-pop Enjoyer", "Get >98% accuracy on 3 different ranked Dreamcatcher maps in a row that are at least 3.5* using NM or HD. Failing or retrying will reset your streak.", tags=["consistency", "mode-m"])
 
 # Day 6 (80)
-create("Secret", "#E2FB36DB", "Shouldn't have built those balls on hypxiel", tags=[])
+create("Secret", "#E2FB36DB", "Shouldn't have built those balls on hypxiel<br/>Note: \"hypxiel\" is intentional, not a typo.", tags=[])
 create("Secret", "Addicted", "Just a small bit is enough to make you Insane. It might be too late for you now.", tags=[])
 create("Secret", "10-Meter Dash", "Don't blink or you'll miss it", tags=[])
 create("Secret", "Rotten Basket", "Cannot get worse than that", tags=["mode-f"])
