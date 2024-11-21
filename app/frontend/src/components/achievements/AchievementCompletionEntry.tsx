@@ -35,7 +35,9 @@ export default function AchievementCompletionEntry({
 }) {
   return (
     <div className="achievement-players-entry">
-      {"placement" in completion && completion.placement !== null ? (
+      {"placement" in completion &&
+      completion.placement !== null &&
+      completion.placement !== undefined ? (
         <>
           <p className="placement-text place">#{completion.placement!.place}</p>
           <p className="placement-text value">{completion.placement!.value}</p>
