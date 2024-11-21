@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-os.environ["DJANGO_SETTINGS_MODULE"] = "app.settings"
+os.environ["DJANGO_SETTINGS_MODULE"] = "..app.settings"
 django.setup()
 
 
@@ -111,7 +111,7 @@ create("Knowledge", "Super Dr.. Drama?", "Pass this map that tried to bring back
 create("Knowledge", "Eternal Glory", "PFC the longest running #1 score specifically from osu!'s most iconic player (according to n3rdiness)", tags=[])
 create("Skill", "Jittering Accuracy", "Achieve at least 90% accuracy on this map using no mods", tags=["mode-m", "accuracy", "4k"], beatmap_id=1286501)
 create("Skill", "Alice's Dense Freezer", "Get 25 misses or less on this map with EZDT/EZNC and optionally HD", tags=["reading", "aim", "mechanics", "mode-o", "misses"], beatmap_id=2663395)
-create("Skill", "Back to school", "Get 0 misses on Run Lads Run [Math Test (Hard) - Version #7] with NM or HD only", tags=["mode-o", "gimmick", "reading"], beatmap_id=4845683)
+create("Skill", "Back to school", "Get 0 misses on Run Lads Run [Math Test (Hard) - Version #7] with NM or HD only", tags=["mode-o", "gimmick", "reading", "math"], beatmap_id=4845683)
 create("Miscellaneous", "Modification Mayhem", "Get any kind of 10 Mod pass excluding NF", tags=["lazer", "pass"])
 
 # Day 3 (50)
@@ -149,3 +149,15 @@ create("Knowledge", "Handcam Quiz", "Submit a score on this player's top play wi
 create("Skill", "EZ Can't Hurt You In Other Gamemodes... Right?", "Get >95% on this map with EZ", tags=["mode-t"], beatmap_id=145511)
 create("Skill", "Slow and Steady", "Set a play on this map worth at least 200pp using HTHR only", tags=["mode-o", "streams"], beatmap_id=2211018)
 create("Skill", "K-pop Enjoyer", "Get >98% accuracy on 3 different ranked Dreamcatcher maps in a row that are at least 3.5* using NM or HD. Failing or retrying will reset your streak.", tags=["consistency", "mode-m"])
+
+# Day 6 (80)
+create("Secret", "#E2FB36DB", "Shouldn't have built those balls on hypxiel", tags=[])
+create("Secret", "Addicted", "Just a small bit is enough to make you Insane. It might be too late for you now.", tags=[])
+create("Secret", "10-Meter Dash", "Don't blink or you'll miss it", tags=[])
+create("Secret", "Rotten Basket", "Cannot get worse than that", tags=["mode-f"])
+create("Secret", "The Last Declamation", "A Man who doesn't wish to be Emperor and has never spoke before, speaks to the world, to his soldiers. He does not wish for them to be enslaved nor used as tools of war, afterall they are not as simple as livestock, they are men. He exclaims that they have the power to make machines, create happiness as the \"the Kingdom of God is within man\".", tags=[])
+create("Secret", "Cursed", "The curse of the legendary sword.", tags=[])
+create("Knowledge", "The Three Kims", "Some say there's a map whose background is a certain korean man laughing at his defeated opponent.", tags=[])
+create("Knowledge", "SFA", "This player is well-known for popularizing a certain tablet area style. Submit a score on the map that got them top 100 with the same mods (NF allowed).", tags=[])
+create("Knowledge", "Ants in the Spotlight", "It's basically an fc... <a class=\"external-link\" href=\"https://i.imgur.com/5PpMhGi.png\" target=\"_blank\">https://i.imgur.com/5PpMhGi.png</a>", tags=[])
+create("Miscellaneous", "Mathematician", "Submit a play on this mapset where the cross sum of your max combo matches your miss count", tags=["math"], beatmap_id=1863223)
