@@ -118,7 +118,14 @@ function getGrouping(
       ];
     case "date completed":
       return [
-        ["*", "Not completed"],
+        [
+          "Past hour",
+          "Past 24 hours",
+          "Past 3 days",
+          "Past week",
+          "Over a week ago",
+          "Not completed",
+        ],
         (a) => (a.completed ? getTimeGroup(a) : "Not completed"),
         (a, b) => getTimestamp(a.completions) - getTimestamp(b.completions),
       ];
