@@ -159,5 +159,5 @@ create("Secret", "The Last Declamation", "A Man who doesn't wish to be Emperor a
 create("Secret", "Cursed", "The curse of the legendary sword.", tags=[])
 create("Knowledge", "The Three Kims", "Some say there's a map whose background is a certain korean man laughing at his defeated opponent.", tags=[])
 create("Knowledge", "SFA", "This player is well-known for popularizing a certain tablet area style. Submit a score on the map that got them top 100 with the same mods (NF allowed).", tags=[])
-create("Knowledge", "Ants in the Spotlight", "It's basically an fc... <a class=\"external-link\" href=\"https://i.imgur.com/5PpMhGi.png\" target=\"_blank\">https://i.imgur.com/5PpMhGi.png</a>", tags=[])
+create("Knowledge", "Ants in the Spotlight", "It's basically an fc... <a class=\"external-link\" href=\"https://i.imgur.com/5PpMhGi.png\" target=\"_blank\">https://i.imgur.com/5PpMhGi.png</a>", tags=["mode-o"])
 create("Miscellaneous", "Mathematician", "Submit a play on this mapset where the cross sum of your max combo matches your miss count", tags=["math"], beatmap_id=1863223)
