@@ -304,20 +304,22 @@ function AllTeams({
   return (
     <div className="info-container">
       <p className="info-title center">All Teams</p>
-      {teams
-        .sort((a, b) => a.id - b.id)
-        .map((team, idx) => (
-          <div key={idx}>
-            <p className="info-subtitle">
-              {team.name} ({getAnonName(team.id)}) - {team.points}pts
-            </p>
-            <div className="info-inner-container players">
-              {team.players.map((player, i) => (
+      {teams.map((team, idx) => (
+        <div key={idx}>
+          <p className="info-subtitle">
+            {team.name} ({getAnonName(team.id)}) - {team.points}pts
+          </p>
+          <div className="info-inner-container players">
+            {team.players
+              .sort(
+                (a, b) => (a.team_admin ? 0 : a.id) - (b.team_admin ? 0 : b.id),
+              )
+              .map((player, i) => (
                 <PlayerCard key={i} player={player} />
               ))}
-            </div>
           </div>
-        ))}
+        </div>
+      ))}
     </div>
   );
 }
