@@ -294,7 +294,7 @@ function UnauthenticatedContent() {
   );
 }
 
-function AdminAllTeams({
+function AllTeams({
   teams,
 }: {
   teams: AchievementTeamExtendedType[] | undefined;
@@ -303,19 +303,21 @@ function AdminAllTeams({
 
   return (
     <div className="info-container">
-      <p className="info-title center">ADMIN: All Teams</p>
-      {teams.map((team, idx) => (
-        <div key={idx}>
-          <p className="info-subtitle">
-            {team.name} | {getAnonName(team.id)}
-          </p>
-          <div className="info-inner-container players">
-            {team.players.map((player, i) => (
-              <PlayerCard key={i} player={player} />
-            ))}
+      <p className="info-title center">All Teams</p>
+      {teams
+        .sort((a, b) => a.id - b.id)
+        .map((team, idx) => (
+          <div key={idx}>
+            <p className="info-subtitle">
+              {team.name} ({getAnonName(team.id)}) - {team.points}pts
+            </p>
+            <div className="info-inner-container players">
+              {team.players.map((player, i) => (
+                <PlayerCard key={i} player={player} />
+              ))}
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
     </div>
   );
 }
@@ -358,7 +360,7 @@ export default function TeamCard() {
   const session = useContext(SessionContext);
   const dispatchEventMsg = useContext(EventContext);
   const { setPopup } = useContext(PopupContext) as PopupContextType;
-  const [adminShowTeams, setAdminShowTeams] = useState<boolean>(false);
+  const [showTeams, setShowTeams] = useState<boolean>(false);
 
   const teamsResponse = useGetTeams();
   const teams = teamsResponse.data;
@@ -439,6 +441,11 @@ export default function TeamCard() {
     );
   };
 
+  const canSeeTeams =
+    teams === undefined
+      ? false
+      : teams.filter((t) => "players" in t && t.players.length > 0).length > 1;
+
   return (
     <motion.div layout className="card-container teams">
       <AnimatePresence>
@@ -465,16 +472,14 @@ export default function TeamCard() {
           />
         )}
       </motion.div>
-      {session.user?.is_admin && (
+      {canSeeTeams && (
         <Button
           text="Toggle Teams List"
-          onClick={() => setAdminShowTeams((s) => !s)}
+          onClick={() => setShowTeams((s) => !s)}
         />
       )}
-      {adminShowTeams && (
-        <AdminAllTeams
-          teams={teams as AchievementTeamExtendedType[] | undefined}
-        />
+      {showTeams && (
+        <AllTeams teams={teams as AchievementTeamExtendedType[] | undefined} />
       )}
     </motion.div>
   );
