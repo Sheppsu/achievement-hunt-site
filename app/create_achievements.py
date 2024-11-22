@@ -171,5 +171,5 @@ create("Secret", "Sacrilege", "Peppy did what?!?! I am disappointed...", tags=[]
 create("Secret", "Performer", "There's a professional pianist that is... a bumblebee?", tags=[])
 create("Secret", "Supreme commander", "You control all of our military forces. Your skills are priceless. Do whatever it takes to kick the enemies ass!", tags=[])
 create("Knowledge", "Faker's Start", "A well-known korean tournament player noted a certain country-based tournament from 2021 as the first tournament where he didn't get \"completely destroyed by nerves.\" Submit a score on the Grand Finals DT1 of this tournament with DT and optionally NF.", tags=[])
-create("Skill", "Bananas? I LOVE BANANAS!", "Compete for the highest score on this map. If on lazer, use Classic mod. Lazer scoring will be used (but stable scores still counts).", tags=["mode-f", "competition", "score"], beatmap_id=80895)
+create("Skill", "Bananas? I LOVE BANANAS!", "Compete for the highest score on this map. This achievement can only be completed in stable.", tags=["mode-f", "competition", "score", "stable"], beatmap_id=80895)
 create("Skill", "Reading Mashup", "Compete for the highest score on this map. If on lazer, use Classic mod. Lazer scoring will be used (but stable scores still counts).", tags=["mode-o", "competition", "score"], beatmap_id=4820929)
