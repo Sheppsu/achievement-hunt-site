@@ -164,7 +164,7 @@ create("Miscellaneous", "Mathematician", "Submit a play on this mapset where the
 
 # Day 7 (90)
 create("Secret", "Emotional", "Rest well, Aniki.", tags=[])
-create("Secret", "The Day Before Halloween", "In 2015, someone we all love started a new chapter for osu! However, the main subject of this achievement has everything to do with updates of the old chapter: use one to replicate the top play of a specific user who is just short of one million ranked score.", tags=[])
+create("Secret", "The Day Before Halloween", "In 2015, someone we all love started a new chapter for osu! However, the main subject of this achievement has everything to do with recent updates of the old chapter: use one to create the link of a specific user (who is just short of one million ranked score) and loosely replicate their top play.", tags=[])
 create("Secret", "colorblind", "idontseeanycolorsinthevisiblecolorspectrum", tags=[])
 create("Secret", "A Four-Man Job", "Should be easy enough by yourself even if the lights fade away in what they call \"Fosserøyk\"", tags=["mode-o"])
 create("Secret", "Sacrilege", "Peppy did what?!?! I am disappointed...", tags=[])
