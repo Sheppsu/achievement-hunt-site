@@ -182,6 +182,6 @@ create("Knowledge", "Beats from the top", "From #1 to musician. Submit a score o
 create("Knowledge", "Profile Museum", "Identify this player by an old screenshot of their profile and submit a score on their current top play with the same mods (NF allowed). <a class=\"external-link\" href=\"https://i.imgur.com/XmShZc4.png\" target=\"_blank\">https://i.imgur.com/XmShZc4.png</a>")
 create("Knowledge", "Promise", "A well-known artist in both the osu! and vtuber communities. Submit a score on a mapset of one of their songs under their older alias using EZNCHD.", tags=["reading"])
 create("Knowledge", "We all had to start somewhere", "His maps suck don't play it", tags=[])
-create("Skill", "Onslaught From the Girl with Eyes of Fire", "Pass this map using NM or HD ", tags=["mode-t"], beatmap_id=2399787)
+create("Skill", "Onslaught From the Girl with Eyes of Fire", "Pass this map using HT and optionally HD (you can also pass it NM if you want)", tags=["mode-t"], beatmap_id=2399787)
 create("Skill", "Ragnarok", "Pass this map using no mods", tags=["mode-m", "7k"], beatmap_id=221368)
 create("Skill", "Don't Step on their Tails", "Get at least an A rank on this map using NM or HD", tags=["mode-f"], beatmap_id=698097)
