@@ -8,6 +8,7 @@ import time
 from django.conf import settings
 from django.contrib.auth import login as do_login, logout as do_logout
 from django.db.models.deletion import RestrictedError
+from django.db import models
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect
 from django.views.decorators.http import require_http_methods, require_POST
@@ -245,6 +246,7 @@ def create_team(req):
     team["players"] = [player]
     return success(team)
 
+
 @require_http_methods(["PATCH"])
 def transfer_admin(req):
     if event_ended():
@@ -292,6 +294,76 @@ def rename_team(req):
         return error("team name taken")
     
     return success(name)
+
+
+def player_stats(req):
+    if not (req.user.is_authenticated and req.user.is_admin) and not event_ended():
+        return error("cannot get this data yet")
+
+    category = req.GET.get("category")
+
+    completion_count_aggr = models.Count("completions")
+
+    if category is not None:
+        category = category[0].upper() + category[1:].lower()
+        if category not in ("Secret", "Knowledge", "Skill"):
+            category = None
+
+        completion_count_aggr.filter = models.Q(completions__achievement__category=category)
+
+    most_completions = Player.objects.select_related(
+        "user"
+    ).annotate(
+        completion_count=completion_count_aggr
+    ).order_by(
+        "-completion_count"
+    )
+
+    most_first_completions = Player.objects.raw(
+        f"""
+        WITH firsts AS (
+            SELECT achievement_id, MIN(time_completed) AS time_completed FROM achievements_achievementcompletion 
+            {'' if category is None else 
+            'INNER JOIN achievements_achievement ON (achievements_achievement.id = achievement_id)\n'
+            'WHERE category = \'%s\'' % category}
+            GROUP BY achievement_id
+        )
+        SELECT 
+            achievements_player.id,
+            achievements_player.team_id,
+            achievements_player.user_id,
+            achievements_user.username,
+            achievements_user.avatar,
+            achievements_user.cover,
+            achievements_user.is_achievement_creator,
+            achievements_user.is_admin,
+            COUNT(achievements_achievementcompletion.id) AS completion_count 
+        FROM achievements_achievementcompletion
+        INNER JOIN achievements_player ON (achievements_player.id = achievements_achievementcompletion.player_id)
+        INNER JOIN achievements_user ON (achievements_user.id = achievements_player.user_id)
+        WHERE achievement_id IN (SELECT achievement_id FROM firsts) AND 
+            time_completed IN (SELECT time_completed FROM firsts)
+        GROUP BY achievements_player.id,
+            achievements_player.team_id,
+            achievements_player.user_id,
+            achievements_user.username,
+            achievements_user.avatar,
+            achievements_user.cover,
+            achievements_user.is_achievement_creator,
+            achievements_user.is_admin
+        ORDER BY completion_count DESC;
+        """
+    )
+
+    return success({
+        "most_completions": list(
+            (completion.serialize(includes=["user", "completion_count"]) for completion in most_completions)
+        ),
+        "most_first_completions": list(
+            (player.serialize(includes=["user", "completion_count"]) for player in most_first_completions)
+        )
+    })
+
 
 def get_auth_packet(req):
     if not req.user.is_authenticated:

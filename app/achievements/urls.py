@@ -12,5 +12,6 @@ urlpatterns = [
     path("teams/create/", views.create_team),
     path("teams/rename/", views.rename_team),
     path("teams/transfer/", views.transfer_admin),
+    path("stats/", views.player_stats),
     path("wsauth/", views.get_auth_packet)
 ]
