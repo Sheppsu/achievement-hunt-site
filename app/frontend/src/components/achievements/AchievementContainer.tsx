@@ -13,6 +13,11 @@ import {
   AnonymousAchievementCompletionType,
 } from "api/types/AchievementCompletionType.ts";
 import { AchievementTeamExtendedType } from "api/types/AchievementTeamType.ts";
+import Button from "components/Button";
+import {
+  useDispatchStateContext,
+  useStateContext,
+} from "contexts/StateContext";
 
 function intersects(a: string[], b: string[]): boolean {
   for (const item of b) {
@@ -183,7 +188,7 @@ export default function AchievementContainer({
   scope: AnimationScope;
 }) {
   const session = useContext(SessionContext);
-  const { data: baseAchievements } = useGetAchievements();
+  const { data: baseAchievements, refetch } = useGetAchievements();
   const { data: teams } = useGetTeams();
 
   if (
@@ -282,6 +287,9 @@ export default function AchievementContainer({
 
   return (
     <div ref={scope} className="achievements-container">
+      <div style={{ width: 250 }}>
+        <Button onClick={() => refetch()}>Refresh Achievements</Button>
+      </div>
       {Object.keys(sortedAchievements)
         .sort(sortGroups)
         .map((key) => {

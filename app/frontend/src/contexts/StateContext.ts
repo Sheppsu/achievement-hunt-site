@@ -4,6 +4,7 @@ import {
   NavItems,
   SortedNavRowItems,
 } from "components/achievements/AchievementNavigationBar.tsx";
+import { AchievementExtendedType } from "api/types/AchievementType";
 
 interface BaseStateActionType {
   id: number;
@@ -65,6 +66,11 @@ interface SwitchNavItemSort extends BaseStateActionType {
   label: keyof NavItems;
 }
 
+interface CurrentAchievementsType extends BaseStateActionType {
+  id: 12;
+  currentAchievements: AchievementExtendedType[];
+}
+
 type StateActionType =
   | ConnectingType
   | AuthType
@@ -76,7 +82,8 @@ type StateActionType =
   | DisconnectionType
   | AdjustAudioType
   | ActivateNavItem
-  | SwitchNavItemSort;
+  | SwitchNavItemSort
+  | CurrentAchievementsType;
 
 export function wsReducer(
   state: WebsocketState,
@@ -166,6 +173,9 @@ export function wsReducer(
         ...state,
         achievementsFilter: newFilter,
       };
+    }
+    case 12: {
+      return { ...state, currentAchievements: action.currentAchievements };
     }
   }
 }
