@@ -21,7 +21,6 @@ export type SortedNavRowItems = {
 
 export type NavItems = {
   mode: NavRowItems;
-  categories: NavRowItems;
   tags: NavRowItems;
   sort: SortedNavRowItems;
 };
@@ -29,13 +28,8 @@ export type NavItems = {
 export function getDefaultNav(
   achievements: AchievementExtendedType[],
 ): NavItems {
-  const categories: string[] = [];
   const tags: string[] = [];
   for (const achievement of achievements) {
-    if (!categories.includes(achievement.category)) {
-      categories.push(achievement.category);
-    }
-
     for (const tag of achievement.tags.split(",")) {
       if (tag === "") continue;
       if (tag.startsWith("mode-")) continue;
@@ -55,12 +49,10 @@ export function getDefaultNav(
         { label: "catch", active: false },
       ],
     },
-    categories: { items: categories.map((c) => ({ label: c, active: false })) },
     tags: { items: tags.map((t) => ({ label: t, active: false })) },
     sort: {
       items: [
-        { label: "category", active: true },
-        { label: "completions", active: false },
+        { label: "completions", active: true },
         { label: "player", active: false },
         { label: "date completed", active: false },
         { label: "batch", active: false },

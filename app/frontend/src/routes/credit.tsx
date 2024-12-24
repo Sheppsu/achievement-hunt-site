@@ -1,7 +1,7 @@
 import AnimatedPage from "components/AnimatedPage.tsx";
 import { Helmet } from "react-helmet";
 
-import "assets/css/staff.css";
+import "assets/css/credits.css";
 
 export default function Credit() {
   return (

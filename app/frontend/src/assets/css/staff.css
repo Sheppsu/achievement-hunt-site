@@ -1,9 +1,30 @@
-.staff-container {
+.staff__page {
+    width: 100%;
+    max-width: 1000px;
+    margin: auto;
+
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.staff__achievement {
+    padding: 10px;
+
     display: flex;
     flex-direction: column;
     gap: 5px;
+
+    background-color: var(--background-color);
+    border-radius: 10px;
+    border: solid var(--border-color) 2px;
 }
 
-.external-link.staff {
-    font-size: 20px;
+.staff__achievement__name {
+    font-size: 30px;
+    font-weight: 600;
+}
+
+.staff__achievement__solution {
+    color: #FFC0C0;
 }

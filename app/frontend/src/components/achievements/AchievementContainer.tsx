@@ -99,8 +99,6 @@ function getGrouping(
   };
 
   switch (sort) {
-    case "category":
-      return [["*"], (a) => a.category, (a, b) => b.name.localeCompare(a.name)];
     case "completions":
       return [
         ["1+ completion(s)", "No completions"],
@@ -212,9 +210,6 @@ export default function AchievementContainer({
 
   extendAchievementData(achievements, nTeams, myTeam);
 
-  const activeCategories = filters.categories.items
-    .filter((item) => item.active)
-    .map((item) => item.label);
   const activeTags = filters.tags.items
     .filter((item) => item.active)
     .map((item) => item.label);
@@ -228,12 +223,6 @@ export default function AchievementContainer({
     if (!matchesMode(achievement, state.mode)) continue;
 
     if (!matchesSearch(achievement, searchFilter)) continue;
-
-    if (
-      activeCategories.length != 0 &&
-      !activeCategories.includes(achievement.category)
-    )
-      continue;
 
     if (
       activeTags.length != 0 &&

@@ -23,13 +23,15 @@ def require_staff(func):
 def achievements(req):
     return success(
         [
-            achievement.serialize(includes=["comments__user", "beatmap", "vote_count"])
+            achievement.serialize(includes=["comments__user", "beatmap", "vote_count", "solution"])
             for achievement in Achievement.objects.prefetch_related(
                 "comments__user"
             ).select_related(
                 "beatmap"
             ).annotate(
                 vote_count=models.Count("votes")
+            ).filter(
+                release_time=None
             ).all()
         ]
     )
