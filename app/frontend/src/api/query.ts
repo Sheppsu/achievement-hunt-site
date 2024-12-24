@@ -16,7 +16,10 @@ import {
   AchievementTeamExtendedType,
   AchievementTeamType,
 } from "./types/AchievementTeamType";
-import { AchievementExtendedType } from "./types/AchievementType";
+import {
+  AchievementExtendedType,
+  StaffAchievementType,
+} from "./types/AchievementType";
 
 function getUrl(endpoint: string): string {
   endpoint = endpoint.startsWith("/") ? endpoint : "/" + endpoint;
@@ -272,4 +275,14 @@ export function useCreateTeam(): SpecificUseMutationResult<AchievementTeamExtend
       method: "POST",
     },
   );
+}
+
+export function useGetStaffAchievement(
+  enabled: boolean = true,
+): UseQueryResult<StaffAchievementType[]> {
+  return useMakeQuery({
+    queryKey: ["staff", "achievements"],
+    enabled,
+    refetchInterval: 60000,
+  });
 }

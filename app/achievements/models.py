@@ -73,8 +73,8 @@ class BeatmapInfo(SerializableModel):
 
 class Achievement(SerializableModel):
     name = models.CharField(max_length=128)
-    category = models.CharField(max_length=32)
-    description = models.CharField(max_length=2096)
+    description = models.CharField(max_length=2048)
+    solution = models.CharField(max_length=2048)
     audio = models.CharField(default="")
     tags = models.CharField(max_length=128)
     beatmap = models.ForeignKey(
@@ -83,9 +83,11 @@ class Achievement(SerializableModel):
         on_delete=models.PROTECT,
         null=True
     )
+    release_time = models.DateTimeField(null=True)
+    creator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, default=None)
 
     class Serialization:
-        FIELDS = ["id", "name", "category", "description", "audio", "tags", "beatmap"]
+        FIELDS = ["id", "name", "description", "audio", "tags", "beatmap", "release_time"]
 
 
 class AchievementCompletionPlacement(SerializableModel):
@@ -114,6 +116,23 @@ class AchievementCompletion(SerializableModel):
 
     class Serialization:
         FIELDS = ["time_completed"]
+
+
+class AchievementComment(SerializableModel):
+    achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE, related_name="comments")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
+    msg = models.CharField(max_length=4096)
+
+    class Serialization:
+        FIELDS = ["id", "msg"]
+
+
+class AchievementVote(SerializableModel):
+    achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE, related_name="votes")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="votes")
+
+    class Serialization:
+        FIELDS = ["id"]
 
 
 class Team(SerializableModel):

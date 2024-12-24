@@ -224,7 +224,7 @@ function YourTeamContent({
       {user?.team_admin && (
         <div className="info-inner-container buttons">
           <Button text="Rename Team" onClick={renameTeamPopup} />
-          <Button text="Transfer Admin" onClick={transferTeamAdminPopup} />
+          <Button text="Transfer Staff" onClick={transferTeamAdminPopup} />
         </div>
       )}
     </>
