@@ -28,3 +28,45 @@
 .staff__achievement__solution {
     color: #FFC0C0;
 }
+
+.staff__achievement__footer {
+    height: 30px;
+
+    margin-top: 5px;
+
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+}
+
+.staff__achievement__footer__vote-container {
+    height: calc(100% - 8px);
+
+    padding: 4px;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+
+    border: solid var(--border-color) 2px;
+    border-radius: 5px;
+}
+
+.staff__achievement__footer__vote-container:hover {
+    cursor: pointer;
+}
+
+.staff__achievement__footer__tag {
+    height: calc(100% - 8px);
+
+    padding: 4px 8px;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    border: solid var(--border-color) 2px;
+    border-radius: 20px;
+}
