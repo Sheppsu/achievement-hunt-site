@@ -1,8 +1,8 @@
 from django.views.decorators.http import require_POST, require_GET
-from django.db import models
 
 from ..models import Achievement, AchievementComment, AchievementVote
-from .util import error, success, parse_body
+from .util import error, success, require_valid_data
+from common.serializer import SerializableField
 
 
 __all__ = ("achievements",)
@@ -23,13 +23,28 @@ def require_staff(func):
 def achievements(req):
     return success(
         [
-            achievement.serialize(includes=["comments__user", "beatmap", "vote_count", "solution"])
+            achievement.serialize(
+                includes=[
+                    "comments__user",
+                    "beatmap",
+                    "solution",
+                    SerializableField(
+                        "votes",
+                        serial_key="has_voted",
+                        post_transform=lambda votes: any((v["user_id"] == req.user.id for v in votes))
+                    ),
+                    SerializableField(
+                        "votes",
+                        serial_key="vote_count",
+                        post_transform=lambda votes: len(votes)
+                    )
+                ]
+            )
             for achievement in Achievement.objects.prefetch_related(
-                "comments__user"
+                "comments__user",
+                "votes"
             ).select_related(
                 "beatmap"
-            ).annotate(
-                vote_count=models.Count("votes")
             ).filter(
                 release_time=None
             ).all()
@@ -39,7 +54,7 @@ def achievements(req):
 
 def require_achievement(func):
     def wrapper(req, *args, **kwargs):
-        achievement_id = kwargs.get("achievement_id", None)
+        achievement_id = kwargs.pop("achievement_id", None)
         if achievement_id is None:
             return error("Invalid achievement id")
 
@@ -55,8 +70,12 @@ def require_achievement(func):
 @require_staff
 @require_POST
 @require_achievement
-def create_comment(req, achievement):
-    data = parse_body(req.body, ("msg",))
+@require_valid_data("msg")
+def create_comment(req, data, achievement):
+    msg = data["msg"]
+
+    if not isinstance(msg, str) or len(msg) > 4096:
+        return error("invalid msg")
 
     comment = AchievementComment.objects.create(
         achievement=achievement,
@@ -64,17 +83,14 @@ def create_comment(req, achievement):
         msg=data["msg"],
     )
 
-    if not isinstance(comment, str) or len(comment) > 4096:
-        return error("invalid comment string")
-
     return success(comment.serialize())
 
 
 @require_staff
 @require_POST
 @require_achievement
-def vote_achievement(req, achievement):
-    data = parse_body(req.body, ("add",))
+@require_valid_data("add")
+def vote_achievement(req, data, achievement):
     add_vote = data["add"]
 
     existing_vote = AchievementVote.objects.filter(achievement_id=achievement.id, user_id=req.user).first()
@@ -90,4 +106,4 @@ def vote_achievement(req, achievement):
     else:
         existing_vote.delete()
 
-    return success(None)
+    return success({"added": add_vote})

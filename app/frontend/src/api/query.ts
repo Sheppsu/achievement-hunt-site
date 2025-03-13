@@ -11,7 +11,6 @@ import {
 import { EventContext, EventType } from "contexts/EventContext";
 import { UndefinedInitialDataOptions } from "node_modules/@tanstack/react-query/build/legacy";
 import { useContext } from "react";
-import { AchievementPlayerType } from "./types/AchievementPlayerType";
 import {
   AchievementTeamExtendedType,
   AchievementTeamType,
@@ -20,6 +19,7 @@ import {
   AchievementExtendedType,
   StaffAchievementType,
 } from "./types/AchievementType";
+import { SessionContext } from "contexts/SessionContext.ts";
 
 function getUrl(endpoint: string): string {
   endpoint = endpoint.startsWith("/") ? endpoint : "/" + endpoint;
@@ -285,4 +285,50 @@ export function useGetStaffAchievement(
     enabled,
     refetchInterval: 60000,
   });
+}
+
+function onVoted(
+  achievements: StaffAchievementType[],
+  achievementId: number,
+  added: boolean,
+) {
+  const newAchievements = [];
+
+  for (const achievement of achievements) {
+    if (achievement.id === achievementId) {
+      newAchievements.push({
+        ...achievement,
+        has_voted: added,
+        vote_count: achievement.vote_count + (added ? 1 : -1),
+      });
+      continue;
+    }
+
+    newAchievements.push(achievement);
+  }
+
+  return newAchievements;
+}
+
+export function useVoteAchievement(
+  achievementId: number,
+): SpecificUseMutationResult<{ added: boolean }> {
+  const queryClient = useContext(QueryClientContext);
+  return useMakeMutation(
+    {
+      mutationKey: ["staff", "achievements", achievementId.toString(), "vote"],
+      onSuccess: (result: { added: boolean }) => {
+        console.log(result);
+
+        queryClient?.setQueryData(
+          ["staff", "achievements"],
+          (achievements: StaffAchievementType[]) =>
+            onVoted(achievements, achievementId, result.added),
+        );
+      },
+    },
+    {
+      method: "POST",
+    },
+  );
 }

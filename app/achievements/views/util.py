@@ -14,6 +14,7 @@ def success(data, status=200):
 def parse_body(body: bytes, require_has: tuple | list):
     try:
         data = json.loads(body.decode("utf-8"))
+        print(data)
         if not isinstance(data, dict):
             return
 
@@ -24,3 +25,18 @@ def parse_body(body: bytes, require_has: tuple | list):
         return data
     except (UnicodeDecodeError, json.JSONDecodeError):
         return
+
+
+def require_valid_data(*keys):
+    def decorator(func):
+        def wrapper(req, *args, **kwargs):
+            data = parse_body(req.body, keys)
+            print(data)
+            if data is None:
+                return error("Invalid body format (expected json) or keys")
+
+            return func(req, *args, **kwargs, data=data)
+
+        return wrapper
+
+    return decorator

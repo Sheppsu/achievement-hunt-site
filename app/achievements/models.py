@@ -132,7 +132,7 @@ class AchievementVote(SerializableModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="votes")
 
     class Serialization:
-        FIELDS = ["id"]
+        FIELDS = ["id", "user_id"]
 
 
 class Team(SerializableModel):

@@ -1,5 +1,4 @@
 import base64
-import json
 import random
 import secrets
 import struct
@@ -14,7 +13,7 @@ from django.views.decorators.http import require_http_methods, require_POST
 from nacl.secret import SecretBox
 
 from ..models import *
-from .util import error, success
+from .util import error, success, require_valid_data
 from common.serializer import SerializableField
 
 
@@ -36,7 +35,7 @@ __all__ = (
 EVENT_START, EVENT_END = settings.EVENT_START, settings.EVENT_END
 
 
-def before_event(func):
+def before_or_during_event(func):
     def wrapper(*args, **kwargs):
         if event_ended():
             return error("event ended")
@@ -153,13 +152,10 @@ def teams(req):
 
 
 @require_POST
-@before_event
-def join_team(req):
-    if event_ended():
-        return error("event ended")
-
-    data = parse_body(req.body, ("invite",))
-    if data is None or data["invite"] is None:
+@before_or_during_event
+@require_valid_data("invite")
+def join_team(req, data):
+    if data["invite"] is None:
         return error("invalid invite")
 
     team = select_teams(invite=data["invite"])
@@ -181,11 +177,8 @@ def join_team(req):
 
 
 @require_http_methods(["DELETE"])
-@before_event
+@before_or_during_event
 def leave_team(req):
-    if event_ended():
-        return error("event ended")
-
     # TODO: maybe make this into a postgresql function
     team = None
     if req.user.is_authenticated:
@@ -208,13 +201,10 @@ def leave_team(req):
 
 
 @require_POST
-@before_event
-def create_team(req):
-    if event_ended():
-        return error("event ended")
-
-    data = parse_body(req.body, ("name",))
-    if data is None or (name := data["name"]) is None or len(name) == 0 or len(name) > 32:
+@before_or_during_event
+@require_valid_data("name")
+def create_team(req, data):
+    if (name := data["name"]) is None or len(name) == 0 or len(name) > 32:
         return error("invalid name")
 
     player = Player.objects.filter(user_id=req.user.id).first()
@@ -239,12 +229,12 @@ def create_team(req):
 
 
 @require_http_methods(["PATCH"])
-def transfer_admin(req):
+@require_valid_data("newAdminId")
+def transfer_admin(req, data):
     if event_ended():
         return error("event ended")
-    
-    data = parse_body(req.body, ("newAdminId",))
-    if data is None or (userId := data["newAdminId"]) is None:
+
+    if (userId := data["newAdminId"]) is None:
         return error("invalid user id")
     
     currentAdmin = Player.objects.filter(user_id=req.user.id).first()
@@ -265,12 +255,12 @@ def transfer_admin(req):
 
 
 @require_http_methods(["PATCH"])
-def rename_team(req):
+@require_valid_data("name")
+def rename_team(req, data):
     if event_ended():
         return error("event ended")
 
-    data = parse_body(req.body, ("name",))
-    if data is None or (name := data["name"]) is None or len(name) == 0 or len(name) > 32:
+    if (name := data["name"]) is None or len(name) == 0 or len(name) > 32:
         return error("invalid name")
 
     player = Player.objects.filter(user_id=req.user.id).first()

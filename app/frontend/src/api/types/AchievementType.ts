@@ -26,4 +26,5 @@ export type StaffAchievementType = {
   solution: string;
   comments: AchievementCommentType[];
   vote_count: number;
+  has_voted: boolean;
 } & AchievementType;
