@@ -3,7 +3,7 @@ import { StateDispatch } from "contexts/StateContext.ts";
 import { AchievementExtendedType } from "api/types/AchievementType.ts";
 import { useEffect, useState } from "react";
 import { toTitleCase } from "util/helperFunctions.ts";
-import Button from "components/Button.tsx";
+import Button from "components/inputs/Button.tsx";
 import classNames from "classnames";
 
 export type NavItem = {

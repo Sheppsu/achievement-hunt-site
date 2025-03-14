@@ -10,7 +10,7 @@ import {
 
 import "assets/css/team.css";
 import "assets/css/form.css";
-import BaseButton from "components/Button";
+import BaseButton from "components/inputs/Button.tsx";
 import { FaCrown } from "react-icons/fa6";
 
 import { SessionContext } from "contexts/SessionContext";

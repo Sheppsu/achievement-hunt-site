@@ -19,7 +19,7 @@ import {
   AchievementExtendedType,
   StaffAchievementType,
 } from "./types/AchievementType";
-import { SessionContext } from "contexts/SessionContext.ts";
+import { AchievementCommentType } from "api/types/AchievementCommentType.ts";
 
 function getUrl(endpoint: string): string {
   endpoint = endpoint.startsWith("/") ? endpoint : "/" + endpoint;
@@ -318,12 +318,58 @@ export function useVoteAchievement(
     {
       mutationKey: ["staff", "achievements", achievementId.toString(), "vote"],
       onSuccess: (result: { added: boolean }) => {
-        console.log(result);
-
         queryClient?.setQueryData(
           ["staff", "achievements"],
           (achievements: StaffAchievementType[]) =>
             onVoted(achievements, achievementId, result.added),
+        );
+      },
+    },
+    {
+      method: "POST",
+    },
+  );
+}
+
+function onCommented(
+  achievements: StaffAchievementType[],
+  achievementId: number,
+  comment: AchievementCommentType,
+) {
+  const newAchievements = [];
+
+  for (const achievement of achievements) {
+    if (achievementId === achievementId) {
+      newAchievements.push({
+        ...achievement,
+        comments: achievement.comments.concat([comment]),
+      });
+      continue;
+    }
+
+    newAchievements.push(achievement);
+  }
+
+  return newAchievements;
+}
+
+export function useSendComment(
+  achievementId: number,
+): SpecificUseMutationResult<AchievementCommentType> {
+  const queryClient = useContext(QueryClientContext);
+  return useMakeMutation(
+    {
+      mutationKey: [
+        "staff",
+        "achievements",
+        achievementId.toString(),
+        "comment",
+      ],
+      onSuccess: (result: AchievementCommentType) => {
+        queryClient?.setQueryData(
+          ["staff", "achievements"],
+          (achievements: StaffAchievementType[]) =>
+            onCommented(achievements, achievementId, result),
         );
       },
     },
