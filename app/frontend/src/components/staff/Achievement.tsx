@@ -38,6 +38,8 @@ export default function Achievement(props: AchievementProps) {
 
   const [isCommenting, setIsCommenting] = useState(false);
   const [canSendComment, setCanSendComment] = useState(false);
+  const [commentText, setCommentText] = useState("");
+  const [sendingComment, setSendingComment] = useState(false);
   const sendComment = useSendComment(achievement.id);
 
   const onCommentStart = () => {
@@ -48,24 +50,37 @@ export default function Achievement(props: AchievementProps) {
     setIsCommenting(false);
   };
 
-  const isCommentTextValid = (msg: string) => {
-    return msg.trim().length !== 0;
+  const isCommentTextValid = () => {
+    return commentText.trim().length !== 0;
   };
 
-  const onSubmitComment = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    const data = new FormData(e.currentTarget);
-    const msg = data.get("msg") as string;
-    if (!isCommentTextValid(msg)) {
+  const onSendComment = () => {
+    if (sendingComment) {
       return;
     }
 
-    sendComment.mutate({ msg });
+    setSendingComment(true);
+
+    if (!isCommentTextValid()) {
+      return;
+    }
+
+    sendComment.mutate(
+      { msg: commentText },
+      {
+        onSuccess: () => {
+          onCommentCancel();
+          setCommentText("");
+        },
+        onSettled: () => {
+          setSendingComment(false);
+        },
+      },
+    );
   };
 
-  const onCommentInput = (e: React.FormEvent<HTMLTextAreaElement>) => {
-    const isValid = isCommentTextValid(e.currentTarget.value);
+  const onCommentInput = () => {
+    const isValid = isCommentTextValid();
     if (isValid && !canSendComment) {
       setCanSendComment(true);
     } else if (!isValid && canSendComment) {
@@ -87,35 +102,37 @@ export default function Achievement(props: AchievementProps) {
         </div>
       </div>
       <div className="staff__achievement__comment-container">
-        {achievement.comments.map((comment) => (
-          <AchievementComment comment={comment} />
+        {achievement.comments.map((comment, i) => (
+          <AchievementComment key={i} comment={comment} />
         ))}
-        <form onSubmit={onSubmitComment}>
-          <TextArea
-            name="msg"
-            placeholder="Type comment here"
-            hidden={!isCommenting}
-            onInput={onCommentInput}
+        <TextArea
+          name="msg"
+          placeholder="Type comment here"
+          hidden={!isCommenting}
+          onInput={onCommentInput}
+          onChange={(e: React.FormEvent<HTMLTextAreaElement>) =>
+            setCommentText(e.currentTarget.value)
+          }
+          value={commentText}
+        />
+        <div className="staff__achievement__comment-container__row">
+          <Button
+            children="Comment"
+            onClick={onCommentStart}
+            hidden={isCommenting}
           />
-          <div className="staff__achievement__comment-container__row">
-            <Button
-              children="Comment"
-              onClick={onCommentStart}
-              hidden={isCommenting}
-            />
-            <Button
-              children="Send"
-              hidden={!isCommenting}
-              unavailable={!canSendComment}
-              type="submit"
-            />
-            <Button
-              children="Cancel"
-              onClick={onCommentCancel}
-              hidden={!isCommenting}
-            />
-          </div>
-        </form>
+          <Button
+            children="Send"
+            onClick={onSendComment}
+            hidden={!isCommenting}
+            unavailable={!canSendComment || sendingComment}
+          />
+          <Button
+            children="Cancel"
+            onClick={onCommentCancel}
+            hidden={!isCommenting || sendingComment}
+          />
+        </div>
       </div>
     </div>
   );

@@ -83,7 +83,7 @@ def create_comment(req, data, achievement):
         msg=data["msg"],
     )
 
-    return success(comment.serialize())
+    return success(comment.serialize(includes=["user"]))
 
 
 @require_staff

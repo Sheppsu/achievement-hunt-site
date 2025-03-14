@@ -10,10 +10,12 @@ export default function AchievementComment(props: AchievementCommentProps) {
   return (
     <div className="staff__achievement__comment">
       <div className="staff__achievement__comment__user">
-        <div
-          style={{ backgroundImage: `url(${comment.user.avatar})` }}
-          className="staff__achievement__comment__user__avatar"
-        />
+        <div>
+          <div
+            style={{ backgroundImage: `url(${comment.user.avatar})` }}
+            className="staff__achievement__comment__user__avatar"
+          />
+        </div>
         <div className="staff__achievement__comment__user__details">
           <p>{comment.user.username}</p>
           <p className="staff__achievement__comment__user__details__title">
