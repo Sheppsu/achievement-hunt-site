@@ -19,7 +19,14 @@ export function useAuthEnsurer() {
     }
   };
 
+  const ensureAdmin = () => {
+    if (session.user === null || !session.user.is_admin) {
+      throw new ForbiddenError();
+    }
+  };
+
   return {
     ensureStaff,
+    ensureAdmin,
   };
 }
