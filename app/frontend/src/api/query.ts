@@ -339,7 +339,7 @@ function onCommented(
   const newAchievements = [];
 
   for (const achievement of achievements) {
-    if (achievementId === achievementId) {
+    if (achievement.id === achievementId) {
       newAchievements.push({
         ...achievement,
         comments: achievement.comments.concat([comment]),
