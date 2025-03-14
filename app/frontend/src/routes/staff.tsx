@@ -2,8 +2,11 @@ import { useGetStaffAchievement } from "api/query.ts";
 import Achievement from "components/staff/Achievement.tsx";
 
 import "assets/css/staff.css";
+import { useAuthEnsurer } from "util/auth.ts";
 
 export default function Staff() {
+  useAuthEnsurer().ensureStaff();
+
   const { data: achievements, isLoading } = useGetStaffAchievement();
 
   if (isLoading) {
@@ -16,8 +19,8 @@ export default function Staff() {
 
   return (
     <div className="staff__page">
-      {achievements.map((a) => (
-        <Achievement achievement={a} />
+      {achievements.map((a, i) => (
+        <Achievement key={i} achievement={a} />
       ))}
     </div>
   );
