@@ -45,7 +45,7 @@ export default function Staff() {
       achievementName.length > 0 &&
       achievementDescription.length > 0 &&
       achievementTags.length > 0 &&
-      !isNaN(parseInt(achievementBeatmapId))
+      !isNaN(parseInt(achievementBeatmapId.trim()))
     );
   };
 
@@ -62,7 +62,7 @@ export default function Staff() {
         description: achievementDescription,
         solution: achievementSolution,
         tags: achievementTags,
-        beatmap_id: parseInt(achievementBeatmapId),
+        beatmap_id: parseInt(achievementBeatmapId.trim()),
       },
       {
         onSuccess: () => {
