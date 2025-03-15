@@ -4,4 +4,5 @@ export type AchievementCommentType = {
   id: number;
   msg: string;
   user: UserType;
+  posted_at: string;
 };

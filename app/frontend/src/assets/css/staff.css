@@ -227,4 +227,15 @@
 
 .staff__achievement__comment__content {
     flex-grow: 1;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 5px;
+
+    word-break: break-word;
+}
+
+.staff__achievement__comment__content__time-ago {
+    color: #d3d3d3;
 }

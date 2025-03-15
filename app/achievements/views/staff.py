@@ -4,6 +4,8 @@ from ..models import Achievement, AchievementComment, AchievementVote, BeatmapIn
 from .util import error, success, require_valid_data
 from common.serializer import SerializableField
 
+from datetime import datetime, timezone
+
 
 __all__ = ("achievements",)
 
@@ -83,6 +85,7 @@ def create_comment(req, data, achievement):
         achievement=achievement,
         user=req.user,
         msg=data["msg"],
+        posted_at=datetime.now(tz=timezone.utc)
     )
 
     return success(comment.serialize(includes=["user"]))
