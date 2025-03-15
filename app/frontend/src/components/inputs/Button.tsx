@@ -1,5 +1,6 @@
 import "assets/css/button.css";
 import React from "react";
+import { splitProps } from "components/inputs/util.ts";
 
 type ButtonProps = {
   children: React.ReactNode;
@@ -12,34 +13,46 @@ type ButtonProps = {
   type?: "button" | "submit" | "reset";
 };
 
+const elementDefaults = {
+  className: "",
+  type: "button",
+};
+
+const otherDefaults = {
+  hidden: false,
+  unavailable: false,
+  children: "",
+  width: "auto",
+  height: "auto",
+};
+
 export default function Button(props: ButtonProps) {
-  const unavailable = props.unavailable === true;
+  const [elementProps, otherProps] = splitProps(
+    props,
+    elementDefaults,
+    otherDefaults,
+  );
 
-  if (props.className === undefined) {
-    props.className = "";
+  if (otherProps.hidden === true) {
+    elementProps.className += " hide";
   }
 
-  if (props.hidden === true) {
-    props.className += " hide";
+  if (otherProps.unavailable) {
+    elementProps.className += " unavailable";
   }
 
-  if (unavailable) {
-    props.className += " unavailable";
-  }
-
-  props.className += " prevent-select button";
+  elementProps.className += " prevent-select button";
 
   return (
     <button
       style={{
-        width: props.width,
-        height: props.height,
+        width: otherProps.width,
+        height: otherProps.height,
       }}
-      className={props.className}
-      onClick={unavailable ? undefined : props.onClick}
-      type={props.type ?? "button"}
+      onClick={otherProps.unavailable ? undefined : elementProps.onClick}
+      {...elementProps}
     >
-      {props.children}
+      {otherProps.children}
     </button>
   );
 }

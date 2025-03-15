@@ -1,3 +1,5 @@
+import { splitProps } from "components/inputs/util.ts";
+
 type TextAreaProps = {
   className?: string;
   placeholder?: string;
@@ -7,28 +9,33 @@ type TextAreaProps = {
   [_k: string]: any;
 };
 
+const elementDefaults = {
+  className: "",
+};
+
+const otherDefaults = {
+  hidden: false,
+  onInput: null,
+};
+
 export default function TextArea(props: TextAreaProps) {
-  if (props.className === undefined) {
-    props.className = "";
-  }
+  const [elementProps, otherProps] = splitProps(
+    props,
+    elementDefaults,
+    otherDefaults,
+  );
 
-  if (props.hidden === true) {
-    props.className += " hide";
-  }
-
-  props.className += " staff__achievement__comment__textarea";
-
-  const otherOnInput = props.onInput !== undefined ? props.onInput : null;
+  elementProps.className += " staff__achievement__comment__textarea";
 
   // resize text area
-  props.onInput = (e: React.FormEvent<HTMLTextAreaElement>) => {
+  elementProps.onInput = (e: React.FormEvent<HTMLTextAreaElement>) => {
     e.currentTarget.style.height = "auto";
     e.currentTarget.style.height = e.currentTarget.scrollHeight + "px";
 
-    if (otherOnInput !== null) {
-      otherOnInput(e);
+    if (otherProps.onInput !== null) {
+      otherProps.onInput(e);
     }
   };
 
-  return <textarea {...props} />;
+  return <textarea {...elementProps} />;
 }
