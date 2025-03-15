@@ -4,6 +4,7 @@ import {
   AnonymousAchievementCompletionType,
 } from "api/types/AchievementCompletionType.ts";
 import { AchievementCommentType } from "api/types/AchievementCommentType.ts";
+import { UserType } from "api/types/UserType.ts";
 
 export type AchievementType = {
   id: number;
@@ -27,4 +28,5 @@ export type StaffAchievementType = {
   comments: AchievementCommentType[];
   vote_count: number;
   has_voted: boolean;
+  creator: UserType;
 } & AchievementType;

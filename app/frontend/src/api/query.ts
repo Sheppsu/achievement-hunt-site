@@ -21,6 +21,7 @@ import {
   StaffAchievementType,
 } from "./types/AchievementType";
 import { AchievementCommentType } from "api/types/AchievementCommentType.ts";
+import { UserType } from "api/types/UserType.ts";
 
 function getUrl(endpoint: string): string {
   endpoint = endpoint.startsWith("/") ? endpoint : "/" + endpoint;
@@ -380,7 +381,10 @@ export function useSendComment(
   );
 }
 
-type AchievementCreationReturn = AchievementType & { solution: string };
+type AchievementCreationReturn = AchievementType & {
+  solution: string;
+  creator: UserType;
+};
 
 function onAchievementCreation(
   achievements: StaffAchievementType[],

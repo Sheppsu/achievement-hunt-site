@@ -18,6 +18,8 @@ export default function Staff() {
   const [achievementDescription, setAchievementDescription] = useState("");
   const [achievementSolution, setAchievementSolution] = useState("");
   const [achievementTags, setAchievementTags] = useState("");
+  const [achievementBeatmapId, setAchievementBeatmapId] = useState("");
+
   const [creationOpen, setCreationOpen] = useState(false);
   const [sendingCreation, setSendingCreation] = useState(false);
   const createAchievement = useCreateAchievement();
@@ -42,8 +44,8 @@ export default function Staff() {
     return (
       achievementName.length > 0 &&
       achievementDescription.length > 0 &&
-      achievementSolution.length > 0 &&
-      achievementTags.length > 0
+      achievementTags.length > 0 &&
+      !isNaN(parseInt(achievementBeatmapId))
     );
   };
 
@@ -60,6 +62,7 @@ export default function Staff() {
         description: achievementDescription,
         solution: achievementSolution,
         tags: achievementTags,
+        beatmap_id: parseInt(achievementBeatmapId),
       },
       {
         onSuccess: () => {
@@ -67,6 +70,8 @@ export default function Staff() {
           setAchievementName("");
           setAchievementDescription("");
           setAchievementSolution("");
+          setAchievementTags("");
+          setAchievementBeatmapId("");
         },
         onSettled: () => {
           setSendingCreation(false);
@@ -90,7 +95,7 @@ export default function Staff() {
         })}
       >
         <TextInput
-          placeholder="Achievement name"
+          placeholder="Type achievement name"
           style={{ width: "auto" }}
           className="staff__text-input"
           value={achievementName}
@@ -100,7 +105,7 @@ export default function Staff() {
         />
         <TextArea
           className="staff__textarea"
-          placeholder="Achievement description"
+          placeholder="Type description here"
           value={achievementDescription}
           onChange={(e: React.FormEvent<HTMLTextAreaElement>) => {
             setAchievementDescription(e.currentTarget.value);
@@ -108,14 +113,14 @@ export default function Staff() {
         />
         <TextArea
           className="staff__textarea"
-          placeholder="Achievement solution (N/A for explicit achievements)"
+          placeholder="Type solution here (for non-explicit achievements)"
           value={achievementSolution}
           onChange={(e: React.FormEvent<HTMLTextAreaElement>) => {
             setAchievementSolution(e.currentTarget.value);
           }}
         />
         <TextInput
-          placeholder="Achievement tags"
+          placeholder="Type tags here (e.g. 'gimmick,lazer,reading')"
           style={{ width: "auto" }}
           className="staff__text-input"
           value={achievementTags}
@@ -123,8 +128,21 @@ export default function Staff() {
             setAchievementTags(e.currentTarget.value);
           }}
         />
+        <TextInput
+          placeholder="Type beatmap id here (or leave empty)"
+          style={{ width: "auto" }}
+          className="staff__text-input"
+          value={achievementBeatmapId}
+          onChange={(e: React.FormEvent<HTMLInputElement>) => {
+            setAchievementBeatmapId(e.currentTarget.value);
+          }}
+        />
         <div className="staff__achievement-creation-panel__row">
-          <Button children="Create" onClick={onCreate} />
+          <Button
+            children="Create"
+            onClick={onCreate}
+            unavailable={sendingCreation}
+          />
           <Button children="Cancel" onClick={onCancelCreation} />
         </div>
       </div>

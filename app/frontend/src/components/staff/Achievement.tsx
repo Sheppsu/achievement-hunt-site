@@ -94,12 +94,44 @@ export default function Achievement(props: AchievementProps) {
         <p className="staff__achievement__name">{achievement.name}</p>
         <p>{achievement.description}</p>
         <p className="staff__achievement__solution">{achievement.solution}</p>
+        {achievement.beatmap === null ? (
+          ""
+        ) : (
+          <a
+            className="staff__achievement__beatmap"
+            href={`https://osu.ppy.sh/b/${achievement.beatmap.id}`}
+            target="_blank"
+          >
+            <div
+              className="staff__achievement__beatmap__cover"
+              style={{ backgroundImage: `url(${achievement.beatmap.cover})` }}
+            ></div>
+            <div className="staff__achievement__beatmap__info">
+              <p>
+                {achievement.beatmap.artist} - {achievement.beatmap.title}
+              </p>
+              <p className="staff__achievement__beatmap__info__version">
+                [{achievement.beatmap.version}]
+              </p>
+            </div>
+            <p className="staff__achievement__beatmap__star-rating">
+              {achievement.beatmap.star_rating}*
+            </p>
+          </a>
+        )}
         <div className="staff__achievement__footer">
           <VoteContainer achievement={achievement} />
           {achievement.tags.split(",").map((tag) => (
             <div className="staff__achievement__footer__tag">{tag}</div>
           ))}
         </div>
+        {achievement.creator === null ? (
+          ""
+        ) : (
+          <p className="staff__achievement__creator">
+            Submitted by {achievement.creator.username}
+          </p>
+        )}
       </div>
       <div className="staff__achievement__comment-container">
         {achievement.comments.map((comment, i) => (

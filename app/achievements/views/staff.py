@@ -28,6 +28,7 @@ def achievements(req):
                     "comments__user",
                     "beatmap",
                     "solution",
+                    "creator",
                     SerializableField(
                         "votes",
                         serial_key="has_voted",
@@ -44,7 +45,8 @@ def achievements(req):
                 "comments__user",
                 "votes"
             ).select_related(
-                "beatmap"
+                "beatmap",
+                "creator"
             ).filter(
                 release_time=None
             ).all()
