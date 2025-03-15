@@ -24,7 +24,7 @@ export function splitProps(
     }
   }
 
-  for (const [k, v] of Object.entries(otherProps)) {
+  for (const [k, v] of Object.entries(otherDefaults)) {
     if (!(k in otherProps)) {
       otherProps[k] = v;
     }

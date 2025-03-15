@@ -89,7 +89,7 @@ export default function Achievement(props: AchievementProps) {
   };
 
   return (
-    <div className="staff__achievement-container">
+    <div>
       <div className="staff__achievement">
         <p className="staff__achievement__name">{achievement.name}</p>
         <p>{achievement.description}</p>
@@ -106,6 +106,7 @@ export default function Achievement(props: AchievementProps) {
           <AchievementComment key={i} comment={comment} />
         ))}
         <TextArea
+          className="staff__textarea"
           name="msg"
           placeholder="Type comment here"
           hidden={!isCommenting}

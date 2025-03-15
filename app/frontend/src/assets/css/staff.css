@@ -8,8 +8,57 @@
     gap: 10px;
 }
 
-.staff__achievement-container {
+.staff__text-input {
+    height: 25px;
+    padding: 0;
+    font-size: 15px;
 
+    background-color: transparent;
+    border: none;
+    border-radius: 0;
+}
+
+.staff__textarea {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+
+    font-size: 15px;
+
+    border: none;
+    outline: none;
+    resize: none;
+    overflow: hidden;
+
+    color: white;
+    background-color: transparent;
+}
+
+.staff__interaction-bar {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.staff__achievement-creation-panel {
+    padding: 10px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    border: solid 2px var(--border-color);
+    border-radius: 10px;
+
+    background-color: var(--background-color);
+}
+
+.staff__achievement-creation-panel__row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: right;
+    gap: 10px;
 }
 
 .staff__achievement {
@@ -92,22 +141,6 @@
     flex-direction: row;
     justify-content: right;
     gap: 5px;
-}
-
-.staff__achievement__comment__textarea {
-    width: 100%;
-    padding: 0;
-    margin: 0;
-
-    font-size: 15px;
-
-    border: none;
-    outline: none;
-    resize: none;
-    overflow: hidden;
-
-    color: white;
-    background-color: transparent;
 }
 
 .staff__achievement__comment {

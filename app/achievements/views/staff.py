@@ -1,6 +1,6 @@
 from django.views.decorators.http import require_POST, require_GET
 
-from ..models import Achievement, AchievementComment, AchievementVote
+from ..models import Achievement, AchievementComment, AchievementVote, BeatmapInfo
 from .util import error, success, require_valid_data
 from common.serializer import SerializableField
 
@@ -107,3 +107,43 @@ def vote_achievement(req, data, achievement):
         existing_vote.delete()
 
     return success({"added": add_vote})
+
+
+@require_staff
+@require_POST
+@require_valid_data(
+    "name",
+    "description",
+    "solution",
+    "tags"
+)
+def create_achievement(req, data):
+    name, description, solution, tags = data["name"], data["description"], data["solution"], data["tags"]
+    if not isinstance(name, str) or len(name) == 0 or len(name) > 128:
+        return error("invalid name length")
+    if not isinstance(description, str) or len(description) == 0 or len(description) > 2048:
+        return error("invalid description length")
+    if not isinstance(solution, str) or len(solution) > 2048:
+        return error("solution length too big")
+    if not isinstance(tags, str) or len(tags) > 128:
+        return error("invalid tags length")
+
+    beatmap = data.get("beatmap_id", None)
+    if beatmap is not None:
+        if not isinstance(beatmap, int):
+            return error("invalid beatmap_id type")
+
+        beatmap = BeatmapInfo.get_or_create(beatmap)
+        if beatmap is None:
+            return error("invalid beatmap_id")
+
+    achievement = Achievement.objects.create(
+        name=name,
+        description=description,
+        solution=solution,
+        tags=tags,
+        beatmap=beatmap,
+        creator=req.user
+    )
+
+    return success(achievement.serialize(includes=["creator", "beatmap", "solution"]))

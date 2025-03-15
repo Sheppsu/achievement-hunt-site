@@ -17,5 +17,6 @@ urlpatterns = [
 
     path("staff/achievements/", staff.achievements),
     path("staff/achievements/<int:achievement_id>/vote/", staff.vote_achievement),
-    path("staff/achievements/<int:achievement_id>/comment/", staff.create_comment)
+    path("staff/achievements/<int:achievement_id>/comment/", staff.create_comment),
+    path("staff/achievements/create/", staff.create_achievement),
 ]

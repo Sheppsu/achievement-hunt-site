@@ -7,6 +7,9 @@ from osu import Client
 from common import create_auth_handler, SerializableModel
 
 
+osu_client = settings.OSU_CLIENT
+
+
 class UserManager(models.Manager):
     def create_user(self, code: str):
         try:
@@ -66,6 +69,25 @@ class BeatmapInfo(SerializableModel):
     title = models.CharField()
     cover = models.CharField()
     star_rating = models.FloatField()
+
+    @classmethod
+    def get_or_create(cls, beatmap_id):
+        beatmap = BeatmapInfo.objects.filter(id=beatmap_id).first()
+        if beatmap is None:
+            try:
+                info = osu_client.get_beatmap(beatmap_id)
+                beatmap = BeatmapInfo.objects.create(
+                    id=info.id,
+                    artist=info.beatmapset.artist,
+                    title=info.beatmapset.title,
+                    version=info.version,
+                    cover=info.beatmapset.covers.cover,
+                    star_rating=info.difficulty_rating
+                )
+            except:
+                return
+
+        return beatmap
 
     class Serialization:
         FIELDS = ["id", "artist", "version", "title", "cover", "star_rating"]

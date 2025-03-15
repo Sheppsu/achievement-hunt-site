@@ -25,7 +25,9 @@ export default function TextArea(props: TextAreaProps) {
     otherDefaults,
   );
 
-  elementProps.className += " staff__achievement__comment__textarea";
+  if (otherProps.hidden) {
+    elementProps.className += " hide";
+  }
 
   // resize text area
   elementProps.onInput = (e: React.FormEvent<HTMLTextAreaElement>) => {

@@ -17,6 +17,7 @@ import {
 } from "./types/AchievementTeamType";
 import {
   AchievementExtendedType,
+  AchievementType,
   StaffAchievementType,
 } from "./types/AchievementType";
 import { AchievementCommentType } from "api/types/AchievementCommentType.ts";
@@ -370,6 +371,39 @@ export function useSendComment(
           ["staff", "achievements"],
           (achievements: StaffAchievementType[]) =>
             onCommented(achievements, achievementId, result),
+        );
+      },
+    },
+    {
+      method: "POST",
+    },
+  );
+}
+
+type AchievementCreationReturn = AchievementType & { solution: string };
+
+function onAchievementCreation(
+  achievements: StaffAchievementType[],
+  achievement: AchievementCreationReturn,
+) {
+  return achievements.concat({
+    ...achievement,
+    comments: [],
+    vote_count: 0,
+    has_voted: false,
+  });
+}
+
+export function useCreateAchievement(): SpecificUseMutationResult<AchievementCreationReturn> {
+  const queryClient = useContext(QueryClientContext);
+  return useMakeMutation(
+    {
+      mutationKey: ["staff", "achievements", "create"],
+      onSuccess: (result: AchievementCreationReturn) => {
+        queryClient?.setQueryData(
+          ["staff", "achievements"],
+          (achievements: StaffAchievementType[]) =>
+            onAchievementCreation(achievements, result),
         );
       },
     },
