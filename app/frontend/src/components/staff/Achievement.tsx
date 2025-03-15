@@ -3,8 +3,11 @@ import { BiSolidUpArrow, BiUpArrow } from "react-icons/bi";
 import { useSendComment, useVoteAchievement } from "api/query.ts";
 import Button from "components/inputs/Button.tsx";
 import TextArea from "components/inputs/TextArea.tsx";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import AchievementComment from "components/staff/AchievementComment.tsx";
+import { SessionContext } from "contexts/SessionContext.ts";
+import AchievementCreation from "components/staff/AchievementCreation.tsx";
+import classNames from "classnames";
 
 function VoteContainer({ achievement }: { achievement: StaffAchievementType }) {
   const vote = useVoteAchievement(achievement.id);
@@ -36,10 +39,13 @@ type AchievementProps = {
 export default function Achievement(props: AchievementProps) {
   const achievement = props.achievement;
 
+  const session = useContext(SessionContext);
+
   const [isCommenting, setIsCommenting] = useState(false);
   const [canSendComment, setCanSendComment] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [sendingComment, setSendingComment] = useState(false);
+  const [editing, setEditing] = useState(false);
   const sendComment = useSendComment(achievement.id);
 
   const onCommentStart = () => {
@@ -48,6 +54,14 @@ export default function Achievement(props: AchievementProps) {
 
   const onCommentCancel = () => {
     setIsCommenting(false);
+  };
+
+  const onStartEdit = () => {
+    setEditing(true);
+  };
+
+  const onCancelEdit = () => {
+    setEditing(false);
   };
 
   const isCommentTextValid = () => {
@@ -90,7 +104,7 @@ export default function Achievement(props: AchievementProps) {
 
   return (
     <div>
-      <div className="staff__achievement">
+      <div className={classNames("staff__achievement", { hide: editing })}>
         <p className="staff__achievement__name">{achievement.name}</p>
         <p>{achievement.description}</p>
         <p className="staff__achievement__solution">{achievement.solution}</p>
@@ -133,6 +147,12 @@ export default function Achievement(props: AchievementProps) {
           </p>
         )}
       </div>
+      <AchievementCreation
+        hidden={!editing}
+        onCancelCreation={onCancelEdit}
+        submitText="Save"
+        achievement={achievement}
+      />
       <div className="staff__achievement__comment-container">
         {achievement.comments.map((comment, i) => (
           <AchievementComment key={i} comment={comment} />
@@ -149,6 +169,15 @@ export default function Achievement(props: AchievementProps) {
           value={commentText}
         />
         <div className="staff__achievement__comment-container__row">
+          <Button
+            children="Edit"
+            hidden={
+              achievement.creator === null ||
+              achievement.creator.id !== session.user!.id ||
+              editing
+            }
+            onClick={onStartEdit}
+          />
           <Button
             children="Comment"
             onClick={onCommentStart}

@@ -122,7 +122,7 @@ def vote_achievement(req, data, achievement):
     "solution",
     "tags"
 )
-def create_achievement(req, data):
+def create_achievement(req, data, achievement=None):
     name, description, solution, tags = data["name"], data["description"], data["solution"], data["tags"]
     if not isinstance(name, str) or len(name) == 0 or len(name) > 128:
         return error("invalid name length")
@@ -142,13 +142,28 @@ def create_achievement(req, data):
         if beatmap is None:
             return error("invalid beatmap_id")
 
-    achievement = Achievement.objects.create(
-        name=name,
-        description=description,
-        solution=solution,
-        tags=tags,
-        beatmap=beatmap,
-        creator=req.user
-    )
+    if achievement is None:
+        achievement = Achievement.objects.create(
+            name=name,
+            description=description,
+            solution=solution,
+            tags=tags,
+            beatmap=beatmap,
+            creator=req.user
+        )
+    elif achievement.creator_id != req.user.id:
+        return error("cannot edit an achievement that's not yours")
+    else:
+        achievement.name = name
+        achievement.description = description
+        achievement.solution = solution
+        achievement.tags = tags
+        achievement.beatmap = beatmap
+        achievement.save()
 
     return success(achievement.serialize(includes=["creator", "beatmap", "solution"]))
+
+
+@require_achievement
+def edit_achievement(req, achievement):
+    return create_achievement(req, achievement=achievement)

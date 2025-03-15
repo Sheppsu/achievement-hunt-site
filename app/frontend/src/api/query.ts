@@ -416,3 +416,47 @@ export function useCreateAchievement(): SpecificUseMutationResult<AchievementCre
     },
   );
 }
+
+function onAchievementEdit(
+  achievements: StaffAchievementType[],
+  editedAchievement: AchievementCreationReturn,
+) {
+  const newAchievements = [];
+
+  for (const achievement of achievements) {
+    if (achievement.id === editedAchievement.id) {
+      newAchievements.push({
+        ...editedAchievement,
+        comments: achievement.comments,
+        vote_count: achievement.vote_count,
+        has_voted: achievement.has_voted,
+      });
+      continue;
+    }
+
+    newAchievements.push(achievement);
+  }
+
+  return newAchievements;
+}
+
+export function useEditAchievement(
+  achievementId: number,
+): SpecificUseMutationResult<AchievementCreationReturn> {
+  const queryClient = useContext(QueryClientContext);
+  return useMakeMutation(
+    {
+      mutationKey: ["staff", "achievements", achievementId.toString(), "edit"],
+      onSuccess: (result: AchievementCreationReturn) => {
+        queryClient?.setQueryData(
+          ["staff", "achievements"],
+          (achievements: StaffAchievementType[]) =>
+            onAchievementEdit(achievements, result),
+        );
+      },
+    },
+    {
+      method: "POST",
+    },
+  );
+}
