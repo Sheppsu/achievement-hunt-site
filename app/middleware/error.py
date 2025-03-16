@@ -43,9 +43,6 @@ class DiscordLogger:
     WEBHOOK_URL = os.getenv("WEBHOOK_URL")
 
     def __init__(self):
-        if not settings.DEBUG and self.WEBHOOK_URL is None:
-            raise RuntimeError("Missing WEBHOOK_URL env var")
-
         self._queue: queue.Queue = queue.Queue()
         self._running: threading.Event = threading.Event()
 
@@ -65,6 +62,10 @@ class DiscordLogger:
         self._running.clear()
 
     def submit(self, req, exc):
+        if self.WEBHOOK_URL is None:
+            _log.warn("Unable to log error, WEBHOOK_URL is None")
+            return
+
         self._queue.put(_create_embeds(req, exc))
 
         if not self._running.is_set():
