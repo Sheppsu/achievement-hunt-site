@@ -3,13 +3,16 @@ from django.conf import settings
 import os
 import threading
 import requests
+import queue
+import logging
 
 
 __all__ = (
     "ExceptionLoggingMiddleware",
+    "DiscordLogger"
 )
 
-WEBHOOK_URL = os.getenv("WEBHOOK")
+_log = logging.getLogger(__name__)
 
 
 def header_embed():
@@ -20,11 +23,11 @@ def header_embed():
     })
 
 
-def log_err(req, e):
+def _create_embeds(req, exc):
     embeds = []
     embeds.append({
         "title": f"{req.method} {req.path}",
-        "description": str(e),
+        "description": str(exc),
         "color": 0xff0000,
     })
     embeds.append(header_embed())
@@ -32,7 +35,43 @@ def log_err(req, e):
         if len(embeds[-1]["fields"]) == 25:
             embeds.append(header_embed())
         embeds[-1]["fields"].append({"name": name, "value": value})
-    threading.Thread(target=requests.post, args=(WEBHOOK_URL,), kwargs={"json": {"embeds": embeds}}).start()
+
+    return embeds
+
+
+class DiscordLogger:
+    WEBHOOK_URL = os.getenv("WEBHOOK_URL")
+
+    def __init__(self):
+        if not settings.DEBUG and self.WEBHOOK_URL is None:
+            raise RuntimeError("Missing WEBHOOK_URL env var")
+
+        self._queue: queue.Queue = queue.Queue()
+        self._running: threading.Event = threading.Event()
+
+    def run(self):
+        self._running.set()
+        threading.Thread(target=self._loop).start()
+
+    def _loop(self):
+        while self._running.is_set():
+            embeds = self._queue.get()
+            try:
+                resp = requests.post(self.WEBHOOK_URL, json={"embeds": embeds})
+                resp.raise_for_status()
+            except Exception as exc:
+                _log.exception("Failed to send completion to discord", exc_info=exc)
+
+        self._running.clear()
+
+    def submit(self, req, exc):
+        self._queue.put(_create_embeds(req, exc))
+
+        if not self._running.is_set():
+            self.run()
+
+    def stop(self):
+        self._running.clear()
 
 
 class ExceptionLoggingMiddleware:
@@ -44,4 +83,4 @@ class ExceptionLoggingMiddleware:
 
     def process_exception(self, req, exc) -> None:
         if not settings.DEBUG:
-            log_err(req, exc)
+            settings.DISCORD_LOGGER.submit(req, exc)

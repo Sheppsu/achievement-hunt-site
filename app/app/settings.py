@@ -17,6 +17,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 from osu import AuthHandler, Scope, Client
 
+from middleware.error import DiscordLogger
+
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -188,3 +190,5 @@ WS_CONNECTION_VALIDATOR = os.getenv("WS_CONNECTION_VALIDATOR")
 
 EVENT_START = 1731715200
 EVENT_END = 1732492800
+
+DISCORD_LOGGER = DiscordLogger()
