@@ -7,6 +7,9 @@ from osu import Client
 from common import create_auth_handler, SerializableModel
 
 
+osu_client = settings.OSU_CLIENT
+
+
 class UserManager(models.Manager):
     def create_user(self, code: str):
         try:
@@ -67,14 +70,33 @@ class BeatmapInfo(SerializableModel):
     cover = models.CharField()
     star_rating = models.FloatField()
 
+    @classmethod
+    def get_or_create(cls, beatmap_id):
+        beatmap = BeatmapInfo.objects.filter(id=beatmap_id).first()
+        if beatmap is None:
+            try:
+                info = osu_client.get_beatmap(beatmap_id)
+                beatmap = BeatmapInfo.objects.create(
+                    id=info.id,
+                    artist=info.beatmapset.artist,
+                    title=info.beatmapset.title,
+                    version=info.version,
+                    cover=info.beatmapset.covers.cover,
+                    star_rating=info.difficulty_rating
+                )
+            except:
+                return
+
+        return beatmap
+
     class Serialization:
         FIELDS = ["id", "artist", "version", "title", "cover", "star_rating"]
 
 
 class Achievement(SerializableModel):
     name = models.CharField(max_length=128)
-    category = models.CharField(max_length=32)
-    description = models.CharField(max_length=2096)
+    description = models.CharField(max_length=2048)
+    solution = models.CharField(max_length=2048)
     audio = models.CharField(default="")
     tags = models.CharField(max_length=128)
     beatmap = models.ForeignKey(
@@ -83,9 +105,23 @@ class Achievement(SerializableModel):
         on_delete=models.PROTECT,
         null=True
     )
+    release_time = models.DateTimeField(null=True)
+    creator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, default=None)
+    created_at = models.DateTimeField()
+    last_edited_at = models.DateTimeField()
 
     class Serialization:
-        FIELDS = ["id", "name", "category", "description", "audio", "tags", "beatmap"]
+        FIELDS = [
+            "id",
+            "name",
+            "description",
+            "audio",
+            "tags",
+            "beatmap",
+            "release_time",
+            "created_at",
+            "last_edited_at"
+        ]
 
 
 class AchievementCompletionPlacement(SerializableModel):
@@ -114,6 +150,24 @@ class AchievementCompletion(SerializableModel):
 
     class Serialization:
         FIELDS = ["time_completed"]
+
+
+class AchievementComment(SerializableModel):
+    achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE, related_name="comments")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
+    msg = models.CharField(max_length=4096)
+    posted_at = models.DateTimeField()
+
+    class Serialization:
+        FIELDS = ["id", "msg", "posted_at"]
+
+
+class AchievementVote(SerializableModel):
+    achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE, related_name="votes")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="votes")
+
+    class Serialization:
+        FIELDS = ["id", "user_id"]
 
 
 class Team(SerializableModel):

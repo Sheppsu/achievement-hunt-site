@@ -12,23 +12,30 @@ __all__ = (
 
 
 class SerializableField:
-    __slots__ = ("field", "serialize_condition", "serialize_filter", "post_serial_filter")
+    __slots__ = ("field", "serial_key", "serialize_condition", "serialize_filter", "post_serial_filter", "post_transform")
 
     def __init__(
         self,
         field: str,
+        serial_key: str | None = None,
         condition: Callable[[models.Model], bool] | None = None,
         filter: Callable[[models.Model], bool] | None = None,
-        post_serial_filter: Callable[[Any], bool] | None = None
+        post_serial_filter: Callable[[Any], bool] | None = None,
+        post_transform: Callable[[Any], Any] | None = None,
     ):
         self.field = field
+        self.serial_key = serial_key
         self.serialize_condition = condition
         self.serialize_filter = filter
         self.post_serial_filter = post_serial_filter
+        self.post_transform = post_transform
 
     @property
     def is_passive(self):
-        return self.serialize_condition is None and self.serialize_filter is None and self.post_serial_filter is None
+        return self.serialize_condition is None and \
+            self.serialize_filter is None and \
+            self.post_serial_filter is None and \
+            self.post_transform is None
 
     def split(self, sep=None, maxsplit=-1):
         result = list(map(SerializableField, self.field.split(sep=sep, maxsplit=maxsplit)))
@@ -39,13 +46,15 @@ class SerializableField:
     def clone(self, new_field: str):
         return SerializableField(
             new_field,
+            self.serial_key,
             self.serialize_condition,
             self.serialize_filter,
-            self.post_serial_filter
+            self.post_serial_filter,
+            self.post_transform
         )
 
     def __eq__(self, other: str):
-        return self.field == other
+        return self.field == other and self.is_passive
 
     def __str__(self):
         return self.field
@@ -105,29 +114,28 @@ class SerializableModel(models.Model):
             if serialize_condition is not None and not serialize_condition(self):
                 continue
 
-            # filter iterative values
-            serialize_filter = getattr(field, "serialize_filter", None)
-            post_serial_filter = getattr(field, "post_serial_filter", None)
-
             value = getattr(self, str_field)
             if isinstance(value, SerializableModel):
                 value = value.serialize(includes.get(field), excludes.get(field))
             elif isinstance(value, datetime):
                 value = value.isoformat()
             elif value.__class__.__name__ == "RelatedManager":
-                serialize_filter = serialize_filter or (lambda a: True)
                 value = (
                     obj.serialize(includes.get(field), excludes.get(field))
-                    for obj in value.all() if serialize_filter(obj)
+                    for obj in value.all()
+                    if field.serialize_filter is None or field.serialize_filter(obj)
                 )
 
-            if post_serial_filter is not None and hasattr(value, "__iter__"):
-                value = filter(post_serial_filter, value)
+            if field.post_serial_filter is not None and hasattr(value, "__iter__"):
+                value = filter(field.post_serial_filter, value)
 
             if hasattr(value, "__next__"):
                 value = list(value)
 
-            data[field_transforms.get(str_field, str_field)] = value
+            if field.post_transform is not None:
+                value = field.post_transform(value)
+
+            data[field.serial_key or field_transforms.get(str_field, str_field)] = value
 
         return data
 

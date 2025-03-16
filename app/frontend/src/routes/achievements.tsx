@@ -18,6 +18,7 @@ import AchievementProgress from "components/achievements/AchievementProgress.tsx
 import AchievementNavigationBar, {
   getDefaultNav,
 } from "components/achievements/AchievementNavigationBar.tsx";
+import classNames from "classnames";
 
 function getTimeStr(delta: number) {
   const days = Math.floor((delta / (1000 * 60 * 60 * 24)) % 60);
@@ -32,15 +33,20 @@ function getTimeStr(delta: number) {
 function HiddenAchievementCompletionPage({
   time,
   eventStart,
+  hidden,
 }: {
   time: number;
   eventStart: number;
+  hidden: boolean;
 }) {
   const delta = eventStart - time;
   const timeString = getTimeStr(delta);
 
   return (
-    <div style={{ margin: "auto", textAlign: "center", marginTop: "20px" }}>
+    <div
+      className={classNames({ hide: hidden })}
+      style={{ margin: "auto", textAlign: "center", marginTop: "20px" }}
+    >
       <Helmet>
         <title>CTA - Starts in {timeString}</title>
       </Helmet>
@@ -64,11 +70,13 @@ function FullAchievementCompletionPage({
   state,
   scope,
   dispatchState,
+  hidden,
 }: {
   team: AchievementTeamExtendedType | null;
   state: WebsocketState;
   scope: AnimationScope;
   dispatchState: StateDispatch;
+  hidden: boolean;
 }) {
   return (
     <>
@@ -78,6 +86,7 @@ function FullAchievementCompletionPage({
           state={state}
           dispatchState={dispatchState}
           team={team}
+          hidden={hidden}
         />
       </div>
     </>
@@ -106,12 +115,6 @@ export default function AchievementCompletionPage() {
   const state = useStateContext();
   const dispatchState = useDispatchStateContext();
 
-  if (isHidden) {
-    return (
-      <HiddenAchievementCompletionPage time={time} eventStart={eventStart} />
-    );
-  }
-
   if (state.achievementsFilter === null && achievements !== undefined) {
     dispatchState({ id: 5, achievementsFilter: getDefaultNav(achievements) });
   }
@@ -122,7 +125,13 @@ export default function AchievementCompletionPage() {
         <title>CTA - Completions</title>
       </Helmet>
 
-      <div className="page-container">
+      <HiddenAchievementCompletionPage
+        time={time}
+        eventStart={eventStart}
+        hidden={!isHidden}
+      />
+
+      <div className={classNames("page-container", { hide: isHidden })}>
         <div style={{ margin: "auto", textAlign: "center", marginTop: "20px" }}>
           <h1 style={{ fontSize: "3em" }}>
             {time < eventEnd
@@ -136,6 +145,7 @@ export default function AchievementCompletionPage() {
           animate={animate}
           dispatchState={dispatchState}
           achievements={achievements}
+          isStaff={false}
         />
 
         <div className="achievement-content-container">
@@ -145,6 +155,7 @@ export default function AchievementCompletionPage() {
               state={state}
               dispatchState={dispatchState}
               team={team}
+              hidden={isHidden}
             />
           ) : (
             <LimitedAchievementCompletionPage state={state} scope={scope} />

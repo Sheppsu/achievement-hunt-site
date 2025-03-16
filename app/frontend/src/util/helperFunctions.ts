@@ -2,6 +2,10 @@ import {
   AchievementTeamExtendedType,
   AchievementTeamType,
 } from "api/types/AchievementTeamType.ts";
+import {
+  AchievementCompletionType,
+  AnonymousAchievementCompletionType,
+} from "api/types/AchievementCompletionType.ts";
 
 export function toTitleCase(str: string) {
   switch (str) {
@@ -71,6 +75,23 @@ export function getMyTeam(
         }
       }
     }
+
+  return null;
+}
+
+export function getMyCompletion(
+  cs: (AchievementCompletionType | AnonymousAchievementCompletionType)[],
+  myTeam: AchievementTeamExtendedType | null,
+) {
+  if (myTeam === null) return null;
+
+  const playerIds = myTeam.players.map((p) => p.user.id);
+
+  for (const c of cs) {
+    if ("player" in c && playerIds.includes(c.player.user.id)) {
+      return c;
+    }
+  }
 
   return null;
 }

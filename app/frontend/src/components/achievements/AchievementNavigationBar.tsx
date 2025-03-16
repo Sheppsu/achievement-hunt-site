@@ -1,9 +1,12 @@
 import { WebsocketState } from "types/WebsocketStateType.ts";
 import { StateDispatch } from "contexts/StateContext.ts";
-import { AchievementExtendedType } from "api/types/AchievementType.ts";
+import {
+  AchievementExtendedType,
+  AchievementType,
+} from "api/types/AchievementType.ts";
 import { useEffect, useState } from "react";
 import { toTitleCase } from "util/helperFunctions.ts";
-import Button from "components/Button.tsx";
+import Button from "components/inputs/Button.tsx";
 import classNames from "classnames";
 
 export type NavItem = {
@@ -21,21 +24,16 @@ export type SortedNavRowItems = {
 
 export type NavItems = {
   mode: NavRowItems;
-  categories: NavRowItems;
   tags: NavRowItems;
   sort: SortedNavRowItems;
 };
 
 export function getDefaultNav(
-  achievements: AchievementExtendedType[],
+  achievements: AchievementType[],
+  isStaff: boolean = false,
 ): NavItems {
-  const categories: string[] = [];
   const tags: string[] = [];
   for (const achievement of achievements) {
-    if (!categories.includes(achievement.category)) {
-      categories.push(achievement.category);
-    }
-
     for (const tag of achievement.tags.split(",")) {
       if (tag === "") continue;
       if (tag.startsWith("mode-")) continue;
@@ -46,6 +44,19 @@ export function getDefaultNav(
     }
   }
 
+  const sortItems = isStaff
+    ? [
+        { label: "last edited", active: true },
+        { label: "creation time", active: false },
+        { label: "votes", active: false },
+      ]
+    : [
+        { label: "completions", active: true },
+        { label: "player", active: false },
+        { label: "date completed", active: false },
+        { label: "batch", active: false },
+      ];
+
   return {
     mode: {
       items: [
@@ -55,16 +66,9 @@ export function getDefaultNav(
         { label: "catch", active: false },
       ],
     },
-    categories: { items: categories.map((c) => ({ label: c, active: false })) },
     tags: { items: tags.map((t) => ({ label: t, active: false })) },
     sort: {
-      items: [
-        { label: "category", active: true },
-        { label: "completions", active: false },
-        { label: "player", active: false },
-        { label: "date completed", active: false },
-        { label: "batch", active: false },
-      ],
+      items: sortItems,
       sort: "desc",
     },
   };
@@ -122,11 +126,13 @@ export default function AchievementNavigationBar({
   animate,
   dispatchState,
   achievements,
+  isStaff,
 }: {
   state: WebsocketState | null;
   animate: Function;
   dispatchState: StateDispatch;
-  achievements: AchievementExtendedType[] | undefined;
+  achievements: AchievementType[] | undefined;
+  isStaff: boolean;
 }) {
   const [animating, setAnimating] = useState(false);
   const [searchField, setSearchField] = useState<string>("");
@@ -145,7 +151,10 @@ export default function AchievementNavigationBar({
   function onReset() {
     if (!achievements) return;
 
-    dispatchState({ id: 5, achievementsFilter: getDefaultNav(achievements) });
+    dispatchState({
+      id: 5,
+      achievementsFilter: getDefaultNav(achievements, isStaff),
+    });
     dispatchState({ id: 6, achievementsSearchFilter: "" });
     setSearchField("");
 

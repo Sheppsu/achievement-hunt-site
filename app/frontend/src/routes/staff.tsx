@@ -1,124 +1,94 @@
-import AnimatedPage from "components/AnimatedPage.tsx";
-import { Helmet } from "react-helmet";
+import { useCreateAchievement, useGetStaffAchievement } from "api/query.ts";
+import Achievement from "components/staff/Achievement.tsx";
 
 import "assets/css/staff.css";
+import { useAuthEnsurer } from "util/auth.ts";
+import Button from "components/inputs/Button.tsx";
+import TextInput from "components/inputs/TextInput.tsx";
+import TextArea from "components/inputs/TextArea.tsx";
+import { useState } from "react";
+import classNames from "classnames";
+import AchievementCreation from "components/staff/AchievementCreation.tsx";
+import AchievementNavigationBar, {
+  getDefaultNav,
+} from "components/achievements/AchievementNavigationBar.tsx";
+import {
+  useDispatchStateContext,
+  useStateContext,
+} from "contexts/StateContext.ts";
+import { useAnimate } from "framer-motion";
+import { getSortedAchievements } from "util/achievementSorting.ts";
 
-export default function StaffPage() {
+export default function Staff() {
+  useAuthEnsurer().ensureStaff();
+
+  const { data: achievements, isLoading } = useGetStaffAchievement();
+  const state = useStateContext();
+  const dispatchState = useDispatchStateContext();
+  const [scope, animate] = useAnimate();
+
+  const [creationOpen, setCreationOpen] = useState(false);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (achievements === undefined) {
+    return <div>Failed to load achievements</div>;
+  }
+
+  if (state.achievementsFilter === null) {
+    dispatchState({
+      id: 5,
+      achievementsFilter: getDefaultNav(achievements, true),
+    });
+    return <div>Loading...</div>;
+  }
+
+  const onOpenCreation = () => {
+    setCreationOpen(true);
+  };
+
+  const onCancelCreation = () => {
+    setCreationOpen(false);
+  };
+
+  const sortedAchievements = getSortedAchievements(
+    achievements,
+    state.achievementsFilter,
+    state.achievementsSearchFilter,
+    null,
+    false,
+    null,
+  );
+
   return (
-    <AnimatedPage>
-      <Helmet>
-        <title>CTA - Staff</title>
-      </Helmet>
-
-      <div className="index-container">
-        <div className="card-container">
-          <div className="info-container">
-            <h1 className="staff-header">Host</h1>
-            <div className="staff-container">
-              <a
-                href="https://sheppsu.me"
-                target="_blank"
-                className="external-link staff"
-              >
-                Sheppsu
-              </a>
-            </div>
-            <h1 className="staff-header">Banner graphic</h1>
-            <div className="staff-container">
-              <a
-                href="https://osu.ppy.sh/users/18607342"
-                target="_blank"
-                className="external-link staff"
-              >
-                Kheops
-              </a>
-            </div>
-            <h1 className="staff-header">Website developers</h1>
-            <div className="staff-container">
-              <a
-                href="https://sheppsu.me"
-                target="_blank"
-                className="external-link staff"
-              >
-                Sheppsu
-              </a>
-              <a
-                href="https://aychar.dev"
-                target="_blank"
-                className="external-link staff"
-              >
-                aychar
-              </a>
-              <a
-                href="https://github.com/Rinne0333"
-                target="_blank"
-                className="external-link staff"
-              >
-                Rinne
-              </a>
-            </div>
-            <h1 className="staff-header">Achievement masterminds</h1>
-            <div className="staff-container">
-              <a
-                href="https://osu.ppy.sh/users/7772622"
-                target="_blank"
-                className="external-link staff"
-              >
-                rc4322 / TamamoLover
-              </a>
-              <a
-                href="https://osu.ppy.sh/users/14177677"
-                target="_blank"
-                className="external-link staff"
-              >
-                Whatsoever545
-              </a>
-              <a
-                href="https://osu.ppy.sh/users/14208558"
-                target="_blank"
-                className="external-link staff"
-              >
-                Alanko
-              </a>
-              <a
-                href="https://osu.ppy.sh/users/11153810"
-                target="_blank"
-                className="external-link staff"
-              >
-                Anonymoose
-              </a>
-              <a
-                href="https://sheppsu.me"
-                target="_blank"
-                className="external-link staff"
-              >
-                Sheppsu
-              </a>
-              <a
-                href="https://aychar.dev"
-                target="_blank"
-                className="external-link staff"
-              >
-                aychar
-              </a>
-              <a
-                href="https://github.com/Rinne0333"
-                target="_blank"
-                className="external-link staff"
-              >
-                Rinne
-              </a>
-              <a
-                href="https://osu.ppy.sh/users/1699875"
-                target="_blank"
-                className="external-link staff"
-              >
-                Remyria
-              </a>
-            </div>
-          </div>
-        </div>
+    <div className="staff__page">
+      <div className="staff__interaction-bar">
+        <Button
+          children="Create achievement"
+          hidden={creationOpen}
+          onClick={onOpenCreation}
+        />
       </div>
-    </AnimatedPage>
+      <AchievementNavigationBar
+        state={state}
+        animate={animate}
+        dispatchState={dispatchState}
+        achievements={achievements}
+        isStaff={true}
+      />
+      <AchievementCreation
+        hidden={!creationOpen}
+        onCancelCreation={onCancelCreation}
+        submitText="Create"
+      />
+      <div className="staff__achievement-container" ref={scope}>
+        {/* sorting for staff page puts everything under the 'values' category */}
+        {sortedAchievements["values"].map((a, i) => (
+          <Achievement key={i} achievement={a} />
+        ))}
+      </div>
+    </div>
   );
 }

@@ -1,5 +1,5 @@
 import discordLogo from "assets/images/discord-logo.png";
-import {Link} from "react-router-dom";
+import { Link } from "react-router-dom";
 export default function Footer() {
   return (
     <footer>
@@ -19,22 +19,25 @@ export default function Footer() {
             className="external-link"
           >
             sheppsu
-          </a>{", "}
+          </a>
+          {", "}
           <a
             href="https://github.com/hrfarmer"
             target="_blank"
             className="external-link"
           >
             aychar
-          </a>{", and "}
+          </a>
+          {", and "}
           <a
             href="https://github.com/Rinne0333"
             target="_blank"
             className="external-link"
           >
             Rinne
-          </a>{" | "}
-          <Link to="/staff" className="external-link">
+          </a>
+          {" | "}
+          <Link to="/credits" className="external-link">
             See all staff
           </Link>
         </p>

@@ -1,28 +1,41 @@
 import base64
-import json
 import random
 import secrets
 import struct
 import time
 
-from django.conf import settings
 from django.contrib.auth import login as do_login, logout as do_logout
 from django.db.models.deletion import RestrictedError
-from django.db import models
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect
 from django.views.decorators.http import require_http_methods, require_POST
 
 from nacl.secret import SecretBox
 
-from .models import *
+from ..models import *
+from .util import error, success, require_valid_data
 from common.serializer import SerializableField
+
+
+__all__ = (
+    "login",
+    "logout",
+    "teams",
+    "achievements",
+    "join_team",
+    "leave_team",
+    "create_team",
+    "rename_team",
+    "transfer_admin",
+    "player_stats",
+    "get_auth_packet"
+)
 
 
 EVENT_START, EVENT_END = settings.EVENT_START, settings.EVENT_END
 
 
-def before_event(func):
+def before_or_during_event(func):
     def wrapper(*args, **kwargs):
         if event_ended():
             return error("event ended")
@@ -53,29 +66,6 @@ def select_teams(many=False, **kwargs) -> list[Team] | Team | None:
     return teams[0]
 
 
-def error(msg: str, status=400):
-    return JsonResponse({"error": msg}, status=status, safe=False)
-
-
-def success(data, status=200):
-    return JsonResponse({"data": data}, status=status, safe=False)
-
-
-def parse_body(body: bytes, require_has: tuple | list):
-    try:
-        data = json.loads(body.decode("utf-8"))
-        if not isinstance(data, dict):
-            return
-
-        for require in require_has:
-            if require not in data:
-                return
-
-        return data
-    except (UnicodeDecodeError, json.JSONDecodeError):
-        return
-
-
 def login(req):
     code = req.GET.get("code", None)
     if code is not None:
@@ -90,8 +80,8 @@ def login(req):
 def logout(req):
     if req.user.is_authenticated:
         do_logout(req)
-        return JsonResponse({}, safe=False)
-    return JsonResponse({"error": "not logged in"}, status=403, safe=False)
+        return success({})
+    return error("not logged in", status=403)
 
 
 def achievements(req):
@@ -162,13 +152,10 @@ def teams(req):
 
 
 @require_POST
-@before_event
-def join_team(req):
-    if event_ended():
-        return error("event ended")
-
-    data = parse_body(req.body, ("invite",))
-    if data is None or data["invite"] is None:
+@before_or_during_event
+@require_valid_data("invite")
+def join_team(req, data):
+    if data["invite"] is None:
         return error("invalid invite")
 
     team = select_teams(invite=data["invite"])
@@ -190,11 +177,8 @@ def join_team(req):
 
 
 @require_http_methods(["DELETE"])
-@before_event
+@before_or_during_event
 def leave_team(req):
-    if event_ended():
-        return error("event ended")
-
     # TODO: maybe make this into a postgresql function
     team = None
     if req.user.is_authenticated:
@@ -217,13 +201,10 @@ def leave_team(req):
 
 
 @require_POST
-@before_event
-def create_team(req):
-    if event_ended():
-        return error("event ended")
-
-    data = parse_body(req.body, ("name",))
-    if data is None or (name := data["name"]) is None or len(name) == 0 or len(name) > 32:
+@before_or_during_event
+@require_valid_data("name")
+def create_team(req, data):
+    if (name := data["name"]) is None or len(name) == 0 or len(name) > 32:
         return error("invalid name")
 
     player = Player.objects.filter(user_id=req.user.id).first()
@@ -248,12 +229,12 @@ def create_team(req):
 
 
 @require_http_methods(["PATCH"])
-def transfer_admin(req):
+@require_valid_data("newAdminId")
+def transfer_admin(req, data):
     if event_ended():
         return error("event ended")
-    
-    data = parse_body(req.body, ("newAdminId",))
-    if data is None or (userId := data["newAdminId"]) is None:
+
+    if (userId := data["newAdminId"]) is None:
         return error("invalid user id")
     
     currentAdmin = Player.objects.filter(user_id=req.user.id).first()
@@ -274,12 +255,12 @@ def transfer_admin(req):
 
 
 @require_http_methods(["PATCH"])
-def rename_team(req):
+@require_valid_data("name")
+def rename_team(req, data):
     if event_ended():
         return error("event ended")
 
-    data = parse_body(req.body, ("name",))
-    if data is None or (name := data["name"]) is None or len(name) == 0 or len(name) > 32:
+    if (name := data["name"]) is None or len(name) == 0 or len(name) > 32:
         return error("invalid name")
 
     player = Player.objects.filter(user_id=req.user.id).first()
@@ -297,24 +278,15 @@ def rename_team(req):
 
 
 def player_stats(req):
+    # TODO: fix
+
     if not (req.user.is_authenticated and req.user.is_admin) and not event_ended():
         return error("cannot get this data yet")
-
-    category = req.GET.get("category")
-
-    completion_count_aggr = models.Count("completions")
-
-    if category is not None:
-        category = category[0].upper() + category[1:].lower()
-        if category not in ("Secret", "Knowledge", "Skill"):
-            category = None
-
-        completion_count_aggr.filter = models.Q(completions__achievement__category=category)
 
     most_completions = Player.objects.select_related(
         "user"
     ).annotate(
-        completion_count=completion_count_aggr
+        completion_count=models.Count("completions")
     ).order_by(
         "-completion_count"
     )
@@ -323,9 +295,6 @@ def player_stats(req):
         f"""
         WITH firsts AS (
             SELECT achievement_id, MIN(time_completed) AS time_completed FROM achievements_achievementcompletion 
-            {'' if category is None else 
-            'INNER JOIN achievements_achievement ON (achievements_achievement.id = achievement_id)\n'
-            'WHERE category = \'%s\'' % category}
             GROUP BY achievement_id
         )
         SELECT 

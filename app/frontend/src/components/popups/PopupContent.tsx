@@ -1,4 +1,4 @@
-import Button from "components/Button.tsx";
+import Button from "components/inputs/Button.tsx";
 import { FormEvent } from "react";
 
 export function SimplePromptPopup({

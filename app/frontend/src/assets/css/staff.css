@@ -1,9 +1,249 @@
-.staff-container {
+.staff__page {
+    width: 100%;
+    max-width: 1000px;
+    margin: auto;
+
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.staff__text-input {
+    height: 25px;
+    padding: 0;
+    font-size: 15px;
+
+    background-color: transparent;
+    border: none;
+    border-radius: 0;
+}
+
+.staff__textarea {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+
+    font-size: 15px;
+
+    border: none;
+    outline: none;
+    resize: none;
+    overflow: hidden;
+
+    color: white;
+    background-color: transparent;
+}
+
+.staff__interaction-bar {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.staff__achievement-container {
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.staff__achievement-creation-panel {
+    padding: 10px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    border: solid 2px var(--border-color);
+    border-radius: 10px;
+
+    background-color: var(--background-color);
+}
+
+.staff__achievement-creation-panel__row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: right;
+    gap: 10px;
+}
+
+.staff__achievement {
+    padding: 10px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+
+    background-color: var(--background-color);
+    border-radius: 10px 10px 0 0;
+    border: solid var(--border-color) 2px;
+}
+
+.staff__achievement__name {
+    font-size: 30px;
+    font-weight: 600;
+}
+
+.staff__achievement__solution {
+    color: #FFC0C0;
+}
+
+.staff__achievement__beatmap {
+    height: 50px;
+
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+}
+
+.staff__achievement__beatmap__cover {
+    height: 100%;
+    aspect-ratio: 18/5;
+
+    border-radius: 10px;
+
+    background-repeat: no-repeat;
+    background-position: 50%;
+    background-size: cover;
+}
+
+.staff__achievement__beatmap__info {
+    flex-grow: 1;
+
+    display: flex;
+    flex-direction: column;
+
+    text-wrap: nowrap;
+
+    overflow: hidden;
+}
+
+.staff__achievement__beatmap__info__version {
+    font-size: 15px;
+}
+
+.staff__achievement__beatmap__star-rating {
+    padding-top: 5px;
+
+    font-size: 40px;
+    font-weight: 600;
+}
+
+.staff__achievement__footer {
+    margin-top: 5px;
+
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+}
+
+.staff__achievement__footer__vote-container {
+    height: calc(100% - 8px);
+
+    padding: 4px;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+
+    border: solid var(--border-color) 2px;
+    border-radius: 5px;
+}
+
+.staff__achievement__footer__vote-container:hover {
+    cursor: pointer;
+}
+
+.staff__achievement__footer__tag {
+    height: calc(100% - 8px);
+
+    padding: 4px 8px;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    border: solid var(--border-color) 2px;
+    border-radius: 20px;
+}
+
+.staff__achievement__creator {
+    font-size: 14px;
+}
+
+.staff__achievement__comment-container {
+    padding: 5px 10px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    border-radius: 0 0 10px 10px;
+
+    background-color: var(--border-color);
+}
+
+.staff__achievement__comment-container__row {
+    display: flex;
+    flex-direction: row;
+    justify-content: right;
+    gap: 5px;
+}
+
+.staff__achievement__comment {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.staff__achievement__comment__user {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.staff__achievement__comment__user__avatar {
+    width: 50px;
+    aspect-ratio: 1/1;
+
+    border-radius: 5px;
+    background-repeat: no-repeat;
+    background-position: 50%;
+    background-size: contain;
+}
+
+.staff__achievement__comment__user__details {
     display: flex;
     flex-direction: column;
     gap: 5px;
 }
 
-.external-link.staff {
-    font-size: 20px;
+.staff__achievement__comment__user__details__title {
+    font-size: 15px;
+}
+
+.staff__achievement__comment__divider {
+    min-width: 2px;  /* prevent flex squishing */
+    align-self: stretch;
+
+    background-color: var(--site-background-color);
+}
+
+.staff__achievement__comment__content {
+    flex-grow: 1;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 5px;
+
+    word-break: break-word;
+}
+
+.staff__achievement__comment__content__time-ago {
+    color: #d3d3d3;
 }
