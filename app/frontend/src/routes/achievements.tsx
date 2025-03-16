@@ -145,6 +145,7 @@ export default function AchievementCompletionPage() {
           animate={animate}
           dispatchState={dispatchState}
           achievements={achievements}
+          isStaff={false}
         />
 
         <div className="achievement-content-container">

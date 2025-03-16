@@ -42,7 +42,8 @@ export default function AchievementCreation(props: AchievementCreationProps) {
       achievementName.length > 0 &&
       achievementDescription.length > 0 &&
       achievementTags.length > 0 &&
-      !isNaN(parseInt(achievementBeatmapId.trim()))
+      (achievementBeatmapId.trim().length == 0 ||
+        !isNaN(parseInt(achievementBeatmapId.trim())))
     );
   };
 

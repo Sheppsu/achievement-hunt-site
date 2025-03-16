@@ -106,7 +106,11 @@ export default function Achievement(props: AchievementProps) {
     <div>
       <div className={classNames("staff__achievement", { hide: editing })}>
         <p className="staff__achievement__name">{achievement.name}</p>
-        <p>{achievement.description}</p>
+        <div>
+          {achievement.description.split("\n").map((line) => (
+            <p>{line}</p>
+          ))}
+        </div>
         <p className="staff__achievement__solution">{achievement.solution}</p>
         {achievement.beatmap === null ? (
           ""

@@ -149,7 +149,9 @@ def create_achievement(req, data, achievement=None):
             solution=solution,
             tags=tags,
             beatmap=beatmap,
-            creator=req.user
+            creator=req.user,
+            created_at=(date_now := datetime.now(tz=timezone.utc)),
+            last_edited_at=date_now
         )
     elif achievement.creator_id != req.user.id:
         return error("cannot edit an achievement that's not yours")
@@ -159,6 +161,7 @@ def create_achievement(req, data, achievement=None):
         achievement.solution = solution
         achievement.tags = tags
         achievement.beatmap = beatmap
+        achievement.last_edited_at = datetime.now(tz=timezone.utc)
         achievement.save()
 
     return success(achievement.serialize(includes=["creator", "beatmap", "solution"]))

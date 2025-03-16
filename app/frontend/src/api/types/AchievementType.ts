@@ -13,6 +13,9 @@ export type AchievementType = {
   audio: string;
   beatmap: BeatmapInfoType | null;
   tags: string;
+  release_time: string | null;
+  created_at: string;
+  last_edited_at: string;
 };
 
 export type AchievementExtendedType = {
@@ -22,6 +25,11 @@ export type AchievementExtendedType = {
     | AnonymousAchievementCompletionType
   )[];
 } & AchievementType;
+
+export type CompletedAchievementType = AchievementExtendedType & {
+  completed: boolean;
+  points: number | null;
+};
 
 export type StaffAchievementType = {
   solution: string;

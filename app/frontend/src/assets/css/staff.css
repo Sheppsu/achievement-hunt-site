@@ -40,6 +40,14 @@
     gap: 10px;
 }
 
+.staff__achievement-container {
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
 .staff__achievement-creation-panel {
     padding: 10px;
 

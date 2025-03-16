@@ -107,9 +107,21 @@ class Achievement(SerializableModel):
     )
     release_time = models.DateTimeField(null=True)
     creator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, default=None)
+    created_at = models.DateTimeField()
+    last_edited_at = models.DateTimeField()
 
     class Serialization:
-        FIELDS = ["id", "name", "description", "audio", "tags", "beatmap", "release_time"]
+        FIELDS = [
+            "id",
+            "name",
+            "description",
+            "audio",
+            "tags",
+            "beatmap",
+            "release_time",
+            "created_at",
+            "last_edited_at"
+        ]
 
 
 class AchievementCompletionPlacement(SerializableModel):
