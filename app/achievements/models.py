@@ -17,24 +17,30 @@ class UserManager(models.Manager):
             auth.get_auth_token(code)
             client = Client(auth)
             user = client.get_own_data()
-
-            try:
-                user_obj = self.get(id=user.id)
-                user_obj.username = user.username
-                user_obj.avatar = user.avatar_url
-                user_obj.cover = user.cover.url or ""
-            except User.DoesNotExist:
-                user_obj = User(
-                    user.id,
-                    user.username,
-                    user.avatar_url,
-                    user.cover.url or ""
-                )
-            user_obj.save()
-
-            return user_obj
+            return self._create_user(user)
         except requests.HTTPError:
             return
+
+    def create_user_from_id(self, user_id):
+        user = osu_client.get_user(user_id)
+        return self._create_user(user)
+
+    def _create_user(self, user):
+        try:
+            user_obj = self.get(id=user.id)
+            user_obj.username = user.username
+            user_obj.avatar = user.avatar_url
+            user_obj.cover = user.cover.url or ""
+        except User.DoesNotExist:
+            user_obj = User(
+                user.id,
+                user.username,
+                user.avatar_url,
+                user.cover.url or ""
+            )
+        user_obj.save()
+
+        return user_obj
 
 
 class User(SerializableModel):
