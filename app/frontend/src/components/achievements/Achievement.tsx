@@ -53,21 +53,13 @@ export default function Achievement({
           <div className={infoCls}>
             <div className="achievement-info">
               <div style={{ display: "flex" }}>
-                <h1
-                  style={{ flexGrow: "1" }}
-                  dangerouslySetInnerHTML={{ __html: achievement.name }}
-                ></h1>
+                <h1 style={{ flexGrow: "1" }}>{achievement.name}</h1>
                 <div style={{ flexBasis: "100px" }}></div>
               </div>
               <p className="achievement-points-label">
                 {points === null ? "" : `${points}pts`}
               </p>
-              <p
-                className="achievement-info-description"
-                dangerouslySetInnerHTML={{
-                  __html: `${achievement.completion_count} completions | ${achievement.description}`,
-                }}
-              ></p>
+              <p className="achievement-info-description">{`${achievement.completion_count} completions | ${achievement.description}`}</p>
               <div className="achievement-tags-container">
                 {tags.map((tag) => (
                   <div className="achievement-tag">{toTitleCase(tag)}</div>
