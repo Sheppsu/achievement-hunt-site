@@ -460,3 +460,34 @@ export function useEditAchievement(
     },
   );
 }
+
+function onAchievementDeleted(
+  achievements: StaffAchievementType[],
+  achievementId: number,
+) {
+  return achievements.filter((achievement) => achievement.id != achievementId);
+}
+
+export function useDeleteAchievement(achievementId: number) {
+  const queryClient = useContext(QueryClientContext);
+  return useMakeMutation(
+    {
+      mutationKey: [
+        "staff",
+        "achievements",
+        achievementId.toString(),
+        "delete",
+      ],
+      onSuccess: () => {
+        queryClient?.setQueryData(
+          ["staff", "achievements"],
+          (achievements: StaffAchievementType[]) =>
+            onAchievementDeleted(achievements, achievementId),
+        );
+      },
+    },
+    {
+      method: "DELETE",
+    },
+  );
+}
