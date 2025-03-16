@@ -63,7 +63,7 @@ class DiscordLogger:
 
     def submit(self, req, exc):
         if self.WEBHOOK_URL is None:
-            _log.warn("Unable to log error, WEBHOOK_URL is None")
+            _log.warning("Unable to log error, WEBHOOK_URL is None", exc_info=exc)
             return
 
         self._queue.put(_create_embeds(req, exc))

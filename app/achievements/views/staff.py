@@ -1,4 +1,4 @@
-from django.views.decorators.http import require_POST, require_GET
+from django.views.decorators.http import require_POST, require_GET, require_http_methods
 
 from ..models import Achievement, AchievementComment, AchievementVote, BeatmapInfo
 from .util import error, success, require_valid_data
@@ -170,3 +170,14 @@ def create_achievement(req, data, achievement=None):
 @require_achievement
 def edit_achievement(req, achievement):
     return create_achievement(req, achievement=achievement)
+
+
+@require_staff
+@require_http_methods(["DELETE"])
+@require_achievement
+def delete_achievement(req, achievement):
+    if achievement.creator_id != req.user.id:
+        return error("cannot delete an achievement that's not yours")
+
+    achievement.delete()
+    return success(None)

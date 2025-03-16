@@ -1,6 +1,10 @@
 import { StaffAchievementType } from "api/types/AchievementType.ts";
 import { BiSolidUpArrow, BiUpArrow } from "react-icons/bi";
-import { useSendComment, useVoteAchievement } from "api/query.ts";
+import {
+  useDeleteAchievement,
+  useSendComment,
+  useVoteAchievement,
+} from "api/query.ts";
 import Button from "components/inputs/Button.tsx";
 import TextArea from "components/inputs/TextArea.tsx";
 import React, { useContext, useState } from "react";
@@ -46,7 +50,9 @@ export default function Achievement(props: AchievementProps) {
   const [commentText, setCommentText] = useState("");
   const [sendingComment, setSendingComment] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const sendComment = useSendComment(achievement.id);
+  const deleteAchievement = useDeleteAchievement(achievement.id);
 
   const onCommentStart = () => {
     setIsCommenting(true);
@@ -100,6 +106,23 @@ export default function Achievement(props: AchievementProps) {
     } else if (!isValid && canSendComment) {
       setCanSendComment(false);
     }
+  };
+
+  const onDeleteAchievement = () => {
+    if (deleting) {
+      return;
+    }
+
+    setDeleting(true);
+
+    deleteAchievement.mutate(
+      {},
+      {
+        onSettled: () => {
+          setDeleting(false);
+        },
+      },
+    );
   };
 
   return (
@@ -173,6 +196,15 @@ export default function Achievement(props: AchievementProps) {
           value={commentText}
         />
         <div className="staff__achievement__comment-container__row">
+          <Button
+            children="Delete"
+            hidden={
+              achievement.creator === null ||
+              achievement.creator.id !== session.user!.id
+            }
+            unavailable={deleting}
+            onClick={onDeleteAchievement}
+          />
           <Button
             children="Edit"
             hidden={
