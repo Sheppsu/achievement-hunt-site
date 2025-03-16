@@ -278,24 +278,15 @@ def rename_team(req, data):
 
 
 def player_stats(req):
+    # TODO: fix
+
     if not (req.user.is_authenticated and req.user.is_admin) and not event_ended():
         return error("cannot get this data yet")
-
-    category = req.GET.get("category")
-
-    completion_count_aggr = models.Count("completions")
-
-    if category is not None:
-        category = category[0].upper() + category[1:].lower()
-        if category not in ("Secret", "Knowledge", "Skill"):
-            category = None
-
-        completion_count_aggr.filter = models.Q(completions__achievement__category=category)
 
     most_completions = Player.objects.select_related(
         "user"
     ).annotate(
-        completion_count=completion_count_aggr
+        completion_count=models.Count("completions")
     ).order_by(
         "-completion_count"
     )
@@ -304,9 +295,6 @@ def player_stats(req):
         f"""
         WITH firsts AS (
             SELECT achievement_id, MIN(time_completed) AS time_completed FROM achievements_achievementcompletion 
-            {'' if category is None else 
-            'INNER JOIN achievements_achievement ON (achievements_achievement.id = achievement_id)\n'
-            'WHERE category = \'%s\'' % category}
             GROUP BY achievement_id
         )
         SELECT 
