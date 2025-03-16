@@ -195,10 +195,12 @@ export default function AchievementProgress({
   team,
   state,
   dispatchState,
+  hidden,
 }: {
   team: AchievementTeamExtendedType | null;
   state: WebsocketState;
   dispatchState: StateDispatch;
+  hidden: boolean;
 }) {
   const session = useContext(SessionContext);
   const queryClient = useContext(QueryClientContext) as QueryClient;
@@ -206,6 +208,7 @@ export default function AchievementProgress({
 
   const { data: authData } = useQuery({
     queryKey: ["wsauth"],
+    enabled: !hidden,
     queryFn: () => fetch("/api/wsauth/").then((resp) => resp.json()),
   });
   const { data: achievements } = useGetAchievements();
