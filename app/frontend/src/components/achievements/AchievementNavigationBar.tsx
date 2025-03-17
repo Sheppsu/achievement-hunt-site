@@ -201,6 +201,15 @@ export default function AchievementNavigationBar({
     doAnimation();
   }
 
+  function onShowMyAchievements(e: React.ChangeEvent<HTMLInputElement>) {
+    dispatchState({
+      id: 12,
+      hideMyAchievements: e.target.checked,
+    });
+
+    doAnimation();
+  }
+
   return (
     <div className="achievement-nav-bar">
       {state === null ? (
@@ -216,7 +225,11 @@ export default function AchievementNavigationBar({
               value={searchField}
               onChange={onSearchChange}
             />
-            <div className="achievement-nav-bar-input-group">
+            <div
+              className={classNames("achievement-nav-bar-input-group", {
+                hide: isStaff,
+              })}
+            >
               <input
                 id="hide-completed"
                 type="checkbox"
@@ -225,6 +238,20 @@ export default function AchievementNavigationBar({
                 checked={state.hideCompletedAchievements}
               />
               <p>Hide completed achievements</p>
+            </div>
+            <div
+              className={classNames("achievement-nav-bar-input-group", {
+                hide: !isStaff,
+              })}
+            >
+              <input
+                id="hide-my-achievements"
+                type="checkbox"
+                style={{ width: 18 }}
+                onChange={onShowMyAchievements}
+                checked={state.showMyAchievements}
+              />
+              <p>Show my achievements</p>
             </div>
           </div>
           {Object.entries((state.achievementsFilter ?? {}) as NavItems).map(
