@@ -2,9 +2,10 @@ import classNames from "classnames";
 import TextInput from "components/inputs/TextInput.tsx";
 import TextArea from "components/inputs/TextArea.tsx";
 import Button from "components/inputs/Button.tsx";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { useCreateAchievement, useEditAchievement } from "api/query.ts";
 import { StaffAchievementType } from "api/types/AchievementType.ts";
+import { EventContext } from "contexts/EventContext.ts";
 
 type AchievementCreationProps = {
   hidden: boolean;
@@ -37,18 +38,34 @@ export default function AchievementCreation(props: AchievementCreationProps) {
       ? useCreateAchievement()
       : useEditAchievement(achievement.id);
 
-  const isInputValid = () => {
-    return (
-      achievementName.length > 0 &&
-      achievementDescription.length > 0 &&
-      achievementTags.length > 0 &&
-      (achievementBeatmapId.trim().length == 0 ||
-        !isNaN(parseInt(achievementBeatmapId.trim())))
-    );
+  const dispatchEventMsg = useContext(EventContext);
+
+  const isInputValid = (showError = false) => {
+    if (achievementName.length === 0) {
+      if (showError) dispatchEventMsg({ type: "error", msg: "Missing name" });
+      return false;
+    }
+    if (achievementDescription.length === 0) {
+      if (showError)
+        dispatchEventMsg({ type: "error", msg: "Missing description" });
+      return false;
+    }
+    if (
+      achievementBeatmapId.trim().length !== 0 &&
+      isNaN(parseInt(achievementBeatmapId.trim()))
+    ) {
+      if (showError)
+        dispatchEventMsg({
+          type: "error",
+          msg: "Invalid beatmap id (make sure it's id, not link)",
+        });
+      return false;
+    }
+    return true;
   };
 
   const onCreate = () => {
-    if (!isInputValid() || sendingCreation) {
+    if (!isInputValid(true) || sendingCreation) {
       return;
     }
 
