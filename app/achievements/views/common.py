@@ -132,6 +132,8 @@ def achievements(req):
             "completions__placement",
         ).annotate(
             completion_count=models.Count("completions"),
+        ).exclude(
+            release_time=None
         ).all()
     ])
 
