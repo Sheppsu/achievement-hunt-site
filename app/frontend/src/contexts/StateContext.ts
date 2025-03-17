@@ -65,6 +65,11 @@ interface SwitchNavItemSort extends BaseStateActionType {
   label: keyof NavItems;
 }
 
+interface HideMyAchievements extends BaseStateActionType {
+  id: 12;
+  hideMyAchievements: boolean;
+}
+
 type StateActionType =
   | ConnectingType
   | AuthType
@@ -76,7 +81,8 @@ type StateActionType =
   | DisconnectionType
   | AdjustAudioType
   | ActivateNavItem
-  | SwitchNavItemSort;
+  | SwitchNavItemSort
+  | HideMyAchievements;
 
 export function wsReducer(
   state: WebsocketState,
@@ -167,6 +173,11 @@ export function wsReducer(
         achievementsFilter: newFilter,
       };
     }
+    case 12:
+      return {
+        ...state,
+        showMyAchievements: action.hideMyAchievements,
+      };
   }
 }
 

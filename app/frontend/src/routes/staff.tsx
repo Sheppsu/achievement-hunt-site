@@ -6,7 +6,7 @@ import { useAuthEnsurer } from "util/auth.ts";
 import Button from "components/inputs/Button.tsx";
 import TextInput from "components/inputs/TextInput.tsx";
 import TextArea from "components/inputs/TextArea.tsx";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import classNames from "classnames";
 import AchievementCreation from "components/staff/AchievementCreation.tsx";
 import AchievementNavigationBar, {
@@ -18,6 +18,7 @@ import {
 } from "contexts/StateContext.ts";
 import { useAnimate } from "framer-motion";
 import { getSortedAchievements } from "util/achievementSorting.ts";
+import { SessionContext } from "contexts/SessionContext.ts";
 
 export default function Staff() {
   useAuthEnsurer().ensureStaff();
@@ -26,6 +27,7 @@ export default function Staff() {
   const state = useStateContext();
   const dispatchState = useDispatchStateContext();
   const [scope, animate] = useAnimate();
+  const session = useContext(SessionContext);
 
   const [creationOpen, setCreationOpen] = useState(false);
 
@@ -53,8 +55,15 @@ export default function Staff() {
     setCreationOpen(false);
   };
 
+  let filteredAchievements = achievements;
+  if (state.showMyAchievements) {
+    filteredAchievements = achievements.filter(
+      (a) => a.creator !== null && a.creator.id === session.user!.id,
+    );
+  }
+
   const sortedAchievements = getSortedAchievements(
-    achievements,
+    filteredAchievements,
     state.achievementsFilter,
     state.achievementsSearchFilter,
     null,
