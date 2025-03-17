@@ -47,9 +47,6 @@ function HiddenAchievementCompletionPage({
       className={classNames({ hide: hidden })}
       style={{ margin: "auto", textAlign: "center", marginTop: "20px" }}
     >
-      <Helmet>
-        <title>CTA - Starts in {timeString}</title>
-      </Helmet>
       <h1 style={{ fontSize: "3em" }}>Starts in {timeString}</h1>
     </div>
   );

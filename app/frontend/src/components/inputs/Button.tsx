@@ -1,5 +1,5 @@
 import "assets/css/button.css";
-import React from "react";
+import React, { useRef, useState } from "react";
 import { splitProps } from "components/inputs/util.ts";
 
 type ButtonProps = {
@@ -11,6 +11,7 @@ type ButtonProps = {
   width?: string;
   height?: string;
   type?: "button" | "submit" | "reset";
+  holdToUse?: boolean;
 };
 
 const elementDefaults = {
@@ -24,9 +25,15 @@ const otherDefaults = {
   children: "",
   width: "auto",
   height: "auto",
+  holdToUse: false,
+  onClick: undefined,
 };
 
 export default function Button(props: ButtonProps) {
+  const timeoutId = useRef<null | number>(null);
+  const intervalId = useRef<null | number>(null);
+  const [progress, setProgress] = useState<null | number>(null);
+
   const [elementProps, otherProps] = splitProps(
     props,
     elementDefaults,
@@ -43,13 +50,48 @@ export default function Button(props: ButtonProps) {
 
   elementProps.className += " prevent-select button";
 
+  // for hold-to-use buttons
+  const onMouseDown = (e: React.FormEvent<HTMLButtonElement>) => {
+    timeoutId.current = setTimeout(() => {
+      timeoutId.current = null;
+      otherProps.onClick(e);
+    }, 3000);
+    intervalId.current = setInterval(() => {
+      setProgress((p) => Math.min(100, (p ?? 0) + 5.0 / 3.0));
+    }, 50);
+  };
+  const onMouseUp = (e: React.FormEvent<HTMLButtonElement>) => {
+    if (timeoutId.current !== null) {
+      clearTimeout(timeoutId.current);
+      timeoutId.current = null;
+    }
+    if (intervalId.current !== null) {
+      clearInterval(intervalId.current);
+      intervalId.current = null;
+      setProgress(null);
+    }
+  };
+
+  const bgWidth = progress === null ? undefined : `${progress}%`;
+
   return (
     <button
       style={{
         width: otherProps.width,
         height: otherProps.height,
+        background:
+          bgWidth === undefined
+            ? undefined
+            : `linear-gradient(to right, var(--generic-button-color), var(--generic-button-color) ${bgWidth}, var(--generic-button-hover-color) ${bgWidth}, var(--generic-button-hover-color) 100%)`,
       }}
-      onClick={otherProps.unavailable ? undefined : elementProps.onClick}
+      onClick={
+        otherProps.unavailable || otherProps.holdToUse
+          ? undefined
+          : otherProps.onClick
+      }
+      onMouseDown={otherProps.holdToUse ? onMouseDown : undefined}
+      onMouseUp={otherProps.holdToUse ? onMouseUp : undefined}
+      onMouseLeave={otherProps.holdToUse ? onMouseUp : undefined}
       {...elementProps}
     >
       {otherProps.children}
