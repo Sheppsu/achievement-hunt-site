@@ -1,3 +1,8 @@
+:root {
+  --generic-button-color: #ffffff;
+  --generic-button-hover-color: #d0d0d0;
+}
+
 .button {
   padding: 6px 12px 6px 12px;
 
@@ -10,14 +15,14 @@
   font-size: larger;
   transition: all 0.3s;
 
-  background-color: #ffffff;
+  background-color: var(--generic-button-color);
   color: #000000;
 }
 
 .button:hover {
   cursor: pointer;
 
-  background-color: #d0d0d0;
+  background-color: var(--generic-button-hover-color);
 }
 
 .button.unavailable {

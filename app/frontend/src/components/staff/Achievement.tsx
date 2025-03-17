@@ -204,6 +204,7 @@ export default function Achievement(props: AchievementProps) {
             }
             unavailable={deleting}
             onClick={onDeleteAchievement}
+            holdToUse={true}
           />
           <Button
             children="Edit"

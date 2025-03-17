@@ -280,8 +280,6 @@ def rename_team(req, data):
 
 
 def player_stats(req):
-    # TODO: fix
-
     if not (req.user.is_authenticated and req.user.is_admin) and not event_ended():
         return error("cannot get this data yet")
 
