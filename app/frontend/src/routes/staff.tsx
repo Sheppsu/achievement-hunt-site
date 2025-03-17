@@ -86,7 +86,7 @@ export default function Staff() {
       <div className="staff__achievement-container" ref={scope}>
         {/* sorting for staff page puts everything under the 'values' category */}
         {(sortedAchievements["values"] ?? []).map((a, i) => (
-          <Achievement key={i} achievement={a} />
+          <Achievement key={a.id} achievement={a} />
         ))}
       </div>
     </div>
