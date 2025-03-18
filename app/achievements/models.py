@@ -68,6 +68,22 @@ class User(SerializableModel):
         return self.username
 
 
+class EventIteration(SerializableModel):
+    start = models.DateTimeField()
+    end = models.DateTimeField()
+
+    class Serialization:
+        FIELDS = ["id", "start", "end"]
+
+
+class AchievementBatch(SerializableModel):
+    iteration = models.ForeignKey(EventIteration, on_delete=models.CASCADE)
+    release_time = models.DateTimeField()
+
+    class Serialization:
+        FIELDS = ["id", "release_time"]
+
+
 class BeatmapInfo(SerializableModel):
     id = models.PositiveIntegerField(primary_key=True)
     artist = models.CharField()
@@ -115,6 +131,7 @@ class Achievement(SerializableModel):
     creator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, default=None)
     created_at = models.DateTimeField()
     last_edited_at = models.DateTimeField()
+    batch = models.ForeignKey(AchievementBatch, on_delete=models.SET_NULL, null=True, default=None)
 
     class Serialization:
         FIELDS = [
