@@ -204,6 +204,9 @@
 }
 
 .staff__achievement__comment__user {
+    flex-basis: 180px;
+    flex-shrink: 0;
+
     display: flex;
     flex-direction: row;
     gap: 10px;
