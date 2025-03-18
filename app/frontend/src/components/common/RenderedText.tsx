@@ -31,7 +31,7 @@ export default function RenderedText({ text }: { text: string }) {
     lastI = match.index + url.length;
   }
 
-  if (lastI < text.length - 1) {
+  if (lastI < text.length) {
     elements.push(formatLines(text.substring(lastI)));
   }
 
