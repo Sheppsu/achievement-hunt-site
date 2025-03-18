@@ -5,7 +5,7 @@ import {
   AchievementType,
 } from "api/types/AchievementType.ts";
 import { useEffect, useState } from "react";
-import { toTitleCase } from "util/helperFunctions.ts";
+import { parseTags, toTitleCase } from "util/helperFunctions.ts";
 import Button from "components/inputs/Button.tsx";
 import classNames from "classnames";
 
@@ -34,10 +34,7 @@ export function getDefaultNav(
 ): NavItems {
   const tags: string[] = [];
   for (const achievement of achievements) {
-    for (const tag of achievement.tags.split(",")) {
-      if (tag === "") continue;
-      if (tag.startsWith("mode-")) continue;
-
+    for (const tag of parseTags(achievement.tags, false)) {
       if (!tags.includes(tag)) {
         tags.push(tag);
       }
