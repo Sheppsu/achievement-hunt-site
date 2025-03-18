@@ -545,3 +545,11 @@ div.vertical-divider {
 .event-bar.error {
   background-color: rgb(227, 62, 62);
 }
+
+a.rendered-text {
+  color: #b4c5ff;
+}
+
+a.rendered-text:hover {
+  color: #97a5d6;
+}

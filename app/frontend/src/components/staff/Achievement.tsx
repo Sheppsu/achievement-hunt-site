@@ -13,6 +13,7 @@ import { SessionContext } from "contexts/SessionContext.ts";
 import AchievementCreation from "components/staff/AchievementCreation.tsx";
 import classNames from "classnames";
 import { parseTags } from "util/helperFunctions.ts";
+import RenderedText from "components/common/RenderedText.tsx";
 
 function VoteContainer({ achievement }: { achievement: StaffAchievementType }) {
   const vote = useVoteAchievement(achievement.id);
@@ -131,11 +132,11 @@ export default function Achievement(props: AchievementProps) {
       <div className={classNames("staff__achievement", { hide: editing })}>
         <p className="staff__achievement__name">{achievement.name}</p>
         <div>
-          {achievement.description.split("\n").map((line) => (
-            <p>{line}</p>
-          ))}
+          <RenderedText text={achievement.description} />
         </div>
-        <p className="staff__achievement__solution">{achievement.solution}</p>
+        <p className="staff__achievement__solution">
+          <RenderedText text={achievement.solution} />
+        </p>
         {achievement.beatmap === null ? (
           ""
         ) : (
