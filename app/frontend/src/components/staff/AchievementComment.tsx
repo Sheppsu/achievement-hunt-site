@@ -1,5 +1,6 @@
 import { AchievementCommentType } from "api/types/AchievementCommentType.ts";
 import { timeAgo } from "util/helperFunctions.ts";
+import RenderedText from "components/common/RenderedText.tsx";
 
 type AchievementCommentProps = {
   comment: AchievementCommentType;
@@ -26,7 +27,9 @@ export default function AchievementComment(props: AchievementCommentProps) {
       </div>
       <div className="staff__achievement__comment__divider"></div>
       <div className="staff__achievement__comment__content">
-        <p>{comment.msg}</p>
+        <p>
+          <RenderedText text={comment.msg} />
+        </p>
         <div className="staff__achievement__comment__content__time-ago">
           {timeAgo(comment.posted_at)}
         </div>
