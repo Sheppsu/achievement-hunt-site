@@ -31,6 +31,10 @@
 
 /* element properties */
 
+* {
+  font-family: "Radio Canada", sans-serif;
+}
+
 html {
   position: relative;
   min-height: 100%;

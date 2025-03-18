@@ -1,9 +1,9 @@
-import "assets/css/button.css";
+import "assets/css/inputs/button.css";
 import React, { useRef, useState } from "react";
 import { splitProps } from "components/inputs/util.ts";
 
 type ButtonProps = {
-  children: React.ReactNode;
+  children: React.ReactNode | string;
   className?: string;
   hidden?: boolean;
   unavailable?: boolean;
@@ -40,7 +40,7 @@ export default function Button(props: ButtonProps) {
     otherDefaults,
   );
 
-  if (otherProps.hidden === true) {
+  if (otherProps.hidden) {
     elementProps.className += " hide";
   }
 
@@ -54,13 +54,13 @@ export default function Button(props: ButtonProps) {
   const onMouseDown = (e: React.FormEvent<HTMLButtonElement>) => {
     timeoutId.current = setTimeout(() => {
       timeoutId.current = null;
-      otherProps.onClick(e);
+      if (otherProps.onClick) otherProps.onClick(e);
     }, 3000);
     intervalId.current = setInterval(() => {
       setProgress((p) => Math.min(100, (p ?? 0) + 5.0 / 3.0));
     }, 50);
   };
-  const onMouseUp = (e: React.FormEvent<HTMLButtonElement>) => {
+  const onMouseUp = () => {
     if (timeoutId.current !== null) {
       clearTimeout(timeoutId.current);
       timeoutId.current = null;

@@ -1,5 +1,5 @@
 import { AchievementExtendedType } from "api/types/AchievementType";
-import { toTitleCase } from "util/helperFunctions";
+import { parseTags, toTitleCase } from "util/helperFunctions";
 import AchievementCompletionEntry from "components/achievements/AchievementCompletionEntry.tsx";
 import { AchievementCompletionType } from "api/types/AchievementCompletionType.ts";
 import AudioPlayer from "components/audio/AudioPlayer.tsx";
@@ -16,30 +16,8 @@ export default function Achievement({
   points: number | null;
   state: WebsocketState;
 }) {
-  const rawTags = achievement.tags.split(",");
   const completions = achievement.completions;
-
-  const modeMap: { [_k: string]: string } = {
-    "mode-o": "standard",
-    "mode-t": "taiko",
-    "mode-f": "catch",
-    "mode-m": "mania",
-  };
-
-  let mode: string | null = null;
-  const filteredTags: string[] = [];
-  for (const tag of rawTags) {
-    if (tag === "") continue;
-
-    if (tag.startsWith("mode-")) {
-      mode = modeMap[tag];
-      continue;
-    }
-
-    filteredTags.push(tag);
-  }
-
-  const tags = [`Mode: ${mode ?? "any"}`].concat(filteredTags);
+  const tags = parseTags(achievement.tags);
 
   const infoCls =
     "achievement-info-container" + (completed ? " complete" : " incomplete");

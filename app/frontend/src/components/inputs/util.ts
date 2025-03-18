@@ -1,10 +1,18 @@
-type AnyDict = { [_k: string]: any };
+type AnyDict = Record<string, any>;
 
-export function splitProps(
-  props: AnyDict,
-  elementDefaults: AnyDict,
-  otherDefaults: AnyDict,
-): [AnyDict, AnyDict] {
+export function splitProps<
+  T1 extends Partial<{ [K in keyof T2]: T1[K] }> &
+    Partial<{ [K in keyof T3]: T1[K] }>,
+  T2 extends AnyDict,
+  T3 extends AnyDict,
+>(
+  props: T1,
+  elementDefaults: T2,
+  otherDefaults: T3,
+): [
+  Required<{ [K in keyof T2]: Exclude<T1[K], undefined> }> & AnyDict,
+  Required<{ [K in keyof T3]: Exclude<T1[K], undefined> }>,
+] {
   const elementProps: AnyDict = {};
   const otherProps: AnyDict = {};
 
@@ -30,5 +38,8 @@ export function splitProps(
     }
   }
 
-  return [elementProps, otherProps];
+  return [
+    elementProps as Required<{ [K in keyof T2]: Exclude<T1[K], undefined> }>,
+    otherProps as Required<{ [K in keyof T3]: Exclude<T1[K], undefined> }>,
+  ];
 }

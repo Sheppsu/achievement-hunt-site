@@ -114,6 +114,58 @@ export function calculateScore(
   return Math.round(Math.max(f(completions), f(teams - 1)));
 }
 
+function* cleanTags(tags: string) {
+  for (let tag of tags.split(",")) {
+    tag = tag.trim().toLowerCase();
+    if (tag === "") {
+      continue;
+    }
+
+    yield tag;
+  }
+}
+
+const modeMap: { [_k: string]: string } = {
+  "mode-o": "standard",
+  "mode-t": "taiko",
+  "mode-f": "catch",
+  "mode-m": "mania",
+};
+
+export function parseTags(tags: string, includeMode: boolean = true): string[] {
+  let mode: string | null = null;
+  const filteredTags: string[] = [];
+  for (let tag of cleanTags(tags)) {
+    if (tag.startsWith("mode-")) {
+      mode = modeMap[tag];
+      continue;
+    }
+
+    if (filteredTags.includes(tag)) {
+      continue;
+    }
+
+    filteredTags.push(tag);
+  }
+
+  if (!includeMode) {
+    return filteredTags;
+  }
+
+  return [`Mode: ${mode ?? "any"}`].concat(filteredTags);
+}
+
+export function parseMode(tags: string): string {
+  for (const tag of cleanTags(tags)) {
+    const mode = modeMap[tag];
+    if (mode !== undefined) {
+      return tag;
+    }
+  }
+
+  return "any";
+}
+
 const anonymousNames = [
   "Jagged Bone",
   "Glorious Ball",

@@ -1,0 +1,9 @@
+.dropdown {
+    font-size: 20px;
+
+    border: 2px solid var(--border-color);
+    border-radius: 5px;
+
+    background-color: var(--background-color);
+    color: white;
+}
