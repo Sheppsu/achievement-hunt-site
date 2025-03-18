@@ -1,17 +1,19 @@
 import { splitProps } from "components/inputs/util.ts";
+import { HTMLInputAutoCompleteAttribute } from "react";
 
 type TextInputProps = {
   className?: string;
   placeholder?: string;
   hidden?: boolean;
   onInput?: (e: React.FormEvent<HTMLInputElement>) => void;
-  autoComplete?: boolean;
+  onChange?: (e: React.FormEvent<HTMLInputElement>) => void;
+  autoComplete?: HTMLInputAutoCompleteAttribute;
   [_k: string]: any;
 };
 
 const elementDefaults = {
   className: "",
-  autoComplete: false,
+  autoComplete: "off",
 };
 
 const otherDefaults = {
