@@ -98,6 +98,9 @@ def create_comment(req, data, achievement):
 def vote_achievement(req, data, achievement):
     add_vote = data["add"]
 
+    if req.user.id == achievement.creator.id:
+        return error("Can't vote for your own achievement!")
+
     existing_vote = AchievementVote.objects.filter(achievement_id=achievement.id, user_id=req.user).first()
 
     if add_vote and existing_vote is not None:

@@ -72,7 +72,7 @@ def require_iteration_after_end(func):
 def require_user(func):
     def wrapper(req, *args, **kwargs):
         if not req.user.is_authenticated:
-            return error("Not logged in", status=403)
+            return error("not logged in", status=403)
 
         return func(req, *args, **kwargs)
 

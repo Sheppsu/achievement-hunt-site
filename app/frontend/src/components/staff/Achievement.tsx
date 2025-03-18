@@ -16,7 +16,11 @@ import { parseTags } from "util/helperFunctions.ts";
 import RenderedText from "components/common/RenderedText.tsx";
 
 function VoteContainer({ achievement }: { achievement: StaffAchievementType }) {
+  const session = useContext(SessionContext);
+
   const vote = useVoteAchievement(achievement.id);
+  const isCreator =
+    achievement.creator !== null && achievement.creator.id === session.user!.id;
 
   const onClick = () => {
     vote.mutate(
@@ -29,11 +33,13 @@ function VoteContainer({ achievement }: { achievement: StaffAchievementType }) {
 
   return (
     <div
-      className="staff__achievement__footer__vote-container"
-      onClick={onClick}
+      className={classNames("staff__achievement__footer__vote-container", {
+        disabled: isCreator,
+      })}
+      onClick={isCreator ? undefined : onClick}
     >
       {achievement.vote_count}
-      {achievement.has_voted ? <BiSolidUpArrow /> : <BiUpArrow />}
+      {achievement.has_voted || isCreator ? <BiSolidUpArrow /> : <BiUpArrow />}
     </div>
   );
 }

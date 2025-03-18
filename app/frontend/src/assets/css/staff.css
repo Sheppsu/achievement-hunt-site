@@ -161,6 +161,10 @@
     cursor: pointer;
 }
 
+.staff__achievement__footer__vote-container.disabled:hover {
+    cursor: default;
+}
+
 .staff__achievement__footer__tag {
     height: calc(100% - 8px);
 
