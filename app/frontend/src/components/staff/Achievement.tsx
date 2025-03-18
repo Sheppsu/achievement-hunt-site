@@ -131,9 +131,9 @@ export default function Achievement(props: AchievementProps) {
     <div>
       <div className={classNames("staff__achievement", { hide: editing })}>
         <p className="staff__achievement__name">{achievement.name}</p>
-        <div>
+        <p>
           <RenderedText text={achievement.description} />
-        </div>
+        </p>
         <p className="staff__achievement__solution">
           <RenderedText text={achievement.solution} />
         </p>
