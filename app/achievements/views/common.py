@@ -31,16 +31,65 @@ __all__ = (
     "get_auth_packet"
 )
 
+current_iteration = EventIteration.objects.order_by('-id').last()
+current_iteration_start = current_iteration.start.timestamp()
+current_iteration_end = current_iteration.end.timestamp()
 
-EVENT_START, EVENT_END = settings.EVENT_START, settings.EVENT_END
+
+def require_iteration_before_end(func):
+    @require_iteration
+    def wrapper(req, *args, iteration, **kwargs):
+        if iteration.has_ended():
+            return error("iteration ended", status=403)
+
+        return func(req, *args, iteration=iteration, **kwargs)
+
+    return wrapper
 
 
-def before_or_during_event(func):
-    def wrapper(*args, **kwargs):
-        if event_ended():
-            return error("event ended")
+def require_iteration_after_start(func):
+    @require_iteration
+    def wrapper(req, *args, iteration, **kwargs):
+        if not iteration.has_started():
+            return error("iteration has not started", status=403)
 
-        return func(*args, **kwargs)
+        return func(req, *args, iteration=iteration, **kwargs)
+
+    return wrapper
+
+
+def require_iteration_after_end(func):
+    @require_iteration
+    def wrapper(req, *args, iteration, **kwargs):
+        if not iteration.has_ended():
+            return error("must wait until iteration ends", status=403)
+
+        return func(req, *args, iteration=iteration, **kwargs)
+
+    return wrapper
+
+
+def require_user(func):
+    def wrapper(req, *args, **kwargs):
+        if not req.user.is_authenticated:
+            return error("Not logged in", status=403)
+
+        return func(req, *args, **kwargs)
+
+    return wrapper
+
+
+def require_iteration(func):
+    def wrapper(req, iteration_id=None, *args, **kwargs):
+        if iteration_id is None:
+            iteration = current_iteration
+        else:
+            iteration = EventIteration.objects.filter(id=iteration_id).first()
+
+        if iteration is None:
+            return error("iteration not found", status=404)
+
+        return func(req, *args, iteration=iteration, **kwargs)
 
     return wrapper
 
@@ -49,21 +98,20 @@ def serialize_team(team: Team):
     return team.serialize(includes=["players__user"])
 
 
-def event_ended():
-    return time.time() >= EVENT_END
-
-
-def event_started():
-    return time.time() >= EVENT_START-1
-
-
-def select_teams(many=False, **kwargs) -> list[Team] | Team | None:
-    teams = Team.objects.prefetch_related("players__user").filter(**kwargs)
+def select_teams(iteration_id, many=False, **kwargs) -> list[Team] | Team | None:
+    teams = Team.objects.prefetch_related("players__user").filter(
+        iteration_id=iteration_id,
+        **kwargs
+    )
     if many:
         return teams
     if len(teams) == 0:
         return
     return teams[0]
+
+
+def select_current_player(user_id, iteration_id):
+    return Player.objects.filter(user_id=user_id, team__iteration_id=iteration_id).first()
 
 
 def login(req):
@@ -84,12 +132,13 @@ def logout(req):
     return error("not logged in", status=403)
 
 
-def achievements(req):
-    if not event_started() and not settings.DEBUG:
-        return error("cannot get achievements before event starts")
-
+@require_iteration_after_start
+def achievements(req, iteration):
     team = (
-        Team.objects.prefetch_related("players").filter(players__user=req.user).first()
+        Team.objects.prefetch_related("players").filter(
+            players__user_id=req.user.id,
+            iteration_id=iteration.id
+        ).first()
         if req.user.is_authenticated else None
     )
 
@@ -105,7 +154,7 @@ def achievements(req):
     return success([
         achievement.serialize(
             ["beatmap", "completion_count", "completions__player__user", "completions__placement"]
-            if event_ended() or is_admin else
+            if iteration.has_ended() or is_admin else
             [
                 "beatmap",
                 "completion_count",
@@ -126,27 +175,29 @@ def achievements(req):
             ],
         )
         for achievement in Achievement.objects.select_related(
-            "beatmap"
+            "beatmap",
+            "batch"
         ).prefetch_related(
             "completions__player__user",
             "completions__placement",
         ).annotate(
             completion_count=models.Count("completions"),
-        ).exclude(
-            release_time=None
+        ).filter(
+            batch__iteration_id=iteration.id
         ).all()
     ])
 
 
-def teams(req):
-    if event_ended() or (req.user.is_authenticated and req.user.is_admin):
-        serialized_teams = map(serialize_team, select_teams(many=True))
+@require_iteration
+def teams(req, iteration):
+    if iteration.has_ended() or (req.user.is_authenticated and req.user.is_admin):
+        serialized_teams = map(serialize_team, select_teams(iteration.id, many=True))
     else:
         serialized_teams = (
             serialize_team(team)
             if any(map(lambda p: p.user.id == req.user.id, team.players.all())) else
             team.serialize(excludes=["invite", "icon", "name"])
-            for team in select_teams(many=True)
+            for team in select_teams(iteration.id, many=True)
         )
     sorted_teams = sorted(serialized_teams, key=lambda t: t['points'], reverse=True)
 
@@ -154,20 +205,21 @@ def teams(req):
 
 
 @require_POST
-@before_or_during_event
+@require_iteration_before_end
 @require_valid_data("invite")
-def join_team(req, data):
+@require_user
+def join_team(req, data, iteration):
     if data["invite"] is None:
         return error("invalid invite")
 
-    team = select_teams(invite=data["invite"])
+    team = select_teams(iteration.id, invite=data["invite"])
     if team is None:
         return error("invalid invite")
 
     if len(team.players.all()) == 5:
         return error("That team is already full")
 
-    player = Player.objects.filter(user_id=req.user.id).first()
+    player = select_current_player(req.user.id, iteration.id)
     if player is not None:
         return error("already on a team")
 
@@ -179,12 +231,13 @@ def join_team(req, data):
 
 
 @require_http_methods(["DELETE"])
-@before_or_during_event
-def leave_team(req):
-    # TODO: maybe make this into a postgresql function
-    team = None
-    if req.user.is_authenticated:
-        team = Team.objects.prefetch_related("players__user").filter(players__user_id=req.user.id).first()
+@require_iteration_before_end
+@require_user
+def leave_team(req, iteration):
+    team = Team.objects.prefetch_related("players__user").filter(
+        players__user_id=req.user.id,
+        iteration_id=iteration.id
+    ).first()
     if team is None:
         return error("not on team")
 
@@ -203,19 +256,20 @@ def leave_team(req):
 
 
 @require_POST
-@before_or_during_event
+@require_iteration_before_end
 @require_valid_data("name")
-def create_team(req, data):
+@require_user
+def create_team(req, data, iteration):
     if (name := data["name"]) is None or len(name) == 0 or len(name) > 32:
         return error("invalid name")
 
-    player = Player.objects.filter(user_id=req.user.id).first()
+    player = select_current_player(req.user.id, iteration.id)
     if player is not None:
         return error("already on a team")
 
     try:
         invite = secrets.token_urlsafe(12)
-        team = Team(name=name, icon="", invite=invite)
+        team = Team(name=name, icon="", invite=invite, iteration=current_iteration)
         team.save()
     except:
         return error("team name taken")
@@ -232,40 +286,38 @@ def create_team(req, data):
 
 @require_http_methods(["PATCH"])
 @require_valid_data("newAdminId")
-def transfer_admin(req, data):
-    if event_ended():
-        return error("event ended")
-
-    if (userId := data["newAdminId"]) is None:
+@require_iteration_before_end
+@require_user
+def transfer_admin(req, data, iteration):
+    if (new_admin_user_id := data["newAdminId"]) is None:
         return error("invalid user id")
     
-    currentAdmin = Player.objects.filter(user_id=req.user.id).first()
-    if currentAdmin is None or not currentAdmin.team_admin:
+    current_admin = select_current_player(req.user.id, iteration.id)
+    if current_admin is None or not current_admin.team_admin:
         return error("not on a team or not admin")
     
-    newAdmin = Player.objects.filter(user_id=userId).first()
-    if newAdmin is None or currentAdmin.team_id != newAdmin.team_id:
+    new_admin = select_current_player(new_admin_user_id, iteration.id)
+    if new_admin is None or current_admin.team_id != new_admin.team_id:
         return error("users not on the same team")
     
-    currentAdmin.team_admin = False
-    currentAdmin.save()
+    current_admin.team_admin = False
+    current_admin.save()
 
-    newAdmin.team_admin = True
-    newAdmin.save()
+    new_admin.team_admin = True
+    new_admin.save()
 
-    return success({"prevAdminId": currentAdmin.user.id, "newAdminId": newAdmin.user.id})
+    return success({"prevAdminId": current_admin.user.id, "newAdminId": new_admin.user.id})
 
 
 @require_http_methods(["PATCH"])
 @require_valid_data("name")
-def rename_team(req, data):
-    if event_ended():
-        return error("event ended")
-
+@require_iteration_before_end
+@require_user
+def rename_team(req, data, iteration):
     if (name := data["name"]) is None or len(name) == 0 or len(name) > 32:
         return error("invalid name")
 
-    player = Player.objects.filter(user_id=req.user.id).first()
+    player = select_current_player(req.user.id, iteration.id)
     if player is None or not player.team_admin:
         return error("not on a team or not admin")
 
@@ -279,12 +331,12 @@ def rename_team(req, data):
     return success(name)
 
 
-def player_stats(req):
-    if not (req.user.is_authenticated and req.user.is_admin) and not event_ended():
-        return error("cannot get this data yet")
-
+@require_iteration_after_end
+def player_stats(req, iteration):
     most_completions = Player.objects.select_related(
         "user"
+    ).filter(
+        team__iteration_id=iteration.id
     ).annotate(
         completion_count=models.Count("completions")
     ).order_by(
@@ -294,7 +346,9 @@ def player_stats(req):
     most_first_completions = Player.objects.raw(
         f"""
         WITH firsts AS (
-            SELECT achievement_id, MIN(time_completed) AS time_completed FROM achievements_achievementcompletion 
+            SELECT achievement_id, MIN(time_completed) AS time_completed FROM achievements_achievementcompletion
+            INNER JOIN achievements_achievement ON (achievements_achievement.id = achievements_achievementcompletion.achievement_id) 
+            WHERE achievements_achievement.iteration_id = {current_iteration.id}
             GROUP BY achievement_id
         )
         SELECT 
@@ -334,11 +388,10 @@ def player_stats(req):
     })
 
 
-def get_auth_packet(req):
-    if not req.user.is_authenticated:
-        return HttpResponse(status=403)
-
-    player = Player.objects.filter(user_id=req.user.id).first()
+@require_user
+@require_iteration
+def get_auth_packet(req, iteration):
+    player = select_current_player(req.user.id, iteration.id)
     if player is None:
         return error("no associated player")
 

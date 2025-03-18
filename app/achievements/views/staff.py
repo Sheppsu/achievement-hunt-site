@@ -50,7 +50,7 @@ def achievements(req):
                 "beatmap",
                 "creator"
             ).filter(
-                release_time=None
+                batch_id=None
             ).all()
         ]
     )

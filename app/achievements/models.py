@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 
 import requests
+import time
 from osu import Client
 
 from common import create_auth_handler, SerializableModel
@@ -71,6 +72,12 @@ class User(SerializableModel):
 class EventIteration(SerializableModel):
     start = models.DateTimeField()
     end = models.DateTimeField()
+
+    def has_ended(self):
+        return time.time() >= self.end.timestamp()
+
+    def has_started(self):
+        return time.time() >= self.start.timestamp() - 5
 
     class Serialization:
         FIELDS = ["id", "start", "end"]
@@ -198,6 +205,7 @@ class Team(SerializableModel):
     icon = models.CharField(max_length=64, null=True)
     invite = models.CharField(max_length=16)
     points = models.PositiveIntegerField(default=0)
+    iteration = models.ForeignKey(EventIteration, on_delete=models.SET_NULL, null=True)
 
     class Serialization:
         FIELDS = ["id", "name", "icon", "invite", "points"]
