@@ -1,5 +1,6 @@
 import django
 import os
+from datetime import datetime, timezone
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -12,6 +13,25 @@ from django.conf import settings
 
 
 client = settings.OSU_CLIENT
+
+
+dates = []
+for i in range(8):
+    dates.append(datetime(year=2024, month=11, day=16+i, tzinfo=timezone.utc))
+dates.append(datetime(year=2024, month=11, day=25, tzinfo=timezone.utc))
+
+
+iteration = EventIteration.objects.filter(start=dates[0], end=dates[-1]).first()
+if iteration is None:
+    iteration = EventIteration.objects.create(start=dates[0], end=dates[-1])
+
+
+batches = []
+for i in range(8):
+    batch = AchievementBatch.objects.filter(iteration=iteration, release_time=dates[i]).first()
+    if batch is None:
+        batch = AchievementBatch.objects.create(iteration=iteration, release_time=dates[i])
+    batches.append(batch)
 
 
 id_interval = 0
@@ -27,7 +47,6 @@ def create(category, name, description, tags=None, audio="", beatmap_id=None):
     existing = Achievement.objects.filter(id=id_interval).first()
     if (
         existing is not None and
-        existing.category == category and
         existing.name == name and
         existing.description == description and
         existing.tags == tags and
@@ -49,7 +68,6 @@ def create(category, name, description, tags=None, audio="", beatmap_id=None):
         ).save()
 
     if existing is not None:
-        existing.category = category
         existing.name = name
         existing.description = description
         existing.tags = tags
@@ -57,14 +75,16 @@ def create(category, name, description, tags=None, audio="", beatmap_id=None):
         existing.beatmap_id = beatmap_id
         existing.save()
     else:
-        a = Achievement(
+        Achievement(
             id=id_interval,
-            category=category,
             name=name,
             description=description,
             beatmap_id=beatmap_id,
             audio=audio,
-            tags=tags
+            tags=tags,
+            batch=batches[max(0, id_interval - 21) // 10],
+            created_at=datetime.now(timezone.utc),
+            last_edited_at=datetime.now(timezone.utc),
         ).save()
 
     print(f"{name} - {id_interval}")
