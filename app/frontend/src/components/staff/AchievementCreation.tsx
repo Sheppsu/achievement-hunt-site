@@ -6,6 +6,8 @@ import { useContext, useState } from "react";
 import { useCreateAchievement, useEditAchievement } from "api/query.ts";
 import { StaffAchievementType } from "api/types/AchievementType.ts";
 import { EventContext } from "contexts/EventContext.ts";
+import Dropdown from "components/inputs/Dropdown.tsx";
+import { parseMode, parseTags } from "util/helperFunctions.ts";
 
 type AchievementCreationProps = {
   hidden: boolean;
@@ -27,10 +29,13 @@ export default function AchievementCreation(props: AchievementCreationProps) {
     achievement?.solution ?? "",
   );
   const [achievementTags, setAchievementTags] = useState(
-    achievement?.tags ?? "",
+    parseTags(achievement?.tags ?? "", false).join(","),
   );
   const [achievementBeatmapId, setAchievementBeatmapId] = useState(
     achievement?.beatmap?.id?.toString() ?? "",
+  );
+  const [achievementMode, setAchievementMode] = useState(
+    parseMode(achievement?.tags ?? ""),
   );
   const [sendingCreation, setSendingCreation] = useState(false);
   const saveAchievement =
@@ -71,12 +76,20 @@ export default function AchievementCreation(props: AchievementCreationProps) {
 
     setSendingCreation(true);
 
+    let tags = achievementTags;
+    if (achievementMode !== "any") {
+      if (tags.trim().length != 0 && !tags.endsWith(",")) {
+        tags += ",";
+      }
+      tags += achievementMode;
+    }
+
     saveAchievement.mutate(
       {
         name: achievementName,
         description: achievementDescription,
         solution: achievementSolution,
-        tags: achievementTags,
+        tags,
         beatmap_id: parseInt(achievementBeatmapId.trim()),
       },
       {
@@ -137,6 +150,22 @@ export default function AchievementCreation(props: AchievementCreationProps) {
           setAchievementTags(e.currentTarget.value);
         }}
       />
+      <div className="staff__achievement-creation-panel__row">
+        <p>Gamemode:</p>
+        <Dropdown
+          options={{
+            Any: "any",
+            Standard: "mode-o",
+            Taiko: "mode-t",
+            Mania: "mode-m",
+            Catch: "mode-f",
+          }}
+          onChange={(e: React.FormEvent<HTMLSelectElement>) => {
+            setAchievementMode(e.currentTarget.value);
+          }}
+          value={achievementMode}
+        />
+      </div>
       <TextInput
         placeholder="Type beatmap id here (or leave empty)"
         style={{ width: "auto" }}
@@ -146,7 +175,7 @@ export default function AchievementCreation(props: AchievementCreationProps) {
           setAchievementBeatmapId(e.currentTarget.value);
         }}
       />
-      <div className="staff__achievement-creation-panel__row">
+      <div className="staff__achievement-creation-panel__row right">
         <Button
           children={props.submitText}
           onClick={onCreate}

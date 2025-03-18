@@ -12,6 +12,7 @@ import AchievementComment from "components/staff/AchievementComment.tsx";
 import { SessionContext } from "contexts/SessionContext.ts";
 import AchievementCreation from "components/staff/AchievementCreation.tsx";
 import classNames from "classnames";
+import { parseTags } from "util/helperFunctions.ts";
 
 function VoteContainer({ achievement }: { achievement: StaffAchievementType }) {
   const vote = useVoteAchievement(achievement.id);
@@ -162,7 +163,7 @@ export default function Achievement(props: AchievementProps) {
         )}
         <div className="staff__achievement__footer">
           <VoteContainer achievement={achievement} />
-          {achievement.tags.split(",").map((tag) => (
+          {parseTags(achievement.tags).map((tag) => (
             <div className="staff__achievement__footer__tag">{tag}</div>
           ))}
         </div>
