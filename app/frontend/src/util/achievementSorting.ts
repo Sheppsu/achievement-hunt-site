@@ -78,6 +78,13 @@ function getGrouping(
     else return "Over a week ago";
   };
 
+  const getLastActive = (a: StaffAchievementType): number => {
+    return Math.max(
+      Date.parse(a.last_edited_at),
+      ...a.comments.map((c) => Date.parse(c.posted_at)),
+    );
+  };
+
   switch (sort) {
     case "completions":
       return [
@@ -134,12 +141,12 @@ function getGrouping(
         (a: AchievementType, b: AchievementType) =>
           Date.parse(a.created_at) - Date.parse(b.created_at),
       ];
-    case "last edited":
+    case "last active":
       return [
         ["*"],
         () => "values",
-        (a: AchievementType, b: AchievementType) =>
-          Date.parse(a.last_edited_at) - Date.parse(b.last_edited_at),
+        (a: StaffAchievementType, b: StaffAchievementType) =>
+          getLastActive(a) - getLastActive(b),
       ];
     default:
       throw new Error(

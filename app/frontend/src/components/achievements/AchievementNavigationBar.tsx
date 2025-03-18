@@ -43,7 +43,7 @@ export function getDefaultNav(
 
   const sortItems = isStaff
     ? [
-        { label: "last edited", active: true },
+        { label: "last active", active: true },
         { label: "creation time", active: false },
         { label: "votes", active: false },
       ]
