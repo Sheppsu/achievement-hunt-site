@@ -23,9 +23,12 @@ export type SortedNavRowItems = {
 } & NavRowItems;
 
 export type NavItems = {
-  mode: NavRowItems;
-  tags: NavRowItems;
-  sort: SortedNavRowItems;
+  rows: {
+    mode: NavRowItems;
+    tags: NavRowItems;
+    sort: SortedNavRowItems;
+  };
+  isStaff: boolean;
 };
 
 export function getDefaultNav(
@@ -54,20 +57,29 @@ export function getDefaultNav(
         { label: "batch", active: false },
       ];
 
+  let modes = [
+    { label: "standard", active: true },
+    { label: "taiko", active: false },
+    { label: "mania", active: false },
+    { label: "catch", active: false },
+  ];
+  if (isStaff) {
+    modes[0].active = false;
+    modes = [{ label: "any", active: true }].concat(modes);
+  }
+
   return {
-    mode: {
-      items: [
-        { label: "standard", active: true },
-        { label: "taiko", active: false },
-        { label: "mania", active: false },
-        { label: "catch", active: false },
-      ],
+    rows: {
+      mode: {
+        items: modes,
+      },
+      tags: { items: tags.map((t) => ({ label: t, active: false })) },
+      sort: {
+        items: sortItems,
+        sort: "desc",
+      },
     },
-    tags: { items: tags.map((t) => ({ label: t, active: false })) },
-    sort: {
-      items: sortItems,
-      sort: "desc",
-    },
+    isStaff,
   };
 }
 
@@ -81,8 +93,8 @@ function AchievementNavigationBarRow({
   label: string;
   sort: string | undefined;
   children: NavItem[];
-  onItemClick: (label: keyof NavItems, itemLabel: string) => void;
-  onLabelClick: (label: keyof NavItems) => void;
+  onItemClick: (label: keyof NavItems["rows"], itemLabel: string) => void;
+  onLabelClick: (label: keyof NavItems["rows"]) => void;
 }) {
   const isSorted = sort !== undefined;
 
@@ -96,7 +108,9 @@ function AchievementNavigationBarRow({
           "sort-type": isSorted,
         })}
         onClick={
-          isSorted ? () => onLabelClick(label as keyof NavItems) : undefined
+          isSorted
+            ? () => onLabelClick(label as keyof NavItems["rows"])
+            : undefined
         }
       >
         {labelText}
@@ -108,7 +122,9 @@ function AchievementNavigationBarRow({
             className={
               "achievement-nav-bar-item" + (item.active ? " active" : "")
             }
-            onClick={() => onItemClick(label as keyof NavItems, item.label)}
+            onClick={() =>
+              onItemClick(label as keyof NavItems["rows"], item.label)
+            }
           >
             {toTitleCase(item.label)}
           </p>
@@ -158,7 +174,7 @@ export default function AchievementNavigationBar({
     doAnimation();
   }
 
-  function onItemClick(label: keyof NavItems, itemLabel: string) {
+  function onItemClick(label: keyof NavItems["rows"], itemLabel: string) {
     if (state === null || state.achievementsFilter === null) return;
 
     dispatchState({
@@ -171,13 +187,16 @@ export default function AchievementNavigationBar({
     if (label === "mode")
       dispatchState({
         id: 4,
-        mode: ["standard", "taiko", "catch", "mania"].indexOf(itemLabel),
+        mode:
+          itemLabel === "any"
+            ? null
+            : ["standard", "taiko", "catch", "mania"].indexOf(itemLabel),
       });
 
     doAnimation();
   }
 
-  function onLabelClick(label: keyof NavItems) {
+  function onLabelClick(label: keyof NavItems["rows"]) {
     dispatchState({ id: 11, label });
   }
 
@@ -205,6 +224,15 @@ export default function AchievementNavigationBar({
     });
 
     doAnimation();
+  }
+
+  // reset navigator when switching pages (staff vs achievements)
+  if (
+    state !== null &&
+    state.achievementsFilter !== null &&
+    state.achievementsFilter.isStaff !== isStaff
+  ) {
+    onReset();
   }
 
   return (
@@ -251,17 +279,17 @@ export default function AchievementNavigationBar({
               <p>Show my achievements</p>
             </div>
           </div>
-          {Object.entries((state.achievementsFilter ?? {}) as NavItems).map(
-            ([label, children]) => (
-              <AchievementNavigationBarRow
-                label={label}
-                sort={"sort" in children ? children.sort : undefined}
-                children={children.items}
-                onItemClick={onItemClick}
-                onLabelClick={onLabelClick}
-              />
-            ),
-          )}
+          {Object.entries(
+            (state.achievementsFilter?.rows ?? {}) as NavItems["rows"],
+          ).map(([label, children]) => (
+            <AchievementNavigationBarRow
+              label={label}
+              sort={"sort" in children ? children.sort : undefined}
+              children={children.items}
+              onItemClick={onItemClick}
+              onLabelClick={onLabelClick}
+            />
+          ))}
           <Button onClick={() => onReset()}>Reset to Default</Button>
         </>
       )}
