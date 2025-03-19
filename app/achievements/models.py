@@ -154,6 +154,12 @@ class Achievement(SerializableModel):
         ]
 
 
+class BeatmapConnection(SerializableModel):
+    achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE, related_name="beatmaps")
+    beatmap = models.ForeignKey(BeatmapInfo, on_delete=models.CASCADE)
+    hide = models.BooleanField(default=False)
+
+
 class AchievementCompletionPlacement(SerializableModel):
     value = models.BigIntegerField()
     is_float = models.BooleanField()
