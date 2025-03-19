@@ -38,13 +38,17 @@ function matchesSearch(achievement: AchievementType, searchFilter: string[]) {
   return true;
 }
 
-function matchesMode(achievement: AchievementType, mode: number): boolean {
+function matchesMode(
+  achievement: AchievementType,
+  mode: number,
+  exclusive: boolean,
+): boolean {
   for (const tag of achievement.tags.split(",")) {
     if (tag.startsWith("mode-"))
       return ["o", "t", "f", "m"].indexOf(tag[tag.length - 1]) == mode;
   }
 
-  return true;
+  return !exclusive;
 }
 
 function getGrouping(
@@ -162,18 +166,20 @@ export function getSortedAchievements<T extends AchievementType>(
   mode: number | null = null,
   hideCompletedAchievements: boolean = false,
   team: AchievementTeamExtendedType | null = null,
+  exclusiveModeFiltering: boolean = false,
 ): { [_k: string]: T[] } {
-  const activeTags = filters.tags.items
+  const activeTags = filters.rows.tags.items
     .filter((item) => item.active)
     .map((item) => item.label);
   const searchFilter = searchText.toLowerCase().split(" ");
-  const sort = filters.sort.items.filter((i) => i.active)[0].label;
+  const sort = filters.rows.sort.items.filter((i) => i.active)[0].label;
 
   const [groupSort, groupFunc, sortFunc] = getGrouping(sort, team);
   const sortedAchievements: { [key: string]: T[] } = {};
 
   for (const achievement of achievements) {
-    if (mode != null && !matchesMode(achievement, mode)) continue;
+    if (mode != null && !matchesMode(achievement, mode, exclusiveModeFiltering))
+      continue;
 
     if (!matchesSearch(achievement, searchFilter)) continue;
 
@@ -197,7 +203,7 @@ export function getSortedAchievements<T extends AchievementType>(
 
     // create sort function based on current sort direction
     const directionalSortFunc: (a: T, b: T) => boolean =
-      filters.sort.sort === "desc"
+      filters.rows.sort.sort === "desc"
         ? // @ts-ignore
           (a, b) => sortFunc(a, b) < 0
         : // @ts-ignore
@@ -222,7 +228,7 @@ export function getSortedAchievements<T extends AchievementType>(
   const sortGroups = (g1: string, g2: string) => {
     const i1 = getGroupIndex(g1);
     const i2 = getGroupIndex(g2);
-    if (filters.sort.sort === "desc")
+    if (filters.rows.sort.sort === "desc")
       return i1 == i2 ? g1.localeCompare(g2) : i1 - i2;
     return i1 == i2 ? g2.localeCompare(g1) : i2 - i1;
   };

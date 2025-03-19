@@ -25,7 +25,7 @@ interface SubmitType extends BaseStateActionType {
 
 interface ModeType extends BaseStateActionType {
   id: 4;
-  mode: number;
+  mode: number | null;
 }
 
 interface FilterType extends BaseStateActionType {
@@ -55,14 +55,14 @@ interface AdjustAudioType extends BaseStateActionType {
 
 interface ActivateNavItem extends BaseStateActionType {
   id: 10;
-  label: keyof NavItems;
+  label: keyof NavItems["rows"];
   item: string;
   multiSelect: boolean;
 }
 
 interface SwitchNavItemSort extends BaseStateActionType {
   id: 11;
-  label: keyof NavItems;
+  label: keyof NavItems["rows"];
 }
 
 interface HideMyAchievements extends BaseStateActionType {
@@ -149,11 +149,11 @@ export function wsReducer(
       const newFilter = { ...state.achievementsFilter! };
 
       if (action.multiSelect) {
-        for (const item of newFilter[action.label].items) {
+        for (const item of newFilter.rows[action.label].items) {
           if (item.label === action.item) item.active = !item.active;
         }
       } else {
-        for (const item of newFilter[action.label].items)
+        for (const item of newFilter.rows[action.label].items)
           item.active = item.label === action.item;
       }
 
@@ -165,7 +165,7 @@ export function wsReducer(
     case 11: {
       const newFilter = { ...state.achievementsFilter! };
 
-      const row = newFilter[action.label] as SortedNavRowItems;
+      const row = newFilter.rows[action.label] as SortedNavRowItems;
       row.sort = row.sort === "desc" ? "asc" : "desc";
 
       return {

@@ -21,7 +21,7 @@ export function defaultState(): WebsocketState {
 export type WebsocketState = {
   ws: WebSocket | null | undefined;
   authenticated: boolean;
-  mode: number;
+  mode: number | null;
   submitEnabled: boolean;
   achievementsFilter: NavItems | null;
   achievementsSearchFilter: string; // probably put filter stuff in its own reducer
