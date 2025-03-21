@@ -26,15 +26,18 @@ def parse_body(body: bytes, require_has: tuple | list):
         return
 
 
-def require_valid_data(*keys):
+def accepts_json_data(fmt):
     def decorator(func):
-        def wrapper(req, *args, **kwargs):
-            data = parse_body(req.body, keys)
-            if data is None:
-                return error("Invalid body format (expected json) or keys")
+        def check(req, *args, **kwargs):
+            try:
+                data = json.loads(req.body.decode("utf-8"))
+                result = fmt.validate(data)
+                if result.is_failed:
+                    return error(result.msg, 400)
+                return func(req, *args, data=data, **kwargs)
+            except json.JSONDecodeError:
+                return error("Invalid json data", 400)
 
-            return func(req, *args, **kwargs, data=data)
-
-        return wrapper
+        return check
 
     return decorator

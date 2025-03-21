@@ -1,13 +1,11 @@
 import { WebsocketState } from "types/WebsocketStateType.ts";
 import { StateDispatch } from "contexts/StateContext.ts";
-import {
-  AchievementExtendedType,
-  AchievementType,
-} from "api/types/AchievementType.ts";
-import { useEffect, useState } from "react";
+import { AchievementType } from "api/types/AchievementType.ts";
+import { useState } from "react";
 import { parseTags, toTitleCase } from "util/helperFunctions.ts";
 import Button from "components/inputs/Button.tsx";
 import classNames from "classnames";
+import TextInput from "components/inputs/TextInput.tsx";
 
 export type NavItem = {
   label: string;
@@ -242,11 +240,8 @@ export default function AchievementNavigationBar({
       ) : (
         <>
           <div className="achievement-nav-bar-input-row">
-            <input
-              type="text"
+            <TextInput
               placeholder="Search"
-              name="input"
-              autoComplete="off"
               value={searchField}
               onChange={onSearchChange}
             />

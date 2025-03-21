@@ -99,6 +99,12 @@
     display: flex;
     flex-direction: row;
     gap: 5px;
+
+    color: white;
+}
+
+.staff__achievement__beatmap.red {
+    color: #FFC0C0;
 }
 
 .staff__achievement__beatmap__cover {
@@ -121,10 +127,18 @@
     text-wrap: nowrap;
 
     overflow: hidden;
+
+    color: inherit;
+}
+
+.staff__achievement__beatmap__info__title {
+    color: inherit;
 }
 
 .staff__achievement__beatmap__info__version {
     font-size: 15px;
+
+    color: inherit;
 }
 
 .staff__achievement__beatmap__star-rating {
@@ -132,6 +146,8 @@
 
     font-size: 40px;
     font-weight: 600;
+
+    color: inherit;
 }
 
 .staff__achievement__footer {

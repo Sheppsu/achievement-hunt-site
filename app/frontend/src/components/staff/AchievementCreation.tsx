@@ -31,8 +31,13 @@ export default function AchievementCreation(props: AchievementCreationProps) {
   const [achievementTags, setAchievementTags] = useState(
     parseTags(achievement?.tags ?? "", false).join(","),
   );
-  const [achievementBeatmapId, setAchievementBeatmapId] = useState(
-    achievement?.beatmap?.id?.toString() ?? "",
+  const [achievementBeatmaps, setAchievementBeatmaps] = useState(
+    achievement
+      ? achievement.beatmaps.map((b) => ({
+          hide: b.hide,
+          id: b.info.id.toString(),
+        }))
+      : [],
   );
   const [achievementMode, setAchievementMode] = useState(
     parseMode(achievement?.tags ?? ""),
@@ -55,16 +60,15 @@ export default function AchievementCreation(props: AchievementCreationProps) {
         dispatchEventMsg({ type: "error", msg: "Missing description" });
       return false;
     }
-    if (
-      achievementBeatmapId.trim().length !== 0 &&
-      isNaN(parseInt(achievementBeatmapId.trim()))
-    ) {
-      if (showError)
-        dispatchEventMsg({
-          type: "error",
-          msg: "Invalid beatmap id (make sure it's id, not link)",
-        });
-      return false;
+    for (const beatmap of achievementBeatmaps) {
+      if (isNaN(parseInt(beatmap.id.trim()))) {
+        if (showError)
+          dispatchEventMsg({
+            type: "error",
+            msg: "Invalid beatmap id (make sure it's id, not link)",
+          });
+        return false;
+      }
     }
     return true;
   };
@@ -90,7 +94,10 @@ export default function AchievementCreation(props: AchievementCreationProps) {
         description: achievementDescription,
         solution: achievementSolution,
         tags,
-        beatmap_id: parseInt(achievementBeatmapId.trim()),
+        beatmaps: achievementBeatmaps.map((beatmap) => ({
+          hide: beatmap.hide,
+          id: parseInt(beatmap.id),
+        })),
       },
       {
         onSuccess: () => {
@@ -100,7 +107,7 @@ export default function AchievementCreation(props: AchievementCreationProps) {
             setAchievementDescription("");
             setAchievementSolution("");
             setAchievementTags("");
-            setAchievementBeatmapId("");
+            setAchievementBeatmaps([]);
           }
         },
         onSettled: () => {
@@ -108,6 +115,19 @@ export default function AchievementCreation(props: AchievementCreationProps) {
         },
       },
     );
+  };
+
+  const onBeatmapChange = (
+    i: number,
+    field: "hide" | "id",
+    value: string | boolean,
+  ) => {
+    setAchievementBeatmaps((beatmaps) => {
+      const newItem = beatmaps[i];
+      // @ts-ignore
+      newItem[field] = value;
+      return beatmaps.slice(0, i).concat([newItem], beatmaps.slice(i + 1));
+    });
   };
 
   return (
@@ -166,16 +186,44 @@ export default function AchievementCreation(props: AchievementCreationProps) {
           value={achievementMode}
         />
       </div>
-      <TextInput
-        placeholder="Type beatmap id here (or leave empty)"
-        style={{ width: "auto" }}
-        className="staff__text-input"
-        value={achievementBeatmapId}
-        onChange={(e: React.FormEvent<HTMLInputElement>) => {
-          setAchievementBeatmapId(e.currentTarget.value);
-        }}
-      />
+      {achievementBeatmaps.map((beatmap, i) => (
+        <div key={i} className="staff__achievement-creation-panel__row">
+          <input
+            type="checkbox"
+            checked={beatmap.hide}
+            onChange={(e: React.FormEvent<HTMLInputElement>) =>
+              onBeatmapChange(i, "hide", e.currentTarget.checked)
+            }
+          />
+          <p>Hide</p>
+          <TextInput
+            placeholder="Beatmap id"
+            style={{ width: "auto" }}
+            value={beatmap.id}
+            onChange={(e: React.FormEvent<HTMLInputElement>) =>
+              onBeatmapChange(i, "id", e.currentTarget.value)
+            }
+          />
+          <Button
+            children="Remove"
+            onClick={() =>
+              setAchievementBeatmaps((beatmaps) =>
+                beatmaps.slice(0, i).concat(beatmaps.slice(i + 1)),
+              )
+            }
+          />
+        </div>
+      ))}
+
       <div className="staff__achievement-creation-panel__row right">
+        <Button
+          children="Add beatmap"
+          onClick={() =>
+            setAchievementBeatmaps((beatmaps) =>
+              beatmaps.concat([{ hide: false, id: "" }]),
+            )
+          }
+        />
         <Button
           children={props.submitText}
           onClick={onCreate}

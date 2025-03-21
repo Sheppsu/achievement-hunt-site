@@ -143,31 +143,31 @@ export default function Achievement(props: AchievementProps) {
         <p className="staff__achievement__solution">
           <RenderedText text={achievement.solution} />
         </p>
-        {achievement.beatmap === null ? (
-          ""
-        ) : (
+        {achievement.beatmaps.map((beatmap) => (
           <a
-            className="staff__achievement__beatmap"
-            href={`https://osu.ppy.sh/b/${achievement.beatmap.id}`}
+            className={classNames("staff__achievement__beatmap", {
+              red: beatmap.hide,
+            })}
+            href={`https://osu.ppy.sh/b/${beatmap.info.id}`}
             target="_blank"
           >
             <div
               className="staff__achievement__beatmap__cover"
-              style={{ backgroundImage: `url(${achievement.beatmap.cover})` }}
+              style={{ backgroundImage: `url(${beatmap.info.cover})` }}
             ></div>
             <div className="staff__achievement__beatmap__info">
-              <p>
-                {achievement.beatmap.artist} - {achievement.beatmap.title}
+              <p className="staff__achievement__beatmap__info__title">
+                {beatmap.info.artist} - {beatmap.info.title}
               </p>
               <p className="staff__achievement__beatmap__info__version">
-                [{achievement.beatmap.version}]
+                [{beatmap.info.version}]
               </p>
             </div>
             <p className="staff__achievement__beatmap__star-rating">
-              {achievement.beatmap.star_rating}*
+              {beatmap.info.star_rating}*
             </p>
           </a>
-        )}
+        ))}
         <div className="staff__achievement__footer">
           <VoteContainer achievement={achievement} />
           {parseTags(achievement.tags).map((tag) => (

@@ -1,0 +1,18 @@
+.text-input {
+    width: 160px;
+    height: 18px;
+    padding: 10px;
+
+    background-color: black;
+    color: white;
+
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+
+    font-family: "Radio Canada", sans-serif;
+    font-size: 20px;
+}
+
+.text-input:focus {
+    outline: none;
+}

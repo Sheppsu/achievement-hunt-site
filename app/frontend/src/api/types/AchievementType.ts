@@ -1,17 +1,17 @@
-import { BeatmapInfoType } from "./BeatmapInfoType";
 import {
   AchievementCompletionType,
   AnonymousAchievementCompletionType,
 } from "api/types/AchievementCompletionType.ts";
 import { AchievementCommentType } from "api/types/AchievementCommentType.ts";
 import { UserType } from "api/types/UserType.ts";
+import { BeatmapConnectionType } from "api/types/BeatmapConnectionType.ts";
 
 export type AchievementType = {
   id: number;
   name: string;
   description: string;
   audio: string;
-  beatmap: BeatmapInfoType | null;
+  beatmaps: BeatmapConnectionType[];
   tags: string;
   release_time: string | null;
   created_at: string;

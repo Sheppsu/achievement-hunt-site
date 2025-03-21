@@ -13,8 +13,9 @@ from django.views.decorators.http import require_http_methods, require_POST
 from nacl.secret import SecretBox
 
 from ..models import *
-from .util import error, success, require_valid_data
+from .util import error, success, accepts_json_data
 from common.serializer import SerializableField
+from common.validation import *
 
 
 __all__ = (
@@ -153,10 +154,10 @@ def achievements(req, iteration):
 
     return success([
         achievement.serialize(
-            ["beatmap", "completion_count", "completions__player__user", "completions__placement"]
+            ["beatmaps__info", "completion_count", "completions__player__user", "completions__placement"]
             if iteration.has_ended() or is_admin else
             [
-                "beatmap",
+                "beatmaps__info",
                 "completion_count",
                 SerializableField(
                     "completions",
@@ -175,15 +176,16 @@ def achievements(req, iteration):
             ],
         )
         for achievement in Achievement.objects.select_related(
-            "beatmap",
             "batch"
         ).prefetch_related(
             "completions__player__user",
             "completions__placement",
+            "beatmaps__info"
         ).annotate(
             completion_count=models.Count("completions"),
         ).filter(
-            batch__iteration_id=iteration.id
+            batch__iteration_id=iteration.id,
+            beatmaps__hide=False
         ).all()
     ])
 
@@ -206,12 +208,11 @@ def teams(req, iteration):
 
 @require_POST
 @require_iteration_before_end
-@require_valid_data("invite")
+@accepts_json_data(
+    DictionaryType({"invite": StringType()})
+)
 @require_user
 def join_team(req, data, iteration):
-    if data["invite"] is None:
-        return error("invalid invite")
-
     team = select_teams(iteration.id, invite=data["invite"])
     if team is None:
         return error("invalid invite")
@@ -257,19 +258,18 @@ def leave_team(req, iteration):
 
 @require_POST
 @require_iteration_before_end
-@require_valid_data("name")
+@accepts_json_data(
+    DictionaryType({"name": StringType(min_length=1, max_length=32)})
+)
 @require_user
 def create_team(req, data, iteration):
-    if (name := data["name"]) is None or len(name) == 0 or len(name) > 32:
-        return error("invalid name")
-
     player = select_current_player(req.user.id, iteration.id)
     if player is not None:
         return error("already on a team")
 
     try:
         invite = secrets.token_urlsafe(12)
-        team = Team(name=name, icon="", invite=invite, iteration=current_iteration)
+        team = Team(name=data["name"], icon="", invite=invite, iteration=current_iteration)
         team.save()
     except:
         return error("team name taken")
@@ -285,18 +285,17 @@ def create_team(req, data, iteration):
 
 
 @require_http_methods(["PATCH"])
-@require_valid_data("newAdminId")
+@accepts_json_data(
+    DictionaryType({"newAdminId": IntegerType()})
+)
 @require_iteration_before_end
 @require_user
 def transfer_admin(req, data, iteration):
-    if (new_admin_user_id := data["newAdminId"]) is None:
-        return error("invalid user id")
-    
     current_admin = select_current_player(req.user.id, iteration.id)
     if current_admin is None or not current_admin.team_admin:
         return error("not on a team or not admin")
     
-    new_admin = select_current_player(new_admin_user_id, iteration.id)
+    new_admin = select_current_player(data["newAdminId"], iteration.id)
     if new_admin is None or current_admin.team_id != new_admin.team_id:
         return error("users not on the same team")
     
@@ -310,16 +309,17 @@ def transfer_admin(req, data, iteration):
 
 
 @require_http_methods(["PATCH"])
-@require_valid_data("name")
+@accepts_json_data(
+    DictionaryType({"name": StringType(min_length=1, max_length=32)})
+)
 @require_iteration_before_end
 @require_user
 def rename_team(req, data, iteration):
-    if (name := data["name"]) is None or len(name) == 0 or len(name) > 32:
-        return error("invalid name")
-
     player = select_current_player(req.user.id, iteration.id)
     if player is None or not player.team_admin:
         return error("not on a team or not admin")
+
+    name = data["name"]
 
     try:
         team = player.team

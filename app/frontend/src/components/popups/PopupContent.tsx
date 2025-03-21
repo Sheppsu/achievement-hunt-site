@@ -1,5 +1,6 @@
 import Button from "components/inputs/Button.tsx";
 import { FormEvent } from "react";
+import TextInput from "components/inputs/TextInput.tsx";
 
 export function SimplePromptPopup({
   prompt,
@@ -13,7 +14,7 @@ export function SimplePromptPopup({
       <div className="form-container">
         <div className="input-container">
           <p>{prompt}: </p>
-          <input type="text" name="prompt-value" autoComplete="off" />
+          <TextInput name="prompt-value" />
         </div>
         <div className="input-container center">
           <Button type="submit" children="Submit" width="200px" />

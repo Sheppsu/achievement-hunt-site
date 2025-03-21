@@ -83,22 +83,6 @@ footer {
   overflow: hidden;
 }
 
-input {
-  width: 160px;
-  height: 18px;
-  padding: 10px;
-  background-color: black;
-  border: 2px solid var(--border-color);
-  color: white;
-  font-family: "Radio Canada", sans-serif;
-  font-size: 20px;
-  border-radius: 8px;
-}
-
-input:focus {
-  outline: none;
-}
-
 textarea {
   font-family: "Radio Canada", sans-serif;
 }

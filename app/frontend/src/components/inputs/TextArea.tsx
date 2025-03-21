@@ -5,7 +5,7 @@ type TextAreaProps = {
   placeholder?: string;
   hidden?: boolean;
   onInput?: (e: React.FormEvent<HTMLTextAreaElement>) => void;
-  onChange?: (e: React.FormEvent<HTMLTextAreaElement>) => void;
+  onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   name?: string;
   [_k: string]: any;
 };

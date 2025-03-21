@@ -100,23 +100,39 @@ class BeatmapInfo(SerializableModel):
     star_rating = models.FloatField()
 
     @classmethod
-    def get_or_create(cls, beatmap_id):
-        beatmap = BeatmapInfo.objects.filter(id=beatmap_id).first()
+    def _get_or_create(cls, info):
+        beatmap = BeatmapInfo.objects.filter(id=info.id).first()
         if beatmap is None:
-            try:
-                info = osu_client.get_beatmap(beatmap_id)
-                beatmap = BeatmapInfo.objects.create(
-                    id=info.id,
-                    artist=info.beatmapset.artist,
-                    title=info.beatmapset.title,
-                    version=info.version,
-                    cover=info.beatmapset.covers.cover,
-                    star_rating=info.difficulty_rating
-                )
-            except:
-                return
+            beatmap = BeatmapInfo.objects.create(
+                id=info.id,
+                artist=info.beatmapset.artist,
+                title=info.beatmapset.title,
+                version=info.version,
+                cover=info.beatmapset.covers.cover,
+                star_rating=info.difficulty_rating
+            )
+        else:
+            beatmap.artist = info.beatmapset.artist
+            beatmap.title = info.beatmapset.title
+            beatmap.version = info.version
+            beatmap.cover = info.beatmapset.covers.cover
+            beatmap.star_rating = info.difficulty_rating
+            beatmap.save()
 
         return beatmap
+
+    @classmethod
+    def get_or_create(cls, beatmap_id):
+        info = osu_client.get_beatmap(beatmap_id)
+        return cls._get_or_create(info)
+
+    @classmethod
+    def bulk_get_or_create(cls, beatmap_ids):
+        beatmaps = osu_client.get_beatmaps(beatmap_ids)
+        if len(beatmaps) != len(beatmap_ids):
+            return
+
+        return list(map(cls._get_or_create, beatmaps))
 
     class Serialization:
         FIELDS = ["id", "artist", "version", "title", "cover", "star_rating"]
@@ -147,7 +163,6 @@ class Achievement(SerializableModel):
             "description",
             "audio",
             "tags",
-            "beatmap",
             "release_time",
             "created_at",
             "last_edited_at"
@@ -156,8 +171,11 @@ class Achievement(SerializableModel):
 
 class BeatmapConnection(SerializableModel):
     achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE, related_name="beatmaps")
-    beatmap = models.ForeignKey(BeatmapInfo, on_delete=models.CASCADE)
+    info = models.ForeignKey(BeatmapInfo, on_delete=models.CASCADE)
     hide = models.BooleanField(default=False)
+
+    class Serialization:
+        FIELDS = ["hide"]
 
 
 class AchievementCompletionPlacement(SerializableModel):

@@ -4,6 +4,7 @@ import AchievementCompletionEntry from "components/achievements/AchievementCompl
 import { AchievementCompletionType } from "api/types/AchievementCompletionType.ts";
 import AudioPlayer from "components/audio/AudioPlayer.tsx";
 import { WebsocketState } from "types/WebsocketStateType.ts";
+import classNames from "classnames";
 
 export default function Achievement({
   achievement,
@@ -52,38 +53,34 @@ export default function Achievement({
             <AudioPlayer currentSong={achievement.audio} />
           )}
 
-          {achievement.beatmap === null ? (
-            ""
-          ) : (
-            <a
-              href={`https://osu.ppy.sh/b/${achievement.beatmap.id}`}
-              target="_blank"
-            >
+          {achievement.beatmaps.map((beatmap) => (
+            <a href={`https://osu.ppy.sh/b/${beatmap.info.id}`} target="_blank">
               <div className="achievement-details-container">
                 <img
                   className="achievement-details-cover"
-                  src={achievement.beatmap.cover}
+                  src={beatmap.info.cover}
                   alt=""
                 ></img>
                 <div className="achievement-details-beatmap-info">
                   <p className="achievement-details-beatmap-info-text">
-                    {achievement.beatmap.artist} - {achievement.beatmap.title}
+                    {beatmap.info.artist} - {beatmap.info.title}
                   </p>
                   <p className="achievement-details-beatmap-info-text">
-                    [{achievement.beatmap.version}]
+                    [{beatmap.info.version}]
                   </p>
                 </div>
                 <h1 className="achievement-details-star-rating">
-                  {achievement.beatmap.star_rating}*
+                  {beatmap.info.star_rating}*
                 </h1>
               </div>
             </a>
-          )}
-          {achievement.beatmap === null || completions.length === 0 ? (
-            ""
-          ) : (
-            <hr />
-          )}
+          ))}
+          <hr
+            className={classNames({
+              hide:
+                achievement.beatmaps.length == 0 || completions.length === 0,
+            })}
+          />
           {completions.length == 0 ? (
             ""
           ) : (
