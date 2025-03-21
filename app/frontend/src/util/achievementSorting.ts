@@ -23,14 +23,16 @@ function intersects(a: string[], b: string[]): boolean {
 
 function matchesSearch(achievement: AchievementType, searchFilter: string[]) {
   for (const word of searchFilter) {
-    const bm = achievement.beatmap;
     if (
       word != "" &&
       !achievement.name.toLowerCase().includes(word) &&
       !achievement.description.toLowerCase().includes(word) &&
-      !(bm === null ? false : bm.artist.toLowerCase().includes(word)) &&
-      !(bm === null ? false : bm.title.toLowerCase().includes(word)) &&
-      !(bm === null ? false : bm.version.toLowerCase().includes(word))
+      achievement.beatmaps.filter(
+        (bm) =>
+          bm.info.artist.toLowerCase().includes(word) ||
+          bm.info.title.toLowerCase().includes(word) ||
+          bm.info.version.toLowerCase().includes(word),
+      ).length == 0
     )
       return false;
   }
