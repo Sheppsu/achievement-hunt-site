@@ -136,7 +136,6 @@ def vote_achievement(req, data, achievement):
     })
 )
 def create_achievement(req, data, achievement=None):
-
     beatmaps = data["beatmaps"]
     if len(beatmaps) > 0:
         beatmaps = [
@@ -167,6 +166,10 @@ def create_achievement(req, data, achievement=None):
         achievement.save()
 
     resp_beatmaps = []
+
+    for connection in BeatmapConnection.objects.filter(achievement_id=achievement.id):
+        if not any((info.id == connection.info_id for info, _ in beatmaps)):
+            connection.delete()
 
     for info, hide in beatmaps:
         obj, _ = BeatmapConnection.objects.update_or_create(
