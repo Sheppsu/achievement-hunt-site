@@ -53,6 +53,7 @@ export default function Button(props: ButtonProps) {
   // for hold-to-use buttons
   const onMouseDown = (e: React.FormEvent<HTMLButtonElement>) => {
     timeoutId.current = setTimeout(() => {
+      if (timeoutId.current === null) return;
       timeoutId.current = null;
       if (otherProps.onClick) otherProps.onClick(e);
     }, 3000);
@@ -92,6 +93,8 @@ export default function Button(props: ButtonProps) {
       onMouseDown={otherProps.holdToUse ? onMouseDown : undefined}
       onMouseUp={otherProps.holdToUse ? onMouseUp : undefined}
       onMouseLeave={otherProps.holdToUse ? onMouseUp : undefined}
+      onTouchStart={otherProps.holdToUse ? onMouseDown : undefined}
+      onTouchEnd={otherProps.holdToUse ? onMouseUp : undefined}
       {...elementProps}
     >
       {otherProps.children}
