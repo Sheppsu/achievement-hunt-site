@@ -17,7 +17,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from osu import AuthHandler, Scope, Client
 
-from middleware.error import DiscordLogger
+from common.discord import DiscordLogger
 
 load_dotenv()
 

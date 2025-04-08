@@ -5,7 +5,8 @@ import requests
 import time
 from osu import Client
 
-from common import create_auth_handler, SerializableModel
+from common.util import create_auth_handler
+from common.serializer import SerializableModel
 
 
 osu_client = settings.OSU_CLIENT

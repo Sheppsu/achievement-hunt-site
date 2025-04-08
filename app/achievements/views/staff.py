@@ -1,4 +1,5 @@
 from django.views.decorators.http import require_POST, require_GET, require_http_methods
+from django.conf import settings
 
 from ..models import *
 from .util import error, success, accepts_json_data
@@ -9,6 +10,9 @@ from datetime import datetime, timezone
 
 
 __all__ = ("achievements",)
+
+
+discord_logger = settings.DISCORD_LOGGER
 
 
 def require_staff(func):
@@ -86,6 +90,8 @@ def create_comment(req, data, achievement):
         posted_at=datetime.now(tz=timezone.utc)
     )
 
+    discord_logger.submit_comment(comment)
+
     return success(comment.serialize(includes=["user"]))
 
 
@@ -155,6 +161,7 @@ def create_achievement(req, data, achievement=None):
             created_at=(date_now := datetime.now(tz=timezone.utc)),
             last_edited_at=date_now
         )
+        discord_logger.submit_achievement(achievement)
     elif achievement.creator_id != req.user.id:
         return error("cannot edit an achievement that's not yours")
     else:
