@@ -40,7 +40,7 @@ export const routes: RouteObject[] = [
           },
           {
             path: "staff",
-            element: <Index />,
+            element: <Staff />,
           },
           {
             path: "staff/achievements/:achievementId",
