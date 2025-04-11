@@ -25,29 +25,60 @@ def require_staff(func):
     return wrapper
 
 
+def require_achievement(select: list | None = None, prefetch: list | None = None):
+    def decorator(func):
+        def wrapper(req, *args, **kwargs):
+            achievement_id = kwargs.pop("achievement_id", None)
+            if achievement_id is None:
+                return error("Invalid achievement id")
+
+            achievement = Achievement.objects.filter(id=achievement_id)
+
+            if select is not None:
+                achievement.select_related(*select)
+
+            if prefetch is not None:
+                achievement.prefetch_related(*prefetch)
+
+            achievement = achievement.first()
+
+            if achievement is None:
+                return error("Invalid achievement id")
+
+            return func(req, *args, achievement=achievement, **kwargs)
+
+        return wrapper
+
+    return decorator
+
+
+def serialize_full_achievement(req, achievement: Achievement):
+    return achievement.serialize(
+        includes=[
+            "comments__user",
+            "beatmaps__info",
+            "solution",
+            "creator",
+            SerializableField(
+                "votes",
+                serial_key="has_voted",
+                post_transform=lambda votes: any((v["user_id"] == req.user.id for v in votes))
+            ),
+            SerializableField(
+                "votes",
+                serial_key="vote_count",
+                post_transform=lambda votes: len(votes)
+            )
+        ]
+    )
+
+
 @require_staff
 @require_GET
 def achievements(req):
     return success(
         [
-            achievement.serialize(
-                includes=[
-                    "comments__user",
-                    "beatmaps__info",
-                    "solution",
-                    "creator",
-                    SerializableField(
-                        "votes",
-                        serial_key="has_voted",
-                        post_transform=lambda votes: any((v["user_id"] == req.user.id for v in votes))
-                    ),
-                    SerializableField(
-                        "votes",
-                        serial_key="vote_count",
-                        post_transform=lambda votes: len(votes)
-                    )
-                ]
-            )
+            serialize_full_achievement(req, achievement)
             for achievement in Achievement.objects.prefetch_related(
                 "comments__user",
                 "votes",
@@ -61,24 +92,19 @@ def achievements(req):
     )
 
 
-def require_achievement(func):
-    def wrapper(req, *args, **kwargs):
-        achievement_id = kwargs.pop("achievement_id", None)
-        if achievement_id is None:
-            return error("Invalid achievement id")
-
-        achievement = Achievement.objects.filter(id=achievement_id).first()
-        if achievement is None:
-            return error("Invalid achievement id")
-
-        return func(req, *args, achievement=achievement, **kwargs)
-
-    return wrapper
+@require_staff
+@require_GET
+@require_achievement(
+    select=["creator"],
+    prefetch=["comments__user", "votes", "beatmaps__info"]
+)
+def show_achievement(req, achievement):
+    return success(serialize_full_achievement(req, achievement))
 
 
 @require_staff
 @require_POST
-@require_achievement
+@require_achievement()
 @accepts_json_data(
     DictionaryType({"msg": StringType(min_length=1, max_length=4096)})
 )
@@ -97,14 +123,14 @@ def create_comment(req, data, achievement):
 
 @require_staff
 @require_POST
-@require_achievement
+@require_achievement()
 @accepts_json_data(
     DictionaryType({"add": BoolType()})
 )
 def vote_achievement(req, data, achievement):
     add_vote = data["add"]
 
-    if req.user.id == achievement.creator.id:
+    if req.user.id == achievement.creator_id:
         return error("Can't vote for your own achievement!")
 
     existing_vote = AchievementVote.objects.filter(achievement_id=achievement.id, user_id=req.user).first()
@@ -192,14 +218,14 @@ def create_achievement(req, data, achievement=None):
     return success(resp_data)
 
 
-@require_achievement
+@require_achievement(select=["creator"])
 def edit_achievement(req, achievement):
     return create_achievement(req, achievement=achievement)
 
 
 @require_staff
 @require_http_methods(["DELETE"])
-@require_achievement
+@require_achievement()
 def delete_achievement(req, achievement):
     if achievement.creator_id != req.user.id:
         return error("cannot delete an achievement that's not yours")

@@ -279,7 +279,7 @@ export function useCreateTeam(): SpecificUseMutationResult<AchievementTeamExtend
   );
 }
 
-export function useGetStaffAchievement(
+export function useGetStaffAchievements(
   enabled: boolean = true,
 ): UseQueryResult<StaffAchievementType[]> {
   return useMakeQuery({
@@ -490,4 +490,15 @@ export function useDeleteAchievement(achievementId: number) {
       method: "DELETE",
     },
   );
+}
+
+export function useGetStaffAchievement(
+  achievementId: number,
+  enabled: boolean = true,
+): UseQueryResult<StaffAchievementType> {
+  return useMakeQuery({
+    queryKey: ["staff", "achievements", achievementId.toString()],
+    enabled,
+    refetchInterval: 60000,
+  });
 }

@@ -1,13 +1,10 @@
-import { useCreateAchievement, useGetStaffAchievement } from "api/query.ts";
+import { useGetStaffAchievements } from "api/query.ts";
 import Achievement from "components/staff/Achievement.tsx";
 
 import "assets/css/staff.css";
 import { useAuthEnsurer } from "util/auth.ts";
 import Button from "components/inputs/Button.tsx";
-import TextInput from "components/inputs/TextInput.tsx";
-import TextArea from "components/inputs/TextArea.tsx";
 import { useContext, useState } from "react";
-import classNames from "classnames";
 import AchievementCreation from "components/staff/AchievementCreation.tsx";
 import AchievementNavigationBar, {
   getDefaultNav,
@@ -20,10 +17,10 @@ import { useAnimate } from "framer-motion";
 import { getSortedAchievements } from "util/achievementSorting.ts";
 import { SessionContext } from "contexts/SessionContext.ts";
 
-export default function Staff() {
+export default function Index() {
   useAuthEnsurer().ensureStaff();
 
-  const { data: achievements, isLoading } = useGetStaffAchievement();
+  const { data: achievements, isLoading } = useGetStaffAchievements();
   const state = useStateContext();
   const dispatchState = useDispatchStateContext();
   const [scope, animate] = useAnimate();

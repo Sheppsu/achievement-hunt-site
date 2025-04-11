@@ -97,6 +97,7 @@ class DiscordLogger:
 
         embed = {
             "title": "New comment",
+            "url": f"https://cta.sheppsu.me/staff/achievements/{comment.achievement_id}",
             "description": f"Reply to **{comment.achievement.name}**:\n" + comment.msg,
             "color": 0x31A6CE,
             "footer": {

@@ -5,7 +5,8 @@ import Logout from "./logout";
 import AchievementCompletionPage from "./achievements";
 import AchievementsIndex from "./team";
 import Credit from "routes/credit.tsx";
-import Staff from "routes/staff.tsx";
+import Staff from "routes/staff";
+import StaffAchievement from "routes/staff/achievement.tsx";
 import ErrorBoundary from "../errors/ErrorBoundary.tsx";
 
 export const routes: RouteObject[] = [
@@ -39,7 +40,11 @@ export const routes: RouteObject[] = [
           },
           {
             path: "staff",
-            element: <Staff />,
+            element: <Index />,
+          },
+          {
+            path: "staff/achievements/:achievementId",
+            element: <StaffAchievement />,
           },
         ],
       },
