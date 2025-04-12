@@ -51,10 +51,12 @@ class DiscordLogger:
 
     def _loop(self):
         while self._running.is_set():
-            embeds, url = self._queue.get()
             try:
+                embeds, url = self._queue.get(timeout=3)
                 resp = requests.post(url, json={"embeds": embeds})
                 resp.raise_for_status()
+            except queue.Empty:
+                pass
             except Exception as exc:
                 _log.exception("Failed to send completion to discord", exc_info=exc)
 
@@ -80,6 +82,7 @@ class DiscordLogger:
 
         embed = {
             "title": "New achievement",
+            "url": f"https://cta.sheppsu.me/staff/achievements/{achievement.id}",
             "description": achievement.name,
             "color": 0x2DD286,
             "footer": {
