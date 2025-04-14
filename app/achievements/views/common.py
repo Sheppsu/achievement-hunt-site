@@ -4,19 +4,18 @@ import secrets
 import struct
 import time
 
-from django.contrib.auth import login as do_login, logout as do_logout
+from common.serializer import SerializableField
+from common.validation import *
+from django.contrib.auth import login as do_login
+from django.contrib.auth import logout as do_logout
 from django.db.models.deletion import RestrictedError
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect
 from django.views.decorators.http import require_http_methods, require_POST
-
 from nacl.secret import SecretBox
 
 from ..models import *
-from .util import error, success, accepts_json_data
-from common.serializer import SerializableField
-from common.validation import *
-
+from .util import accepts_json_data, error, success
 
 __all__ = (
     "login",
@@ -32,10 +31,15 @@ __all__ = (
     "get_auth_packet"
 )
 
-current_iteration = EventIteration.objects.order_by('-id').last()
-current_iteration_start = current_iteration.start.timestamp()
-current_iteration_end = current_iteration.end.timestamp()
+current_iteration = None
 
+def get_current_iteration():
+    # pylint: disable=global-statement
+    global current_iteration
+
+    if current_iteration is None:
+        current_iteration = EventIteration.objects.order_by('-id').last()
+    return current_iteration
 
 def require_iteration_before_end(func):
     @require_iteration
@@ -83,7 +87,7 @@ def require_user(func):
 def require_iteration(func):
     def wrapper(req, iteration_id=None, *args, **kwargs):
         if iteration_id is None:
-            iteration = current_iteration
+            iteration = get_current_iteration()
         else:
             iteration = EventIteration.objects.filter(id=iteration_id).first()
 
@@ -351,7 +355,7 @@ def player_stats(req, iteration):
         WITH firsts AS (
             SELECT achievement_id, MIN(time_completed) AS time_completed FROM achievements_achievementcompletion
             INNER JOIN achievements_achievement ON (achievements_achievement.id = achievements_achievementcompletion.achievement_id) 
-            WHERE achievements_achievement.iteration_id = {current_iteration.id}
+            WHERE achievements_achievement.iteration_id = {iteration.id}
             GROUP BY achievement_id
         )
         SELECT 
