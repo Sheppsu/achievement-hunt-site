@@ -157,6 +157,10 @@ def achievements(req, iteration):
             ["beatmaps__info", "completion_count", "completions__player__user", "completions__placement"]
             if iteration.has_ended() or is_admin else
             [
+                SerializableField(
+                    "beatmaps",
+                    condition=lambda b: not b.hide
+                ),
                 "beatmaps__info",
                 "completion_count",
                 SerializableField(
@@ -184,8 +188,7 @@ def achievements(req, iteration):
         ).annotate(
             completion_count=models.Count("completions"),
         ).filter(
-            batch__iteration_id=iteration.id,
-            beatmaps__hide=False
+            batch__iteration_id=iteration.id
         ).all()
     ])
 
