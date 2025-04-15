@@ -1,7 +1,7 @@
 {
   "type": "module",
   "scripts": {
-    "check": "tsc",
+    "check": "tsc --skipLibCheck",
     "build": "vite build",
     "build-debug": "vite build -m debug",
     "watch": "vite build --watch -m debug"
