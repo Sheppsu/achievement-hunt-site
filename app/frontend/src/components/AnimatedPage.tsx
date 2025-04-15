@@ -2,7 +2,7 @@ import {
   PageTransitionContext,
   PageTransitionContextType,
 } from "contexts/PageTransitionContext";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { useContext } from "react";
 
 export default function AnimatedPage({
@@ -11,7 +11,7 @@ export default function AnimatedPage({
   children: React.ReactNode;
 }) {
   const { setTransitioning } = useContext(
-    PageTransitionContext
+    PageTransitionContext,
   ) as PageTransitionContextType;
   return (
     <motion.div

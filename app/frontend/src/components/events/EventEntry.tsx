@@ -1,9 +1,8 @@
+import { Event, EventContext } from "contexts/EventContext.ts";
+import { motion } from "motion/react";
 import { useContext, useEffect } from "react";
-import AnimatedPage from "../AnimatedPage.tsx";
-import { EventContext, Event } from "contexts/EventContext.ts";
-import { motion } from "framer-motion";
 import { IoIosWarning, IoMdInformationCircle } from "react-icons/io";
-import { IoCheckmarkSharp, IoClose } from "react-icons/io5";
+import { IoCheckmarkSharp } from "react-icons/io5";
 
 export default function EventEntry({
   event,
@@ -20,7 +19,7 @@ export default function EventEntry({
   useEffect(() => {
     const timeoutId = setTimeout(
       () => dispatchEventMsg({ type: "expired", id: event.id }),
-      expiresIn
+      expiresIn,
     );
     return () => clearTimeout(timeoutId);
   }, [expiresIn, dispatchEventMsg, event]);

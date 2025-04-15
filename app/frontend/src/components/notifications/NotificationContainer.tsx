@@ -1,8 +1,8 @@
-import NotificationEventEntry from "components/notifications/NotificationEventEntry.tsx";
-import { motion } from "framer-motion";
-import React, { useContext } from "react";
-import { EventContext, EventState } from "contexts/EventContext.ts";
 import cn from "classnames";
+import NotificationEventEntry from "components/notifications/NotificationEventEntry.tsx";
+import { EventContext, EventState } from "contexts/EventContext.ts";
+import { motion } from "motion/react";
+import { useContext } from "react";
 
 export default function NotificationContainer({
   eventsState,

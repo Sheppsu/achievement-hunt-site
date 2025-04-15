@@ -1,18 +1,18 @@
-import Achievement from "./Achievement";
 import { useGetAchievements, useGetTeams } from "api/query";
+import { AchievementTeamExtendedType } from "api/types/AchievementTeamType.ts";
 import { CompletedAchievementType } from "api/types/AchievementType";
 import "assets/css/achievements.css";
-import { AnimationScope } from "framer-motion";
+import { SessionContext } from "contexts/SessionContext.ts";
+import { AnimationScope } from "motion/react";
+import { useContext } from "react";
+import { WebsocketState } from "types/WebsocketStateType.ts";
+import { getSortedAchievements } from "util/achievementSorting.ts";
 import {
   calculateScore,
   getMyCompletion,
   getMyTeam,
 } from "util/helperFunctions.ts";
-import { useContext } from "react";
-import { SessionContext } from "contexts/SessionContext.ts";
-import { WebsocketState } from "types/WebsocketStateType.ts";
-import { AchievementTeamExtendedType } from "api/types/AchievementTeamType.ts";
-import { getSortedAchievements } from "util/achievementSorting.ts";
+import Achievement from "./Achievement";
 
 function extendAchievementData(
   achievements: CompletedAchievementType[],

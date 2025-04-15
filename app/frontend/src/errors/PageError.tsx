@@ -1,5 +1,5 @@
 export class PageError extends Error {
-  public render(): JSX.Element {
+  public render(): React.ReactNode {
     return <div>{this.message}</div>;
   }
 }

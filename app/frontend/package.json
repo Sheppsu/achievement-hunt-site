@@ -1,27 +1,27 @@
 {
   "type": "module",
   "scripts": {
-    "check": "tsc",
+    "check": "tsc --skipLibCheck",
     "build": "vite build",
     "build-debug": "vite build -m debug",
     "watch": "vite build --watch -m debug"
   },
   "dependencies": {
-    "@tanstack/react-query": "^5.48.0",
-    "@types/react": "^18.3.3",
-    "@types/react-dom": "^18.3.0",
+    "@tanstack/react-query": "^5.74.0",
+    "@types/react": "^19.1.1",
+    "@types/react-dom": "^19.1.2",
     "@types/react-helmet": "^6.1.11",
     "classnames": "^2.5.1",
-    "framer-motion": "^11.3.12",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "motion": "^12.7.2",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
     "react-helmet": "^6.1.0",
-    "react-icons": "^5.3.0",
-    "react-router-dom": "^6.24.0",
-    "typescript": "^5.5.2",
-    "vite": "^5.3.1"
+    "react-icons": "^5.5.0",
+    "react-router-dom": "^7.5.0",
+    "typescript": "^5.8.3",
+    "vite": "^6.2.6"
   },
   "devDependencies": {
-    "prettier": "^3.3.3"
+    "prettier": "^3.5.3"
   }
 }

@@ -1,27 +1,27 @@
-import { Link, NavLink, useLocation, useOutlet } from "react-router-dom";
 import { useContext, useReducer, useState } from "react";
+import { Link, NavLink, useLocation, useOutlet } from "react-router-dom";
 
-import Footer from "./Footer";
-import EventContainer from "./events/EventContainer.tsx";
+import { EventContext, eventReducer } from "contexts/EventContext";
 import { SessionContext } from "contexts/SessionContext";
 import { getSessionData } from "util/auth";
-import { EventContext, eventReducer } from "contexts/EventContext";
+import Footer from "./Footer";
+import EventContainer from "./events/EventContainer.tsx";
 
 import OsuLogo from "../assets/images/osu.png";
 
 import "assets/css/main.css";
-import PopupContainer from "./popups/PopupContainer.tsx";
-import { PopupContext, PopupState } from "contexts/PopupContext";
-import { AnimatePresence } from "framer-motion";
-import React from "react";
-import { IoIosNotifications } from "react-icons/io";
 import NotificationContainer from "components/notifications/NotificationContainer.tsx";
+import { PopupContext, PopupState } from "contexts/PopupContext";
 import {
   StateContext,
   StateDispatchContext,
   wsReducer,
 } from "contexts/StateContext.ts";
+import { AnimatePresence } from "motion/react";
+import React from "react";
+import { IoIosNotifications } from "react-icons/io";
 import { defaultState } from "types/WebsocketStateType.ts";
+import PopupContainer from "./popups/PopupContainer.tsx";
 
 function AnimatedOutlet() {
   const location = useLocation();
