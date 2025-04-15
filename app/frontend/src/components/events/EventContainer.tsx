@@ -1,8 +1,8 @@
 import "assets/css/main.css";
-import EventEntry from "./EventEntry.tsx";
-import { useEffect, useState } from "react";
 import { Event } from "contexts/EventContext.ts";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence } from "motion/react";
+import { useEffect, useState } from "react";
+import EventEntry from "./EventEntry.tsx";
 
 export default function EventContainer({ events }: { events: Event[] }) {
   const [time, setTime] = useState(Date.now());

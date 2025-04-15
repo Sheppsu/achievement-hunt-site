@@ -1,4 +1,3 @@
-import { FormEvent, SetStateAction, useContext, useState } from "react";
 import {
   useCreateTeam,
   useGetTeams,
@@ -7,19 +6,20 @@ import {
   useRenameTeam,
   useTransferTeamAdmin,
 } from "api/query";
+import { FormEvent, SetStateAction, useContext, useState } from "react";
 
-import "assets/css/team.css";
 import "assets/css/form.css";
+import "assets/css/team.css";
 import BaseButton from "components/inputs/Button.tsx";
 import { FaCrown } from "react-icons/fa6";
 
-import { SessionContext } from "contexts/SessionContext";
-import { EventContext, EventDispatch } from "contexts/EventContext";
-import { AchievementTeamExtendedType } from "api/types/AchievementTeamType";
 import { AchievementPlayerType } from "api/types/AchievementPlayerType";
-import { PopupContext, PopupContextType } from "contexts/PopupContext";
-import { AnimatePresence, motion } from "framer-motion";
+import { AchievementTeamExtendedType } from "api/types/AchievementTeamType";
 import { SimplePromptPopup } from "components/popups/PopupContent.tsx";
+import { EventContext, EventDispatch } from "contexts/EventContext";
+import { PopupContext, PopupContextType } from "contexts/PopupContext";
+import { SessionContext } from "contexts/SessionContext";
+import { AnimatePresence, motion } from "motion/react";
 import { getAnonName } from "util/helperFunctions";
 
 function Button({

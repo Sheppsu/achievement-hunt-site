@@ -2,20 +2,20 @@ import { useGetStaffAchievements } from "api/query.ts";
 import Achievement from "components/staff/Achievement.tsx";
 
 import "assets/css/staff.css";
-import { useAuthEnsurer } from "util/auth.ts";
-import Button from "components/inputs/Button.tsx";
-import { useContext, useState } from "react";
-import AchievementCreation from "components/staff/AchievementCreation.tsx";
 import AchievementNavigationBar, {
   getDefaultNav,
 } from "components/achievements/AchievementNavigationBar.tsx";
+import Button from "components/inputs/Button.tsx";
+import AchievementCreation from "components/staff/AchievementCreation.tsx";
+import { SessionContext } from "contexts/SessionContext.ts";
 import {
   useDispatchStateContext,
   useStateContext,
 } from "contexts/StateContext.ts";
-import { useAnimate } from "framer-motion";
+import { useAnimate } from "motion/react";
+import { useContext, useState } from "react";
 import { getSortedAchievements } from "util/achievementSorting.ts";
-import { SessionContext } from "contexts/SessionContext.ts";
+import { useAuthEnsurer } from "util/auth.ts";
 
 export default function Index() {
   useAuthEnsurer().ensureStaff();

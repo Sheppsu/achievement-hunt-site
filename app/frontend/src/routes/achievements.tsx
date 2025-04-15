@@ -1,24 +1,24 @@
 import { useGetAchievements, useGetTeams } from "api/query";
-import AchievementContainer from "components/achievements/AchievementContainer";
-import { useContext, useEffect, useState } from "react";
-import { SessionContext } from "contexts/SessionContext";
-import { Helmet } from "react-helmet";
 import { AchievementTeamExtendedType } from "api/types/AchievementTeamType";
+import "assets/css/achievements.css";
+import classNames from "classnames";
+import AchievementContainer from "components/achievements/AchievementContainer";
+import AchievementNavigationBar, {
+  getDefaultNav,
+} from "components/achievements/AchievementNavigationBar.tsx";
+import AchievementProgress from "components/achievements/AchievementProgress.tsx";
 import AnimatedPage from "components/AnimatedPage";
-import { getMyTeam } from "util/helperFunctions";
-import { AnimationScope, useAnimate } from "framer-motion";
-import { WebsocketState } from "types/WebsocketStateType.ts";
+import { SessionContext } from "contexts/SessionContext";
 import {
   StateDispatch,
   useDispatchStateContext,
   useStateContext,
 } from "contexts/StateContext.ts";
-import "assets/css/achievements.css";
-import AchievementProgress from "components/achievements/AchievementProgress.tsx";
-import AchievementNavigationBar, {
-  getDefaultNav,
-} from "components/achievements/AchievementNavigationBar.tsx";
-import classNames from "classnames";
+import { AnimationScope, useAnimate } from "motion/react";
+import { useContext, useEffect, useState } from "react";
+import { Helmet } from "react-helmet";
+import { WebsocketState } from "types/WebsocketStateType.ts";
+import { getMyTeam } from "util/helperFunctions";
 
 function getTimeStr(delta: number) {
   const days = Math.floor((delta / (1000 * 60 * 60 * 24)) % 60);
