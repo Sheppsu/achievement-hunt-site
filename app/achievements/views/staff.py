@@ -197,6 +197,7 @@ def create_achievement(req, data, achievement=None):
         achievement.tags = data["tags"]
         achievement.last_edited_at = datetime.now(tz=timezone.utc)
         achievement.save()
+        discord_logger.submit_achievement(achievement, edited=True)
 
     resp_beatmaps = []
 
