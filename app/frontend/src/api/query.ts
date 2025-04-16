@@ -7,6 +7,7 @@ import {
   queryOptions,
   useMutation,
   useQuery,
+  QueryClient,
 } from "@tanstack/react-query";
 import { EventContext, EventType } from "contexts/EventContext";
 import { UndefinedInitialDataOptions } from "node_modules/@tanstack/react-query/build/legacy";
@@ -237,10 +238,16 @@ export function useLeaveTeam(): SpecificUseMutationResult<null> {
 }
 
 function onJoinTeam(
+  queryClient: QueryClient | undefined,
   joinedTeam: AchievementTeamExtendedType,
-  teams: AchievementTeamType[],
 ) {
-  return teams.map((team) => (team.id == joinedTeam.id ? joinedTeam : team));
+  // update team data for team being joined
+  queryClient?.setQueryData(
+    ["teams"],
+    (teams: AchievementTeamType[] | undefined) =>
+      teams?.map((team) => (team.id == joinedTeam.id ? joinedTeam : team)),
+  );
+  return;
 }
 
 export function useJoinTeam(): SpecificUseMutationResult<AchievementTeamExtendedType> {
@@ -248,12 +255,7 @@ export function useJoinTeam(): SpecificUseMutationResult<AchievementTeamExtended
   return useMakeMutation(
     {
       mutationKey: ["teams", "join"],
-      onSuccess: (joinedTeam) => {
-        // update team data for team being joined
-        queryClient?.setQueryData(["teams"], (teams: AchievementTeamType[]) =>
-          onJoinTeam(joinedTeam, teams),
-        );
-      },
+      onSuccess: (joinedTeam) => onJoinTeam(queryClient, joinedTeam),
     },
     {
       method: "POST",
@@ -290,26 +292,41 @@ export function useGetStaffAchievements(
 }
 
 function onVoted(
-  achievements: StaffAchievementType[],
+  queryClient: QueryClient | undefined,
   achievementId: number,
   added: boolean,
 ) {
-  const newAchievements = [];
+  const concatVote = (achievement: StaffAchievementType) => ({
+    ...achievement,
+    has_voted: added,
+    vote_count: achievement.vote_count + (added ? 1 : -1),
+  });
 
-  for (const achievement of achievements) {
-    if (achievement.id === achievementId) {
-      newAchievements.push({
-        ...achievement,
-        has_voted: added,
-        vote_count: achievement.vote_count + (added ? 1 : -1),
-      });
-      continue;
-    }
+  queryClient?.setQueryData(
+    ["staff", "achievements"],
+    (achievements: StaffAchievementType[] | undefined) => {
+      if (achievements === undefined) return;
 
-    newAchievements.push(achievement);
-  }
+      const newAchievements = [];
 
-  return newAchievements;
+      for (const achievement of achievements) {
+        if (achievement.id === achievementId) {
+          newAchievements.push(concatVote(achievement));
+          continue;
+        }
+
+        newAchievements.push(achievement);
+      }
+
+      return newAchievements;
+    },
+  );
+
+  queryClient?.setQueryData(
+    ["staff", "achievements", achievementId.toString()],
+    (achievement: StaffAchievementType | undefined) =>
+      achievement === undefined ? undefined : concatVote(achievement),
+  );
 }
 
 export function useVoteAchievement(
@@ -319,13 +336,8 @@ export function useVoteAchievement(
   return useMakeMutation(
     {
       mutationKey: ["staff", "achievements", achievementId.toString(), "vote"],
-      onSuccess: (result: { added: boolean }) => {
-        queryClient?.setQueryData(
-          ["staff", "achievements"],
-          (achievements: StaffAchievementType[]) =>
-            onVoted(achievements, achievementId, result.added),
-        );
-      },
+      onSuccess: (result: { added: boolean }) =>
+        onVoted(queryClient, achievementId, result.added),
     },
     {
       method: "POST",
@@ -334,25 +346,40 @@ export function useVoteAchievement(
 }
 
 function onCommented(
-  achievements: StaffAchievementType[],
+  queryClient: QueryClient | undefined,
   achievementId: number,
   comment: AchievementCommentType,
 ) {
-  const newAchievements = [];
+  const concatComment = (achievement: StaffAchievementType) => ({
+    ...achievement,
+    comments: achievement.comments.concat([comment]),
+  });
 
-  for (const achievement of achievements) {
-    if (achievement.id === achievementId) {
-      newAchievements.push({
-        ...achievement,
-        comments: achievement.comments.concat([comment]),
-      });
-      continue;
-    }
+  queryClient?.setQueryData(
+    ["staff", "achievements"],
+    (achievements: StaffAchievementType[] | undefined) => {
+      if (achievements === undefined) return;
 
-    newAchievements.push(achievement);
-  }
+      const newAchievements = [];
 
-  return newAchievements;
+      for (const achievement of achievements) {
+        if (achievement.id === achievementId) {
+          newAchievements.push(concatComment(achievement));
+          continue;
+        }
+
+        newAchievements.push(achievement);
+      }
+
+      return newAchievements;
+    },
+  );
+
+  queryClient?.setQueryData(
+    ["staff", "achievements", achievementId.toString()],
+    (achievement: StaffAchievementType | undefined) =>
+      achievement === undefined ? undefined : concatComment(achievement),
+  );
 }
 
 export function useSendComment(
@@ -367,13 +394,8 @@ export function useSendComment(
         achievementId.toString(),
         "comment",
       ],
-      onSuccess: (result: AchievementCommentType) => {
-        queryClient?.setQueryData(
-          ["staff", "achievements"],
-          (achievements: StaffAchievementType[]) =>
-            onCommented(achievements, achievementId, result),
-        );
-      },
+      onSuccess: (result: AchievementCommentType) =>
+        onCommented(queryClient, achievementId, result),
     },
     {
       method: "POST",
@@ -387,15 +409,19 @@ type AchievementCreationReturn = AchievementType & {
 };
 
 function onAchievementCreation(
-  achievements: StaffAchievementType[],
+  queryClient: QueryClient | undefined,
   achievement: AchievementCreationReturn,
 ) {
-  return achievements.concat({
-    ...achievement,
-    comments: [],
-    vote_count: 0,
-    has_voted: false,
-  });
+  queryClient?.setQueryData(
+    ["staff", "achievements"],
+    (achievements: StaffAchievementType[] | undefined) =>
+      achievements?.concat({
+        ...achievement,
+        comments: [],
+        vote_count: 0,
+        has_voted: false,
+      }),
+  );
 }
 
 export function useCreateAchievement(): SpecificUseMutationResult<AchievementCreationReturn> {
@@ -403,13 +429,8 @@ export function useCreateAchievement(): SpecificUseMutationResult<AchievementCre
   return useMakeMutation(
     {
       mutationKey: ["staff", "achievements", "create"],
-      onSuccess: (result: AchievementCreationReturn) => {
-        queryClient?.setQueryData(
-          ["staff", "achievements"],
-          (achievements: StaffAchievementType[]) =>
-            onAchievementCreation(achievements, result),
-        );
-      },
+      onSuccess: (result: AchievementCreationReturn) =>
+        onAchievementCreation(queryClient, result),
     },
     {
       method: "POST",
@@ -418,26 +439,41 @@ export function useCreateAchievement(): SpecificUseMutationResult<AchievementCre
 }
 
 function onAchievementEdit(
-  achievements: StaffAchievementType[],
+  queryClient: QueryClient | undefined,
   editedAchievement: AchievementCreationReturn,
 ) {
-  const newAchievements = [];
+  const combineAchievements = (achievement: StaffAchievementType) => ({
+    ...editedAchievement,
+    comments: achievement.comments,
+    vote_count: achievement.vote_count,
+    has_voted: achievement.has_voted,
+  });
 
-  for (const achievement of achievements) {
-    if (achievement.id === editedAchievement.id) {
-      newAchievements.push({
-        ...editedAchievement,
-        comments: achievement.comments,
-        vote_count: achievement.vote_count,
-        has_voted: achievement.has_voted,
-      });
-      continue;
-    }
+  queryClient?.setQueryData(
+    ["staff", "achievements"],
+    (achievements: StaffAchievementType[] | undefined) => {
+      if (achievements === undefined) return;
 
-    newAchievements.push(achievement);
-  }
+      const newAchievements = [];
 
-  return newAchievements;
+      for (const achievement of achievements) {
+        if (achievement.id === editedAchievement.id) {
+          newAchievements.push(combineAchievements(achievement));
+          continue;
+        }
+
+        newAchievements.push(achievement);
+      }
+
+      return newAchievements;
+    },
+  );
+
+  queryClient?.setQueryData(
+    ["staff", "achievements", editedAchievement.id.toString()],
+    (achievement: StaffAchievementType | undefined) =>
+      achievement === undefined ? undefined : combineAchievements(achievement),
+  );
 }
 
 export function useEditAchievement(
@@ -447,13 +483,8 @@ export function useEditAchievement(
   return useMakeMutation(
     {
       mutationKey: ["staff", "achievements", achievementId.toString(), "edit"],
-      onSuccess: (result: AchievementCreationReturn) => {
-        queryClient?.setQueryData(
-          ["staff", "achievements"],
-          (achievements: StaffAchievementType[]) =>
-            onAchievementEdit(achievements, result),
-        );
-      },
+      onSuccess: (result: AchievementCreationReturn) =>
+        onAchievementEdit(queryClient, result),
     },
     {
       method: "POST",
@@ -462,10 +493,18 @@ export function useEditAchievement(
 }
 
 function onAchievementDeleted(
-  achievements: StaffAchievementType[],
+  queryClient: QueryClient | undefined,
   achievementId: number,
 ) {
-  return achievements.filter((achievement) => achievement.id != achievementId);
+  queryClient?.setQueryData(
+    ["staff", "achievements"],
+    (achievements: StaffAchievementType[] | undefined) =>
+      achievements?.filter((achievement) => achievement.id != achievementId),
+  );
+
+  queryClient?.invalidateQueries({
+    queryKey: ["staff", "achievements", achievementId.toString()],
+  });
 }
 
 export function useDeleteAchievement(achievementId: number) {
@@ -478,13 +517,7 @@ export function useDeleteAchievement(achievementId: number) {
         achievementId.toString(),
         "delete",
       ],
-      onSuccess: () => {
-        queryClient?.setQueryData(
-          ["staff", "achievements"],
-          (achievements: StaffAchievementType[]) =>
-            onAchievementDeleted(achievements, achievementId),
-        );
-      },
+      onSuccess: () => onAchievementDeleted(queryClient, achievementId),
     },
     {
       method: "DELETE",
