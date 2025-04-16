@@ -47,7 +47,9 @@ class DiscordLogger:
 
     def run(self):
         self._running.set()
-        threading.Thread(target=self._loop).start()
+        t = threading.Thread(target=self._loop)
+        t.daemon = True
+        t.start()
 
     def _loop(self):
         while self._running.is_set():
