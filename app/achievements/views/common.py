@@ -33,6 +33,7 @@ __all__ = (
 
 current_iteration = None
 
+
 def get_current_iteration():
     # pylint: disable=global-statement
     global current_iteration
@@ -40,6 +41,7 @@ def get_current_iteration():
     if current_iteration is None:
         current_iteration = EventIteration.objects.order_by('-id').last()
     return current_iteration
+
 
 def require_iteration_before_end(func):
     @require_iteration
