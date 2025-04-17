@@ -71,8 +71,10 @@ class User(SerializableModel):
 
 
 class EventIteration(SerializableModel):
+    name = models.CharField(max_length=64, default="")
     start = models.DateTimeField()
     end = models.DateTimeField()
+    description = models.JSONField(default=dict)
 
     def has_ended(self):
         return time.time() >= self.end.timestamp()
@@ -81,7 +83,7 @@ class EventIteration(SerializableModel):
         return time.time() >= self.start.timestamp() - 5
 
     class Serialization:
-        FIELDS = ["id", "start", "end"]
+        FIELDS = ["id", "name", "start", "end"]
 
 
 class AchievementBatch(SerializableModel):
