@@ -86,7 +86,7 @@ class DiscordLogger:
             "title": "Achievement edited" if edited else "New achievement",
             "url": f"https://cta.sheppsu.me/staff/achievements/{achievement.id}",
             "description": achievement.name,
-            "color": 0x2DD286,
+            "color": 0xF6AF49 if edited else 0x2DD286,
             "footer": {
                 "text": achievement.creator.username,
                 "icon_url": achievement.creator.avatar
