@@ -47,40 +47,44 @@ export default function Header() {
   return (
     <>
       <EventContext.Provider value={dispatchEventMsg}>
-        <div className="prevent-select header">
-          <Link to="/">
-            <h1 className="header-title">CTA</h1>
-          </Link>
-          <div className="header-buttons-container">
-            <NavLink to="/teams" className="header-button-link">
-              Teams
-            </NavLink>
-            <NavLink to="/achievements" className="header-button-link">
-              Achievements
-            </NavLink>
-          </div>
-          <div className="header-login-container">
-            <div
-              className="header-notification-button-container"
-              onClick={() => {
-                setShowNotifications(!showNotifications);
-              }}
-            >
-              <IoIosNotifications size={24} />
-            </div>
-            {session.isAuthenticated ? (
-              <img
-                src={session.user?.avatar}
-                alt="avatar"
-                className="login-pic"
-              />
-            ) : (
-              <div style={{ height: "100%" }}>
-                <Link to={session.authUrl}>
-                  <img src={OsuLogo} alt="osu logo" className="login-pic" />
-                </Link>
+        <div className="header-container">
+          <div className="prevent-select header">
+            <div className="header-left-container">
+              <Link to="/">
+                <h1 className="header-title">CTA2</h1>
+              </Link>
+              <div className="header-buttons-container">
+                <NavLink to="/teams" className="header-button-link">
+                  Dashboard
+                </NavLink>
+                <NavLink to="/achievements" className="header-button-link">
+                  Achievements
+                </NavLink>
               </div>
-            )}
+            </div>
+            <div className="header-login-container">
+              <div
+                className="header-notification-button-container"
+                onClick={() => {
+                  setShowNotifications(!showNotifications);
+                }}
+              >
+                <IoIosNotifications size={24} />
+              </div>
+              {session.isAuthenticated ? (
+                <img
+                  src={session.user?.avatar}
+                  alt="avatar"
+                  className="login-pic"
+                />
+              ) : (
+                <div style={{ height: "100%" }}>
+                  <Link to={session.authUrl}>
+                    <img src={OsuLogo} alt="osu logo" className="login-pic" />
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -95,7 +99,9 @@ export default function Header() {
           <SessionContext.Provider value={getSessionData()}>
             <StateContext.Provider value={wsState}>
               <StateDispatchContext.Provider value={dispatchWsState}>
-                <AnimatedOutlet />
+                <div style={{ marginTop: "35px" }}>
+                  <AnimatedOutlet />
+                </div>
               </StateDispatchContext.Provider>
             </StateContext.Provider>
           </SessionContext.Provider>
