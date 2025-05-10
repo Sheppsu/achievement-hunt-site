@@ -20,6 +20,7 @@ import { EventContext, EventDispatch } from "contexts/EventContext";
 import { PopupContext, PopupContextType } from "contexts/PopupContext";
 import { SessionContext } from "contexts/SessionContext";
 import { AnimatePresence, motion } from "motion/react";
+import { BsPeopleFill, BsPlusCircleFill } from "react-icons/bs";
 import { getAnonName } from "util/helperFunctions";
 
 function Button({
@@ -238,41 +239,25 @@ function NoTeamContent({
   createTeam: (evt: FormEvent<HTMLFormElement>) => void;
   joinTeam: (evt: FormEvent<HTMLFormElement>) => void;
 }) {
-  const { setPopup } = useContext(PopupContext) as PopupContextType;
+  const { setPopup } = useContext(PopupContext)!;
   const session = useContext(SessionContext);
 
   const eventEnded = Date.now() >= session.eventEnd;
 
-  const createTeamPopup = () => {
-    setPopup({
-      title: "Create Team",
-      content: <SimplePromptPopup prompt="Team name" onSubmit={createTeam} />,
-    });
-  };
-
-  const joinTeamPopup = () => {
-    setPopup({
-      title: "Join team",
-      content: <SimplePromptPopup prompt="Invite code" onSubmit={joinTeam} />,
-    });
-  };
-
   return (
-    <motion.div layout>
-      <div className="info-inner-container your-team">
-        <p className="info-inner-text">No team</p>
-      </div>
-      <div className="info-inner-container buttons">
-        <Button
-          text="Create team"
-          onClick={createTeamPopup}
-          disabled={eventEnded}
-        />
-        <Button
-          text="Join team"
-          onClick={joinTeamPopup}
-          disabled={eventEnded}
-        />
+    <motion.div layout style={{ height: "100%" }}>
+      <div className="no-team-container">
+        <div className="no-team-container-item">
+          <div />
+          <BsPlusCircleFill size={75} />
+          <Button text="Create a Team" disabled={eventEnded} />
+        </div>
+        <div className="horizontal-divider"></div>
+        <div className="no-team-container-item">
+          <div />
+          <BsPeopleFill size={100} />
+          <Button text="Join a Team" disabled={eventEnded} />
+        </div>
       </div>
     </motion.div>
   );
@@ -459,7 +444,6 @@ export default function TeamCard() {
         )}
       </AnimatePresence>
       <motion.div className="info-container" layout>
-        <h1 className="info-title">Your team</h1>
         {!session.isAuthenticated ? (
           <UnauthenticatedContent />
         ) : teamsResponse.isLoading ? (

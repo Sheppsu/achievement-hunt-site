@@ -99,7 +99,13 @@ export default function Header() {
           <SessionContext.Provider value={getSessionData()}>
             <StateContext.Provider value={wsState}>
               <StateDispatchContext.Provider value={dispatchWsState}>
-                <div style={{ marginTop: "35px" }}>
+                <div
+                  style={{
+                    marginTop: "35px",
+                    height: "calc(100vh - 100px)",
+                    overflowY: "auto",
+                  }}
+                >
                   <AnimatedOutlet />
                 </div>
               </StateDispatchContext.Provider>

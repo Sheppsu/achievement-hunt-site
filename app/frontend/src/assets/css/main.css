@@ -49,6 +49,7 @@ html {
 
 body {
   overflow-x: hidden;
+  min-height: 100vh;
 }
 
 p {
@@ -177,6 +178,7 @@ hr {
   flex-direction: row;
   justify-content: center;
   gap: 20px;
+  height: 85vh;
 }
 
 .info-container {
@@ -184,7 +186,6 @@ hr {
   padding: 15px;
   margin: 0;
 
-  border-radius: var(--border-rounding);
   border: solid 2px var(--border-color);
   text-align: center;
 
@@ -194,6 +195,7 @@ hr {
   display: flex;
   flex-direction: column;
   gap: 5px;
+  height: 100%;
 }
 
 .card-container {
@@ -207,6 +209,12 @@ hr {
 div.vertical-divider {
   width: 2px;
 
+  background-color: var(--border-color);
+}
+
+div.horizontal-divider {
+  height: 2px;
+  width: 100%;
   background-color: var(--border-color);
 }
 

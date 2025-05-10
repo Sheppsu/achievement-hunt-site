@@ -1,14 +1,13 @@
 import "assets/css/team.css";
 
 import { useGetTeams } from "api/query";
-import { AchievementTeamType } from "api/types/AchievementTeamType";
 import { getAnonName } from "util/helperFunctions.ts";
 
 export default function LeaderboardCard() {
   const teamsResp = useGetTeams(true);
 
   return (
-    <div className="card-container lb">
+    <div className="card-container teams">
       <div className="info-container">
         <h1 className="info-title">Leaderboard</h1>
         <div className="info-inner-container leaderboard">
