@@ -95,6 +95,11 @@ textarea {
 button {
   font-family: "Clash Display", sans-serif;
   border: none;
+  background-color: transparent;
+}
+
+button:hover {
+  cursor: pointer;
 }
 
 td {

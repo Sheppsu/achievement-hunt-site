@@ -8,19 +8,20 @@ import {
 } from "api/query";
 import { FormEvent, SetStateAction, useContext, useState } from "react";
 
+import { AchievementPlayerType } from "api/types/AchievementPlayerType";
+import { AchievementTeamExtendedType } from "api/types/AchievementTeamType";
 import "assets/css/form.css";
 import "assets/css/team.css";
 import BaseButton from "components/inputs/Button.tsx";
-import { FaCrown } from "react-icons/fa6";
-
-import { AchievementPlayerType } from "api/types/AchievementPlayerType";
-import { AchievementTeamExtendedType } from "api/types/AchievementTeamType";
 import { SimplePromptPopup } from "components/popups/PopupContent.tsx";
 import { EventContext, EventDispatch } from "contexts/EventContext";
 import { PopupContext, PopupContextType } from "contexts/PopupContext";
 import { SessionContext } from "contexts/SessionContext";
 import { AnimatePresence, motion } from "motion/react";
 import { BsPeopleFill, BsPlusCircleFill } from "react-icons/bs";
+import { FaCrown } from "react-icons/fa6";
+import { IoWarning } from "react-icons/io5";
+import { MdArrowBack } from "react-icons/md";
 import { getAnonName } from "util/helperFunctions";
 
 function Button({
@@ -232,34 +233,108 @@ function YourTeamContent({
   );
 }
 
-function NoTeamContent({
-  createTeam,
-  joinTeam,
-}: {
-  createTeam: (evt: FormEvent<HTMLFormElement>) => void;
-  joinTeam: (evt: FormEvent<HTMLFormElement>) => void;
-}) {
-  const { setPopup } = useContext(PopupContext)!;
-  const session = useContext(SessionContext);
-
-  const eventEnded = Date.now() >= session.eventEnd;
-
+function NoTeamContent() {
+  const [currentTab, setCurrentTab] = useState<"create" | "join" | "default">(
+    "default",
+  );
   return (
     <motion.div layout style={{ height: "100%" }}>
-      <div className="no-team-container">
-        <div className="no-team-container-item">
-          <div />
-          <BsPlusCircleFill size={75} />
-          <Button text="Create a Team" disabled={eventEnded} />
+      {currentTab === "default" ? (
+        <div className="no-team-container">
+          <div className="no-team-container-item">
+            <div />
+            <BsPlusCircleFill size={75} />
+            <Button
+              text="Create a Team"
+              onClick={() => setCurrentTab("create")}
+            />
+          </div>
+          <div className="horizontal-divider"></div>
+          <div className="no-team-container-item">
+            <div />
+            <BsPeopleFill size={100} />
+            <Button text="Join a Team" onClick={() => setCurrentTab("join")} />
+          </div>
         </div>
-        <div className="horizontal-divider"></div>
-        <div className="no-team-container-item">
-          <div />
-          <BsPeopleFill size={100} />
-          <Button text="Join a Team" disabled={eventEnded} />
-        </div>
-      </div>
+      ) : currentTab === "create" ? (
+        <CreateTeamComponent setCurrentTab={setCurrentTab} />
+      ) : (
+        <JoinTeamComponent setCurrentTab={setCurrentTab} />
+      )}
     </motion.div>
+  );
+}
+
+function CreateTeamComponent({
+  setCurrentTab,
+}: {
+  setCurrentTab: (tab: "create" | "join" | "default") => void;
+}) {
+  return (
+    <>
+      <div className="no-team-header">
+        <button onClick={() => setCurrentTab("default")}>
+          <MdArrowBack size={24} color="white" />
+        </button>
+        <h1>Create Team</h1>
+      </div>
+      <form className="no-team-create-form">
+        <div>
+          <div className="no-team-create-form-item">
+            <p className="no-team-create-form-heading">Team Name</p>
+            <input
+              type="text"
+              name="team-name"
+              placeholder="Enter team name here..."
+            />
+            <p className="no-team-create-form-subtitle">
+              This will be hidden from other teams during the tournament to keep
+              anonymity
+            </p>
+          </div>
+          <div className="no-team-create-form-item">
+            <p className="no-team-create-form-heading">Anonymous Team Name</p>
+            <input type="text" placeholder="Placeholder 1" />
+            <input type="text" placeholder="Placeholder 2" />
+            <p className="no-team-create-form-subtitle">
+              This will be what other teams see throughout the tournament
+            </p>
+          </div>
+        </div>
+        <div className="no-team-create-form-bottom-container">
+          <div className="no-team-create-form-warning">
+            <div className="no-team-create-form-warning-heading">
+              <IoWarning size={35} color="#C2A800" />
+              <h1>WARNING</h1>
+            </div>
+            <p className="no-team-create-form-warning-content">
+              <span className="no-team-create-form-warning-content-bold">
+                DO NOT
+              </span>{" "}
+              let others know what team you're on, or who your teammates are. We
+              cannot completely prevent people from profile stalking to get
+              solutions to achievements, so anonymity is your best defense
+              against it. DM a staff member if you suspect that someone is
+              profile stalking (this is against the rules).
+            </p>
+          </div>
+          <Button text="Create Team" type="submit" />
+        </div>
+      </form>
+    </>
+  );
+}
+
+function JoinTeamComponent({
+  setCurrentTab,
+}: {
+  setCurrentTab: (tab: "create" | "join" | "default") => void;
+}) {
+  return (
+    <div>
+      <p>Join a Team</p>
+      <Button text="Back" onClick={() => setCurrentTab("default")} />
+    </div>
   );
 }
 
@@ -449,7 +524,7 @@ export default function TeamCard() {
         ) : teamsResponse.isLoading ? (
           <LoadingContent />
         ) : ownTeam === null ? (
-          <NoTeamContent createTeam={onCreateTeam} joinTeam={onJoinTeam} />
+          <NoTeamContent />
         ) : (
           <YourTeamContent
             ownTeam={ownTeam}
