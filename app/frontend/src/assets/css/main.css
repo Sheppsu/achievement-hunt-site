@@ -22,6 +22,12 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: "Clash Display";
+  src: url("../fonts/ClashDisplay-Variable.ttf");
+  font-style: normal;
+}
+
 :root {
   --background-color: #171717;
   --border-color: #2f2f2f;
@@ -32,7 +38,7 @@
 /* element properties */
 
 * {
-  font-family: "Radio Canada", sans-serif;
+  font-family: "Clash Display", sans-serif;
 }
 
 html {
@@ -46,13 +52,13 @@ body {
 }
 
 p {
-  font-family: "Radio Canada", sans-serif;
+  font-family: "Clash Display", sans-serif;
   margin: 0;
   color: white;
 }
 
 div {
-  font-family: "Radio Canada", sans-serif;
+  font-family: "Clash Display", sans-serif;
   color: white;
 }
 
@@ -63,7 +69,7 @@ a {
 
 h1 {
   margin: 0;
-  font-family: "Radio Canada Big", sans-serif;
+  font-family: "Clash Display", sans-serif;
   font-weight: bold;
   font-size: 50px;
   color: white;
@@ -82,11 +88,11 @@ footer {
 }
 
 textarea {
-  font-family: "Radio Canada", sans-serif;
+  font-family: "Clash Display", sans-serif;
 }
 
 button {
-  font-family: "Radio Canada", sans-serif;
+  font-family: "Clash Display", sans-serif;
   border: none;
 }
 
@@ -270,6 +276,8 @@ div.vertical-divider {
 
   text-align: center;
   font-size: large;
+
+  font-weight: 200;
 }
 
 .header-button-link.active {
@@ -300,14 +308,14 @@ div.vertical-divider {
   color: inherit;
   font-size: 25px;
   font-style: italic;
-  font-family: "Radio Canada", sans-serif;
+  font-family: "Clash Display", sans-serif;
 }
 
 .header-title {
   text-align: center;
-  font-family: "Radio Canada", sans-serif;
-  font-weight: 800;
-  font-size: 45px;
+  font-family: "Clash Display", sans-serif;
+  font-weight: 600;
+  font-size: 42px;
   color: white;
   letter-spacing: 2px;
 }
