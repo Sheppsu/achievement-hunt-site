@@ -1,9 +1,12 @@
 .dropdown {
-    font-size: 20px;
+  font-size: 20px;
 
-    border: 2px solid var(--border-color);
-    border-radius: 5px;
+  border: 2px solid var(--border-color);
 
-    background-color: var(--background-color);
-    color: white;
+  background-color: var(--site-background-color);
+  color: white;
+
+  padding: 5px 0px;
+
+  width: 100%;
 }

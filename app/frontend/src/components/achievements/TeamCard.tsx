@@ -13,6 +13,7 @@ import { AchievementTeamExtendedType } from "api/types/AchievementTeamType";
 import "assets/css/form.css";
 import "assets/css/team.css";
 import BaseButton from "components/inputs/Button.tsx";
+import Dropdown from "components/inputs/Dropdown";
 import { SimplePromptPopup } from "components/popups/PopupContent.tsx";
 import { EventContext, EventDispatch } from "contexts/EventContext";
 import { PopupContext, PopupContextType } from "contexts/PopupContext";
@@ -294,8 +295,33 @@ function CreateTeamComponent({
           </div>
           <div className="no-team-create-form-item">
             <p className="no-team-create-form-heading">Anonymous Team Name</p>
-            <input type="text" placeholder="Placeholder 1" />
-            <input type="text" placeholder="Placeholder 2" />
+            <div className="no-team-create-form-dropdown-container">
+              <Dropdown
+                options={{
+                  test: "test",
+                  test2: "test2",
+                  test3: "test3",
+                  test4: "test4",
+                  test5: "test5",
+                  test6: "test6",
+                  test7: "test7",
+                  test8: "test8",
+                }}
+              />
+
+              <Dropdown
+                options={{
+                  test: "test",
+                  test2: "test2",
+                  test3: "test3",
+                  test4: "test4",
+                  test5: "test5",
+                  test6: "test6",
+                  test7: "test7",
+                  test8: "test8",
+                }}
+              />
+            </div>
             <p className="no-team-create-form-subtitle">
               This will be what other teams see throughout the tournament
             </p>
@@ -331,10 +357,16 @@ function JoinTeamComponent({
   setCurrentTab: (tab: "create" | "join" | "default") => void;
 }) {
   return (
-    <div>
+    <>
+      <div className="no-team-header">
+        <button onClick={() => setCurrentTab("default")}>
+          <MdArrowBack size={24} color="white" />
+        </button>
+        <h1>Join Team</h1>
+      </div>
       <p>Join a Team</p>
       <Button text="Back" onClick={() => setCurrentTab("default")} />
-    </div>
+    </>
   );
 }
 

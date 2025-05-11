@@ -114,6 +114,8 @@
   padding: 20px 0;
 }
 
+/* Create Team */
+
 .no-team-create-form {
   display: flex;
   flex-direction: column;
@@ -152,6 +154,14 @@
   background-color: var(--site-background-color);
   border: solid 2px var(--border-color);
   color: white;
+}
+
+.no-team-create-form-dropdown-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
 }
 
 .no-team-create-form-bottom-container {
