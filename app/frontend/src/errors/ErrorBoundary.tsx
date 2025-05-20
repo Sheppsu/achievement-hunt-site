@@ -1,6 +1,6 @@
 import { isRouteErrorResponse, useRouteError } from "react-router-dom";
 import { PageError } from "./PageError.tsx";
-import Header from "components/Header.tsx";
+import PageLayout from "components/PageLayout.tsx";
 
 export default function ErrorBoundary() {
   const error = useRouteError();
@@ -16,7 +16,7 @@ export default function ErrorBoundary() {
   if (isRouteErrorResponse(error)) {
     return (
       <>
-        <Header />
+        <PageLayout />
         <div>
           {error.status} Error: {error.statusText}
         </div>

@@ -1,7 +1,7 @@
 import { useContext, useReducer, useState } from "react";
 import { Link, NavLink, useLocation, useOutlet } from "react-router-dom";
 
-import { EventContext, eventReducer } from "contexts/EventContext";
+import { EventContext, eventReducer, EventState } from "contexts/EventContext";
 import { SessionContext } from "contexts/SessionContext";
 import { getSessionData } from "util/auth";
 import Footer from "./Footer";
@@ -34,64 +34,72 @@ function AnimatedOutlet() {
   );
 }
 
-export default function Header() {
+function Header({ eventsState }: { eventsState: EventState }) {
   const session = useContext(SessionContext);
+  const [showNotifications, setShowNotifications] = useState<boolean>(false);
+
+  return (
+    <>
+      <div className="header-container">
+        <div className="prevent-select header">
+          <div className="header-left-container">
+            <Link to="/">
+              <h1 className="header-title">CTA2</h1>
+            </Link>
+            <div className="header-buttons-container">
+              <NavLink to="/teams" className="header-button-link">
+                Dashboard
+              </NavLink>
+              <NavLink to="/achievements" className="header-button-link">
+                Achievements
+              </NavLink>
+            </div>
+          </div>
+          <div className="header-login-container">
+            <div
+              className="header-notification-button-container"
+              onClick={() => {
+                setShowNotifications(!showNotifications);
+              }}
+            >
+              <IoIosNotifications size={24} />
+            </div>
+            {session.isAuthenticated ? (
+              <img
+                src={session.user?.avatar}
+                alt="avatar"
+                className="login-pic"
+              />
+            ) : (
+              <div style={{ height: "100%" }}>
+                <Link to={session.authUrl}>
+                  <img src={OsuLogo} alt="osu logo" className="login-pic" />
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      <NotificationContainer
+        eventsState={eventsState}
+        display={showNotifications}
+      />
+    </>
+  );
+}
+
+export default function PageLayout() {
   const [eventsState, dispatchEventMsg] = useReducer(eventReducer, {
     events: [],
     pastEvents: [],
   });
   const [wsState, dispatchWsState] = useReducer(wsReducer, null, defaultState);
   const [popup, setPopup] = useState<PopupState>(null);
-  const [showNotifications, setShowNotifications] = useState<boolean>(false);
 
   return (
     <>
       <EventContext.Provider value={dispatchEventMsg}>
-        <div className="header-container">
-          <div className="prevent-select header">
-            <div className="header-left-container">
-              <Link to="/">
-                <h1 className="header-title">CTA2</h1>
-              </Link>
-              <div className="header-buttons-container">
-                <NavLink to="/teams" className="header-button-link">
-                  Dashboard
-                </NavLink>
-                <NavLink to="/achievements" className="header-button-link">
-                  Achievements
-                </NavLink>
-              </div>
-            </div>
-            <div className="header-login-container">
-              <div
-                className="header-notification-button-container"
-                onClick={() => {
-                  setShowNotifications(!showNotifications);
-                }}
-              >
-                <IoIosNotifications size={24} />
-              </div>
-              {session.isAuthenticated ? (
-                <img
-                  src={session.user?.avatar}
-                  alt="avatar"
-                  className="login-pic"
-                />
-              ) : (
-                <div style={{ height: "100%" }}>
-                  <Link to={session.authUrl}>
-                    <img src={OsuLogo} alt="osu logo" className="login-pic" />
-                  </Link>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <NotificationContainer
-          eventsState={eventsState}
-          display={showNotifications}
-        />
+        <Header eventsState={eventsState} />
 
         <PopupContext.Provider value={{ popup, setPopup }}>
           <PopupContainer />
@@ -99,13 +107,7 @@ export default function Header() {
           <SessionContext.Provider value={getSessionData()}>
             <StateContext.Provider value={wsState}>
               <StateDispatchContext.Provider value={dispatchWsState}>
-                <div
-                  style={{
-                    marginTop: "35px",
-                    height: "calc(100vh - 100px)",
-                    overflowY: "auto",
-                  }}
-                >
+                <div id="page-content">
                   <AnimatedOutlet />
                 </div>
               </StateDispatchContext.Provider>

@@ -49,6 +49,7 @@ html {
 
 body {
   overflow-x: hidden;
+  margin: 0;
   min-height: 100vh;
 }
 
@@ -74,18 +75,6 @@ h1 {
   font-weight: bold;
   font-size: 50px;
   color: white;
-}
-
-footer {
-  height: 50px;
-  width: 100%;
-
-  position: absolute;
-  left: 0;
-  bottom: 0;
-
-  background-color: var(--background-color);
-  overflow: hidden;
 }
 
 textarea {
@@ -114,7 +103,29 @@ hr {
   background-color: #fff;
 }
 
+/* Page layout */
+
+#root {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#page-content {
+  min-height: calc(100vh - 142px);
+}
+
 /* Footer */
+
+footer {
+  height: 50px;
+  width: 100%;
+
+  background-color: var(--background-color);
+  overflow: hidden;
+}
 
 .footer-block {
   height: 80%;
@@ -183,7 +194,6 @@ hr {
   flex-direction: row;
   justify-content: center;
   gap: 20px;
-  height: 85vh;
 }
 
 .info-container {
@@ -227,17 +237,15 @@ div.horizontal-divider {
 
 .header-container {
   width: 100%;
-  height: 45px;
-
   padding-top: 10px;
 
   display: flex;
+  flex-direction: row;
   justify-content: center;
-  align-items: center;
 }
 
 .header {
-  width: 100%;
+  width: calc(100% - 48px);
   height: 40px;
   padding: 10px 16px;
 
