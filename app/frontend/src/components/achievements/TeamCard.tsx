@@ -234,9 +234,15 @@ function YourTeamContent({
   );
 }
 
-function NoTeamContent() {
+function NoTeamContent({
+  onCreateTeam,
+  onJoinTeam,
+}: {
+  onCreateTeam: (evt: FormEvent<HTMLFormElement>) => void;
+  onJoinTeam: (evt: FormEvent<HTMLFormElement>) => void;
+}) {
   const [currentTab, setCurrentTab] = useState<"create" | "join" | "default">(
-    "default",
+    "join",
   );
   return (
     <motion.div layout style={{ height: "100%" }}>
@@ -258,9 +264,15 @@ function NoTeamContent() {
           </div>
         </div>
       ) : currentTab === "create" ? (
-        <CreateTeamComponent setCurrentTab={setCurrentTab} />
+        <CreateTeamComponent
+          setCurrentTab={setCurrentTab}
+          onCreateTeam={onCreateTeam}
+        />
       ) : (
-        <JoinTeamComponent setCurrentTab={setCurrentTab} />
+        <JoinTeamComponent
+          setCurrentTab={setCurrentTab}
+          onJoinTeam={onJoinTeam}
+        />
       )}
     </motion.div>
   );
@@ -268,8 +280,10 @@ function NoTeamContent() {
 
 function CreateTeamComponent({
   setCurrentTab,
+  onCreateTeam,
 }: {
   setCurrentTab: (tab: "create" | "join" | "default") => void;
+  onCreateTeam: (evt: FormEvent<HTMLFormElement>) => void;
 }) {
   return (
     <>
@@ -279,7 +293,7 @@ function CreateTeamComponent({
         </button>
         <h1>Create Team</h1>
       </div>
-      <form className="no-team-create-form">
+      <form className="no-team-create-form" onSubmit={onCreateTeam}>
         <div>
           <div className="no-team-create-form-item">
             <p className="no-team-create-form-heading">Team Name</p>
@@ -308,7 +322,6 @@ function CreateTeamComponent({
                   test8: "test8",
                 }}
               />
-
               <Dropdown
                 options={{
                   test: "test",
@@ -353,8 +366,10 @@ function CreateTeamComponent({
 
 function JoinTeamComponent({
   setCurrentTab,
+  onJoinTeam,
 }: {
   setCurrentTab: (tab: "create" | "join" | "default") => void;
+  onJoinTeam: (evt: FormEvent<HTMLFormElement>) => void;
 }) {
   return (
     <>
@@ -364,8 +379,35 @@ function JoinTeamComponent({
         </button>
         <h1>Join Team</h1>
       </div>
-      <p>Join a Team</p>
-      <Button text="Back" onClick={() => setCurrentTab("default")} />
+      <form className="no-team-join-form-container" onSubmit={onJoinTeam}>
+        <p>Join a Team</p>
+        <input
+          type="text"
+          name="invite"
+          placeholder="Enter invite code here..."
+        />
+        <Button text="Join Team" type="submit" />
+      </form>
+      <div>
+        <p>Looking for Team</p>
+        <Button text="Mark as LFT" /> {/* TODO: Change to switch input */}
+        <p>
+          Mark yourself as looking for a team. Team owners will be able to
+          invite random players in the LFT list, and once you accept you'll join
+          the team. If you don't find a team by the end of registration, we'll
+          put you in a team with other LFT players.
+        </p>
+      </div>
+      <div className="no-team-join-invites-container">
+        <p>Invites</p>
+        <div className="no-team-join-invites-list">
+          <div className="no-team-join-invite-item">
+            <p>Team Name</p>
+            <Button text="Accept" />
+            <Button text="Decline" />
+          </div>
+        </div>
+      </div>
     </>
   );
 }
@@ -556,7 +598,7 @@ export default function TeamCard() {
         ) : teamsResponse.isLoading ? (
           <LoadingContent />
         ) : ownTeam === null ? (
-          <NoTeamContent />
+          <NoTeamContent onCreateTeam={onCreateTeam} onJoinTeam={onJoinTeam} />
         ) : (
           <YourTeamContent
             ownTeam={ownTeam}
