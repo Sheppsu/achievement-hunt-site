@@ -377,34 +377,42 @@ function JoinTeamComponent({
         <button onClick={() => setCurrentTab("default")}>
           <MdArrowBack size={24} color="white" />
         </button>
-        <h1>Join Team</h1>
+        <h1>Enter Code</h1>
       </div>
-      <form className="no-team-join-form-container" onSubmit={onJoinTeam}>
-        <p>Join a Team</p>
-        <input
-          type="text"
-          name="invite"
-          placeholder="Enter invite code here..."
-        />
-        <Button text="Join Team" type="submit" />
-      </form>
-      <div>
-        <p>Looking for Team</p>
-        <Button text="Mark as LFT" /> {/* TODO: Change to switch input */}
-        <p>
-          Mark yourself as looking for a team. Team owners will be able to
-          invite random players in the LFT list, and once you accept you'll join
-          the team. If you don't find a team by the end of registration, we'll
-          put you in a team with other LFT players.
-        </p>
-      </div>
-      <div className="no-team-join-invites-container">
-        <p>Invites</p>
-        <div className="no-team-join-invites-list">
-          <div className="no-team-join-invite-item">
-            <p>Team Name</p>
-            <Button text="Accept" />
-            <Button text="Decline" />
+      <div className="no-team-join-container">
+        <div>
+          <form onSubmit={onJoinTeam}>
+            <div className="no-team-join-item">
+              <p className="no-team-create-form-heading">Team Name</p>
+              <input
+                type="text"
+                name="invite"
+                placeholder="Enter invite code here..."
+              />
+              <Button text="Join Team" type="submit" />
+            </div>
+          </form>
+          <div className="no-team-join-item">
+            <p className="no-team-create-form-heading">Looking for Team</p>
+            <Button text="Mark as LFT" /> {/* TODO: Change to switch input */}
+            <p className="no-team-create-form-subtitle">
+              Mark yourself as looking for a team. Team owners will be able to
+              invite random players in the LFT list, and once you accept you'll
+              join the team. If you don't find a team by the end of
+              registration, we'll put you in a team with other LFT players.
+            </p>
+          </div>
+        </div>
+        <div style={{ width: "100%" }}>
+          <p className="no-team-create-form-heading">Invites</p>
+          <div className="no-team-join-invites-container">
+            <div className="no-team-join-invite-item">
+              <p>Team Name</p>
+              <div className="no-team-join-invite-buttons">
+                <p>Accept</p>
+                <p>Decline</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>

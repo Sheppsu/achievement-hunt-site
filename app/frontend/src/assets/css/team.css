@@ -1,294 +1,343 @@
 :root {
-  --border-rounding: 15px;
-  --border-rounding-less: 10px;
-  --box-shadow: 3px 3px 6px 1px var(--background-color);
+    --border-rounding: 15px;
+    --border-rounding-less: 10px;
+    --box-shadow: 3px 3px 6px 1px var(--background-color);
 }
 
 /* General */
 
 .card-container.teams {
-  gap: 20px;
-  height: 100%;
-  padding: 0 15px;
+    gap: 20px;
+    height: 100%;
+    padding: 0 15px;
 }
 
 .info-container:hover {
-  border: 2px solid #4a4a4a;
+    border: 2px solid #4a4a4a;
 }
 
 .info-title {
-  font-size: 30px;
-  font-weight: 700;
-  text-align: left;
-  padding-left: 18px;
-  margin: 5px 0;
+    font-size: 30px;
+    font-weight: 700;
+    text-align: left;
+    padding-left: 18px;
+    margin: 5px 0;
 }
 
 .info-subtitle {
-  font-size: 20px;
-  font-weight: 500;
-  margin: 5px 0;
+    font-size: 20px;
+    font-weight: 500;
+    margin: 5px 0;
 }
 
 .info-text {
-  margin: 5px 0;
+    margin: 5px 0;
 }
 
 .info-date {
-  font-size: 10px;
-  margin-top: -5px;
-  margin-bottom: 5px;
+    font-size: 10px;
+    margin-top: -5px;
+    margin-bottom: 5px;
 }
 
 .info-buttons-container {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
 }
 
 .info-inner-container {
-  width: calc(100% - 24px);
-  padding: 12px;
+    width: calc(100% - 24px);
+    padding: 12px;
 
-  background-color: var(--site-background-color);
-  border-radius: inherit;
+    background-color: var(--site-background-color);
+    border-radius: inherit;
 
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  gap: 5px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 5px;
 }
 
 .info-inner-container.your-team {
-  gap: 20px;
+    gap: 20px;
 }
 
 .info-inner-container.leaderboard {
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 .info-inner-text {
-  text-align: left;
+    text-align: left;
 }
 
 .info-inner-text.center {
-  text-align: center;
+    text-align: center;
 }
 
 .info-inner-text.grow {
-  flex-grow: 1;
+    flex-grow: 1;
 }
 
 .info-inner-container.buttons {
-  justify-content: center;
-  gap: 20px;
+    justify-content: center;
+    gap: 20px;
 
-  background: none;
+    background: none;
 }
 
 /* No Team */
 
 .no-team-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: 100%;
 }
 
 .no-team-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .no-team-container-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  height: 50%;
-  padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    height: 50%;
+    padding: 20px 0;
 }
 
 /* Create Team */
 
 .no-team-create-form {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  height: 95%;
-  padding: 0 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    height: 95%;
+    padding: 0 15px;
 }
 
 .no-team-create-form-heading {
-  font-size: 25px;
-  font-weight: 600;
-  text-align: left;
+    font-size: 25px;
+    font-weight: 600;
+    text-align: left;
 }
 
 .no-team-create-form-subtitle {
-  font-size: 15px;
-  font-weight: 200;
-  text-align: left;
-  color: #c5c5c5;
+    font-size: 15px;
+    font-weight: 200;
+    text-align: left;
+    color: #c5c5c5;
 }
 
 .no-team-create-form-item {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 30px 0;
-  width: 96%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 30px 0;
+    width: 96%;
 }
 
 .no-team-create-form-item input {
-  width: 100%;
-  padding: 10px;
-  height: 20px;
-  background-color: var(--site-background-color);
-  border: solid 2px var(--border-color);
-  color: white;
+    width: 100%;
+    padding: 10px;
+    height: 20px;
+    background-color: var(--site-background-color);
+    border: solid 2px var(--border-color);
+    color: white;
 }
 
 .no-team-create-form-dropdown-container {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
 }
 
 .no-team-create-form-bottom-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
 }
 
 .no-team-create-form-warning {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-  background-color: #696401;
-  opacity: 0.74;
-  border: solid 2px #c2a800;
-  padding: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    background-color: #696401;
+    opacity: 0.74;
+    border: solid 2px #c2a800;
+    padding: 15px;
 }
 
 .no-team-create-form-warning-heading {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: start;
-  width: 100%;
-  gap: 5px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: start;
+    width: 100%;
+    gap: 5px;
 }
 
 .no-team-create-form-warning-content {
-  font-weight: 200;
-  text-align: left;
-  font-size: 16px;
+    font-weight: 200;
+    text-align: left;
+    font-size: 16px;
 }
 
 .no-team-create-form-warning-content-bold {
-  font-weight: 600;
+    font-weight: 600;
+}
+
+/* Join Team */
+
+.no-team-join-container {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.no-team-join-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 30px 0;
+    width: 96%;
+}
+
+.no-team-join-item input {
+    width: 100%;
+    padding: 10px;
+    height: 20px;
+    background-color: var(--site-background-color);
+    border: solid 2px var(--border-color);
+    color: white;
+}
+
+.no-team-join-invites-container {
+    background-color: var(--site-background-color);
+    border: solid 2px var(--border-color);
+    height: 150px;
+    width: 100%
+}
+
+.no-team-join-invite-item {
+    height: 42px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.no-team-join-invite-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 /* Player */
 
 .info-inner-container.players {
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
 .player-card {
-  width: 300px;
-  height: 50px;
-  padding: 0 5px;
+    width: 300px;
+    height: 50px;
+    padding: 0 5px;
 
-  border: solid 2px var(--border-color);
-  border-radius: var(--border-rounding);
+    border: solid 2px var(--border-color);
+    border-radius: var(--border-rounding);
 
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 5px;
-  transition: border-color 0.3s ease;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 5px;
+    transition: border-color 0.3s ease;
 }
 
 .player-card-selectable:hover {
-  cursor: pointer;
+    cursor: pointer;
 }
 
 .player-card-selected {
-  border: solid 2px white;
+    border: solid 2px white;
 }
 
 .player-card-avatar {
-  height: 35px;
-  width: 35px;
+    height: 35px;
+    width: 35px;
 
-  border-radius: 100%;
+    border-radius: 100%;
 }
 
 /* Placement */
 
 .info-inner-container.placement {
-  background-color: inherit;
-  justify-content: space-between;
+    background-color: inherit;
+    justify-content: space-between;
 }
 
 .placement-section {
-  flex-grow: 1;
+    flex-grow: 1;
 
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .placement-title-container {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
 }
 
 .info-title.placement {
-  width: fit-content;
-  padding: 10px;
-  margin: 0;
+    width: fit-content;
+    padding: 10px;
+    margin: 0;
 
-  border-radius: var(--border-rounding);
+    border-radius: var(--border-rounding);
 
-  background-color: var(--site-background-color);
+    background-color: var(--site-background-color);
 
-  display: block;
+    display: block;
 }
 
 /* Layout */
 
 @media (max-width: 1100px) {
-  .index-container {
-    flex-direction: column;
-    align-items: center;
-    height: 100%;
-  }
+    .index-container {
+        flex-direction: column;
+        align-items: center;
+        height: 100%;
+    }
 
-  .card-divider {
-    display: none;
-  }
+    .card-divider {
+        display: none;
+    }
 }
 
 @media (max-width: 500px) {
-  .info-buttons-container {
-    flex-direction: column;
-    gap: 10px;
-  }
+    .info-buttons-container {
+        flex-direction: column;
+        gap: 10px;
+    }
 }
