@@ -1,250 +1,281 @@
 /* General */
 
 .cards-container__column.teams {
-    gap: 20px;
-    padding: 0 15px;
+  gap: 20px;
+  padding: 0 15px;
 
-    min-height: 85vh;
+  min-height: 85vh;
 }
 
 .card:hover {
-    border: 2px solid #4a4a4a;
+  border: 2px solid #4a4a4a;
 }
 
 .card.fill {
-    flex-grow: 1;
+  flex-grow: 1;
 }
 
 .card--teams__title {
-    font-size: 30px;
-    font-weight: 700;
-    text-align: left;
-    padding-left: 18px;
-    margin: 5px 0;
+  font-size: 30px;
+  font-weight: 700;
+  text-align: left;
+  padding-left: 18px;
+  margin: 5px 0;
 }
 
 .card--teams__subtitle {
-    font-size: 20px;
-    font-weight: 500;
-    margin: 5px 0;
+  font-size: 20px;
+  font-weight: 500;
+  margin: 5px 0;
 }
 
 .card--teams__label {
-    font-size: 25px;
-    font-weight: 600;
-    text-align: left;
+  font-size: 25px;
+  font-weight: 600;
+  text-align: left;
 }
 
 .card--teams__description {
-    font-size: 15px;
-    font-weight: 200;
-    text-align: left;
-    color: #c5c5c5;
+  font-size: 15px;
+  font-weight: 200;
+  text-align: left;
+  color: #c5c5c5;
 }
 
 .card--teams__container {
-    width: calc(100% - 24px);
-    padding: 12px;
+  width: calc(100% - 24px);
+  padding: 12px;
 
-    background-color: var(--site-background-color);
-    border-radius: inherit;
+  background-color: var(--site-background-color);
+  border-radius: inherit;
 
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    gap: 5px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 5px;
 }
 
 .card--teams__container.your-team {
-    gap: 20px;
+  gap: 20px;
 }
 
 .card--teams__container.leaderboard {
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .card--teams__container__text {
-    text-align: left;
+  text-align: left;
 }
 
 .card--teams__container__text.center {
-    text-align: center;
+  text-align: center;
 }
 
 .card--teams__container__text.grow {
-    flex-grow: 1;
+  flex-grow: 1;
 }
 
 .card--teams__container.buttons {
-    justify-content: center;
-    gap: 20px;
+  justify-content: center;
+  gap: 20px;
 
-    background: none;
+  background: none;
 }
 
 /* No Team */
 
 .card--teams__header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 /* Create Team */
 
 .card--teams__form {
-    height: 95%;
-    padding: 0 15px;
+  height: 30%;
 
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
 }
 
 .card--teams__form__item {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding: 30px 0;
-    width: 96%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 30px 0;
+  width: 96%;
 }
 
 .card--teams__form__item input {
-    width: 100%;
-    padding: 10px;
-    height: 20px;
-    background-color: var(--site-background-color);
-    border: solid 2px var(--border-color);
-    color: white;
+  width: 100%;
+  padding: 10px;
+  height: 20px;
+  background-color: var(--site-background-color);
+  border: solid 2px var(--border-color);
+  color: white;
 }
 
 .card--teams__form__item__row {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
 }
 
 .card--teams__form__bottom-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 25px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 25px;
 }
 
 /* Join Team */
 
 .card--teams__invites {
-    width: 100%;
+  width: 100%;
 }
 
 .card--teams__invites__container {
-    background-color: var(--site-background-color);
-    border: solid 2px var(--border-color);
-    height: 150px;
-    width: 100%
+  background-color: var(--site-background-color);
+  border: solid 2px var(--border-color);
+  height: 150px;
+  width: 100%;
 }
 
 .card--teams__invites__container__item {
-    height: 42px;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  height: 42px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .card--teams__invites__container__item__actions {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 /* Player */
 
 .card--teams__container.players {
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .card--teams__container--players__player-card {
-    width: 300px;
-    height: 50px;
-    padding: 0 5px;
+  width: 300px;
+  height: 50px;
+  padding: 0 5px;
 
-    border: solid 2px var(--border-color);
-    border-radius: var(--border-rounding);
+  border: solid 2px var(--border-color);
+  border-radius: var(--border-rounding);
 
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 5px;
-    transition: border-color 0.3s ease;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+  transition: border-color 0.3s ease;
 }
 
 .card--teams__container--players__player-card.selectable:hover {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 .card--teams__container--players__player-card.selected {
-    border: solid 2px white;
+  border: solid 2px white;
 }
 
 .card--teams__container--players__player-card__avatar {
-    height: 35px;
-    width: 35px;
+  height: 35px;
+  width: 35px;
 
-    border-radius: 100%;
+  border-radius: 100%;
 }
 
 /* Placement */
 
 .card--teams__container.placement {
-    background-color: inherit;
-    justify-content: space-between;
+  background-color: inherit;
+  justify-content: space-between;
 }
 
 .card--teams__container--placement__column {
-    flex-grow: 1;
+  flex-grow: 1;
 
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .card--teams__container--placement__column__container {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
 }
 
 .card--teams__title.placement {
-    width: fit-content;
-    padding: 10px;
-    margin: 0;
+  width: fit-content;
+  padding: 10px;
+  margin: 0;
 
-    border-radius: var(--border-rounding);
+  border-radius: var(--border-rounding);
 
-    background-color: var(--site-background-color);
+  background-color: var(--site-background-color);
 
-    display: block;
+  display: block;
+}
+
+.card--teams__container.chat {
+  height: 160px;
+  max-height: 160px;
+  width: 100%;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 3px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 10px 0;
+}
+
+.card--teams__container.chat p {
+  font-size: 16px;
+  width: 90%;
+  max-width: 90%;
+  margin: 2px 0;
+  text-align: left;
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
+.card--teams__container--chat__input {
+  width: 95%; /* Not sure what's wrong with the width here */
+  padding: 10px;
+  height: 20px;
+  background-color: var(--site-background-color);
+  border: solid 2px var(--border-color);
+  color: white;
 }
 
 /* Layout */
 
 @media (max-width: 1100px) {
-    .cards-container {
-        flex-direction: column;
-        align-items: center;
-        height: 100%;
-    }
+  .cards-container {
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+  }
 
-    .cards-container__column.teams {
-        min-height: 0;
-    }
+  .cards-container__column.teams {
+    min-height: 0;
+  }
 }

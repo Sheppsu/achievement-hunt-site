@@ -6,7 +6,7 @@ import {
   useRenameTeam,
   useTransferTeamAdmin,
 } from "api/query";
-import { FormEvent, SetStateAction, useContext, useState } from "react";
+import React, { FormEvent, SetStateAction, useContext, useState } from "react";
 
 import { AchievementPlayerType } from "api/types/AchievementPlayerType";
 import { AchievementTeamExtendedType } from "api/types/AchievementTeamType";
@@ -18,7 +18,7 @@ import { SimplePromptPopup } from "components/popups/PopupContent.tsx";
 import { EventContext, EventDispatch } from "contexts/EventContext";
 import { PopupContext, PopupContextType } from "contexts/PopupContext";
 import { SessionContext } from "contexts/SessionContext";
-import { AnimatePresence, motion } from "motion/react";
+import { motion } from "motion/react";
 import { BsPeopleFill, BsPlusCircleFill } from "react-icons/bs";
 import { FaCrown } from "react-icons/fa6";
 import { IoWarning } from "react-icons/io5";
@@ -248,7 +248,7 @@ function NoTeamContent({
   onJoinTeam: (evt: FormEvent<HTMLFormElement>) => void;
 }) {
   const [currentTab, setCurrentTab] = useState<"create" | "join" | "default">(
-    "join",
+    "default",
   );
   return (
     <motion.div layout style={{ height: "100%" }}>
@@ -305,7 +305,7 @@ function CreateTeamComponent({
             <p className="card--teams__label">Team Name</p>
             <input
               type="text"
-              name="team-name"
+              name="prompt-value"
               placeholder="Enter team name here..."
             />
             <p className="card--teams__description">
@@ -383,7 +383,7 @@ function JoinTeamComponent({
         </button>
         <h1>Enter Code</h1>
       </div>
-      <form className="card--teams__form" onSubmit={onJoinTeam}>
+      <form className="card--teams__form fill" onSubmit={onJoinTeam}>
         <div className="card--teams__form__item">
           <p className="card--teams__label">Team Name</p>
           <input
@@ -500,6 +500,58 @@ function PlacementCard({
   );
 }
 
+type ChatMessage = {
+  name: string;
+  message: string;
+  color: string;
+};
+
+function TeamChat() {
+  const [value, setValue] = useState<string>("");
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    { name: "aychar_", message: "hiiii", color: "red" },
+    {
+      name: "baychar_",
+      message:
+        "HJFIOPEDAHFIOPEAHFOPIAEOIHFEPW FEDASJ FWEIOPHFE WAPFH WAEP FWAEF AWEF WEAFPEWA FHWEAOPF WAEPIOF ",
+      color: "blue",
+    },
+  ]);
+
+  const onChatSend = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const msg = new FormData(e.currentTarget).get("chat-value") as string;
+    setMessages((prevMsgs) => {
+      return [{ name: "aychar_", message: msg, color: "red" }, ...prevMsgs];
+    });
+    setValue("");
+  };
+
+  return (
+    <div className="card">
+      <p className="card--teams__title">Chat</p>
+      <div className="card--teams__container chat">
+        {messages.map((msg, idx) => (
+          <p key={idx}>
+            <span style={{ color: msg.color }}>{msg.name}</span>
+            {msg.message}
+          </p>
+        ))}
+      </div>
+      <form onSubmit={onChatSend}>
+        <input
+          type="text"
+          name="chat-value"
+          className="card--teams__container--chat__input"
+          value={value}
+          onChange={(e) => setValue(e.currentTarget.value)}
+          autoComplete="off"
+        />
+      </form>
+    </div>
+  );
+}
+
 export default function TeamCard() {
   const session = useContext(SessionContext);
   const dispatchEventMsg = useContext(EventContext);
@@ -592,14 +644,6 @@ export default function TeamCard() {
 
   return (
     <motion.div layout className="cards-container__column teams">
-      <AnimatePresence>
-        {ownTeam && (
-          <PlacementCard
-            placement={ownPlacement as number}
-            numberTeams={(teams as Array<any>).length}
-          />
-        )}
-      </AnimatePresence>
       <motion.div className="card fill" layout>
         {!session.isAuthenticated ? (
           <UnauthenticatedContent />
@@ -615,6 +659,7 @@ export default function TeamCard() {
           />
         )}
       </motion.div>
+      {ownTeam && <TeamChat />}
       {canSeeTeams && (
         <Button
           text="Toggle Teams List"
