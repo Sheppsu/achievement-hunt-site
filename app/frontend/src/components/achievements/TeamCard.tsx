@@ -61,14 +61,20 @@ function PlayerCard({
   return (
     <div
       className={
-        "player-card " +
-        (setSelectedPlayer ? "player-card-selectable " : "") +
-        (selectedPlayer === player ? "player-card-selected" : "")
+        "card--teams__container--players__player-card " +
+        (setSelectedPlayer ? "selectable " : "") +
+        (selectedPlayer === player ? "selected" : "")
       }
       onClick={() => setSelectedPlayer && setSelectedPlayer(player)}
     >
-      <img className="player-card-avatar" src={player.user.avatar} alt=""></img>
-      <p className="info-inner-text grow">{player.user.username}</p>
+      <img
+        className="card--teams__container--players__player-card__avatar"
+        src={player.user.avatar}
+        alt=""
+      ></img>
+      <p className="card--teams__container__text grow">
+        {player.user.username}
+      </p>
       {player.team_admin && <FaCrown color="yellow" />}
     </div>
   );
@@ -111,7 +117,7 @@ function TransferTeamAdminComponent({
   return (
     <div>
       <p>Select the player to transfer admin to: </p>
-      <div className="info-inner-container players">
+      <div className="card--teams__container players">
         {playerList.map((player, i) => (
           <PlayerCard
             key={i}
@@ -205,18 +211,18 @@ function YourTeamContent({
 
   return (
     <>
-      <div className="info-inner-container your-team">
-        <p className="info-inner-text center grow">
+      <div className="card--teams__container your-team">
+        <p className="card--teams__container__text center grow">
           {ownTeam.name} | {getAnonName(ownTeam.id)} - {ownTeam.points}pts
         </p>
       </div>
-      <h1 className="info-title">Players</h1>
-      <div className="info-inner-container players">
+      <h1 className="card--teams__title">Players</h1>
+      <div className="card--teams__container players">
         {ownTeam.players.map((player, i) => (
           <PlayerCard key={i} player={player} />
         ))}
       </div>
-      <div className="info-inner-container buttons">
+      <div className="card--teams__container buttons">
         <Button
           text="Leave team"
           onClick={leaveTeam}
@@ -225,7 +231,7 @@ function YourTeamContent({
         <Button text="Invite code" onClick={copyInvite} />
       </div>
       {user?.team_admin && (
-        <div className="info-inner-container buttons">
+        <div className="card--teams__container buttons">
           <Button text="Rename Team" onClick={renameTeamPopup} />
           <Button text="Transfer Index" onClick={transferTeamAdminPopup} />
         </div>
@@ -287,29 +293,29 @@ function CreateTeamComponent({
 }) {
   return (
     <>
-      <div className="no-team-header">
+      <div className="card--teams__header">
         <button onClick={() => setCurrentTab("default")}>
           <MdArrowBack size={24} color="white" />
         </button>
         <h1>Create Team</h1>
       </div>
-      <form className="no-team-create-form" onSubmit={onCreateTeam}>
+      <form className="card--teams__form" onSubmit={onCreateTeam}>
         <div>
-          <div className="no-team-create-form-item">
-            <p className="no-team-create-form-heading">Team Name</p>
+          <div className="card--teams__form__item">
+            <p className="card--teams__label">Team Name</p>
             <input
               type="text"
               name="team-name"
               placeholder="Enter team name here..."
             />
-            <p className="no-team-create-form-subtitle">
+            <p className="card--teams__description">
               This will be hidden from other teams during the tournament to keep
               anonymity
             </p>
           </div>
-          <div className="no-team-create-form-item">
-            <p className="no-team-create-form-heading">Anonymous Team Name</p>
-            <div className="no-team-create-form-dropdown-container">
+          <div className="card--teams__form__item">
+            <p className="card--teams__label">Anonymous Team Name</p>
+            <div className="card--teams__form__item__row">
               <Dropdown
                 options={{
                   test: "test",
@@ -335,26 +341,24 @@ function CreateTeamComponent({
                 }}
               />
             </div>
-            <p className="no-team-create-form-subtitle">
+            <p className="card--teams__description">
               This will be what other teams see throughout the tournament
             </p>
           </div>
         </div>
-        <div className="no-team-create-form-bottom-container">
-          <div className="no-team-create-form-warning">
-            <div className="no-team-create-form-warning-heading">
+        <div className="card--teams__form__bottom-container">
+          <div className="warning-box">
+            <div className="warning-box__heading">
               <IoWarning size={35} color="#C2A800" />
               <h1>WARNING</h1>
             </div>
-            <p className="no-team-create-form-warning-content">
-              <span className="no-team-create-form-warning-content-bold">
-                DO NOT
-              </span>{" "}
-              let others know what team you're on, or who your teammates are. We
-              cannot completely prevent people from profile stalking to get
-              solutions to achievements, so anonymity is your best defense
-              against it. DM a staff member if you suspect that someone is
-              profile stalking (this is against the rules).
+            <p className="warning-box__content">
+              <span style={{ fontWeight: 600 }}>DO NOT</span> let others know
+              what team you're on, or who your teammates are. We cannot
+              completely prevent people from profile stalking to get solutions
+              to achievements, so anonymity is your best defense against it. DM
+              a staff member if you suspect that someone is profile stalking
+              (this is against the rules).
             </p>
           </div>
           <Button text="Create Team" type="submit" />
@@ -373,45 +377,41 @@ function JoinTeamComponent({
 }) {
   return (
     <>
-      <div className="no-team-header">
+      <div className="card--teams__header">
         <button onClick={() => setCurrentTab("default")}>
           <MdArrowBack size={24} color="white" />
         </button>
         <h1>Enter Code</h1>
       </div>
-      <div className="no-team-join-container">
-        <div>
-          <form onSubmit={onJoinTeam}>
-            <div className="no-team-join-item">
-              <p className="no-team-create-form-heading">Team Name</p>
-              <input
-                type="text"
-                name="invite"
-                placeholder="Enter invite code here..."
-              />
-              <Button text="Join Team" type="submit" />
-            </div>
-          </form>
-          <div className="no-team-join-item">
-            <p className="no-team-create-form-heading">Looking for Team</p>
-            <Button text="Mark as LFT" /> {/* TODO: Change to switch input */}
-            <p className="no-team-create-form-subtitle">
-              Mark yourself as looking for a team. Team owners will be able to
-              invite random players in the LFT list, and once you accept you'll
-              join the team. If you don't find a team by the end of
-              registration, we'll put you in a team with other LFT players.
-            </p>
-          </div>
+      <form className="card--teams__form" onSubmit={onJoinTeam}>
+        <div className="card--teams__form__item">
+          <p className="card--teams__label">Team Name</p>
+          <input
+            type="text"
+            name="invite"
+            placeholder="Enter invite code here..."
+          />
+          <Button text="Join Team" type="submit" />
         </div>
-        <div style={{ width: "100%" }}>
-          <p className="no-team-create-form-heading">Invites</p>
-          <div className="no-team-join-invites-container">
-            <div className="no-team-join-invite-item">
-              <p>Team Name</p>
-              <div className="no-team-join-invite-buttons">
-                <p>Accept</p>
-                <p>Decline</p>
-              </div>
+      </form>
+      <div className="card--teams__form__item">
+        <p className="card--teams__label">Looking for Team</p>
+        <Button text="Mark as LFT" /> {/* TODO: Change to switch input */}
+        <p className="card--teams__description">
+          Mark yourself as looking for a team. Team owners will be able to
+          invite random players in the LFT list, and once you accept you'll join
+          the team. If you don't find a team by the end of registration, we'll
+          put you in a team with other LFT players.
+        </p>
+      </div>
+      <div className="card--teams__invites">
+        <p className="card--teams__label">Invites</p>
+        <div className="card--teams__invites__container">
+          <div className="card--teams__invites__container__item">
+            <p>Team Name</p>
+            <div className="card--teams__invites__container__item__actions">
+              <p>Accept</p>
+              <p>Decline</p>
             </div>
           </div>
         </div>
@@ -422,16 +422,16 @@ function JoinTeamComponent({
 
 function LoadingContent() {
   return (
-    <motion.div layout className="info-inner-container your-team">
-      <p className="info-inner-text">Loading...</p>
+    <motion.div layout className="card--teams__container">
+      <p className="card--teams__container__text">Loading...</p>
     </motion.div>
   );
 }
 
 function UnauthenticatedContent() {
   return (
-    <motion.div layout className="info-inner-container your-team">
-      <p className="info-inner-text">Not authenticated.</p>
+    <motion.div layout className="card--teams__container">
+      <p className="card--teams__container__text">Not authenticated.</p>
     </motion.div>
   );
 }
@@ -445,13 +445,13 @@ function AllTeams({
 
   return (
     <div className="card">
-      <p className="info-title center">All Teams</p>
+      <p className="card--teams__title center">All Teams</p>
       {teams.map((team, idx) => (
         <div key={idx}>
-          <p className="info-subtitle">
+          <p className="card--teams__subtitle">
             {team.name} ({getAnonName(team.id)}) - {team.points}pts
           </p>
-          <div className="info-inner-container players">
+          <div className="card--teams__container players">
             {team.players
               .sort(
                 (a, b) => (a.team_admin ? 0 : a.id) - (b.team_admin ? 0 : b.id),
@@ -475,25 +475,25 @@ function PlacementCard({
 }) {
   return (
     <motion.div
-      className="info-container"
+      className="card"
       layout
       initial={{ height: 0, opacity: 0 }}
       animate={{ height: "auto", opacity: 1 }}
       exit={{ height: 0, opacity: 0 }}
     >
-      <div className="info-inner-container placement">
-        <div className="placement-section">
-          <div className="placement-title-container">
-            <p className="info-title placement">#{placement}</p>
+      <div className="card--teams__container placement">
+        <div className="card--teams__container--placement__column">
+          <div className="card--teams__container--placement__column__container">
+            <p className="card--teams__title placement">#{placement}</p>
           </div>
-          <p className="info-subtitle">Current placement</p>
+          <p className="card--teams__subtitle">Current placement</p>
         </div>
         <div className="vertical-divider"></div>
-        <div className="placement-section">
-          <div className="placement-title-container">
-            <p className="info-title placement">{numberTeams}</p>
+        <div className="card--teams__container--placement__column">
+          <div className="card--teams__container--placement__column__container">
+            <p className="card--teams__title placement">{numberTeams}</p>
           </div>
-          <p className="info-subtitle">Registered teams</p>
+          <p className="card--teams__subtitle">Registered teams</p>
         </div>
       </div>
     </motion.div>
@@ -591,7 +591,7 @@ export default function TeamCard() {
       : teams.filter((t) => "players" in t && t.players.length > 0).length > 1;
 
   return (
-    <motion.div layout className="card-container teams">
+    <motion.div layout className="cards-container__column teams">
       <AnimatePresence>
         {ownTeam && (
           <PlacementCard
@@ -600,7 +600,7 @@ export default function TeamCard() {
           />
         )}
       </AnimatePresence>
-      <motion.div className="info-container fill" layout>
+      <motion.div className="card fill" layout>
         {!session.isAuthenticated ? (
           <UnauthenticatedContent />
         ) : teamsResponse.isLoading ? (

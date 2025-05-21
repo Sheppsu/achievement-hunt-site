@@ -527,3 +527,31 @@ a.rendered-text:hover {
 .events__entry__container__bar.error {
     background-color: rgb(227, 62, 62);
 }
+
+/* Warning box */
+
+.warning-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    background-color: #696401;
+    opacity: 0.74;
+    border: solid 2px #c2a800;
+    padding: 15px;
+}
+
+.warning-box__heading {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: start;
+    width: 100%;
+    gap: 5px;
+}
+
+.warning-box__content {
+    font-weight: 200;
+    text-align: left;
+    font-size: 16px;
+}

@@ -28,13 +28,14 @@ __all__ = (
     "rename_team",
     "transfer_admin",
     "player_stats",
-    "get_auth_packet"
+    "get_auth_packet",
+    "get_current_iteration"
 )
 
 current_iteration = None
 
 
-def get_current_iteration():
+def get_current_iteration() -> EventIteration:
     # pylint: disable=global-statement
     global current_iteration
 

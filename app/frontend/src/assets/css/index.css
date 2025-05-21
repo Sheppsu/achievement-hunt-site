@@ -13,3 +13,13 @@
     max-width: 700px;
     aspect-ratio: 5/1;
 }
+
+.info-text {
+    margin: 5px 0;
+}
+
+.info-date {
+    font-size: 10px;
+    margin-top: -5px;
+    margin-bottom: 5px;
+}

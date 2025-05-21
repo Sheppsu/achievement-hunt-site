@@ -9,8 +9,8 @@ export default function LeaderboardCard() {
   return (
     <div className="cards-container__column teams">
       <div className="card fill">
-        <h1 className="info-title">Leaderboard</h1>
-        <div className="info-inner-container leaderboard">
+        <h1 className="card--teams__title">Leaderboard</h1>
+        <div className="card--teams__container leaderboard">
           {teamsResp.isLoading
             ? "Loading..."
             : teamsResp.data === undefined
