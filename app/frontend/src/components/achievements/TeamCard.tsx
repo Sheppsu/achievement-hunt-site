@@ -600,7 +600,7 @@ export default function TeamCard() {
           />
         )}
       </AnimatePresence>
-      <motion.div className="info-container" layout>
+      <motion.div className="info-container fill" layout>
         {!session.isAuthenticated ? (
           <UnauthenticatedContent />
         ) : teamsResponse.isLoading ? (

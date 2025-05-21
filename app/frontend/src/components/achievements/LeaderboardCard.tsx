@@ -8,7 +8,7 @@ export default function LeaderboardCard() {
 
   return (
     <div className="card-container teams">
-      <div className="info-container">
+      <div className="info-container fill">
         <h1 className="info-title">Leaderboard</h1>
         <div className="info-inner-container leaderboard">
           {teamsResp.isLoading

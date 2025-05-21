@@ -8,12 +8,17 @@
 
 .card-container.teams {
     gap: 20px;
-    height: 100%;
     padding: 0 15px;
+
+    min-height: 85vh;
 }
 
 .info-container:hover {
     border: 2px solid #4a4a4a;
+}
+
+.info-container.fill {
+    flex-grow: 1;
 }
 
 .info-title {
