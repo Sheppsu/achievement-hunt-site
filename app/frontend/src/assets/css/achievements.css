@@ -1,11 +1,3 @@
-:root {
-  --border-rounding: 0;
-  --border-rounding-less: 0;
-  --button-color: #438efd;
-  --button-color-hover: #52a1ff;
-  --button-color-disabled: #20457d;
-}
-
 h1 {
   margin: 0;
   font-size: 30px;

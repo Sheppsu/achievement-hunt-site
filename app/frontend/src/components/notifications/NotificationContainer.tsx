@@ -15,7 +15,7 @@ export default function NotificationContainer({
 
   return (
     <motion.div
-      className={cn("notification-container", { hide: !display })}
+      className={cn("notifications-popup", { hide: !display })}
       id="notification-popup"
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
@@ -23,16 +23,16 @@ export default function NotificationContainer({
       transition={{ duration: 0.1 }}
       layout
     >
-      <div className="notifications-header">
+      <div className="notifications-popup__header">
         <p>Notifications</p>
         <button
-          className="notifications-clear-all-button"
+          className="notifications-popup__header__clear-btn"
           onClick={() => dispatchEventMsg({ type: "clearall" })}
         >
           Clear All
         </button>
       </div>
-      <div className="notification-scroll-container">
+      <div className="notifications-popup__container">
         {eventsState.pastEvents
           .map((event, i) => <NotificationEventEntry key={i} event={event} />)
           .reverse()}

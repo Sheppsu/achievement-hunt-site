@@ -2,7 +2,7 @@ import "assets/css/team.css";
 
 export default function InfoCard() {
   return (
-    <div className="info-container">
+    <div className="card">
       <h1 className="info-title">Capture The Achievement</h1>
       <p className="info-text">
         Starts November 16th - Ends November 25th (0:00 UTC)

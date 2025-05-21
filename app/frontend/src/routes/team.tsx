@@ -12,7 +12,7 @@ export default function AchievementsIndex() {
         <title>CTA Teams</title>
       </Helmet>
       <AnimatedPage>
-        <div className="index-container">
+        <div className="cards-container">
           <TeamCard />
           <div className="vertical-divider"></div>
           <LeaderboardCard />

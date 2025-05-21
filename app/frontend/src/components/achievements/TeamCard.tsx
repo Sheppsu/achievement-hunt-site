@@ -444,7 +444,7 @@ function AllTeams({
   if (!teams) return;
 
   return (
-    <div className="info-container">
+    <div className="card">
       <p className="info-title center">All Teams</p>
       {teams.map((team, idx) => (
         <div key={idx}>

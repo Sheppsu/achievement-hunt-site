@@ -26,27 +26,30 @@ export default function EventEntry({
 
   return (
     <motion.div
-      className={"prevent-select event-entry " + event.type}
+      className={"prevent-select events__entry " + event.type}
       initial={{ y: 10, opacity: 0 }}
       animate={{ y: 0, opacity: 100 }}
       exit={{ y: 10, opacity: 0 }}
       layout
     >
-      <div className={"event-status-icon " + event.type}>
+      <div className={"events__entry__status-icon " + event.type}>
         {event.type === "error" ? (
           <IoIosWarning size={30} />
         ) : (
           <IoMdInformationCircle size={30} />
         )}
       </div>
-      <div className="event-text-container">
-        <p className="event-text">{event.msg}</p>
+      <div className="events__entry__container">
+        <p className="events__entry__container__text">{event.msg}</p>
         <div
-          className={"event-bar " + event.type}
+          className={"events__entry__container__bar " + event.type}
           style={{ width: progress }}
         ></div>
       </div>
-      <div className="event-dismiss" onClick={() => (event.expiresAt = time)}>
+      <div
+        className="events__entry__dismiss-btn"
+        onClick={() => (event.expiresAt = time)}
+      >
         <IoCheckmarkSharp size={16} />
       </div>
     </motion.div>

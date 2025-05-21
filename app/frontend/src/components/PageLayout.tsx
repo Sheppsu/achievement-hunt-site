@@ -40,24 +40,30 @@ function Header({ eventsState }: { eventsState: EventState }) {
 
   return (
     <>
-      <div className="header-container">
-        <div className="prevent-select header">
-          <div className="header-left-container">
+      <div className="header">
+        <div className="prevent-select header__container">
+          <div className="header__container__left-box">
             <Link to="/">
-              <h1 className="header-title">CTA2</h1>
+              <h1 className="header__container__left-box__title">CTA2</h1>
             </Link>
-            <div className="header-buttons-container">
-              <NavLink to="/teams" className="header-button-link">
+            <div className="header__container__left-box__links">
+              <NavLink
+                to="/teams"
+                className="header__container__left-box__links__link"
+              >
                 Dashboard
               </NavLink>
-              <NavLink to="/achievements" className="header-button-link">
+              <NavLink
+                to="/achievements"
+                className="header__container__left-box__links__link"
+              >
                 Achievements
               </NavLink>
             </div>
           </div>
-          <div className="header-login-container">
+          <div className="header__container__right-box">
             <div
-              className="header-notification-button-container"
+              className="header__container__right-box__notifications"
               onClick={() => {
                 setShowNotifications(!showNotifications);
               }}
@@ -68,12 +74,16 @@ function Header({ eventsState }: { eventsState: EventState }) {
               <img
                 src={session.user?.avatar}
                 alt="avatar"
-                className="login-pic"
+                className="header__container__right-box__login-pic"
               />
             ) : (
               <div style={{ height: "100%" }}>
                 <Link to={session.authUrl}>
-                  <img src={OsuLogo} alt="osu logo" className="login-pic" />
+                  <img
+                    src={OsuLogo}
+                    alt="osu logo"
+                    className="header__container__right-box__login-pic"
+                  />
                 </Link>
               </div>
             )}
