@@ -1,6 +1,6 @@
 import "assets/css/team.css";
 
-import { useGetTeams } from "api/query";
+import { useGetTeams } from "api/query.ts";
 import { getAnonName } from "util/helperFunctions.ts";
 
 export default function LeaderboardCard() {

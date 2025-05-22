@@ -92,6 +92,16 @@
   gap: 10px;
 }
 
+.card--teams__row {
+  padding: 10px 0;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
 /* Create Team */
 
 .card--teams__form {
