@@ -1,9 +1,9 @@
-import { createContext, useContext } from "react";
-import { WebsocketState } from "types/WebsocketStateType.ts";
 import {
   NavItems,
   SortedNavRowItems,
 } from "components/achievements/AchievementNavigationBar.tsx";
+import { createContext, useContext } from "react";
+import { WebsocketState } from "types/WebsocketStateType.ts";
 
 interface BaseStateActionType {
   id: number;
@@ -84,7 +84,7 @@ type StateActionType =
   | SwitchNavItemSort
   | HideMyAchievements;
 
-export function wsReducer(
+export function stateReducer(
   state: WebsocketState,
   action: StateActionType,
 ): WebsocketState {

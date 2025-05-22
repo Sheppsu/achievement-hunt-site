@@ -15,8 +15,9 @@ import { PopupContext, PopupState } from "contexts/PopupContext";
 import {
   StateContext,
   StateDispatchContext,
-  wsReducer,
+  stateReducer,
 } from "contexts/StateContext.ts";
+import { WebsocketContextProvider } from "contexts/WebsocketContext.tsx";
 import { AnimatePresence } from "motion/react";
 import React from "react";
 import { IoIosNotifications } from "react-icons/io";
@@ -103,7 +104,11 @@ export default function PageLayout() {
     events: [],
     pastEvents: [],
   });
-  const [wsState, dispatchWsState] = useReducer(wsReducer, null, defaultState);
+  const [wsState, dispatchWsState] = useReducer(
+    stateReducer,
+    null,
+    defaultState,
+  );
   const [popup, setPopup] = useState<PopupState>(null);
 
   return (
@@ -117,9 +122,11 @@ export default function PageLayout() {
           <SessionContext.Provider value={getSessionData()}>
             <StateContext.Provider value={wsState}>
               <StateDispatchContext.Provider value={dispatchWsState}>
-                <div id="page-content">
-                  <AnimatedOutlet />
-                </div>
+                <WebsocketContextProvider>
+                  <div id="page-content">
+                    <AnimatedOutlet />
+                  </div>
+                </WebsocketContextProvider>
               </StateDispatchContext.Provider>
             </StateContext.Provider>
           </SessionContext.Provider>
