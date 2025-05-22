@@ -6,13 +6,7 @@ import {
   useRenameTeam,
   useTransferTeamAdmin,
 } from "api/query";
-import React, {
-  FormEvent,
-  SetStateAction,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import React, { FormEvent, SetStateAction, useContext, useState } from "react";
 
 import { AchievementPlayerType } from "api/types/AchievementPlayerType";
 import { AchievementTeamExtendedType } from "api/types/AchievementTeamType";
@@ -24,13 +18,13 @@ import { SimplePromptPopup } from "components/popups/PopupContent.tsx";
 import { EventContext, EventDispatch } from "contexts/EventContext";
 import { PopupContext, PopupContextType } from "contexts/PopupContext";
 import { SessionContext } from "contexts/SessionContext";
-import { WebsocketContext } from "contexts/WebsocketContext";
 import { motion } from "motion/react";
 import { BsPeopleFill, BsPlusCircleFill } from "react-icons/bs";
 import { FaCrown } from "react-icons/fa6";
 import { IoWarning } from "react-icons/io5";
 import { MdArrowBack } from "react-icons/md";
 import { getAnonName } from "util/helperFunctions";
+import TeamChat from "./TeamChat";
 
 function Button({
   text,
@@ -504,46 +498,6 @@ function PlacementCard({
         </div>
       </div>
     </motion.div>
-  );
-}
-
-function TeamChat() {
-  const [value, setValue] = useState<string>("");
-  const { wsState, sendChatMessage } = useContext(WebsocketContext)!;
-
-  const onChatSend = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const msg = new FormData(e.currentTarget).get("chat-value") as string;
-    sendChatMessage(msg);
-    setValue("");
-  };
-
-  useEffect(() => {});
-
-  return (
-    <div className="card">
-      <p className="card--teams__title">Chat</p>
-      <div className="team-chat">
-        <div className="team-chat__messages">
-          {wsState.teamMessages.map((msg, idx) => (
-            <p key={idx}>
-              <span style={{ color: msg.color }}>{msg.name}</span>:{" "}
-              {msg.message}
-            </p>
-          ))}
-        </div>
-      </div>
-      <form onSubmit={onChatSend}>
-        <input
-          type="text"
-          name="chat-value"
-          className="team-chat__input"
-          value={value}
-          onChange={(e) => setValue(e.currentTarget.value)}
-          autoComplete="off"
-        />
-      </form>
-    </div>
   );
 }
 
