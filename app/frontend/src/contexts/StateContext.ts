@@ -3,24 +3,10 @@ import {
   SortedNavRowItems,
 } from "components/achievements/AchievementNavigationBar.tsx";
 import { createContext, useContext } from "react";
-import { WebsocketState } from "types/WebsocketStateType.ts";
+import { AppState } from "types/AppStateType.ts";
 
 interface BaseStateActionType {
   id: number;
-}
-
-interface ConnectingType extends BaseStateActionType {
-  id: 1;
-  ws: WebSocket | undefined;
-}
-
-interface AuthType extends BaseStateActionType {
-  id: 2;
-}
-
-interface SubmitType extends BaseStateActionType {
-  id: 3;
-  disable: boolean;
 }
 
 interface ModeType extends BaseStateActionType {
@@ -41,10 +27,6 @@ interface SearchFilterType extends BaseStateActionType {
 interface CheckboxType extends BaseStateActionType {
   id: 7;
   hideCompletedAchievements: boolean;
-}
-
-interface DisconnectionType extends BaseStateActionType {
-  id: 8;
 }
 
 interface AdjustAudioType extends BaseStateActionType {
@@ -71,41 +53,21 @@ interface HideMyAchievements extends BaseStateActionType {
 }
 
 type StateActionType =
-  | ConnectingType
-  | AuthType
-  | SubmitType
   | ModeType
   | FilterType
   | SearchFilterType
   | CheckboxType
-  | DisconnectionType
   | AdjustAudioType
   | ActivateNavItem
   | SwitchNavItemSort
   | HideMyAchievements;
 
 export function stateReducer(
-  state: WebsocketState,
+  state: AppState,
   action: StateActionType,
-): WebsocketState {
+): AppState {
   switch (action.id) {
-    case 1: // connection
-      return {
-        ...state,
-        ws: action.ws,
-      };
-    case 2: // auth or disconnection
-      return {
-        ...state,
-        authenticated: true,
-        submitEnabled: true,
-      };
-    case 3: // submission
-      return {
-        ...state,
-        submitEnabled: !action.disable,
-      };
-    case 4: // mode change
+    case 4: // mode
       return {
         ...state,
         mode: action.mode,
@@ -124,14 +86,6 @@ export function stateReducer(
       return {
         ...state,
         hideCompletedAchievements: action.hideCompletedAchievements,
-      };
-    case 8: // disconnection
-      return {
-        ...state,
-        ws: null,
-        authenticated: false,
-        submitEnabled: false,
-        lastDisconnect: Date.now(),
       };
     case 9: {
       // audio adjustment
@@ -183,10 +137,10 @@ export function stateReducer(
 
 export type StateDispatch = React.Dispatch<StateActionType>;
 
-export const StateContext = createContext<WebsocketState | null>(null);
+export const StateContext = createContext<AppState | null>(null);
 export const StateDispatchContext = createContext<StateDispatch | null>(null);
 
-export function useStateContext(): WebsocketState {
+export function useStateContext(): AppState {
   return useContext(StateContext)!;
 }
 

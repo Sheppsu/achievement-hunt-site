@@ -10,16 +10,81 @@ import {
   AchievementTeamType,
 } from "api/types/AchievementTeamType";
 import { AchievementExtendedType } from "api/types/AchievementType";
-import { createContext, ReactNode, useContext, useState } from "react";
-import { WebsocketState } from "types/WebsocketStateType";
+import { createContext, ReactNode, useContext, useReducer } from "react";
+import { AppState } from "types/AppStateType";
 import { timeAgo } from "util/helperFunctions";
 import { EventContext, EventType } from "./EventContext";
 import { SessionContext } from "./SessionContext";
-import {
-  StateDispatch,
-  useDispatchStateContext,
-  useStateContext,
-} from "./StateContext";
+import { useStateContext } from "./StateContext";
+
+interface BaseStateActionType {
+  id: number;
+}
+
+interface ConnectingType extends BaseStateActionType {
+  id: 1;
+  ws: WebSocket | undefined;
+}
+
+interface DisconnectionType extends BaseStateActionType {
+  id: 2;
+}
+
+interface AuthType extends BaseStateActionType {
+  id: 3;
+}
+
+interface SubmitType extends BaseStateActionType {
+  id: 4;
+  disable: boolean;
+}
+
+type WsStateActionType =
+  | ConnectingType
+  | AuthType
+  | DisconnectionType
+  | SubmitType;
+
+export type WebsocketState = {
+  ws: WebSocket | null | undefined;
+  authenticated: boolean;
+  lastDisconnect: number;
+  submitEnabled: boolean;
+};
+
+export type WebsocketStateDispatch = React.Dispatch<WsStateActionType>;
+
+function wsStateReducer(
+  state: WebsocketState,
+  action: WsStateActionType,
+): WebsocketState {
+  switch (action.id) {
+    case 1: // connection
+      return {
+        ...state,
+        ws: action.ws,
+      };
+    case 2: // disconnection
+      return {
+        ...state,
+        ws: null,
+        authenticated: false,
+        submitEnabled: false,
+        lastDisconnect: Date.now(),
+      };
+    case 3: // authenticated
+      return {
+        ...state,
+        authenticated: true,
+        submitEnabled: true,
+      };
+    case 4: // submission
+      return {
+        ...state,
+        submitEnabled: !action.disable,
+      };
+  }
+}
 
 type WSAchievementType = {
   id: number;
@@ -28,6 +93,7 @@ type WSAchievementType = {
   time: string;
   placement: AchievementCompletionPlacementType | null;
 };
+
 type RefreshReturnType = {
   achievements: WSAchievementType[];
   score: number;
@@ -109,7 +175,7 @@ function onCompletedAchievement(
 function handleMessage(
   evt: MessageEvent<string>,
   dispatchEventMsg: React.Dispatch<{ type: EventType; msg: string }>,
-  dispatchState: StateDispatch,
+  dispatchWsState: WebsocketStateDispatch,
   queryClient: QueryClient,
 ) {
   const data = JSON.parse(evt.data);
@@ -123,7 +189,7 @@ function handleMessage(
 
   switch (data.code) {
     case 0: {
-      dispatchState({ id: 2 });
+      dispatchWsState({ id: 3 });
       dispatchEventMsg({
         type: "info",
         msg: "You are now authenticated with the submission server",
@@ -155,7 +221,7 @@ function handleMessage(
 function connect(
   uri: string,
   dispatchEventMsg: React.Dispatch<{ type: EventType; msg: string }>,
-  dispatchState: StateDispatch,
+  dispatchWsState: WebsocketStateDispatch,
   queryClient: QueryClient,
   data: object,
 ): WebSocket {
@@ -174,35 +240,45 @@ function connect(
       type: "error",
       msg: "Connection to submissions server failed or unexpectedly closed; reconnecting in 3 seconds...",
     });
-    dispatchState({ id: 8 });
+    dispatchWsState({ id: 2 });
   });
   ws.addEventListener("message", (evt) => {
-    handleMessage(evt, dispatchEventMsg, dispatchState, queryClient);
+    handleMessage(evt, dispatchEventMsg, dispatchWsState, queryClient);
   });
 
   return ws;
 }
 
-function _sendSubmit(state: WebsocketState, dispatchState: StateDispatch) {
-  if (state.ws === null || state.ws === undefined || !state.authenticated) {
+function _sendSubmit(
+  wsState: WebsocketState,
+  dispatchWsState: WebsocketStateDispatch,
+  appState: AppState,
+) {
+  if (
+    wsState.ws === null ||
+    wsState.ws === undefined ||
+    !wsState.authenticated
+  ) {
     return;
   }
 
-  state.ws.send(JSON.stringify({ code: 1, mode: state.mode }));
+  wsState.ws.send(JSON.stringify({ code: 1, mode: appState.mode }));
 
-  dispatchState({ id: 3, disable: true });
-  setTimeout(() => dispatchState({ id: 3, disable: false }), 5000);
+  dispatchWsState({ id: 4, disable: true });
+  setTimeout(() => dispatchWsState({ id: 4, disable: false }), 5000);
 }
 
 function _sendChatMessage(
   state: WebsocketState,
-  dispatchState: StateDispatch,
+  dispatchState: WebsocketStateDispatch,
   msg: string,
 ) {
   throw new Error("Not implemented");
 }
 
 export const WebsocketContext = createContext<{
+  wsState: WebsocketState;
+  dispatchWsState: WebsocketStateDispatch;
   sendSubmit: () => void;
   sendChatMessage: (msg: string) => void;
 } | null>(null);
@@ -212,48 +288,54 @@ export function WebsocketContextProvider({
 }: {
   children: ReactNode;
 }) {
-  const appState = useStateContext();
-  const dispatchState = useDispatchStateContext();
   const queryClient = useContext(QueryClientContext)!;
   const dispatchEventMsg = useContext(EventContext);
   const session = useContext(SessionContext);
+  const appState = useStateContext();
 
-  const [connected, setConnected] = useState<boolean>(false);
+  const [wsState, dispatchWsState] = useReducer(wsStateReducer, {
+    ws: null,
+    authenticated: false,
+    lastDisconnect: 0,
+    submitEnabled: false,
+  });
 
   const { data: authData } = useQuery({
     queryKey: ["wsauth"],
     queryFn: () => fetch("/api/wsauth/").then((resp) => resp.json()),
   });
 
-  if (authData !== undefined && appState.ws === null) {
+  if (authData !== undefined && !("error" in authData) && wsState.ws === null) {
     // mark connecting
-    dispatchState({ id: 1, ws: undefined });
+    dispatchWsState({ id: 1, ws: undefined });
 
     setTimeout(
       () => {
         const ws = connect(
           session.wsUri,
           dispatchEventMsg,
-          dispatchState,
+          dispatchWsState,
           queryClient,
           authData,
         );
-        dispatchState({ id: 1, ws });
+        dispatchWsState({ id: 1, ws });
       },
-      Math.max(0, 3000 - (Date.now() - appState.lastDisconnect)),
+      Math.max(0, 3000 - (Date.now() - wsState.lastDisconnect)),
     );
   }
 
   const sendSubmit = () => {
-    _sendSubmit(appState, dispatchState);
+    _sendSubmit(wsState, dispatchWsState, appState);
   };
 
   const sendChatMessage = (msg: string) => {
-    _sendChatMessage(appState, dispatchState, msg);
+    _sendChatMessage(wsState, dispatchWsState, msg);
   };
 
   return (
-    <WebsocketContext.Provider value={{ sendSubmit, sendChatMessage }}>
+    <WebsocketContext.Provider
+      value={{ wsState, dispatchWsState, sendSubmit, sendChatMessage }}
+    >
       {children}
     </WebsocketContext.Provider>
   );
