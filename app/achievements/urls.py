@@ -12,6 +12,7 @@ iteration_urls = [
     path("teams/transfer/", common.transfer_admin),
     path("stats/", common.player_stats),
     path("wsauth/", common.get_auth_packet),
+    path("register/", common.register),
 ]
 
 urlpatterns = [
