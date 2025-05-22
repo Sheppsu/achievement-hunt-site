@@ -510,6 +510,11 @@ function TeamChat() {
   const [value, setValue] = useState<string>("");
   const [messages, setMessages] = useState<ChatMessage[]>([
     { name: "aychar_", message: "hiiii", color: "red" },
+    { name: "aychar_", message: "hiiii", color: "red" },
+    { name: "aychar_", message: "hiiii", color: "red" },
+    { name: "aychar_", message: "hiiii", color: "red" },
+    { name: "aychar_", message: "hiiii", color: "red" },
+    { name: "aychar_", message: "hiiii", color: "red" },
     {
       name: "baychar_",
       message:
@@ -530,19 +535,21 @@ function TeamChat() {
   return (
     <div className="card">
       <p className="card--teams__title">Chat</p>
-      <div className="card--teams__container chat">
-        {messages.map((msg, idx) => (
-          <p key={idx}>
-            <span style={{ color: msg.color }}>{msg.name}</span>
-            {msg.message}
-          </p>
-        ))}
+      <div className="team-chat">
+        <div className="team-chat__messages">
+          {messages.map((msg, idx) => (
+            <p key={idx}>
+              <span style={{ color: msg.color }}>{msg.name}</span>
+              {msg.message}
+            </p>
+          ))}
+        </div>
       </div>
       <form onSubmit={onChatSend}>
         <input
           type="text"
           name="chat-value"
-          className="card--teams__container--chat__input"
+          className="team-chat__input"
           value={value}
           onChange={(e) => setValue(e.currentTarget.value)}
           autoComplete="off"
