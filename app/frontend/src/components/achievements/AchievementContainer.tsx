@@ -59,7 +59,7 @@ export default function AchievementContainer({
     teams === undefined
   )
     return (
-      <div ref={scope} className="achievements-container">
+      <div ref={scope} className="achievements__container">
         <div>Loading achievements...</div>
       </div>
     );
@@ -87,7 +87,7 @@ export default function AchievementContainer({
   );
 
   return (
-    <div ref={scope} className="achievements-container">
+    <div ref={scope} className="achievements__container">
       {Object.entries(sortedAchievements).map(([group, achievements]) => {
         return (
           <>

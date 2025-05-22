@@ -608,9 +608,7 @@ export default function TeamCard() {
   const onJoinTeam = (evt: FormEvent<HTMLFormElement>) => {
     evt.preventDefault();
 
-    const invite = new FormData(evt.currentTarget).get(
-      "prompt-value",
-    ) as string;
+    const invite = new FormData(evt.currentTarget).get("invite") as string;
     if (invite === "") {
       return dispatchEventMsg({
         type: "error",

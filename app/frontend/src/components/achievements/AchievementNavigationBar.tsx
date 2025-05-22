@@ -100,9 +100,9 @@ function AchievementNavigationBarRow({
   if (isSorted) labelText += sort === "desc" ? " ↓" : " ↑";
 
   return (
-    <div className="achievement-nav-bar-row prevent-select" key={label}>
+    <div className="achievement-nav-bar__row prevent-select" key={label}>
       <p
-        className={classNames("achievement-nav-bar-label", {
+        className={classNames("achievement-nav-bar__row__label", {
           "sort-type": isSorted,
         })}
         onClick={
@@ -113,12 +113,13 @@ function AchievementNavigationBarRow({
       >
         {labelText}
       </p>
-      <div className="achievement-nav-bar-children">
+      <div className="achievement-nav-bar__row__options">
         {children.map((item) => (
           <p
             key={item.label}
             className={
-              "achievement-nav-bar-item" + (item.active ? " active" : "")
+              "achievement-nav-bar__row__options__item" +
+              (item.active ? " active" : "")
             }
             onClick={() =>
               onItemClick(label as keyof NavItems["rows"], item.label)
@@ -239,14 +240,14 @@ export default function AchievementNavigationBar({
         <div>Loading...</div>
       ) : (
         <>
-          <div className="achievement-nav-bar-input-row">
+          <div className="achievement-nav-bar__row--input">
             <TextInput
               placeholder="Search"
               value={searchField}
               onChange={onSearchChange}
             />
             <div
-              className={classNames("achievement-nav-bar-input-group", {
+              className={classNames("achievement-nav-bar__row--input__group", {
                 hide: isStaff,
               })}
             >
@@ -260,7 +261,7 @@ export default function AchievementNavigationBar({
               <p>Hide completed achievements</p>
             </div>
             <div
-              className={classNames("achievement-nav-bar-input-group", {
+              className={classNames("achievement-nav-bar__row--input__group", {
                 hide: !isStaff,
               })}
             >

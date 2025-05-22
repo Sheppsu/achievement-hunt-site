@@ -273,19 +273,19 @@ export default function AchievementProgress({
   )`;
 
   return (
-    <div className="total-achievements-container">
-      <div className="total-achievements-inner-container">
+    <div className="achievements-progress__container">
+      <div className="achievements-progress__container__left-box">
         <h1>Achievement progress</h1>
         <h1>{`${achievementCount}/${
           (achievements as AchievementExtendedType[]).length
         }`}</h1>
         <div
-          className="progress-bar"
+          className="achievements-progress-bar"
           style={{
             background: progressStyle,
           }}
         >
-          <div className="progress-bar-inner"></div>
+          <div className="achievements-progress-bar__inner"></div>
         </div>
       </div>
       <div className={submitCls} onClick={onSubmit}>

@@ -78,7 +78,7 @@ function FullAchievementCompletionPage({
   return (
     <>
       <AchievementContainer scope={scope} state={state} />
-      <div className="progress-container">
+      <div className="achievements-progress">
         <AchievementProgress
           state={state}
           dispatchState={dispatchState}
@@ -128,7 +128,7 @@ export default function AchievementCompletionPage() {
         hidden={!isHidden}
       />
 
-      <div className={classNames("page-container", { hide: isHidden })}>
+      <div className={classNames("achievements-layout", { hide: isHidden })}>
         <div style={{ margin: "auto", textAlign: "center", marginTop: "20px" }}>
           <h1 style={{ fontSize: "3em" }}>
             {time < eventEnd
@@ -145,7 +145,7 @@ export default function AchievementCompletionPage() {
           isStaff={false}
         />
 
-        <div className="achievement-content-container">
+        <div className="achievements">
           {team !== null ? (
             <FullAchievementCompletionPage
               scope={scope}
