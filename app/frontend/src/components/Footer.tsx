@@ -1,5 +1,6 @@
 import discordLogo from "assets/images/discord-logo.png";
 import { Link } from "react-router-dom";
+
 export default function Footer() {
   return (
     <footer>

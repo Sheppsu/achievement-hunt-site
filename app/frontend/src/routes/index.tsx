@@ -15,8 +15,8 @@ export default function App() {
         <div className="banner-wrapper">
           <img className="banner" src={banner} alt="banner"></img>
         </div>
-        <div className="index-container">
-          <div className="card-container">
+        <div className="cards-container">
+          <div className="cards-container__column">
             <InfoCard />
           </div>
         </div>

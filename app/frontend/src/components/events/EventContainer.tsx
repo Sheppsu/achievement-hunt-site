@@ -13,7 +13,7 @@ export default function EventContainer({ events }: { events: Event[] }) {
   });
 
   return (
-    <div className="event-container">
+    <div className="events">
       <AnimatePresence>
         {events.map((event) => (
           <EventEntry key={event.id} event={event} time={time} />

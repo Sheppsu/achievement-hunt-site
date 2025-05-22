@@ -14,7 +14,7 @@ function PlayerElement({
   return (
     <>
       <img
-        className="achievement-players-entry-pfp"
+        className="achievement__players__entry__pfp"
         src={player.user.avatar}
         alt=""
       ></img>
@@ -34,7 +34,7 @@ export default function AchievementCompletionEntry({
   completion: AchievementCompletionType | AnonymousAchievementCompletionType;
 }) {
   return (
-    <div className="achievement-players-entry">
+    <div className="achievement__players__entry">
       {"placement" in completion &&
       completion.placement !== null &&
       completion.placement !== undefined ? (

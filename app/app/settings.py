@@ -15,12 +15,11 @@ import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
-from osu import AuthHandler, Scope, Client
+from osu import AuthHandler, Client, Scope
 
 load_dotenv()
 
 from common.discord import DiscordLogger
-
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -188,8 +187,5 @@ if OSU_DEV_SERVER:
 
 ACHIEVEMENTS_WS_URI = os.getenv("ACHIEVEMENTS_WS_URI")
 WS_CONNECTION_VALIDATOR = os.getenv("WS_CONNECTION_VALIDATOR")
-
-EVENT_START = 1731715200
-EVENT_END = 1732492800
 
 DISCORD_LOGGER = DiscordLogger()

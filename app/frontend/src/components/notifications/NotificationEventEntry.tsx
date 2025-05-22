@@ -21,11 +21,11 @@ export default function NotificationEventEntry({ event }: { event: Event }) {
           <IoMdInformationCircle size={30} />
         )}
       </div>
-      <div className="event-text-container">
-        <p className="event-text">{event.msg}</p>
+      <div className="events__entry__container">
+        <p className="events__entry__container__text">{event.msg}</p>
       </div>
       <div
-        className="event-dismiss"
+        className="events__entry__dismiss-btn"
         onClick={() => dispatchEventMsg({ type: "removed", id: event.id })}
       >
         <IoClose size={20} />

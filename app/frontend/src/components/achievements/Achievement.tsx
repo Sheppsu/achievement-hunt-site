@@ -21,7 +21,7 @@ export default function Achievement({
   const tags = parseTags(achievement.tags);
 
   const infoCls =
-    "achievement-info-container" + (completed ? " complete" : " incomplete");
+    "achievement__container " + (completed ? "complete" : "incomplete");
 
   return (
     <>
@@ -30,16 +30,16 @@ export default function Achievement({
       ) : (
         <div className="achievement">
           <div className={infoCls}>
-            <div className="achievement-info">
+            <div className="achievement__container__info">
               <div style={{ display: "flex" }}>
                 <h1 style={{ flexGrow: "1" }}>{achievement.name}</h1>
                 <div style={{ flexBasis: "100px" }}></div>
               </div>
-              <p className="achievement-points-label">
+              <p className="achievement__points">
                 {points === null ? "" : `${points}pts`}
               </p>
-              <p className="achievement-info-description">{`${achievement.completion_count} completions | ${achievement.description}`}</p>
-              <div className="achievement-tags-container">
+              <p className="achievement__container__info__description">{`${achievement.completion_count} completions | ${achievement.description}`}</p>
+              <div className="achievement__container__info__tags">
                 {tags.map((tag) => (
                   <div className="achievement-tag">{toTitleCase(tag)}</div>
                 ))}
@@ -55,21 +55,19 @@ export default function Achievement({
 
           {achievement.beatmaps.map((beatmap) => (
             <a href={`https://osu.ppy.sh/b/${beatmap.info.id}`} target="_blank">
-              <div className="achievement-details-container">
+              <div className="achievement__beatmap">
                 <img
-                  className="achievement-details-cover"
+                  className="achievement__beatmap__cover"
                   src={beatmap.info.cover}
                   alt=""
                 ></img>
-                <div className="achievement-details-beatmap-info">
-                  <p className="achievement-details-beatmap-info-text">
+                <div className="achievement__beatmap__info">
+                  <p>
                     {beatmap.info.artist} - {beatmap.info.title}
                   </p>
-                  <p className="achievement-details-beatmap-info-text">
-                    [{beatmap.info.version}]
-                  </p>
+                  <p>[{beatmap.info.version}]</p>
                 </div>
-                <h1 className="achievement-details-star-rating">
+                <h1 className="achievement__beatmap__star-rating">
                   {beatmap.info.star_rating}*
                 </h1>
               </div>
@@ -84,7 +82,7 @@ export default function Achievement({
           {completions.length == 0 ? (
             ""
           ) : (
-            <div className="achievement-players-container">
+            <div className="achievement__players">
               {completions
                 .sort((a, b) =>
                   a.placement === undefined || a.placement === null

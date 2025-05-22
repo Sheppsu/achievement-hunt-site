@@ -4,13 +4,13 @@
     gap: 10px;
 }
 
-.input-container {
+.form-container__input {
     display: flex;
     flex-direction: row;
     gap: 5px;
     align-items: center;
 }
 
-.input-container.center {
+.form-container__input.center {
     justify-content: center;
 }

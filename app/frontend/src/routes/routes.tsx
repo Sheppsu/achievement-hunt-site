@@ -1,5 +1,5 @@
 import { type RouteObject } from "react-router-dom";
-import Header from "components/Header";
+import PageLayout from "components/PageLayout";
 import Index from "./index";
 import Logout from "./logout";
 import AchievementCompletionPage from "./achievements";
@@ -11,7 +11,7 @@ import ErrorBoundary from "../errors/ErrorBoundary.tsx";
 
 export const routes: RouteObject[] = [
   {
-    element: <Header />,
+    element: <PageLayout />,
     shouldRevalidate: () => false,
     ErrorBoundary,
     children: [

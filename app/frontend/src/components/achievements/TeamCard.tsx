@@ -6,20 +6,29 @@ import {
   useRenameTeam,
   useTransferTeamAdmin,
 } from "api/query";
-import { FormEvent, SetStateAction, useContext, useState } from "react";
-
-import "assets/css/form.css";
-import "assets/css/team.css";
-import BaseButton from "components/inputs/Button.tsx";
-import { FaCrown } from "react-icons/fa6";
+import React, {
+  FormEvent,
+  SetStateAction,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
 import { AchievementPlayerType } from "api/types/AchievementPlayerType";
 import { AchievementTeamExtendedType } from "api/types/AchievementTeamType";
+import "assets/css/form.css";
+import "assets/css/team.css";
+import BaseButton from "components/inputs/Button.tsx";
+import Dropdown from "components/inputs/Dropdown";
 import { SimplePromptPopup } from "components/popups/PopupContent.tsx";
 import { EventContext, EventDispatch } from "contexts/EventContext";
 import { PopupContext, PopupContextType } from "contexts/PopupContext";
 import { SessionContext } from "contexts/SessionContext";
-import { AnimatePresence, motion } from "motion/react";
+import { motion } from "motion/react";
+import { BsPeopleFill, BsPlusCircleFill } from "react-icons/bs";
+import { FaCrown } from "react-icons/fa6";
+import { IoWarning } from "react-icons/io5";
+import { MdArrowBack } from "react-icons/md";
 import { getAnonName } from "util/helperFunctions";
 
 function Button({
@@ -58,14 +67,20 @@ function PlayerCard({
   return (
     <div
       className={
-        "player-card " +
-        (setSelectedPlayer ? "player-card-selectable " : "") +
-        (selectedPlayer === player ? "player-card-selected" : "")
+        "card--teams__container--players__player-card " +
+        (setSelectedPlayer ? "selectable " : "") +
+        (selectedPlayer === player ? "selected" : "")
       }
       onClick={() => setSelectedPlayer && setSelectedPlayer(player)}
     >
-      <img className="player-card-avatar" src={player.user.avatar} alt=""></img>
-      <p className="info-inner-text grow">{player.user.username}</p>
+      <img
+        className="card--teams__container--players__player-card__avatar"
+        src={player.user.avatar}
+        alt=""
+      ></img>
+      <p className="card--teams__container__text grow">
+        {player.user.username}
+      </p>
       {player.team_admin && <FaCrown color="yellow" />}
     </div>
   );
@@ -108,7 +123,7 @@ function TransferTeamAdminComponent({
   return (
     <div>
       <p>Select the player to transfer admin to: </p>
-      <div className="info-inner-container players">
+      <div className="card--teams__container players">
         {playerList.map((player, i) => (
           <PlayerCard
             key={i}
@@ -202,18 +217,18 @@ function YourTeamContent({
 
   return (
     <>
-      <div className="info-inner-container your-team">
-        <p className="info-inner-text center grow">
+      <div className="card--teams__container your-team">
+        <p className="card--teams__container__text center grow">
           {ownTeam.name} | {getAnonName(ownTeam.id)} - {ownTeam.points}pts
         </p>
       </div>
-      <h1 className="info-title">Players</h1>
-      <div className="info-inner-container players">
+      <h1 className="card--teams__title">Players</h1>
+      <div className="card--teams__container players">
         {ownTeam.players.map((player, i) => (
           <PlayerCard key={i} player={player} />
         ))}
       </div>
-      <div className="info-inner-container buttons">
+      <div className="card--teams__container buttons">
         <Button
           text="Leave team"
           onClick={leaveTeam}
@@ -222,7 +237,7 @@ function YourTeamContent({
         <Button text="Invite code" onClick={copyInvite} />
       </div>
       {user?.team_admin && (
-        <div className="info-inner-container buttons">
+        <div className="card--teams__container buttons">
           <Button text="Rename Team" onClick={renameTeamPopup} />
           <Button text="Transfer Index" onClick={transferTeamAdminPopup} />
         </div>
@@ -232,64 +247,197 @@ function YourTeamContent({
 }
 
 function NoTeamContent({
-  createTeam,
-  joinTeam,
+  onCreateTeam,
+  onJoinTeam,
 }: {
-  createTeam: (evt: FormEvent<HTMLFormElement>) => void;
-  joinTeam: (evt: FormEvent<HTMLFormElement>) => void;
+  onCreateTeam: (evt: FormEvent<HTMLFormElement>) => void;
+  onJoinTeam: (evt: FormEvent<HTMLFormElement>) => void;
 }) {
-  const { setPopup } = useContext(PopupContext) as PopupContextType;
-  const session = useContext(SessionContext);
-
-  const eventEnded = Date.now() >= session.eventEnd;
-
-  const createTeamPopup = () => {
-    setPopup({
-      title: "Create Team",
-      content: <SimplePromptPopup prompt="Team name" onSubmit={createTeam} />,
-    });
-  };
-
-  const joinTeamPopup = () => {
-    setPopup({
-      title: "Join team",
-      content: <SimplePromptPopup prompt="Invite code" onSubmit={joinTeam} />,
-    });
-  };
-
+  const [currentTab, setCurrentTab] = useState<"create" | "join" | "default">(
+    "default",
+  );
   return (
-    <motion.div layout>
-      <div className="info-inner-container your-team">
-        <p className="info-inner-text">No team</p>
-      </div>
-      <div className="info-inner-container buttons">
-        <Button
-          text="Create team"
-          onClick={createTeamPopup}
-          disabled={eventEnded}
+    <motion.div layout style={{ height: "100%" }}>
+      {currentTab === "default" ? (
+        <div className="no-team-container">
+          <div className="no-team-container-item">
+            <div />
+            <BsPlusCircleFill size={75} />
+            <Button
+              text="Create a Team"
+              onClick={() => setCurrentTab("create")}
+            />
+          </div>
+          <div className="horizontal-divider"></div>
+          <div className="no-team-container-item">
+            <div />
+            <BsPeopleFill size={100} />
+            <Button text="Join a Team" onClick={() => setCurrentTab("join")} />
+          </div>
+        </div>
+      ) : currentTab === "create" ? (
+        <CreateTeamComponent
+          setCurrentTab={setCurrentTab}
+          onCreateTeam={onCreateTeam}
         />
-        <Button
-          text="Join team"
-          onClick={joinTeamPopup}
-          disabled={eventEnded}
+      ) : (
+        <JoinTeamComponent
+          setCurrentTab={setCurrentTab}
+          onJoinTeam={onJoinTeam}
         />
-      </div>
+      )}
     </motion.div>
+  );
+}
+
+function CreateTeamComponent({
+  setCurrentTab,
+  onCreateTeam,
+}: {
+  setCurrentTab: (tab: "create" | "join" | "default") => void;
+  onCreateTeam: (evt: FormEvent<HTMLFormElement>) => void;
+}) {
+  return (
+    <>
+      <div className="card--teams__header">
+        <button onClick={() => setCurrentTab("default")}>
+          <MdArrowBack size={24} color="white" />
+        </button>
+        <h1>Create Team</h1>
+      </div>
+      <form className="card--teams__form" onSubmit={onCreateTeam}>
+        <div>
+          <div className="card--teams__form__item">
+            <p className="card--teams__label">Team Name</p>
+            <input
+              type="text"
+              name="prompt-value"
+              placeholder="Enter team name here..."
+            />
+            <p className="card--teams__description">
+              This will be hidden from other teams during the tournament to keep
+              anonymity
+            </p>
+          </div>
+          <div className="card--teams__form__item">
+            <p className="card--teams__label">Anonymous Team Name</p>
+            <div className="card--teams__form__item__row">
+              <Dropdown
+                options={{
+                  test: "test",
+                  test2: "test2",
+                  test3: "test3",
+                  test4: "test4",
+                  test5: "test5",
+                  test6: "test6",
+                  test7: "test7",
+                  test8: "test8",
+                }}
+              />
+              <Dropdown
+                options={{
+                  test: "test",
+                  test2: "test2",
+                  test3: "test3",
+                  test4: "test4",
+                  test5: "test5",
+                  test6: "test6",
+                  test7: "test7",
+                  test8: "test8",
+                }}
+              />
+            </div>
+            <p className="card--teams__description">
+              This will be what other teams see throughout the tournament
+            </p>
+          </div>
+        </div>
+        <div className="card--teams__form__bottom-container">
+          <div className="warning-box">
+            <div className="warning-box__heading">
+              <IoWarning size={35} color="#C2A800" />
+              <h1>WARNING</h1>
+            </div>
+            <p className="warning-box__content">
+              <span style={{ fontWeight: 600 }}>DO NOT</span> let others know
+              what team you're on, or who your teammates are. We cannot
+              completely prevent people from profile stalking to get solutions
+              to achievements, so anonymity is your best defense against it. DM
+              a staff member if you suspect that someone is profile stalking
+              (this is against the rules).
+            </p>
+          </div>
+          <Button text="Create Team" type="submit" />
+        </div>
+      </form>
+    </>
+  );
+}
+
+function JoinTeamComponent({
+  setCurrentTab,
+  onJoinTeam,
+}: {
+  setCurrentTab: (tab: "create" | "join" | "default") => void;
+  onJoinTeam: (evt: FormEvent<HTMLFormElement>) => void;
+}) {
+  return (
+    <>
+      <div className="card--teams__header">
+        <button onClick={() => setCurrentTab("default")}>
+          <MdArrowBack size={24} color="white" />
+        </button>
+        <h1>Enter Code</h1>
+      </div>
+      <form className="card--teams__form fill" onSubmit={onJoinTeam}>
+        <div className="card--teams__form__item">
+          <p className="card--teams__label">Team Name</p>
+          <input
+            type="text"
+            name="invite"
+            placeholder="Enter invite code here..."
+          />
+          <Button text="Join Team" type="submit" />
+        </div>
+      </form>
+      <div className="card--teams__form__item">
+        <p className="card--teams__label">Looking for Team</p>
+        <Button text="Mark as LFT" /> {/* TODO: Change to switch input */}
+        <p className="card--teams__description">
+          Mark yourself as looking for a team. Team owners will be able to
+          invite random players in the LFT list, and once you accept you'll join
+          the team. If you don't find a team by the end of registration, we'll
+          put you in a team with other LFT players.
+        </p>
+      </div>
+      <div className="card--teams__invites">
+        <p className="card--teams__label">Invites</p>
+        <div className="card--teams__invites__container">
+          <div className="card--teams__invites__container__item">
+            <p>Team Name</p>
+            <div className="card--teams__invites__container__item__actions">
+              <p>Accept</p>
+              <p>Decline</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
 
 function LoadingContent() {
   return (
-    <motion.div layout className="info-inner-container your-team">
-      <p className="info-inner-text">Loading...</p>
+    <motion.div layout className="card--teams__container">
+      <p className="card--teams__container__text">Loading...</p>
     </motion.div>
   );
 }
 
 function UnauthenticatedContent() {
   return (
-    <motion.div layout className="info-inner-container your-team">
-      <p className="info-inner-text">Not authenticated.</p>
+    <motion.div layout className="card--teams__container">
+      <p className="card--teams__container__text">Not authenticated.</p>
     </motion.div>
   );
 }
@@ -302,14 +450,14 @@ function AllTeams({
   if (!teams) return;
 
   return (
-    <div className="info-container">
-      <p className="info-title center">All Teams</p>
+    <div className="card">
+      <p className="card--teams__title center">All Teams</p>
       {teams.map((team, idx) => (
         <div key={idx}>
-          <p className="info-subtitle">
+          <p className="card--teams__subtitle">
             {team.name} ({getAnonName(team.id)}) - {team.points}pts
           </p>
-          <div className="info-inner-container players">
+          <div className="card--teams__container players">
             {team.players
               .sort(
                 (a, b) => (a.team_admin ? 0 : a.id) - (b.team_admin ? 0 : b.id),
@@ -333,28 +481,89 @@ function PlacementCard({
 }) {
   return (
     <motion.div
-      className="info-container"
+      className="card"
       layout
       initial={{ height: 0, opacity: 0 }}
       animate={{ height: "auto", opacity: 1 }}
       exit={{ height: 0, opacity: 0 }}
     >
-      <div className="info-inner-container placement">
-        <div className="placement-section">
-          <div className="placement-title-container">
-            <p className="info-title placement">#{placement}</p>
+      <div className="card--teams__container placement">
+        <div className="card--teams__container--placement__column">
+          <div className="card--teams__container--placement__column__container">
+            <p className="card--teams__title placement">#{placement}</p>
           </div>
-          <p className="info-subtitle">Current placement</p>
+          <p className="card--teams__subtitle">Current placement</p>
         </div>
         <div className="vertical-divider"></div>
-        <div className="placement-section">
-          <div className="placement-title-container">
-            <p className="info-title placement">{numberTeams}</p>
+        <div className="card--teams__container--placement__column">
+          <div className="card--teams__container--placement__column__container">
+            <p className="card--teams__title placement">{numberTeams}</p>
           </div>
-          <p className="info-subtitle">Registered teams</p>
+          <p className="card--teams__subtitle">Registered teams</p>
         </div>
       </div>
     </motion.div>
+  );
+}
+
+type ChatMessage = {
+  name: string;
+  message: string;
+  color: string;
+};
+
+function TeamChat() {
+  const [value, setValue] = useState<string>("");
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    { name: "aychar_", message: "hiiii", color: "red" },
+    { name: "aychar_", message: "hiiii", color: "red" },
+    { name: "aychar_", message: "hiiii", color: "red" },
+    { name: "aychar_", message: "hiiii", color: "red" },
+    { name: "aychar_", message: "hiiii", color: "red" },
+    { name: "aychar_", message: "hiiii", color: "red" },
+    {
+      name: "baychar_",
+      message:
+        "HJFIOPEDAHFIOPEAHFOPIAEOIHFEPW FEDASJ FWEIOPHFE WAPFH WAEP FWAEF AWEF WEAFPEWA FHWEAOPF WAEPIOF ",
+      color: "blue",
+    },
+  ]);
+
+  const onChatSend = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const msg = new FormData(e.currentTarget).get("chat-value") as string;
+    setMessages((prevMsgs) => {
+      return [...prevMsgs, { name: "aychar_", message: msg, color: "red" }];
+    });
+    setValue("");
+  };
+
+  useEffect(() => {});
+
+  return (
+    <div className="card">
+      <p className="card--teams__title">Chat</p>
+      <div className="team-chat">
+        <div className="team-chat__messages">
+          {messages.map((msg, idx) => (
+            <p key={idx}>
+              <span style={{ color: msg.color }}>{msg.name}</span>:{" "}
+              {msg.message}
+            </p>
+          ))}
+        </div>
+      </div>
+      <form onSubmit={onChatSend}>
+        <input
+          type="text"
+          name="chat-value"
+          className="team-chat__input"
+          value={value}
+          onChange={(e) => setValue(e.currentTarget.value)}
+          autoComplete="off"
+        />
+      </form>
+    </div>
   );
 }
 
@@ -414,9 +623,7 @@ export default function TeamCard() {
   const onJoinTeam = (evt: FormEvent<HTMLFormElement>) => {
     evt.preventDefault();
 
-    const invite = new FormData(evt.currentTarget).get(
-      "prompt-value",
-    ) as string;
+    const invite = new FormData(evt.currentTarget).get("invite") as string;
     if (invite === "") {
       return dispatchEventMsg({
         type: "error",
@@ -449,23 +656,14 @@ export default function TeamCard() {
       : teams.filter((t) => "players" in t && t.players.length > 0).length > 1;
 
   return (
-    <motion.div layout className="card-container teams">
-      <AnimatePresence>
-        {ownTeam && (
-          <PlacementCard
-            placement={ownPlacement as number}
-            numberTeams={(teams as Array<any>).length}
-          />
-        )}
-      </AnimatePresence>
-      <motion.div className="info-container" layout>
-        <h1 className="info-title">Your team</h1>
+    <motion.div layout className="cards-container__column teams">
+      <motion.div className="card fill" layout>
         {!session.isAuthenticated ? (
           <UnauthenticatedContent />
         ) : teamsResponse.isLoading ? (
           <LoadingContent />
         ) : ownTeam === null ? (
-          <NoTeamContent createTeam={onCreateTeam} joinTeam={onJoinTeam} />
+          <NoTeamContent onCreateTeam={onCreateTeam} onJoinTeam={onJoinTeam} />
         ) : (
           <YourTeamContent
             ownTeam={ownTeam}
@@ -474,6 +672,7 @@ export default function TeamCard() {
           />
         )}
       </motion.div>
+      {ownTeam && <TeamChat />}
       {canSeeTeams && (
         <Button
           text="Toggle Teams List"

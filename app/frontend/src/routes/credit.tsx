@@ -10,9 +10,9 @@ export default function Credit() {
         <title>CTA - Staff</title>
       </Helmet>
 
-      <div className="index-container">
-        <div className="card-container">
-          <div className="info-container">
+      <div className="cards-container">
+        <div className="cards-container__column">
+          <div className="card">
             <h1 className="staff-header">Host</h1>
             <div className="staff-container">
               <a

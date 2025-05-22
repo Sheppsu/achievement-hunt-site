@@ -1,7 +1,7 @@
 import { useContext, useReducer, useState } from "react";
 import { Link, NavLink, useLocation, useOutlet } from "react-router-dom";
 
-import { EventContext, eventReducer } from "contexts/EventContext";
+import { EventContext, eventReducer, EventState } from "contexts/EventContext";
 import { SessionContext } from "contexts/SessionContext";
 import { getSessionData } from "util/auth";
 import Footer from "./Footer";
@@ -34,34 +34,36 @@ function AnimatedOutlet() {
   );
 }
 
-export default function Header() {
+function Header({ eventsState }: { eventsState: EventState }) {
   const session = useContext(SessionContext);
-  const [eventsState, dispatchEventMsg] = useReducer(eventReducer, {
-    events: [],
-    pastEvents: [],
-  });
-  const [wsState, dispatchWsState] = useReducer(wsReducer, null, defaultState);
-  const [popup, setPopup] = useState<PopupState>(null);
   const [showNotifications, setShowNotifications] = useState<boolean>(false);
 
   return (
     <>
-      <EventContext.Provider value={dispatchEventMsg}>
-        <div className="prevent-select header">
-          <Link to="/">
-            <h1 className="header-title">CTA</h1>
-          </Link>
-          <div className="header-buttons-container">
-            <NavLink to="/teams" className="header-button-link">
-              Teams
-            </NavLink>
-            <NavLink to="/achievements" className="header-button-link">
-              Achievements
-            </NavLink>
+      <div className="header">
+        <div className="prevent-select header__container">
+          <div className="header__container__left-box">
+            <Link to="/">
+              <h1 className="header__container__left-box__title">CTA2</h1>
+            </Link>
+            <div className="header__container__left-box__links">
+              <NavLink
+                to="/teams"
+                className="header__container__left-box__links__link"
+              >
+                Dashboard
+              </NavLink>
+              <NavLink
+                to="/achievements"
+                className="header__container__left-box__links__link"
+              >
+                Achievements
+              </NavLink>
+            </div>
           </div>
-          <div className="header-login-container">
+          <div className="header__container__right-box">
             <div
-              className="header-notification-button-container"
+              className="header__container__right-box__notifications"
               onClick={() => {
                 setShowNotifications(!showNotifications);
               }}
@@ -72,22 +74,42 @@ export default function Header() {
               <img
                 src={session.user?.avatar}
                 alt="avatar"
-                className="login-pic"
+                className="header__container__right-box__login-pic"
               />
             ) : (
               <div style={{ height: "100%" }}>
                 <Link to={session.authUrl}>
-                  <img src={OsuLogo} alt="osu logo" className="login-pic" />
+                  <img
+                    src={OsuLogo}
+                    alt="osu logo"
+                    className="header__container__right-box__login-pic"
+                  />
                 </Link>
               </div>
             )}
           </div>
         </div>
+      </div>
+      <NotificationContainer
+        eventsState={eventsState}
+        display={showNotifications}
+      />
+    </>
+  );
+}
 
-        <NotificationContainer
-          eventsState={eventsState}
-          display={showNotifications}
-        />
+export default function PageLayout() {
+  const [eventsState, dispatchEventMsg] = useReducer(eventReducer, {
+    events: [],
+    pastEvents: [],
+  });
+  const [wsState, dispatchWsState] = useReducer(wsReducer, null, defaultState);
+  const [popup, setPopup] = useState<PopupState>(null);
+
+  return (
+    <>
+      <EventContext.Provider value={dispatchEventMsg}>
+        <Header eventsState={eventsState} />
 
         <PopupContext.Provider value={{ popup, setPopup }}>
           <PopupContainer />
@@ -95,7 +117,9 @@ export default function Header() {
           <SessionContext.Provider value={getSessionData()}>
             <StateContext.Provider value={wsState}>
               <StateDispatchContext.Provider value={dispatchWsState}>
-                <AnimatedOutlet />
+                <div id="page-content">
+                  <AnimatedOutlet />
+                </div>
               </StateDispatchContext.Provider>
             </StateContext.Provider>
           </SessionContext.Provider>
