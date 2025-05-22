@@ -12,11 +12,11 @@ export function SimplePromptPopup({
   return (
     <form onSubmit={onSubmit}>
       <div className="form-container">
-        <div className="input-container">
+        <div className="form-container__input">
           <p>{prompt}: </p>
           <TextInput name="prompt-value" />
         </div>
-        <div className="input-container center">
+        <div className="form-container__input center">
           <Button type="submit" children="Submit" width="200px" />
         </div>
       </div>

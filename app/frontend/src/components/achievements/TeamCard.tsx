@@ -6,7 +6,13 @@ import {
   useRenameTeam,
   useTransferTeamAdmin,
 } from "api/query";
-import React, { FormEvent, SetStateAction, useContext, useState } from "react";
+import React, {
+  FormEvent,
+  SetStateAction,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
 import { AchievementPlayerType } from "api/types/AchievementPlayerType";
 import { AchievementTeamExtendedType } from "api/types/AchievementTeamType";
@@ -532,6 +538,8 @@ function TeamChat() {
     setValue("");
   };
 
+  useEffect(() => {});
+
   return (
     <div className="card">
       <p className="card--teams__title">Chat</p>
@@ -539,7 +547,7 @@ function TeamChat() {
         <div className="team-chat__messages">
           {messages.map((msg, idx) => (
             <p key={idx}>
-              <span style={{ color: msg.color }}>{msg.name}</span>
+              <span style={{ color: msg.color }}>{msg.name}</span>:{" "}
               {msg.message}
             </p>
           ))}

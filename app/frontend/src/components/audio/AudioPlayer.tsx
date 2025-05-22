@@ -108,8 +108,8 @@ export default function AudioPlayer({ currentSong }: AudioPlayerProps) {
   };
 
   return (
-    <div className="audio-container">
-      <div className="audio-player">
+    <div className="audio-player">
+      <div className="audio-player__container">
         <audio
           ref={audioRef}
           preload="metadata"

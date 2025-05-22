@@ -1,8 +1,8 @@
-.audio-container {
+.audio-player {
   padding: 10px 5px;
 }
 
-.audio-player {
+.audio-player__container {
   width: 100%;
 
   display: flex;
