@@ -527,7 +527,7 @@ function TeamChat() {
     e.preventDefault();
     const msg = new FormData(e.currentTarget).get("chat-value") as string;
     setMessages((prevMsgs) => {
-      return [{ name: "aychar_", message: msg, color: "red" }, ...prevMsgs];
+      return [...prevMsgs, { name: "aychar_", message: msg, color: "red" }];
     });
     setValue("");
   };
