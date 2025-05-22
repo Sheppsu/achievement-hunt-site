@@ -12,10 +12,17 @@ import {
 import { AchievementExtendedType } from "api/types/AchievementType";
 import { createContext, ReactNode, useContext, useReducer } from "react";
 import { AppState } from "types/AppStateType";
+import { Session } from "types/SessionType";
 import { timeAgo } from "util/helperFunctions";
 import { EventContext, EventType } from "./EventContext";
 import { SessionContext } from "./SessionContext";
 import { useStateContext } from "./StateContext";
+
+export type ChatMessage = {
+  name: string;
+  message: string;
+  color: string;
+};
 
 interface BaseStateActionType {
   id: number;
@@ -39,17 +46,24 @@ interface SubmitType extends BaseStateActionType {
   disable: boolean;
 }
 
+interface ChatType extends BaseStateActionType {
+  id: 5;
+  msg: ChatMessage;
+}
+
 type WsStateActionType =
   | ConnectingType
   | AuthType
   | DisconnectionType
-  | SubmitType;
+  | SubmitType
+  | ChatType;
 
 export type WebsocketState = {
   ws: WebSocket | null | undefined;
   authenticated: boolean;
   lastDisconnect: number;
   submitEnabled: boolean;
+  teamMessages: ChatMessage[];
 };
 
 export type WebsocketStateDispatch = React.Dispatch<WsStateActionType>;
@@ -82,6 +96,11 @@ function wsStateReducer(
       return {
         ...state,
         submitEnabled: !action.disable,
+      };
+    case 5: // team chat message
+      return {
+        ...state,
+        teamMessages: [...state.teamMessages, action.msg],
       };
   }
 }
@@ -177,6 +196,7 @@ function handleMessage(
   dispatchEventMsg: React.Dispatch<{ type: EventType; msg: string }>,
   dispatchWsState: WebsocketStateDispatch,
   queryClient: QueryClient,
+  session: Session,
 ) {
   const data = JSON.parse(evt.data);
   if (data.error !== undefined) {
@@ -215,6 +235,10 @@ function handleMessage(
 
       break;
     }
+    case 2: {
+      if (session.user?.username !== data.msg.name)
+        dispatchWsState({ id: 5, msg: data.msg });
+    }
   }
 }
 
@@ -224,6 +248,7 @@ function connect(
   dispatchWsState: WebsocketStateDispatch,
   queryClient: QueryClient,
   data: object,
+  session: Session,
 ): WebSocket {
   const ws = new WebSocket(uri);
 
@@ -243,7 +268,7 @@ function connect(
     dispatchWsState({ id: 2 });
   });
   ws.addEventListener("message", (evt) => {
-    handleMessage(evt, dispatchEventMsg, dispatchWsState, queryClient);
+    handleMessage(evt, dispatchEventMsg, dispatchWsState, queryClient, session);
   });
 
   return ws;
@@ -269,11 +294,25 @@ function _sendSubmit(
 }
 
 function _sendChatMessage(
-  state: WebsocketState,
-  dispatchState: WebsocketStateDispatch,
+  wsState: WebsocketState,
+  dispatchWsState: WebsocketStateDispatch,
+  session: Session,
   msg: string,
 ) {
-  throw new Error("Not implemented");
+  if (
+    wsState.ws === null ||
+    wsState.ws === undefined ||
+    !wsState.authenticated ||
+    !session.user
+  ) {
+    return;
+  }
+
+  dispatchWsState({
+    id: 5,
+    msg: { name: session.user.username, message: msg, color: "blue" },
+  });
+  wsState.ws.send(JSON.stringify({ code: 2, msg: msg }));
 }
 
 export const WebsocketContext = createContext<{
@@ -298,6 +337,7 @@ export function WebsocketContextProvider({
     authenticated: false,
     lastDisconnect: 0,
     submitEnabled: false,
+    teamMessages: [],
   });
 
   const { data: authData } = useQuery({
@@ -317,6 +357,7 @@ export function WebsocketContextProvider({
           dispatchWsState,
           queryClient,
           authData,
+          session,
         );
         dispatchWsState({ id: 1, ws });
       },
@@ -329,7 +370,7 @@ export function WebsocketContextProvider({
   };
 
   const sendChatMessage = (msg: string) => {
-    _sendChatMessage(wsState, dispatchWsState, msg);
+    _sendChatMessage(wsState, dispatchWsState, session, msg);
   };
 
   return (

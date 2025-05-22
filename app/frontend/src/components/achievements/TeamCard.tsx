@@ -24,6 +24,7 @@ import { SimplePromptPopup } from "components/popups/PopupContent.tsx";
 import { EventContext, EventDispatch } from "contexts/EventContext";
 import { PopupContext, PopupContextType } from "contexts/PopupContext";
 import { SessionContext } from "contexts/SessionContext";
+import { WebsocketContext } from "contexts/WebsocketContext";
 import { motion } from "motion/react";
 import { BsPeopleFill, BsPlusCircleFill } from "react-icons/bs";
 import { FaCrown } from "react-icons/fa6";
@@ -506,35 +507,14 @@ function PlacementCard({
   );
 }
 
-type ChatMessage = {
-  name: string;
-  message: string;
-  color: string;
-};
-
 function TeamChat() {
   const [value, setValue] = useState<string>("");
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    { name: "aychar_", message: "hiiii", color: "red" },
-    { name: "aychar_", message: "hiiii", color: "red" },
-    { name: "aychar_", message: "hiiii", color: "red" },
-    { name: "aychar_", message: "hiiii", color: "red" },
-    { name: "aychar_", message: "hiiii", color: "red" },
-    { name: "aychar_", message: "hiiii", color: "red" },
-    {
-      name: "baychar_",
-      message:
-        "HJFIOPEDAHFIOPEAHFOPIAEOIHFEPW FEDASJ FWEIOPHFE WAPFH WAEP FWAEF AWEF WEAFPEWA FHWEAOPF WAEPIOF ",
-      color: "blue",
-    },
-  ]);
+  const { wsState, sendChatMessage } = useContext(WebsocketContext)!;
 
   const onChatSend = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const msg = new FormData(e.currentTarget).get("chat-value") as string;
-    setMessages((prevMsgs) => {
-      return [...prevMsgs, { name: "aychar_", message: msg, color: "red" }];
-    });
+    sendChatMessage(msg);
     setValue("");
   };
 
@@ -545,7 +525,7 @@ function TeamChat() {
       <p className="card--teams__title">Chat</p>
       <div className="team-chat">
         <div className="team-chat__messages">
-          {messages.map((msg, idx) => (
+          {wsState.teamMessages.map((msg, idx) => (
             <p key={idx}>
               <span style={{ color: msg.color }}>{msg.name}</span>:{" "}
               {msg.message}
