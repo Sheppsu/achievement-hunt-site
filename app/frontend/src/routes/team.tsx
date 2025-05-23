@@ -1,4 +1,3 @@
-import AnimatedPage from "components/AnimatedPage";
 import TeamCard from "components/team/TeamCard.tsx";
 import LeaderboardCard from "components/team/LeaderboardCard.tsx";
 import { Helmet } from "react-helmet";
@@ -87,9 +86,7 @@ export default function AchievementsIndex() {
       <div className="cards-container">
         {cardsColumns.map((cards, i) => (
           <>
-            <motion.div layout className="cards-container__column">
-              {cards}
-            </motion.div>
+            <div className="cards-container__column">{cards}</div>
             {i !== cardsColumns.length - 1 ? (
               <div className="vertical-divider"></div>
             ) : (

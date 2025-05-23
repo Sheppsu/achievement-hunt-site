@@ -22,7 +22,6 @@ import React from "react";
 import { IoIosNotifications } from "react-icons/io";
 import { defaultState } from "types/WebsocketStateType.ts";
 import PopupContainer from "./popups/PopupContainer.tsx";
-import AnimatedPage from "components/AnimatedPage.tsx";
 
 function AnimatedOutlet() {
   const location = useLocation();

@@ -1,5 +1,4 @@
 import { Helmet } from "react-helmet";
-import AnimatedPage from "components/AnimatedPage";
 import InfoCard from "components/achievements/InfoCard";
 
 import "assets/css/index.css";

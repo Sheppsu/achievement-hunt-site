@@ -1,13 +1,11 @@
 import { useGetAchievements, useGetTeams } from "api/query";
 import { AchievementTeamExtendedType } from "api/types/AchievementTeamType";
 import "assets/css/achievements.css";
-import classNames from "classnames";
 import AchievementContainer from "components/achievements/AchievementContainer";
 import AchievementNavigationBar, {
   getDefaultNav,
 } from "components/achievements/AchievementNavigationBar.tsx";
 import AchievementProgress from "components/achievements/AchievementProgress.tsx";
-import AnimatedPage from "components/AnimatedPage";
 import { SessionContext } from "contexts/SessionContext";
 import {
   StateDispatch,
