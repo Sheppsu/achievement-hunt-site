@@ -27,23 +27,28 @@ function Header({ eventsState }: { eventsState: EventState }) {
   const session = useContext(SessionContext);
   const [showNotifications, setShowNotifications] = useState<boolean>(false);
 
+  const path = location.pathname;
+  const iterationPath = path.startsWith("/iterations/")
+    ? "/iterations/" + path.split("/")[2]
+    : "";
+
   return (
     <>
       <div className="header">
         <div className="prevent-select header__container">
           <div className="header__container__left-box">
-            <Link to="/">
+            <Link to={iterationPath + "/"}>
               <h1 className="header__container__left-box__title">CTA2</h1>
             </Link>
             <div className="header__container__left-box__links">
               <NavLink
-                to="/teams"
+                to={iterationPath + "/teams"}
                 className="header__container__left-box__links__link"
               >
                 Dashboard
               </NavLink>
               <NavLink
-                to="/achievements"
+                to={iterationPath + "/achievements"}
                 className="header__container__left-box__links__link"
               >
                 Achievements

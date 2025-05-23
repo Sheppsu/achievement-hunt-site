@@ -2,16 +2,15 @@ import base64
 import random
 import secrets
 import struct
-import time
 
 from common.serializer import SerializableField
 from common.validation import *
 from django.contrib.auth import login as do_login
 from django.contrib.auth import logout as do_logout
 from django.db.models.deletion import RestrictedError
-from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
+from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect
-from django.views.decorators.http import require_http_methods, require_POST
+from django.views.decorators.http import require_http_methods, require_POST, require_GET
 from nacl.secret import SecretBox
 
 from ..models import *
@@ -361,6 +360,12 @@ def rename_team(req, data, iteration):
         return error("team name taken")
     
     return success(name)
+
+
+@require_GET
+@require_iteration
+def get_iteration(req, iteration):
+    return success(iteration.serialize())
 
 
 @require_POST

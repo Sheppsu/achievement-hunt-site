@@ -19,6 +19,9 @@ urlpatterns = [
     path("login/", common.login),
     path("logout/", common.logout),
 
+    path("iteration/", common.get_iteration),
+    path("iterations/<int:iteration_id>/", common.get_iteration),
+
     path("staff/achievements/", staff.achievements),
     path("staff/achievements/<int:achievement_id>/", staff.show_achievement),
     path("staff/achievements/<int:achievement_id>/vote/", staff.vote_achievement),

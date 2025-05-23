@@ -3,7 +3,7 @@ import PageLayout from "components/PageLayout";
 import Index from "./index";
 import Logout from "./logout";
 import AchievementCompletionPage from "./achievements";
-import AchievementsIndex from "./team";
+import TeamPage from "./team";
 import Credit from "routes/credit.tsx";
 import Staff from "routes/staff";
 import StaffAchievement from "routes/staff/achievement.tsx";
@@ -28,7 +28,7 @@ export const routes: RouteObject[] = [
           },
           {
             path: "teams",
-            element: <AchievementsIndex />,
+            element: <TeamPage />,
           },
           {
             path: "achievements",
@@ -45,6 +45,23 @@ export const routes: RouteObject[] = [
           {
             path: "staff/achievements/:achievementId",
             element: <StaffAchievement />,
+          },
+          {
+            path: "iterations/:iterationId",
+            children: [
+              {
+                index: true,
+                element: <Index />,
+              },
+              {
+                path: "teams",
+                element: <TeamPage />,
+              },
+              {
+                path: "achievements",
+                element: <AchievementCompletionPage />,
+              },
+            ],
           },
         ],
       },

@@ -23,6 +23,16 @@ import {
 } from "./types/AchievementType";
 import { AchievementCommentType } from "api/types/AchievementCommentType.ts";
 import { UserType } from "api/types/UserType.ts";
+import { EventIterationType } from "api/types/EventIterationType.ts";
+
+function getIterationParams() {
+  const path = location.pathname;
+  if (!path.startsWith("/iterations/")) {
+    return [];
+  }
+
+  return ["iterations", path.split("/")[2]];
+}
 
 function getUrl(endpoint: string): string {
   endpoint = endpoint.startsWith("/") ? endpoint : "/" + endpoint;
@@ -94,7 +104,7 @@ export function useGetAchievements(
   enabled: boolean = true,
 ): UseQueryResult<AchievementExtendedType[]> {
   return useMakeQuery({
-    queryKey: ["achievements"],
+    queryKey: [...getIterationParams(), "achievements"],
     enabled,
     refetchInterval: 60000,
   });
@@ -104,36 +114,10 @@ export function useGetTeams(
   enabled: boolean = true,
 ): UseQueryResult<Array<AchievementTeamType | AchievementTeamExtendedType>> {
   return useMakeQuery({
-    queryKey: ["teams"],
+    queryKey: [...getIterationParams(), "teams"],
     enabled,
     refetchInterval: 60000,
   });
-}
-
-function onLeaveTeam(
-  teams: (AchievementTeamType | AchievementTeamExtendedType)[],
-) {
-  const newTeams = [];
-
-  for (const team of teams) {
-    // is the team we're leaving
-    if ("invite" in team) {
-      // push "minimal" version of team data (if it still exists even)
-      if (team.players.length !== 1)
-        newTeams.push({
-          id: team.id,
-          name: team.name,
-          icon: team.icon,
-          points: team.points,
-        });
-
-      continue;
-    }
-
-    newTeams.push(team);
-  }
-
-  return newTeams;
 }
 
 function onRenameTeam(
@@ -160,7 +144,7 @@ export function useRenameTeam(): SpecificUseMutationResult<string> {
   const queryClient = useContext(QueryClientContext);
   return useMakeMutation(
     {
-      mutationKey: ["teams", "rename"],
+      mutationKey: [...getIterationParams(), "teams", "rename"],
       onSuccess: (newTeamName) => {
         queryClient?.setQueryData(
           ["teams"],
@@ -208,7 +192,7 @@ export function useTransferTeamAdmin(): SpecificUseMutationResult<TransferTeamAd
   const queryClient = useContext(QueryClientContext);
   return useMakeMutation(
     {
-      mutationKey: ["teams", "transfer"],
+      mutationKey: [...getIterationParams(), "teams", "transfer"],
       onSuccess: (data) => {
         queryClient?.setQueryData(
           ["teams"],
@@ -221,14 +205,42 @@ export function useTransferTeamAdmin(): SpecificUseMutationResult<TransferTeamAd
   );
 }
 
+function onLeaveTeam(
+  teams: (AchievementTeamType | AchievementTeamExtendedType)[],
+) {
+  const newTeams = [];
+
+  for (const team of teams) {
+    // is the team we're leaving
+    if ("invite" in team) {
+      // push "minimal" version of team data (if it still exists even)
+      if (team.players.length !== 1)
+        newTeams.push({
+          id: team.id,
+          name: team.name,
+          icon: team.icon,
+          points: team.points,
+        });
+
+      continue;
+    }
+
+    newTeams.push(team);
+  }
+
+  return newTeams;
+}
+
 export function useLeaveTeam(): SpecificUseMutationResult<null> {
+  const iteration = getIterationParams();
   const queryClient = useContext(QueryClientContext);
+
   return useMakeMutation(
     {
-      mutationKey: ["teams", "leave"],
+      mutationKey: [...iteration, "teams", "leave"],
       onSuccess: () => {
         // remove players or team
-        queryClient?.setQueryData(["teams"], onLeaveTeam);
+        queryClient?.setQueryData([...iteration, "teams"], onLeaveTeam);
       },
     },
     {
@@ -237,25 +249,24 @@ export function useLeaveTeam(): SpecificUseMutationResult<null> {
   );
 }
 
-function onJoinTeam(
-  queryClient: QueryClient | undefined,
-  joinedTeam: AchievementTeamExtendedType,
-) {
-  // update team data for team being joined
-  queryClient?.setQueryData(
-    ["teams"],
-    (teams: AchievementTeamType[] | undefined) =>
-      teams?.map((team) => (team.id == joinedTeam.id ? joinedTeam : team)),
-  );
-  return;
-}
-
 export function useJoinTeam(): SpecificUseMutationResult<AchievementTeamExtendedType> {
+  const iteration = getIterationParams();
   const queryClient = useContext(QueryClientContext);
+
+  function onJoinTeam(joinedTeam: AchievementTeamExtendedType) {
+    // update team data for team being joined
+    queryClient?.setQueryData(
+      [...iteration, "teams"],
+      (teams: AchievementTeamType[] | undefined) =>
+        teams?.map((team) => (team.id == joinedTeam.id ? joinedTeam : team)),
+    );
+    return;
+  }
+
   return useMakeMutation(
     {
-      mutationKey: ["teams", "join"],
-      onSuccess: (joinedTeam) => onJoinTeam(queryClient, joinedTeam),
+      mutationKey: [...iteration, "teams", "join"],
+      onSuccess: onJoinTeam,
     },
     {
       method: "POST",
@@ -264,14 +275,17 @@ export function useJoinTeam(): SpecificUseMutationResult<AchievementTeamExtended
 }
 
 export function useCreateTeam(): SpecificUseMutationResult<AchievementTeamExtendedType> {
+  const iteration = getIterationParams();
   const queryClient = useContext(QueryClientContext);
+
   return useMakeMutation(
     {
-      mutationKey: ["teams", "create"],
+      mutationKey: [...iteration, "teams", "create"],
       onSuccess: (newTeam) => {
         // add team to team list
-        queryClient?.setQueryData(["teams"], (teams: AchievementTeamType[]) =>
-          teams.concat([newTeam]),
+        queryClient?.setQueryData(
+          [...iteration, "teams"],
+          (teams: AchievementTeamType[]) => teams.concat([newTeam]),
         );
       },
     },
@@ -281,63 +295,67 @@ export function useCreateTeam(): SpecificUseMutationResult<AchievementTeamExtend
   );
 }
 
+export function useGetIteration(): UseQueryResult<EventIterationType> {
+  const iteration = getIterationParams();
+
+  return useMakeQuery({
+    queryKey: iteration.length === 0 ? ["iteration"] : iteration,
+  });
+}
+
 export function useGetStaffAchievements(
   enabled: boolean = true,
 ): UseQueryResult<StaffAchievementType[]> {
   return useMakeQuery({
-    queryKey: ["staff", "achievements"],
+    queryKey: [...getIterationParams(), "staff", "achievements"],
     enabled,
     refetchInterval: 60000,
   });
-}
-
-function onVoted(
-  queryClient: QueryClient | undefined,
-  achievementId: number,
-  added: boolean,
-) {
-  const concatVote = (achievement: StaffAchievementType) => ({
-    ...achievement,
-    has_voted: added,
-    vote_count: achievement.vote_count + (added ? 1 : -1),
-  });
-
-  queryClient?.setQueryData(
-    ["staff", "achievements"],
-    (achievements: StaffAchievementType[] | undefined) => {
-      if (achievements === undefined) return;
-
-      const newAchievements = [];
-
-      for (const achievement of achievements) {
-        if (achievement.id === achievementId) {
-          newAchievements.push(concatVote(achievement));
-          continue;
-        }
-
-        newAchievements.push(achievement);
-      }
-
-      return newAchievements;
-    },
-  );
-
-  queryClient?.setQueryData(
-    ["staff", "achievements", achievementId.toString()],
-    (achievement: StaffAchievementType | undefined) =>
-      achievement === undefined ? undefined : concatVote(achievement),
-  );
 }
 
 export function useVoteAchievement(
   achievementId: number,
 ): SpecificUseMutationResult<{ added: boolean }> {
   const queryClient = useContext(QueryClientContext);
+
+  function onVoted(added: boolean) {
+    const concatVote = (achievement: StaffAchievementType) => ({
+      ...achievement,
+      has_voted: added,
+      vote_count: achievement.vote_count + (added ? 1 : -1),
+    });
+
+    queryClient?.setQueryData(
+      ["staff", "achievements"],
+      (achievements: StaffAchievementType[] | undefined) => {
+        if (achievements === undefined) return;
+
+        const newAchievements = [];
+
+        for (const achievement of achievements) {
+          if (achievement.id === achievementId) {
+            newAchievements.push(concatVote(achievement));
+            continue;
+          }
+
+          newAchievements.push(achievement);
+        }
+
+        return newAchievements;
+      },
+    );
+
+    queryClient?.setQueryData(
+      ["staff", "achievements", achievementId.toString()],
+      (achievement: StaffAchievementType | undefined) =>
+        achievement === undefined ? undefined : concatVote(achievement),
+    );
+  }
+
   return useMakeMutation(
     {
       mutationKey: ["staff", "achievements", achievementId.toString(), "vote"],
-      onSuccess: (result: { added: boolean }) =>
-        onVoted(queryClient, achievementId, result.added),
+      onSuccess: (result: { added: boolean }) => onVoted(result.added),
     },
     {
       method: "POST",

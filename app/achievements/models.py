@@ -87,7 +87,7 @@ class EventIteration(SerializableModel):
         return time.time() >= self.start.timestamp() - 5
 
     class Serialization:
-        FIELDS = ["id", "name", "start", "end"]
+        FIELDS = ["id", "name", "start", "end", "registration_end", "description"]
 
 
 class AchievementBatch(SerializableModel):

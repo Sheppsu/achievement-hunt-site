@@ -11,22 +11,7 @@ import { SessionContext } from "contexts/SessionContext.ts";
 import UnauthenticatedCard from "components/team/UnauthenticatedCard.tsx";
 import NoTeamCard from "components/team/NoTeamCard.tsx";
 import TeamListingsCard from "components/team/TeamListingsCard.tsx";
-
-function LoadingCard() {
-  return (
-    <div className="card">
-      <p>Loading...</p>
-    </div>
-  );
-}
-
-function ErrorCard() {
-  return (
-    <div className="card">
-      <p>Error loading teams</p>
-    </div>
-  );
-}
+import TextCard from "components/cards/TextCard.tsx";
 
 export default function AchievementsIndex() {
   const session = useContext(SessionContext);
@@ -51,9 +36,9 @@ export default function AchievementsIndex() {
   if (session.user === null) {
     cardsColumns.push(<UnauthenticatedCard />);
   } else if (teamsLoading) {
-    cardsColumns.push(<LoadingCard />);
+    cardsColumns.push(<TextCard text="Loading..." />);
   } else if (teams === undefined) {
-    cardsColumns.push(<ErrorCard />);
+    cardsColumns.push(<TextCard text="Failed to load teams" />);
   } else if (ownTeam === null) {
     if (session.user.is_admin) {
       cardsColumns.push(
