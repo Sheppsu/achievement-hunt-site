@@ -226,7 +226,7 @@ a.rendered-text:hover {
 }
 
 .card {
-    width: calc(100% - 34px);
+    width: calc(100% - 30px);
     padding: 15px;
     margin: 0;
 
