@@ -340,6 +340,18 @@ def rename_team(req, data, iteration):
     
     return success(name)
 
+@require_user
+@require_iteration
+def chat_messages(req, iteration):
+    player = select_current_player(req.user.id, iteration.id)
+    if player is None:
+        return error("Not on a team")
+    
+    messages = ChatMessage.objects.select_related("player__user").filter(
+        team_id=player.team_id
+    ).order_by("-sent_at")[:50]
+
+    return success([message.serialize([SerializableField("player__user",  post_transform=lambda p: p["username"])]) for message in messages])
 
 @require_iteration_after_end
 def player_stats(req, iteration):

@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import common, staff
 
+from .views import common, staff
 
 iteration_urls = [
     path("teams/", common.teams),
@@ -10,6 +10,7 @@ iteration_urls = [
     path("teams/create/", common.create_team),
     path("teams/rename/", common.rename_team),
     path("teams/transfer/", common.transfer_admin),
+    path("teams/messages/", common.chat_messages),
     path("stats/", common.player_stats),
     path("wsauth/", common.get_auth_packet),
 ]
