@@ -16,10 +16,11 @@ export default function ErrorBoundary() {
   if (isRouteErrorResponse(error)) {
     return (
       <>
-        <PageLayout />
-        <div>
-          {error.status} Error: {error.statusText}
-        </div>
+        <PageLayout>
+          <div style={{ margin: "10px" }}>
+            {error.status} Error: {error.statusText}
+          </div>
+        </PageLayout>
       </>
     );
   }

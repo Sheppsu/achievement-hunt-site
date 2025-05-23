@@ -1,5 +1,5 @@
 import { useContext, useReducer, useState } from "react";
-import { Link, NavLink, useLocation, useOutlet } from "react-router-dom";
+import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 
 import { EventContext, eventReducer, EventState } from "contexts/EventContext";
 import { SessionContext } from "contexts/SessionContext";
@@ -22,26 +22,6 @@ import React from "react";
 import { IoIosNotifications } from "react-icons/io";
 import { defaultState } from "types/WebsocketStateType.ts";
 import PopupContainer from "./popups/PopupContainer.tsx";
-
-function AnimatedOutlet() {
-  const location = useLocation();
-  const element = useOutlet();
-
-  return (
-    <AnimatePresence mode="wait" initial={true}>
-      <motion.div
-        id="page-content"
-        key={location.pathname}
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: -20 }}
-        transition={{ type: "spring", duration: 0.2 }}
-      >
-        {element}
-      </motion.div>
-    </AnimatePresence>
-  );
-}
 
 function Header({ eventsState }: { eventsState: EventState }) {
   const session = useContext(SessionContext);
@@ -107,13 +87,19 @@ function Header({ eventsState }: { eventsState: EventState }) {
   );
 }
 
-export default function PageLayout() {
+export default function PageLayout({
+  children,
+}: {
+  children?: React.ReactNode;
+}) {
   const [eventsState, dispatchEventMsg] = useReducer(eventReducer, {
     events: [],
     pastEvents: [],
   });
   const [wsState, dispatchWsState] = useReducer(wsReducer, null, defaultState);
   const [popup, setPopup] = useState<PopupState>(null);
+
+  const location = useLocation();
 
   return (
     <>
@@ -126,7 +112,18 @@ export default function PageLayout() {
           <SessionContext.Provider value={getSessionData()}>
             <StateContext.Provider value={wsState}>
               <StateDispatchContext.Provider value={dispatchWsState}>
-                <AnimatedOutlet />
+                <AnimatePresence mode="wait" initial={true}>
+                  <motion.div
+                    id="page-content"
+                    key={location.pathname}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ type: "spring", duration: 0.2 }}
+                  >
+                    {children === undefined ? <Outlet /> : children}
+                  </motion.div>
+                </AnimatePresence>
               </StateDispatchContext.Provider>
             </StateContext.Provider>
           </SessionContext.Provider>
