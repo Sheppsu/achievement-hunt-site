@@ -1,5 +1,11 @@
 import { useContext, useReducer, useState } from "react";
-import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
+import {
+  Link,
+  NavLink,
+  Outlet,
+  useLocation,
+  useOutlet,
+} from "react-router-dom";
 
 import { EventContext, eventReducer, EventState } from "contexts/EventContext";
 import { SessionContext } from "contexts/SessionContext";
@@ -105,6 +111,9 @@ export default function PageLayout({
   const [popup, setPopup] = useState<PopupState>(null);
 
   const location = useLocation();
+  if (children === undefined) {
+    children = useOutlet();
+  }
 
   return (
     <>
@@ -117,16 +126,16 @@ export default function PageLayout({
           <SessionContext.Provider value={getSessionData()}>
             <StateContext.Provider value={wsState}>
               <StateDispatchContext.Provider value={dispatchWsState}>
-                <AnimatePresence mode="wait" initial={true}>
+                <AnimatePresence mode="wait">
                   <motion.div
                     id="page-content"
                     key={location.pathname}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ type: "spring", duration: 0.2 }}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
                   >
-                    {children === undefined ? <Outlet /> : children}
+                    {children}
                   </motion.div>
                 </AnimatePresence>
               </StateDispatchContext.Provider>
