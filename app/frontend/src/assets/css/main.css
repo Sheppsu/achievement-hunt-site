@@ -107,10 +107,12 @@ hr {
 
     display: flex;
     flex-direction: column;
+    align-items: center;
     gap: 10px;
 }
 
 #page-content {
+    width: 100%;
     min-height: calc(100vh - 142px);
 }
 
@@ -205,6 +207,8 @@ a.rendered-text:hover {
 /* Card layout classes */
 
 .cards-container {
+    padding: 0 8px;
+
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -214,9 +218,11 @@ a.rendered-text:hover {
 .cards-container__column {
     width: 100%;
     max-width: 700px;
+    min-height: 85vh;
 
     display: flex;
     flex-direction: column;
+    gap: 20px;
 }
 
 .card {

@@ -17,11 +17,12 @@ import {
   StateDispatchContext,
   wsReducer,
 } from "contexts/StateContext.ts";
-import { AnimatePresence } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import React from "react";
 import { IoIosNotifications } from "react-icons/io";
 import { defaultState } from "types/WebsocketStateType.ts";
 import PopupContainer from "./popups/PopupContainer.tsx";
+import AnimatedPage from "components/AnimatedPage.tsx";
 
 function AnimatedOutlet() {
   const location = useLocation();
@@ -29,7 +30,16 @@ function AnimatedOutlet() {
 
   return (
     <AnimatePresence mode="wait" initial={true}>
-      {element && React.cloneElement(element, { key: location.pathname })}
+      <motion.div
+        id="page-content"
+        key={location.pathname}
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -20 }}
+        transition={{ type: "spring", duration: 0.2 }}
+      >
+        {element}
+      </motion.div>
     </AnimatePresence>
   );
 }
@@ -117,9 +127,7 @@ export default function PageLayout() {
           <SessionContext.Provider value={getSessionData()}>
             <StateContext.Provider value={wsState}>
               <StateDispatchContext.Provider value={dispatchWsState}>
-                <div id="page-content">
-                  <AnimatedOutlet />
-                </div>
+                <AnimatedOutlet />
               </StateDispatchContext.Provider>
             </StateContext.Provider>
           </SessionContext.Provider>

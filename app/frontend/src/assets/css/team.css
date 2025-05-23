@@ -1,12 +1,5 @@
 /* General */
 
-.cards-container__column.teams {
-  gap: 20px;
-  padding: 0 15px;
-
-  min-height: 85vh;
-}
-
 .card:hover {
   border: 2px solid #4a4a4a;
 }

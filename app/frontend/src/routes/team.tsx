@@ -16,14 +16,22 @@ import TeamListingsCard from "components/team/TeamListingsCard.tsx";
 function LoadingCard() {
   return (
     <div className="card">
-      <p className="card--teams__title">Loading...</p>
+      <p>Loading...</p>
+    </div>
+  );
+}
+
+function ErrorCard() {
+  return (
+    <div className="card">
+      <p>Error loading teams</p>
     </div>
   );
 }
 
 export default function AchievementsIndex() {
   const session = useContext(SessionContext);
-  const { data: teams } = useGetTeams();
+  const { data: teams, isLoading: teamsLoading } = useGetTeams();
 
   let ownTeam: AchievementTeamExtendedType | null = null;
   let ownPlacement: number | null = null;
@@ -39,24 +47,36 @@ export default function AchievementsIndex() {
       }
     }
 
-  let teamCards;
+  const cardsColumns = [];
+
   if (session.user === null) {
-    teamCards = <UnauthenticatedCard />;
+    cardsColumns.push(<UnauthenticatedCard />);
+  } else if (teamsLoading) {
+    cardsColumns.push(<LoadingCard />);
   } else if (teams === undefined) {
-    teamCards = <LoadingCard />;
+    cardsColumns.push(<ErrorCard />);
   } else if (ownTeam === null) {
     if (session.user.is_admin) {
-      teamCards = (
+      cardsColumns.push(
         <>
           <NoTeamCard />
           <TeamListingsCard teams={teams as AchievementTeamExtendedType[]} />
-        </>
+        </>,
       );
     } else {
-      teamCards = <NoTeamCard />;
+      cardsColumns.push(<NoTeamCard />);
     }
   } else {
-    teamCards = <TeamCard team={ownTeam} />;
+    cardsColumns.push(
+      <>
+        <TeamCard team={ownTeam} />
+        <TeamChatCard />
+      </>,
+    );
+  }
+
+  if (teams !== undefined) {
+    cardsColumns.push(<LeaderboardCard teams={teams} />);
   }
 
   return (
@@ -64,15 +84,20 @@ export default function AchievementsIndex() {
       <Helmet>
         <title>CTA Teams</title>
       </Helmet>
-      <AnimatedPage>
-        <div className="cards-container">
-          <motion.div layout className="cards-container__column teams">
-            {teamCards}
-          </motion.div>
-          <div className="vertical-divider"></div>
-          <LeaderboardCard />
-        </div>
-      </AnimatedPage>
+      <div className="cards-container">
+        {cardsColumns.map((cards, i) => (
+          <>
+            <motion.div layout className="cards-container__column">
+              {cards}
+            </motion.div>
+            {i !== cardsColumns.length - 1 ? (
+              <div className="vertical-divider"></div>
+            ) : (
+              ""
+            )}
+          </>
+        ))}
+      </div>
     </>
   );
 }

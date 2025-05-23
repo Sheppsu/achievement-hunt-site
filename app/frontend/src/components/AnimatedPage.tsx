@@ -15,6 +15,7 @@ export default function AnimatedPage({
   ) as PageTransitionContextType;
   return (
     <motion.div
+      id="page-content"
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}

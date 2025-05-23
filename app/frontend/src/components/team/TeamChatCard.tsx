@@ -36,7 +36,7 @@ export default function TeamChatCard() {
 
   return (
     <div className="card">
-      <p className="card--teams__title">Chat</p>
+      <h1 className="card--teams__title">Chat</h1>
       <div className="team-chat">
         <div className="team-chat__messages">
           {messages.map((msg, idx) => (

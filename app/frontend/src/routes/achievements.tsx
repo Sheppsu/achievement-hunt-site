@@ -112,14 +112,12 @@ export default function AchievementCompletionPage() {
 
   if (time < eventStart) {
     return (
-      <AnimatedPage>
-        <HiddenAchievementCompletionPage time={time} eventStart={eventStart} />
-      </AnimatedPage>
+      <HiddenAchievementCompletionPage time={time} eventStart={eventStart} />
     );
   }
 
   return (
-    <AnimatedPage>
+    <>
       <Helmet>
         <title>CTA - Completions</title>
       </Helmet>
@@ -155,6 +153,6 @@ export default function AchievementCompletionPage() {
           )}
         </div>
       </div>
-    </AnimatedPage>
+    </>
   );
 }

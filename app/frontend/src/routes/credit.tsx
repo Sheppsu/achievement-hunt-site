@@ -5,7 +5,7 @@ import "assets/css/credits.css";
 
 export default function Credit() {
   return (
-    <AnimatedPage>
+    <>
       <Helmet>
         <title>CTA - Staff</title>
       </Helmet>
@@ -119,6 +119,6 @@ export default function Credit() {
           </div>
         </div>
       </div>
-    </AnimatedPage>
+    </>
   );
 }

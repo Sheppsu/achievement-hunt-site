@@ -11,16 +11,14 @@ export default function App() {
       <Helmet>
         <title>CTA</title>
       </Helmet>
-      <AnimatedPage>
-        <div className="banner-wrapper">
-          <img className="banner" src={banner} alt="banner"></img>
+      <div className="banner-wrapper">
+        <img className="banner" src={banner} alt="banner"></img>
+      </div>
+      <div className="cards-container">
+        <div className="cards-container__column">
+          <InfoCard />
         </div>
-        <div className="cards-container">
-          <div className="cards-container__column">
-            <InfoCard />
-          </div>
-        </div>
-      </AnimatedPage>
+      </div>
     </>
   );
 }
