@@ -126,14 +126,13 @@ export default function PageLayout() {
                   <div id="page-content">
                     <AnimatedOutlet />
                   </div>
+                  <Footer />
                 </WebsocketContextProvider>
               </StateDispatchContext.Provider>
             </StateContext.Provider>
           </SessionContext.Provider>
         </PopupContext.Provider>
       </EventContext.Provider>
-
-      <Footer />
     </>
   );
 }

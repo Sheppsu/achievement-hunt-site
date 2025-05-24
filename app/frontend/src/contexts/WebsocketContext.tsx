@@ -246,7 +246,6 @@ function connect(
   dispatchWsState: WebsocketStateDispatch,
   queryClient: QueryClient,
   data: object,
-  session: Session,
 ): WebSocket {
   const ws = new WebSocket(uri);
 
@@ -254,10 +253,6 @@ function connect(
     ws.send(JSON.stringify(data));
   });
   ws.addEventListener("close", (_) => {
-    dispatchEventMsg({
-      type: "error",
-      msg: "Connection to websocket server failed or unexpectedly closed; reconnecting in 5 seconds...",
-    });
     dispatchWsState({ id: 2 });
   });
   ws.addEventListener("message", (evt) => {
@@ -344,11 +339,10 @@ export function WebsocketContextProvider({
           dispatchWsState,
           queryClient,
           authData,
-          session,
         );
         dispatchWsState({ id: 1, ws });
       },
-      Math.max(0, 5000 - (Date.now() - wsState.lastDisconnect)),
+      Math.max(0, 3000 - (Date.now() - wsState.lastDisconnect)),
     );
   }
 
