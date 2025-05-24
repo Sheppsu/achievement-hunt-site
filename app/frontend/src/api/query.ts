@@ -303,6 +303,33 @@ export function useGetIteration(): UseQueryResult<EventIterationType> {
   });
 }
 
+export function useGetRegistration(): UseQueryResult<{ registered: boolean }> {
+  const iteration = getIterationParams();
+
+  return useMakeQuery({
+    queryKey: [...iteration, "registration"],
+  });
+}
+
+export function useRegister(): SpecificUseMutationResult<{
+  registered: boolean;
+}> {
+  const iteration = getIterationParams();
+  const queryClient = useContext(QueryClientContext);
+
+  return useMakeMutation(
+    {
+      mutationKey: [...iteration, "register"],
+      onSuccess: (data) => {
+        queryClient?.setQueryData([...iteration, "registration"], () => data);
+      },
+    },
+    {
+      method: "POST",
+    },
+  );
+}
+
 export function useGetStaffAchievements(
   enabled: boolean = true,
 ): UseQueryResult<StaffAchievementType[]> {

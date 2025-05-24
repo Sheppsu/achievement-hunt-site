@@ -1,4 +1,4 @@
-import { useGetAchievements, useGetTeams } from "api/query";
+import { useGetAchievements, useGetIteration, useGetTeams } from "api/query";
 import { AchievementTeamExtendedType } from "api/types/AchievementTeamType";
 import "assets/css/achievements.css";
 import AchievementContainer from "components/achievements/AchievementContainer";
@@ -83,10 +83,16 @@ function FullAchievementCompletionPage({
   );
 }
 
+function TextPage({ text }: { text: string }) {
+  return (
+    <div className="achievements-layout">
+      <h1>{text}</h1>
+    </div>
+  );
+}
+
 export default function AchievementCompletionPage() {
   const session = useContext(SessionContext);
-  const eventStart = session.eventStart;
-  const eventEnd = session.eventEnd;
 
   const [time, setTime] = useState<number>(Date.now());
   const [scope, animate] = useAnimate();
@@ -95,24 +101,47 @@ export default function AchievementCompletionPage() {
     setInterval(() => setTime(Date.now()), 1000);
   }, []); // run once
 
-  const isHidden = time < eventStart;
+  const { data: iteration, isLoading: iterationLoading } = useGetIteration();
 
-  const { data: achievements } = useGetAchievements(!isHidden);
-  const { data: teams } = useGetTeams();
-  const team = getMyTeam(session.user?.id, teams);
+  const iterationStart =
+    iteration !== undefined ? Date.parse(iteration.start) : null;
+  const showContent = iterationStart !== null && iterationStart < time;
+
+  const { data: achievements, isLoading: achievementsLoading } =
+    useGetAchievements(showContent);
+  const { data: teams, isLoading: teamsLoading } = useGetTeams(showContent);
 
   const state = useStateContext();
   const dispatchState = useDispatchStateContext();
 
-  if (state.achievementsFilter === null && achievements !== undefined) {
+  if (iterationLoading || achievementsLoading || teamsLoading) {
+    return <TextPage text="Loading..." />;
+  }
+
+  if (iteration === undefined) {
+    return <TextPage text="Failed to load" />;
+  }
+
+  if (!showContent) {
+    return (
+      <HiddenAchievementCompletionPage
+        time={time}
+        eventStart={iterationStart!}
+      />
+    );
+  }
+
+  if (achievements === undefined || teams == undefined) {
+    return <TextPage text="Failed to load" />;
+  }
+
+  const team = getMyTeam(session.user?.id, teams);
+
+  if (state.achievementsFilter === null) {
     dispatchState({ id: 5, achievementsFilter: getDefaultNav(achievements) });
   }
 
-  if (time < eventStart) {
-    return (
-      <HiddenAchievementCompletionPage time={time} eventStart={eventStart} />
-    );
-  }
+  const iterationEnd = Date.parse(iteration.end);
 
   return (
     <>
@@ -123,8 +152,8 @@ export default function AchievementCompletionPage() {
       <div className="achievements-layout">
         <div style={{ margin: "auto", textAlign: "center", marginTop: "20px" }}>
           <h1 style={{ fontSize: "3em" }}>
-            {time < eventEnd
-              ? `Ends in: ${getTimeStr(eventEnd - time)}`
+            {time < iterationEnd
+              ? `Ends in: ${getTimeStr(iterationEnd - time)}`
               : "Event ended"}
           </h1>
         </div>
@@ -144,7 +173,7 @@ export default function AchievementCompletionPage() {
               state={state}
               dispatchState={dispatchState}
               team={team}
-              hidden={isHidden}
+              hidden={!showContent}
             />
           ) : (
             <LimitedAchievementCompletionPage state={state} scope={scope} />

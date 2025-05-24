@@ -259,7 +259,7 @@ class Player(SerializableModel):
 class Registration(SerializableModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     iteration = models.ForeignKey(EventIteration, on_delete=models.CASCADE)
-    is_screened = models.BooleanField()
+    is_screened = models.BooleanField(default=False)
 
     class Meta:
         constraints = [

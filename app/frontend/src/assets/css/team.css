@@ -290,4 +290,8 @@
   .cards-container__column.teams {
     min-height: 0;
   }
+
+  div.vertical-divider {
+    display: none;
+  }
 }

@@ -127,11 +127,13 @@ def serialize_team(team: Team):
     return team.serialize(includes=["players__user"])
 
 
-def select_teams(iteration_id, many=False, **kwargs) -> list[Team] | Team | None:
+def select_teams(iteration_id, many=False, sort=False, **kwargs) -> list[Team] | Team | None:
     teams = Team.objects.prefetch_related("players__user").filter(
         iteration_id=iteration_id,
         **kwargs
     )
+    if sort:
+        teams = teams.order_by("-points")
     if many:
         return teams
     if len(teams) == 0:
@@ -224,17 +226,28 @@ def achievements(req, iteration):
 @require_iteration
 def teams(req, iteration):
     if iteration.has_ended() or (req.user.is_authenticated and req.user.is_admin):
-        serialized_teams = map(serialize_team, select_teams(iteration.id, many=True))
+        serialized_teams = list(map(serialize_team, select_teams(iteration.id, many=True, sort=True)))
     else:
-        serialized_teams = (
-            serialize_team(team)
-            if any(map(lambda p: p.user.id == req.user.id, team.players.all())) else
-            team.serialize(excludes=["invite", "icon", "name"])
-            for team in select_teams(iteration.id, many=True)
-        )
-    sorted_teams = sorted(serialized_teams, key=lambda t: t['points'], reverse=True)
+        teams = select_teams(iteration.id, many=True, sort=True)
+        my_team_item = next((
+            (i, team) for i, team in enumerate(teams)
+            if any((player.user_id == req.user.id for player in team.players.all()))
+        ), None)
 
-    return success(sorted_teams)
+        if my_team_item is None:
+            return success([])
+
+        my_team_i, my_team = my_team_item
+
+        # localized leaderboard
+        # (teams above and below you)
+        serialized_teams = [serialize_team(my_team)]
+        if my_team_i > 0:
+            serialized_teams.insert(0, serialize_team(teams[my_team_i-1]))
+        if my_team_i < len(teams) - 1:
+            serialized_teams.append(serialize_team(teams[my_team_i+1]))
+
+    return success(serialized_teams)
 
 
 @require_POST
@@ -368,6 +381,14 @@ def get_iteration(req, iteration):
     return success(iteration.serialize())
 
 
+@require_GET
+@require_iteration
+@require_user
+def get_registration(req, iteration):
+    registration = Registration.objects.filter(user_id=req.user.id, iteration_id=iteration.id).first()
+    return success({"registered": registration is not None})
+
+
 @require_POST
 @accepts_json_data(
     DictionaryType({"register": BoolType()})
@@ -375,9 +396,6 @@ def get_iteration(req, iteration):
 @require_iteration_before_registration_end
 @require_user
 def register(req, data, iteration):
-    if iteration.has_registration_ended:
-        return error("can no longer register")
-
     registration = Registration.objects.filter(user_id=req.user.id, iteration_id=iteration.id).first()
     reg = data["register"]
 
@@ -387,7 +405,7 @@ def register(req, data, iteration):
     if not reg and registration is None:
         return error("already unregistered")
 
-    if reg:
+    if not reg:
         registration.delete()
     else:
         Registration.objects.create(user=req.user, iteration=iteration)
