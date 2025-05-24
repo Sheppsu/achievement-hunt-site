@@ -24,6 +24,7 @@ import {
 import { AchievementCommentType } from "api/types/AchievementCommentType.ts";
 import { UserType } from "api/types/UserType.ts";
 import { EventIterationType } from "api/types/EventIterationType.ts";
+import { AnnouncementType } from "api/types/AnnouncementType.ts";
 
 function getIterationParams() {
   const path = location.pathname;
@@ -328,6 +329,14 @@ export function useRegister(): SpecificUseMutationResult<{
       method: "POST",
     },
   );
+}
+
+export function useGetAnnouncements(): UseQueryResult<AnnouncementType[]> {
+  const iteration = getIterationParams();
+
+  return useMakeQuery({
+    queryKey: [...iteration, "announcements"],
+  });
 }
 
 export function useGetStaffAchievements(

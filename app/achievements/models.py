@@ -268,3 +268,13 @@ class Registration(SerializableModel):
 
     class Serialization:
         FIELDS = ["is_screened"]
+
+
+class Announcement(SerializableModel):
+    iteration = models.ForeignKey(EventIteration, on_delete=models.CASCADE)
+    created_at = models.DateTimeField()
+    title = models.CharField(max_length=64)
+    message = models.TextField()
+
+    class Serialization:
+        FIELDS = ["id", "created_at", "title", "message"]

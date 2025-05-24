@@ -12,6 +12,7 @@ import NoTeamCard from "components/team/NoTeamCard.tsx";
 import TeamListingsCard from "components/team/TeamListingsCard.tsx";
 import TextCard from "components/cards/TextCard.tsx";
 import RegisterButton from "components/team/RegisterButton.tsx";
+import AnnouncementsCard from "components/team/AnnouncementsCard.tsx";
 
 export default function AchievementsIndex() {
   const session = useContext(SessionContext);
@@ -54,9 +55,10 @@ export default function AchievementsIndex() {
     cardsColumns[0].push(<TeamCard team={ownTeam} />, <TeamChatCard />);
   }
 
-  if (teams !== undefined) {
-    // TODO: hide leaderboard when number of teams is 0
-    cardsColumns.push([<LeaderboardCard teams={teams} />]);
+  cardsColumns.push([<AnnouncementsCard />]);
+
+  if (teams !== undefined && teams.length > 0) {
+    cardsColumns[1].push(<LeaderboardCard teams={teams} />);
   }
 
   // show teams listing for admins

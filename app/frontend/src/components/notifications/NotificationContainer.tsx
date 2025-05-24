@@ -45,17 +45,6 @@ export default function NotificationContainer({
       >
         Clear All
       </button>
-      <button
-        className="notifications-popup__header__clear-btn"
-        onClick={() =>
-          dispatchEventMsg({
-            type: "info",
-            msg: "lorem ipsum something something",
-          })
-        }
-      >
-        test
-      </button>
     </motion.div>
   );
 }

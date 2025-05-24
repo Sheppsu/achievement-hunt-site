@@ -470,6 +470,14 @@ def player_stats(req, iteration):
     })
 
 
+@require_iteration
+def get_announcements(req, iteration):
+    return success([
+        announcement.serialize()
+        for announcement in Announcement.objects.filter(iteration_id=iteration.id)
+    ])
+
+
 @require_user
 @require_iteration
 def get_auth_packet(req, iteration):
