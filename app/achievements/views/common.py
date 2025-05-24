@@ -278,7 +278,13 @@ def chat_messages(req, iteration):
         team_id=player.team_id
     ).order_by("-sent_at")[:50]
 
-    return success([{"name": message.player.user.username, "message": message.message, "sent_at": message.sent_at.isoformat()} for message in messages])
+    return success([
+        {
+            "name": message.player.user.username,
+            "message": message.message,
+            "sent_at": message.sent_at.isoformat()
+        } for message in reversed(messages)
+    ])
 
 @require_GET
 @require_iteration
