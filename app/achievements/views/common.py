@@ -8,119 +8,12 @@ from common.validation import *
 from django.contrib.auth import login as do_login
 from django.contrib.auth import logout as do_logout
 from django.db.models.deletion import RestrictedError
-from django.http import HttpResponseBadRequest, JsonResponse
+from django.http import HttpResponseBadRequest
 from django.shortcuts import redirect
 from django.views.decorators.http import require_http_methods, require_POST, require_GET
 from nacl.secret import SecretBox
 
-from ..models import *
-from .util import accepts_json_data, error, success
-
-__all__ = (
-    "login",
-    "logout",
-    "teams",
-    "achievements",
-    "join_team",
-    "leave_team",
-    "create_team",
-    "rename_team",
-    "transfer_admin",
-    "player_stats",
-    "get_auth_packet",
-    "get_current_iteration"
-)
-
-current_iteration = None
-
-
-def get_current_iteration() -> EventIteration:
-    # pylint: disable=global-statement
-    global current_iteration
-
-    if current_iteration is None:
-        current_iteration = EventIteration.objects.order_by('-id').last()
-    return current_iteration
-
-
-def require_iteration_before_start(func):
-    @require_iteration
-    def wrapper(req, *args, iteration, **kwargs):
-        if iteration.has_started():
-            return error("iteration has already started", status=403)
-
-        return func(req, *args, iteration=iteration, **kwargs)
-
-    return wrapper
-
-
-def require_iteration_before_end(func):
-    @require_iteration
-    def wrapper(req, *args, iteration, **kwargs):
-        if iteration.has_ended():
-            return error("iteration ended", status=403)
-
-        return func(req, *args, iteration=iteration, **kwargs)
-
-    return wrapper
-
-
-def require_iteration_after_start(func):
-    @require_iteration
-    def wrapper(req, *args, iteration, **kwargs):
-        if not iteration.has_started():
-            return error("iteration has not started", status=403)
-
-        return func(req, *args, iteration=iteration, **kwargs)
-
-    return wrapper
-
-
-def require_iteration_after_end(func):
-    @require_iteration
-    def wrapper(req, *args, iteration, **kwargs):
-        if not iteration.has_ended():
-            return error("must wait until iteration ends", status=403)
-
-        return func(req, *args, iteration=iteration, **kwargs)
-
-    return wrapper
-
-
-def require_iteration_before_registration_end(func):
-    @require_iteration
-    def wrapper(req, *args, iteration, **kwargs):
-        if iteration.has_registration_ended():
-            return error("Registration period has ended", status=403)
-
-        return func(req, *args, iteration=iteration, **kwargs)
-
-    return wrapper
-
-
-def require_user(func):
-    def wrapper(req, *args, **kwargs):
-        if not req.user.is_authenticated:
-            return error("not logged in", status=403)
-
-        return func(req, *args, **kwargs)
-
-    return wrapper
-
-
-def require_iteration(func):
-    def wrapper(req, iteration_id=None, *args, **kwargs):
-        if iteration_id is None:
-            iteration = get_current_iteration()
-        else:
-            iteration = EventIteration.objects.filter(id=iteration_id).first()
-
-        if iteration is None:
-            return error("iteration not found", status=404)
-
-        return func(req, *args, iteration=iteration, **kwargs)
-
-    return wrapper
+from .util import *
 
 
 def serialize_team(team: Team):

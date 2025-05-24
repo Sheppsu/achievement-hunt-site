@@ -1,6 +1,7 @@
 import "assets/css/team.css";
 import { EventIterationType } from "api/types/EventIterationType.ts";
 import RenderedText from "components/common/RenderedText.tsx";
+import { dateToText } from "util/helperFunctions.ts";
 
 export default function InfoCard({
   iteration,
@@ -11,7 +12,7 @@ export default function InfoCard({
     <div className="card">
       <h1 className="card--teams__title">{iteration.name}</h1>
       <p className="info-text">
-        Starts November 16th - Ends November 25th (0:00 UTC)
+        Starts {dateToText(iteration.start)} - Ends {dateToText(iteration.end)}
       </p>
       {Object.entries(iteration.description).map(([section, text]) => (
         <>
