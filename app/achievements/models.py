@@ -85,7 +85,7 @@ class EventIteration(SerializableModel):
         return time.time() >= self.start.timestamp() - 5
 
     class Serialization:
-        FIELDS = ["id", "name", "start", "end"]
+        FIELDS = ["id", "name", "start", "end", "registration_end", "description"]
 
 
 class AchievementBatch(SerializableModel):
@@ -234,7 +234,7 @@ class Team(SerializableModel):
     icon = models.CharField(max_length=64, null=True)
     invite = models.CharField(max_length=16)
     points = models.PositiveIntegerField(default=0)
-    iteration = models.ForeignKey(EventIteration, on_delete=models.SET_NULL, null=True)
+    iteration = models.ForeignKey(EventIteration, on_delete=models.CASCADE)
 
     class Serialization:
         FIELDS = ["id", "name", "icon", "invite", "points"]
@@ -266,7 +266,7 @@ class ChatMessage(SerializableModel):
 class Registration(SerializableModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     iteration = models.ForeignKey(EventIteration, on_delete=models.CASCADE)
-    is_screened = models.BooleanField()
+    is_screened = models.BooleanField(default=False)
 
     class Meta:
         constraints = [
@@ -275,3 +275,13 @@ class Registration(SerializableModel):
 
     class Serialization:
         FIELDS = ["is_screened"]
+
+
+class Announcement(SerializableModel):
+    iteration = models.ForeignKey(EventIteration, on_delete=models.CASCADE)
+    created_at = models.DateTimeField()
+    title = models.CharField(max_length=64)
+    message = models.TextField()
+
+    class Serialization:
+        FIELDS = ["id", "created_at", "title", "message"]

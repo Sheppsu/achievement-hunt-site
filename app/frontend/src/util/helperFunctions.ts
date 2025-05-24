@@ -57,6 +57,25 @@ export function timeAgo(timestamp: string) {
   return `${leftover1} ${label1} ${leftover2} ${label2} ago`;
 }
 
+export function dateToText(timestamp: string) {
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+  const date = new Date(Date.parse(timestamp));
+  return `${months[date.getUTCMonth() - 1]} ${date.getUTCDay()} (${date.getUTCHours().toString().padStart(2, "0")}:${date.getUTCMinutes().toString().padStart(2, "0")} UTC)`;
+}
+
 export function getMyTeam(
   userId: number | undefined,
   teams?: Array<AchievementTeamExtendedType | AchievementTeamType>,
@@ -370,5 +389,5 @@ const anonymousNames = [
 ];
 
 export function getAnonName(id: number) {
-  return anonymousNames[id - 1];
+  return anonymousNames[(id - 1) % anonymousNames.length];
 }

@@ -1,8 +1,6 @@
 from django.views.decorators.http import require_POST, require_GET, require_http_methods
-from django.conf import settings
 
-from ..models import *
-from .util import error, success, accepts_json_data
+from .util import *
 from common.serializer import SerializableField
 from common.validation import *
 
@@ -13,43 +11,6 @@ __all__ = ("achievements",)
 
 
 discord_logger = settings.DISCORD_LOGGER
-
-
-def require_staff(func):
-    def wrapper(req, *args, **kwargs):
-        if not req.user.is_authenticated or (not req.user.is_admin and not req.user.is_achievement_creator):
-            return error("Unauthorized", status=403)
-
-        return func(req, *args, **kwargs)
-
-    return wrapper
-
-
-def require_achievement(select: list | None = None, prefetch: list | None = None):
-    def decorator(func):
-        def wrapper(req, *args, **kwargs):
-            achievement_id = kwargs.pop("achievement_id", None)
-            if achievement_id is None:
-                return error("Invalid achievement id")
-
-            achievement = Achievement.objects.filter(id=achievement_id)
-
-            if select is not None:
-                achievement.select_related(*select)
-
-            if prefetch is not None:
-                achievement.prefetch_related(*prefetch)
-
-            achievement = achievement.first()
-
-            if achievement is None:
-                return error("Invalid achievement id")
-
-            return func(req, *args, achievement=achievement, **kwargs)
-
-        return wrapper
-
-    return decorator
 
 
 def serialize_full_achievement(req, achievement: Achievement):

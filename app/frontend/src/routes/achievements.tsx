@@ -1,13 +1,11 @@
-import { useGetAchievements, useGetTeams } from "api/query";
+import { useGetAchievements, useGetIteration, useGetTeams } from "api/query";
 import { AchievementTeamExtendedType } from "api/types/AchievementTeamType";
 import "assets/css/achievements.css";
-import classNames from "classnames";
 import AchievementContainer from "components/achievements/AchievementContainer";
 import AchievementNavigationBar, {
   getDefaultNav,
 } from "components/achievements/AchievementNavigationBar.tsx";
 import AchievementProgress from "components/achievements/AchievementProgress.tsx";
-import AnimatedPage from "components/AnimatedPage";
 import { SessionContext } from "contexts/SessionContext";
 import {
   useDispatchStateContext,
@@ -18,6 +16,7 @@ import { useContext, useEffect, useState } from "react";
 import { Helmet } from "react-helmet";
 import { AppState } from "types/AppStateType.ts";
 import { getMyTeam } from "util/helperFunctions";
+import { EventIterationType } from "api/types/EventIterationType.ts";
 
 function getTimeStr(delta: number) {
   const days = Math.floor((delta / (1000 * 60 * 60 * 24)) % 60);
@@ -60,25 +59,33 @@ function FullAchievementCompletionPage({
   team,
   state,
   scope,
+  iteration,
 }: {
   team: AchievementTeamExtendedType | null;
   state: AppState;
   scope: AnimationScope;
+  iteration: EventIterationType;
 }) {
   return (
     <>
       <AchievementContainer scope={scope} state={state} />
       <div className="achievements-progress">
-        <AchievementProgress team={team} />
+        <AchievementProgress team={team} iteration={iteration} />
       </div>
     </>
   );
 }
 
+function TextPage({ text }: { text: string }) {
+  return (
+    <div className="achievements-layout">
+      <h1>{text}</h1>
+    </div>
+  );
+}
+
 export default function AchievementCompletionPage() {
   const session = useContext(SessionContext);
-  const eventStart = session.eventStart;
-  const eventEnd = session.eventEnd;
 
   const [time, setTime] = useState<number>(Date.now());
   const [scope, animate] = useAnimate();
@@ -87,29 +94,50 @@ export default function AchievementCompletionPage() {
     setInterval(() => setTime(Date.now()), 1000);
   }, []); // run once
 
-  const isHidden = time < eventStart;
+  const { data: iteration, isLoading: iterationLoading } = useGetIteration();
 
-  const { data: achievements } = useGetAchievements(!isHidden);
-  const { data: teams } = useGetTeams();
-  const team = getMyTeam(session.user?.id, teams);
+  const iterationStart =
+    iteration !== undefined ? Date.parse(iteration.start) : null;
+  const showContent = iterationStart !== null && iterationStart < time;
+
+  const { data: achievements, isLoading: achievementsLoading } =
+    useGetAchievements(showContent);
+  const { data: teams, isLoading: teamsLoading } = useGetTeams(showContent);
 
   const state = useStateContext();
   const dispatchState = useDispatchStateContext();
 
-  if (state.achievementsFilter === null && achievements !== undefined) {
-    dispatchState({ id: 5, achievementsFilter: getDefaultNav(achievements) });
+  if (iterationLoading || achievementsLoading || teamsLoading) {
+    return <TextPage text="Loading..." />;
   }
 
-  if (time < eventStart) {
+  if (iteration === undefined) {
+    return <TextPage text="Failed to load" />;
+  }
+
+  if (!showContent) {
     return (
-      <AnimatedPage>
-        <HiddenAchievementCompletionPage time={time} eventStart={eventStart} />
-      </AnimatedPage>
+      <HiddenAchievementCompletionPage
+        time={time}
+        eventStart={iterationStart!}
+      />
     );
   }
 
+  if (achievements === undefined || teams == undefined) {
+    return <TextPage text="Failed to load" />;
+  }
+
+  const team = getMyTeam(session.user?.id, teams);
+
+  if (state.achievementsFilter === null) {
+    dispatchState({ id: 5, achievementsFilter: getDefaultNav(achievements) });
+  }
+
+  const iterationEnd = Date.parse(iteration.end);
+
   return (
-    <AnimatedPage>
+    <>
       <Helmet>
         <title>CTA - Completions</title>
       </Helmet>
@@ -117,8 +145,8 @@ export default function AchievementCompletionPage() {
       <div className="achievements-layout">
         <div style={{ margin: "auto", textAlign: "center", marginTop: "20px" }}>
           <h1 style={{ fontSize: "3em" }}>
-            {time < eventEnd
-              ? `Ends in: ${getTimeStr(eventEnd - time)}`
+            {time < iterationEnd
+              ? `Ends in: ${getTimeStr(iterationEnd - time)}`
               : "Event ended"}
           </h1>
         </div>
@@ -137,12 +165,13 @@ export default function AchievementCompletionPage() {
               scope={scope}
               state={state}
               team={team}
+              iteration={iteration}
             />
           ) : (
             <LimitedAchievementCompletionPage state={state} scope={scope} />
           )}
         </div>
       </div>
-    </AnimatedPage>
+    </>
   );
 }

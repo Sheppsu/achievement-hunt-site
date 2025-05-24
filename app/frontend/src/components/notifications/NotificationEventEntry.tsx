@@ -8,13 +8,13 @@ export default function NotificationEventEntry({ event }: { event: Event }) {
   const dispatchEventMsg = useContext(EventContext);
   return (
     <motion.div
-      className={"prevent-select event-entry " + event.type}
+      className={"prevent-select events__entry " + event.type}
       initial={{ opacity: 0 }}
       animate={{ opacity: 100 }}
       exit={{ opacity: 0 }}
       layout
     >
-      <div className={"event-status-icon " + event.type}>
+      <div className={"events__entry__status-icon " + event.type}>
         {event.type === "error" ? (
           <IoIosWarning size={30} />
         ) : (

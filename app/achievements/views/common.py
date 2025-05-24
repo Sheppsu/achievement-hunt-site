@@ -2,137 +2,31 @@ import base64
 import random
 import secrets
 import struct
-import time
 
 from common.serializer import SerializableField
 from common.validation import *
 from django.contrib.auth import login as do_login
 from django.contrib.auth import logout as do_logout
 from django.db.models.deletion import RestrictedError
-from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
+from django.http import HttpResponseBadRequest
 from django.shortcuts import redirect
-from django.views.decorators.http import require_http_methods, require_POST
+from django.views.decorators.http import require_http_methods, require_POST, require_GET
 from nacl.secret import SecretBox
 
-from ..models import *
-from .util import accepts_json_data, error, success
-
-__all__ = (
-    "login",
-    "logout",
-    "teams",
-    "achievements",
-    "join_team",
-    "leave_team",
-    "create_team",
-    "rename_team",
-    "transfer_admin",
-    "player_stats",
-    "get_auth_packet",
-    "get_current_iteration"
-)
-
-current_iteration = None
-
-
-def get_current_iteration() -> EventIteration:
-    # pylint: disable=global-statement
-    global current_iteration
-
-    if current_iteration is None:
-        current_iteration = EventIteration.objects.order_by('-id').last()
-    return current_iteration
-
-
-def require_iteration_before_start(func):
-    @require_iteration
-    def wrapper(req, *args, iteration, **kwargs):
-        if iteration.has_started():
-            return error("iteration has already started", status=403)
-
-        return func(req, *args, iteration=iteration, **kwargs)
-
-    return wrapper
-
-
-def require_iteration_before_end(func):
-    @require_iteration
-    def wrapper(req, *args, iteration, **kwargs):
-        if iteration.has_ended():
-            return error("iteration ended", status=403)
-
-        return func(req, *args, iteration=iteration, **kwargs)
-
-    return wrapper
-
-
-def require_iteration_after_start(func):
-    @require_iteration
-    def wrapper(req, *args, iteration, **kwargs):
-        if not iteration.has_started():
-            return error("iteration has not started", status=403)
-
-        return func(req, *args, iteration=iteration, **kwargs)
-
-    return wrapper
-
-
-def require_iteration_after_end(func):
-    @require_iteration
-    def wrapper(req, *args, iteration, **kwargs):
-        if not iteration.has_ended():
-            return error("must wait until iteration ends", status=403)
-
-        return func(req, *args, iteration=iteration, **kwargs)
-
-    return wrapper
-
-
-def require_iteration_before_registration_end(func):
-    @require_iteration
-    def wrapper(req, *args, iteration, **kwargs):
-        if iteration.has_registration_ended():
-            return error("Registration period has ended", status=403)
-
-        return func(req, *args, iteration=iteration, **kwargs)
-
-    return wrapper
-
-
-def require_user(func):
-    def wrapper(req, *args, **kwargs):
-        if not req.user.is_authenticated:
-            return error("not logged in", status=403)
-
-        return func(req, *args, **kwargs)
-
-    return wrapper
-
-
-def require_iteration(func):
-    def wrapper(req, iteration_id=None, *args, **kwargs):
-        if iteration_id is None:
-            iteration = get_current_iteration()
-        else:
-            iteration = EventIteration.objects.filter(id=iteration_id).first()
-
-        if iteration is None:
-            return error("iteration not found", status=404)
-
-        return func(req, *args, iteration=iteration, **kwargs)
-
-    return wrapper
+from .util import *
 
 
 def serialize_team(team: Team):
     return team.serialize(includes=["players__user"])
 
 
-def select_teams(iteration_id, many=False, **kwargs) -> list[Team] | Team | None:
+def select_teams(iteration_id, many=False, sort=False, **kwargs) -> list[Team] | Team | None:
     teams = Team.objects.prefetch_related("players__user").filter(
         iteration_id=iteration_id,
         **kwargs
     )
+    if sort:
+        teams = teams.order_by("-points")
     if many:
         return teams
     if len(teams) == 0:
@@ -225,17 +119,28 @@ def achievements(req, iteration):
 @require_iteration
 def teams(req, iteration):
     if iteration.has_ended() or (req.user.is_authenticated and req.user.is_admin):
-        serialized_teams = map(serialize_team, select_teams(iteration.id, many=True))
+        serialized_teams = list(map(serialize_team, select_teams(iteration.id, many=True, sort=True)))
     else:
-        serialized_teams = (
-            serialize_team(team)
-            if any(map(lambda p: p.user.id == req.user.id, team.players.all())) else
-            team.serialize(excludes=["invite", "icon", "name"])
-            for team in select_teams(iteration.id, many=True)
-        )
-    sorted_teams = sorted(serialized_teams, key=lambda t: t['points'], reverse=True)
+        teams = select_teams(iteration.id, many=True, sort=True)
+        my_team_item = next((
+            (i, team) for i, team in enumerate(teams)
+            if any((player.user_id == req.user.id for player in team.players.all()))
+        ), None)
 
-    return success(sorted_teams)
+        if my_team_item is None:
+            return success([])
+
+        my_team_i, my_team = my_team_item
+
+        # localized leaderboard
+        # (teams above and below you)
+        serialized_teams = [serialize_team(my_team)]
+        if my_team_i > 0:
+            serialized_teams.insert(0, serialize_team(teams[my_team_i-1]))
+        if my_team_i < len(teams) - 1:
+            serialized_teams.append(serialize_team(teams[my_team_i+1]))
+
+    return success(serialized_teams)
 
 
 @require_POST
@@ -301,7 +206,7 @@ def create_team(req, data, iteration):
 
     try:
         invite = secrets.token_urlsafe(12)
-        team = Team(name=data["name"], icon="", invite=invite, iteration=current_iteration)
+        team = Team(name=data["name"], icon="", invite=invite, iteration=iteration)
         team.save()
     except:
         return error("team name taken")
@@ -373,7 +278,27 @@ def chat_messages(req, iteration):
         team_id=player.team_id
     ).order_by("-sent_at")[:50]
 
-    return success([{"name": message.player.user.username, "message": message.message, "sent_at": message.sent_at.isoformat()} for message in messages])
+    return success([
+        {
+            "name": message.player.user.username,
+            "message": message.message,
+            "sent_at": message.sent_at.isoformat()
+        } for message in reversed(messages)
+    ])
+
+@require_GET
+@require_iteration
+def get_iteration(req, iteration):
+    return success(iteration.serialize())
+
+
+@require_GET
+@require_iteration
+@require_user
+def get_registration(req, iteration):
+    registration = Registration.objects.filter(user_id=req.user.id, iteration_id=iteration.id).first()
+    return success({"registered": registration is not None})
+
 
 @require_POST
 @accepts_json_data(
@@ -382,9 +307,6 @@ def chat_messages(req, iteration):
 @require_iteration_before_registration_end
 @require_user
 def register(req, data, iteration):
-    if iteration.has_registration_ended:
-        return error("can no longer register")
-
     registration = Registration.objects.filter(user_id=req.user.id, iteration_id=iteration.id).first()
     reg = data["register"]
 
@@ -394,7 +316,7 @@ def register(req, data, iteration):
     if not reg and registration is None:
         return error("already unregistered")
 
-    if reg:
+    if not reg:
         registration.delete()
     else:
         Registration.objects.create(user=req.user, iteration=iteration)
@@ -457,6 +379,14 @@ def player_stats(req, iteration):
             (player.serialize(includes=["user", "completion_count"]) for player in most_first_completions)
         )
     })
+
+
+@require_iteration
+def get_announcements(req, iteration):
+    return success([
+        announcement.serialize()
+        for announcement in Announcement.objects.filter(iteration_id=iteration.id)
+    ])
 
 
 @require_user

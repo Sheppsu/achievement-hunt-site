@@ -1,8 +1,8 @@
-import { useGetTeamMessages } from "api/query";
-import { WebsocketContext } from "contexts/WebsocketContext";
+import { useGetTeamMessages } from "api/query.ts";
+import { WebsocketContext } from "contexts/WebsocketContext.tsx";
 import { FormEvent, useContext, useEffect, useRef, useState } from "react";
 
-export default function TeamChat() {
+export default function TeamChatCard() {
   const [value, setValue] = useState<string>("");
   const { wsState, sendChatMessage } = useContext(WebsocketContext)!;
   const { data } = useGetTeamMessages();

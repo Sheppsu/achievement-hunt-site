@@ -6,6 +6,4 @@ export type Session = {
   authUrl: string;
   wsUri: string;
   debug: boolean;
-  eventStart: number;
-  eventEnd: number;
 };

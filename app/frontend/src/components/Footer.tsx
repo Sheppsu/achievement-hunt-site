@@ -63,14 +63,14 @@ export default function Footer() {
               <svg width="10" height="10">
                 <circle cx="5" cy="5" r="4" fill="green" />
               </svg>
-              <p>Connected to websocket</p>
+              <p>Connected to server</p>
             </>
           ) : (
             <>
               <svg width="10" height="10">
                 <circle cx="5" cy="5" r="4" fill="red" />
               </svg>
-              <p>Disconnected from websocket</p>
+              <p>Not connected to server</p>
             </>
           )}
         </div>
