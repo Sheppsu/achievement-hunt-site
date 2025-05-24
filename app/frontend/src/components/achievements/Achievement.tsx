@@ -1,10 +1,10 @@
-import { AchievementExtendedType } from "api/types/AchievementType";
-import { parseTags, toTitleCase } from "util/helperFunctions";
-import AchievementCompletionEntry from "components/achievements/AchievementCompletionEntry.tsx";
 import { AchievementCompletionType } from "api/types/AchievementCompletionType.ts";
-import AudioPlayer from "components/audio/AudioPlayer.tsx";
-import { WebsocketState } from "types/WebsocketStateType.ts";
+import { AchievementExtendedType } from "api/types/AchievementType";
 import classNames from "classnames";
+import AchievementCompletionEntry from "components/achievements/AchievementCompletionEntry.tsx";
+import AudioPlayer from "components/audio/AudioPlayer.tsx";
+import { AppState } from "types/AppStateType.ts";
+import { parseTags, toTitleCase } from "util/helperFunctions";
 
 export default function Achievement({
   achievement,
@@ -15,7 +15,7 @@ export default function Achievement({
   achievement: AchievementExtendedType;
   completed: boolean;
   points: number | null;
-  state: WebsocketState;
+  state: AppState;
 }) {
   const completions = achievement.completions;
   const tags = parseTags(achievement.tags);

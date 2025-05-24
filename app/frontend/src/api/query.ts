@@ -1,5 +1,6 @@
 import {
   MutationKey,
+  QueryClient,
   QueryClientContext,
   UseMutationOptions,
   UseMutationResult,
@@ -7,9 +8,11 @@ import {
   queryOptions,
   useMutation,
   useQuery,
-  QueryClient,
 } from "@tanstack/react-query";
+import { AchievementCommentType } from "api/types/AchievementCommentType.ts";
+import { UserType } from "api/types/UserType.ts";
 import { EventContext, EventType } from "contexts/EventContext";
+import { ChatMessage } from "contexts/WebsocketContext";
 import { UndefinedInitialDataOptions } from "node_modules/@tanstack/react-query/build/legacy";
 import { useContext } from "react";
 import {
@@ -21,8 +24,6 @@ import {
   AchievementType,
   StaffAchievementType,
 } from "./types/AchievementType";
-import { AchievementCommentType } from "api/types/AchievementCommentType.ts";
-import { UserType } from "api/types/UserType.ts";
 
 function getUrl(endpoint: string): string {
   endpoint = endpoint.startsWith("/") ? endpoint : "/" + endpoint;
@@ -533,5 +534,11 @@ export function useGetStaffAchievement(
     queryKey: ["staff", "achievements", achievementId.toString()],
     enabled,
     refetchInterval: 60000,
+  });
+}
+
+export function useGetTeamMessages(): UseQueryResult<ChatMessage[]> {
+  return useMakeQuery({
+    queryKey: ["teams", "messages"],
   });
 }

@@ -6,13 +6,7 @@ import {
   useRenameTeam,
   useTransferTeamAdmin,
 } from "api/query";
-import React, {
-  FormEvent,
-  SetStateAction,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import React, { FormEvent, SetStateAction, useContext, useState } from "react";
 
 import { AchievementPlayerType } from "api/types/AchievementPlayerType";
 import { AchievementTeamExtendedType } from "api/types/AchievementTeamType";
@@ -30,6 +24,7 @@ import { FaCrown } from "react-icons/fa6";
 import { IoWarning } from "react-icons/io5";
 import { MdArrowBack } from "react-icons/md";
 import { getAnonName } from "util/helperFunctions";
+import TeamChat from "./TeamChat";
 
 function Button({
   text,
@@ -503,67 +498,6 @@ function PlacementCard({
         </div>
       </div>
     </motion.div>
-  );
-}
-
-type ChatMessage = {
-  name: string;
-  message: string;
-  color: string;
-};
-
-function TeamChat() {
-  const [value, setValue] = useState<string>("");
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    { name: "aychar_", message: "hiiii", color: "red" },
-    { name: "aychar_", message: "hiiii", color: "red" },
-    { name: "aychar_", message: "hiiii", color: "red" },
-    { name: "aychar_", message: "hiiii", color: "red" },
-    { name: "aychar_", message: "hiiii", color: "red" },
-    { name: "aychar_", message: "hiiii", color: "red" },
-    {
-      name: "baychar_",
-      message:
-        "HJFIOPEDAHFIOPEAHFOPIAEOIHFEPW FEDASJ FWEIOPHFE WAPFH WAEP FWAEF AWEF WEAFPEWA FHWEAOPF WAEPIOF ",
-      color: "blue",
-    },
-  ]);
-
-  const onChatSend = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const msg = new FormData(e.currentTarget).get("chat-value") as string;
-    setMessages((prevMsgs) => {
-      return [...prevMsgs, { name: "aychar_", message: msg, color: "red" }];
-    });
-    setValue("");
-  };
-
-  useEffect(() => {});
-
-  return (
-    <div className="card">
-      <p className="card--teams__title">Chat</p>
-      <div className="team-chat">
-        <div className="team-chat__messages">
-          {messages.map((msg, idx) => (
-            <p key={idx}>
-              <span style={{ color: msg.color }}>{msg.name}</span>:{" "}
-              {msg.message}
-            </p>
-          ))}
-        </div>
-      </div>
-      <form onSubmit={onChatSend}>
-        <input
-          type="text"
-          name="chat-value"
-          className="team-chat__input"
-          value={value}
-          onChange={(e) => setValue(e.currentTarget.value)}
-          autoComplete="off"
-        />
-      </form>
-    </div>
   );
 }
 
