@@ -5,7 +5,8 @@
     "build": "vite build",
     "build-debug": "vite build -m debug",
     "watch": "vite build --watch -m debug",
-    "format": "prettier . --write"
+    "format": "prettier .",
+    "format:write": "prettier . --write"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.74.0",
