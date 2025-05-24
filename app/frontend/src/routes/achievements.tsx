@@ -16,6 +16,7 @@ import { useContext, useEffect, useState } from "react";
 import { Helmet } from "react-helmet";
 import { AppState } from "types/AppStateType.ts";
 import { getMyTeam } from "util/helperFunctions";
+import { EventIterationType } from "api/types/EventIterationType.ts";
 
 function getTimeStr(delta: number) {
   const days = Math.floor((delta / (1000 * 60 * 60 * 24)) % 60);
@@ -58,18 +59,18 @@ function FullAchievementCompletionPage({
   team,
   state,
   scope,
-  hidden,
+  iteration,
 }: {
   team: AchievementTeamExtendedType | null;
   state: AppState;
   scope: AnimationScope;
-  hidden: boolean;
+  iteration: EventIterationType;
 }) {
   return (
     <>
       <AchievementContainer scope={scope} state={state} />
       <div className="achievements-progress">
-        <AchievementProgress team={team} />
+        <AchievementProgress team={team} iteration={iteration} />
       </div>
     </>
   );
@@ -164,7 +165,7 @@ export default function AchievementCompletionPage() {
               scope={scope}
               state={state}
               team={team}
-              hidden={!showContent}
+              iteration={iteration}
             />
           ) : (
             <LimitedAchievementCompletionPage state={state} scope={scope} />

@@ -4,18 +4,21 @@ import { AchievementExtendedType } from "api/types/AchievementType";
 import { SessionContext } from "contexts/SessionContext";
 import { WebsocketContext } from "contexts/WebsocketContext";
 import { useContext } from "react";
+import { EventIterationType } from "api/types/EventIterationType.ts";
 
 export default function AchievementProgress({
   team,
+  iteration,
 }: {
   team: AchievementTeamExtendedType | null;
+  iteration: EventIterationType;
 }) {
   const session = useContext(SessionContext);
   const { wsState, sendSubmit } = useContext(WebsocketContext)!;
 
   const { data: achievements } = useGetAchievements();
 
-  const eventEnded: boolean = Date.now() >= session.eventEnd;
+  const eventEnded: boolean = Date.now() >= Date.parse(iteration.end);
 
   if (team === null || achievements === undefined) {
     return <div>Loading team progress...</div>;
