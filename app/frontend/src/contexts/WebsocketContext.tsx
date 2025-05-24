@@ -21,7 +21,7 @@ import { useStateContext } from "./StateContext";
 export type ChatMessage = {
   name: string;
   message: string;
-  color: string;
+  sent_at: string;
 };
 
 interface BaseStateActionType {
@@ -46,24 +46,17 @@ interface SubmitType extends BaseStateActionType {
   disable: boolean;
 }
 
-interface ChatType extends BaseStateActionType {
-  id: 5;
-  msg: ChatMessage;
-}
-
 type WsStateActionType =
   | ConnectingType
   | AuthType
   | DisconnectionType
-  | SubmitType
-  | ChatType;
+  | SubmitType;
 
 export type WebsocketState = {
   ws: WebSocket | null | undefined;
   authenticated: boolean;
   lastDisconnect: number;
   submitEnabled: boolean;
-  teamMessages: ChatMessage[];
 };
 
 export type WebsocketStateDispatch = React.Dispatch<WsStateActionType>;
@@ -96,11 +89,6 @@ function wsStateReducer(
       return {
         ...state,
         submitEnabled: !action.disable,
-      };
-    case 5: // team chat message
-      return {
-        ...state,
-        teamMessages: [...state.teamMessages, action.msg],
       };
   }
 }
@@ -196,7 +184,6 @@ function handleMessage(
   dispatchEventMsg: React.Dispatch<{ type: EventType; msg: string }>,
   dispatchWsState: WebsocketStateDispatch,
   queryClient: QueryClient,
-  session: Session,
 ) {
   const data = JSON.parse(evt.data);
   if (data.error !== undefined) {
@@ -236,8 +223,19 @@ function handleMessage(
       break;
     }
     case 2: {
-      if (session.user?.username !== data.msg.name)
-        dispatchWsState({ id: 5, msg: data.msg });
+      const current_path = window.location.pathname.slice(1);
+      if (current_path !== "teams") {
+        dispatchEventMsg({
+          type: "info",
+          msg: `New team chat message from ${data.msg.name}! Go to your dashboard to read it.`,
+        });
+      }
+      queryClient.setQueryData(
+        ["teams", "messages"],
+        (messages: ChatMessage[]) => {
+          return [...messages, data.msg];
+        },
+      );
     }
   }
 }
@@ -268,7 +266,7 @@ function connect(
     dispatchWsState({ id: 2 });
   });
   ws.addEventListener("message", (evt) => {
-    handleMessage(evt, dispatchEventMsg, dispatchWsState, queryClient, session);
+    handleMessage(evt, dispatchEventMsg, dispatchWsState, queryClient);
   });
 
   return ws;
@@ -295,7 +293,6 @@ function _sendSubmit(
 
 function _sendChatMessage(
   wsState: WebsocketState,
-  dispatchWsState: WebsocketStateDispatch,
   session: Session,
   msg: string,
 ) {
@@ -308,10 +305,6 @@ function _sendChatMessage(
     return;
   }
 
-  dispatchWsState({
-    id: 5,
-    msg: { name: session.user.username, message: msg, color: "blue" },
-  });
   wsState.ws.send(JSON.stringify({ code: 2, msg: msg }));
 }
 
@@ -337,7 +330,6 @@ export function WebsocketContextProvider({
     authenticated: false,
     lastDisconnect: 0,
     submitEnabled: false,
-    teamMessages: [],
   });
 
   const { data: authData } = useQuery({
@@ -370,7 +362,7 @@ export function WebsocketContextProvider({
   };
 
   const sendChatMessage = (msg: string) => {
-    _sendChatMessage(wsState, dispatchWsState, session, msg);
+    _sendChatMessage(wsState, session, msg);
   };
 
   return (

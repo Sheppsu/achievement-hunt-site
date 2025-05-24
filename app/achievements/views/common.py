@@ -351,7 +351,7 @@ def chat_messages(req, iteration):
         team_id=player.team_id
     ).order_by("-sent_at")[:50]
 
-    return success([message.serialize([SerializableField("player__user",  post_transform=lambda p: p["username"])]) for message in messages])
+    return success(list(reversed([{"name": msg["player"]["user"]["username"], "message": msg["message"], "sent_at": msg["sent_at"]} for msg in [message.serialize(["player__user"]) for message in messages]])))
 
 @require_iteration_after_end
 def player_stats(req, iteration):

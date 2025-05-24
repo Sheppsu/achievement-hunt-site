@@ -1,9 +1,12 @@
+import { useGetTeamMessages } from "api/query";
 import { WebsocketContext } from "contexts/WebsocketContext";
-import { FormEvent, useContext, useEffect, useState } from "react";
+import { FormEvent, useContext, useEffect, useRef, useState } from "react";
 
 export default function TeamChat() {
   const [value, setValue] = useState<string>("");
-  const { wsState, sendChatMessage } = useContext(WebsocketContext)!;
+  const { sendChatMessage } = useContext(WebsocketContext)!;
+  const { data } = useGetTeamMessages();
+  const msgsEndRef = useRef<HTMLDivElement>(null);
 
   const onChatSend = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -12,19 +15,35 @@ export default function TeamChat() {
     setValue("");
   };
 
-  useEffect(() => {});
+  useEffect(() => {
+    if (msgsEndRef.current) {
+      msgsEndRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+      });
+    }
+  }, [data]);
 
   return (
     <div className="card">
       <p className="card--teams__title">Chat</p>
       <div className="team-chat">
         <div className="team-chat__messages">
-          {wsState.teamMessages.map((msg, idx) => (
-            <p key={idx}>
-              <span style={{ color: msg.color }}>{msg.name}</span>:{" "}
-              {msg.message}
-            </p>
-          ))}
+          {data && data.length > 0 ? (
+            data.map((msg, idx) => (
+              <p key={idx}>
+                <span className="team-chat__messages--time">
+                  {new Date(msg.sent_at).toLocaleTimeString()}
+                </span>
+                {"   "}
+                <span style={{ fontWeight: "500" }}>{msg.name}</span>:{" "}
+                {msg.message}
+              </p>
+            ))
+          ) : (
+            <p>No messages!</p>
+          )}
+          <div ref={msgsEndRef} />
         </div>
       </div>
       <form onSubmit={onChatSend}>
