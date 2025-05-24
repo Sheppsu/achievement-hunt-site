@@ -11,5 +11,5 @@ export type PopupContextType = {
 };
 
 export const PopupContext = createContext<PopupContextType | undefined>(
-  undefined
+  undefined,
 );

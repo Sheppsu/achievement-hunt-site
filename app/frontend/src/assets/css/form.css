@@ -1,16 +1,16 @@
 .form-container {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .form-container__input {
-    display: flex;
-    flex-direction: row;
-    gap: 5px;
-    align-items: center;
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+  align-items: center;
 }
 
 .form-container__input.center {
-    justify-content: center;
+  justify-content: center;
 }
