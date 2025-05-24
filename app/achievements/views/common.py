@@ -373,7 +373,7 @@ def chat_messages(req, iteration):
         team_id=player.team_id
     ).order_by("-sent_at")[:50]
 
-    return success(list(reversed([{"name": msg["player"]["user"]["username"], "message": msg["message"], "sent_at": msg["sent_at"]} for msg in [message.serialize(["player__user"]) for message in messages]])))
+    return success([{"name": message.player.user.username, "message": message.message, "sent_at": message.sent_at.isoformat()} for message in messages])
 
 @require_POST
 @accepts_json_data(

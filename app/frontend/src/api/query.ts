@@ -537,12 +537,8 @@ export function useGetStaffAchievement(
   });
 }
 
-export function useGetTeamMessages(
-  enabled: boolean = true,
-): UseQueryResult<ChatMessage[]> {
+export function useGetTeamMessages(): UseQueryResult<ChatMessage[]> {
   return useMakeQuery({
     queryKey: ["teams", "messages"],
-    enabled,
-    refetchInterval: 60000,
   });
 }
