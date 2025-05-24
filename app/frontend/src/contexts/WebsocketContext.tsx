@@ -189,7 +189,7 @@ function handleMessage(
   if (data.error !== undefined) {
     dispatchEventMsg({
       type: "error",
-      msg: `Unexpected error from submission server: ${data.error}`,
+      msg: `Unexpected error from websocket server: ${data.error}`,
     });
     return;
   }
@@ -199,7 +199,7 @@ function handleMessage(
       dispatchWsState({ id: 3 });
       dispatchEventMsg({
         type: "info",
-        msg: "You are now authenticated with the submission server",
+        msg: "You are now authenticated with the websocket server",
       });
       break;
     }
@@ -250,18 +250,13 @@ function connect(
 ): WebSocket {
   const ws = new WebSocket(uri);
 
-  dispatchEventMsg({
-    type: "info",
-    msg: "Connecting to submission server...",
-  });
-
   ws.addEventListener("open", (_) => {
     ws.send(JSON.stringify(data));
   });
   ws.addEventListener("close", (_) => {
     dispatchEventMsg({
       type: "error",
-      msg: "Connection to submissions server failed or unexpectedly closed; reconnecting in 3 seconds...",
+      msg: "Connection to websocket server failed or unexpectedly closed; reconnecting in 5 seconds...",
     });
     dispatchWsState({ id: 2 });
   });
@@ -353,7 +348,7 @@ export function WebsocketContextProvider({
         );
         dispatchWsState({ id: 1, ws });
       },
-      Math.max(0, 3000 - (Date.now() - wsState.lastDisconnect)),
+      Math.max(0, 5000 - (Date.now() - wsState.lastDisconnect)),
     );
   }
 

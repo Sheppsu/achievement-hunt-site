@@ -4,7 +4,7 @@ import { FormEvent, useContext, useEffect, useRef, useState } from "react";
 
 export default function TeamChat() {
   const [value, setValue] = useState<string>("");
-  const { sendChatMessage } = useContext(WebsocketContext)!;
+  const { wsState, sendChatMessage } = useContext(WebsocketContext)!;
   const { data } = useGetTeamMessages();
   const msgsEndRef = useRef<HTMLDivElement>(null);
 
@@ -54,6 +54,12 @@ export default function TeamChat() {
           value={value}
           onChange={(e) => setValue(e.currentTarget.value)}
           autoComplete="off"
+          placeholder={
+            wsState.authenticated
+              ? "Type your message..."
+              : "Websocket server disconnected"
+          }
+          disabled={!wsState.authenticated}
         />
       </form>
     </div>
