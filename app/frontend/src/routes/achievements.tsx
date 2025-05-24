@@ -32,20 +32,15 @@ function getTimeStr(delta: number) {
 function HiddenAchievementCompletionPage({
   time,
   eventStart,
-  hidden,
 }: {
   time: number;
   eventStart: number;
-  hidden: boolean;
 }) {
   const delta = eventStart - time;
   const timeString = getTimeStr(delta);
 
   return (
-    <div
-      className={classNames({ hide: hidden })}
-      style={{ margin: "auto", textAlign: "center", marginTop: "20px" }}
-    >
+    <div style={{ margin: "auto", textAlign: "center", marginTop: "20px" }}>
       <h1 style={{ fontSize: "3em" }}>Starts in {timeString}</h1>
     </div>
   );
@@ -89,11 +84,10 @@ export default function AchievementCompletionPage() {
   const [scope, animate] = useAnimate();
 
   useEffect(() => {
-    const intervalId = setInterval(() => setTime(Date.now()), 1000);
-    return () => clearInterval(intervalId);
-  });
+    setInterval(() => setTime(Date.now()), 1000);
+  }, []); // run once
 
-  const isHidden = time < eventStart && !session.debug;
+  const isHidden = time < eventStart;
 
   const { data: achievements } = useGetAchievements(!isHidden);
   const { data: teams } = useGetTeams();
@@ -106,19 +100,21 @@ export default function AchievementCompletionPage() {
     dispatchState({ id: 5, achievementsFilter: getDefaultNav(achievements) });
   }
 
+  if (time < eventStart) {
+    return (
+      <AnimatedPage>
+        <HiddenAchievementCompletionPage time={time} eventStart={eventStart} />
+      </AnimatedPage>
+    );
+  }
+
   return (
     <AnimatedPage>
       <Helmet>
         <title>CTA - Completions</title>
       </Helmet>
 
-      <HiddenAchievementCompletionPage
-        time={time}
-        eventStart={eventStart}
-        hidden={!isHidden}
-      />
-
-      <div className={classNames("achievements-layout", { hide: isHidden })}>
+      <div className="achievements-layout">
         <div style={{ margin: "auto", textAlign: "center", marginTop: "20px" }}>
           <h1 style={{ fontSize: "3em" }}>
             {time < eventEnd

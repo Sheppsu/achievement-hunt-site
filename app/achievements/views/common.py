@@ -44,6 +44,17 @@ def get_current_iteration() -> EventIteration:
     return current_iteration
 
 
+def require_iteration_before_start(func):
+    @require_iteration
+    def wrapper(req, *args, iteration, **kwargs):
+        if iteration.has_started():
+            return error("iteration has already started", status=403)
+
+        return func(req, *args, iteration=iteration, **kwargs)
+
+    return wrapper
+
+
 def require_iteration_before_end(func):
     @require_iteration
     def wrapper(req, *args, iteration, **kwargs):
@@ -71,6 +82,17 @@ def require_iteration_after_end(func):
     def wrapper(req, *args, iteration, **kwargs):
         if not iteration.has_ended():
             return error("must wait until iteration ends", status=403)
+
+        return func(req, *args, iteration=iteration, **kwargs)
+
+    return wrapper
+
+
+def require_iteration_before_registration_end(func):
+    @require_iteration
+    def wrapper(req, *args, iteration, **kwargs):
+        if iteration.has_registration_ended():
+            return error("Registration period has ended", status=403)
 
         return func(req, *args, iteration=iteration, **kwargs)
 
@@ -217,7 +239,7 @@ def teams(req, iteration):
 
 
 @require_POST
-@require_iteration_before_end
+@require_iteration_before_start
 @accepts_json_data(
     DictionaryType({"invite": StringType()})
 )
@@ -242,7 +264,7 @@ def join_team(req, data, iteration):
 
 
 @require_http_methods(["DELETE"])
-@require_iteration_before_end
+@require_iteration_before_start
 @require_user
 def leave_team(req, iteration):
     team = Team.objects.prefetch_related("players__user").filter(
@@ -267,7 +289,7 @@ def leave_team(req, iteration):
 
 
 @require_POST
-@require_iteration_before_end
+@require_iteration_before_start
 @accepts_json_data(
     DictionaryType({"name": StringType(min_length=1, max_length=32)})
 )
@@ -298,7 +320,7 @@ def create_team(req, data, iteration):
 @accepts_json_data(
     DictionaryType({"newAdminId": IntegerType()})
 )
-@require_iteration_before_end
+@require_iteration_before_start
 @require_user
 def transfer_admin(req, data, iteration):
     current_admin = select_current_player(req.user.id, iteration.id)
@@ -322,7 +344,7 @@ def transfer_admin(req, data, iteration):
 @accepts_json_data(
     DictionaryType({"name": StringType(min_length=1, max_length=32)})
 )
-@require_iteration_before_end
+@require_iteration_before_start
 @require_user
 def rename_team(req, data, iteration):
     player = select_current_player(req.user.id, iteration.id)
@@ -352,6 +374,33 @@ def chat_messages(req, iteration):
     ).order_by("-sent_at")[:50]
 
     return success(list(reversed([{"name": msg["player"]["user"]["username"], "message": msg["message"], "sent_at": msg["sent_at"]} for msg in [message.serialize(["player__user"]) for message in messages]])))
+
+@require_POST
+@accepts_json_data(
+    DictionaryType({"register": BoolType()})
+)
+@require_iteration_before_registration_end
+@require_user
+def register(req, data, iteration):
+    if iteration.has_registration_ended:
+        return error("can no longer register")
+
+    registration = Registration.objects.filter(user_id=req.user.id, iteration_id=iteration.id).first()
+    reg = data["register"]
+
+    if reg and registration is not None:
+        return error("already registered")
+
+    if not reg and registration is None:
+        return error("already unregistered")
+
+    if reg:
+        registration.delete()
+    else:
+        Registration.objects.create(user=req.user, iteration=iteration)
+
+    return success({"registered": reg})
+
 
 @require_iteration_after_end
 def player_stats(req, iteration):

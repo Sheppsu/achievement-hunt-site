@@ -72,7 +72,11 @@ class EventIteration(SerializableModel):
     name = models.CharField(max_length=64, default="")
     start = models.DateTimeField()
     end = models.DateTimeField()
+    registration_end = models.DateTimeField()
     description = models.JSONField(default=dict)
+
+    def has_registration_ended(self):
+        return time.time() >= self.registration_end.timestamp()
 
     def has_ended(self):
         return time.time() >= self.end.timestamp()
@@ -258,3 +262,16 @@ class ChatMessage(SerializableModel):
     class Serialization:
         FIELDS = ["id", "sent_at", "message"]
     
+
+class Registration(SerializableModel):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    iteration = models.ForeignKey(EventIteration, on_delete=models.CASCADE)
+    is_screened = models.BooleanField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["user", "iteration"], name="unique_registration")
+        ]
+
+    class Serialization:
+        FIELDS = ["is_screened"]

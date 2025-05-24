@@ -13,6 +13,7 @@ iteration_urls = [
     path("teams/messages/", common.chat_messages),
     path("stats/", common.player_stats),
     path("wsauth/", common.get_auth_packet),
+    path("register/", common.register),
 ]
 
 urlpatterns = [
