@@ -36,7 +36,7 @@ export const EventContext = createContext((({
 
 export function eventReducer(
   state: EventState,
-  { type, msg, id }: { type: EventType; msg?: string; id?: number }
+  { type, msg, id }: { type: EventType; msg?: string; id?: number },
 ): EventState {
   const events = state.events;
   const pastEvents = state.pastEvents;
