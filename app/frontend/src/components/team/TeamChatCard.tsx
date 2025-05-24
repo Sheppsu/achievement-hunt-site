@@ -1,50 +1,49 @@
-import React, { FormEvent, useEffect, useState } from "react";
-
-type ChatMessage = {
-  name: string;
-  message: string;
-  color: string;
-};
+import { useGetTeamMessages } from "api/query.ts";
+import { WebsocketContext } from "contexts/WebsocketContext.tsx";
+import { FormEvent, useContext, useEffect, useRef, useState } from "react";
 
 export default function TeamChatCard() {
   const [value, setValue] = useState<string>("");
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    { name: "aychar_", message: "hiiii", color: "red" },
-    { name: "aychar_", message: "hiiii", color: "red" },
-    { name: "aychar_", message: "hiiii", color: "red" },
-    { name: "aychar_", message: "hiiii", color: "red" },
-    { name: "aychar_", message: "hiiii", color: "red" },
-    { name: "aychar_", message: "hiiii", color: "red" },
-    {
-      name: "baychar_",
-      message:
-        "HJFIOPEDAHFIOPEAHFOPIAEOIHFEPW FEDASJ FWEIOPHFE WAPFH WAEP FWAEF AWEF WEAFPEWA FHWEAOPF WAEPIOF ",
-      color: "blue",
-    },
-  ]);
+  const { wsState, sendChatMessage } = useContext(WebsocketContext)!;
+  const { data } = useGetTeamMessages();
+  const msgsEndRef = useRef<HTMLDivElement>(null);
 
   const onChatSend = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const msg = new FormData(e.currentTarget).get("chat-value") as string;
-    setMessages((prevMsgs) => {
-      return [...prevMsgs, { name: "aychar_", message: msg, color: "red" }];
-    });
+    sendChatMessage(msg);
     setValue("");
   };
 
-  useEffect(() => {});
+  useEffect(() => {
+    if (msgsEndRef.current) {
+      msgsEndRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+      });
+    }
+  }, [data]);
 
   return (
     <div className="card">
-      <h1 className="card--teams__title">Chat</h1>
+      <p className="card--teams__title">Chat</p>
       <div className="team-chat">
         <div className="team-chat__messages">
-          {messages.map((msg, idx) => (
-            <p key={idx}>
-              <span style={{ color: msg.color }}>{msg.name}</span>:{" "}
-              {msg.message}
-            </p>
-          ))}
+          {data && data.length > 0 ? (
+            data.map((msg, idx) => (
+              <p key={idx}>
+                <span className="team-chat__messages--time">
+                  {new Date(msg.sent_at).toLocaleTimeString()}
+                </span>
+                {"   "}
+                <span style={{ fontWeight: "500" }}>{msg.name}</span>:{" "}
+                {msg.message}
+              </p>
+            ))
+          ) : (
+            <p>No messages!</p>
+          )}
+          <div ref={msgsEndRef} />
         </div>
       </div>
       <form onSubmit={onChatSend}>
@@ -55,6 +54,12 @@ export default function TeamChatCard() {
           value={value}
           onChange={(e) => setValue(e.currentTarget.value)}
           autoComplete="off"
+          placeholder={
+            wsState.authenticated
+              ? "Type your message..."
+              : "Websocket server disconnected"
+          }
+          disabled={!wsState.authenticated}
         />
       </form>
     </div>

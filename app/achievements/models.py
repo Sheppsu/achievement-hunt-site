@@ -234,7 +234,7 @@ class Team(SerializableModel):
     icon = models.CharField(max_length=64, null=True)
     invite = models.CharField(max_length=16)
     points = models.PositiveIntegerField(default=0)
-    iteration = models.ForeignKey(EventIteration, on_delete=models.SET_NULL, null=True)
+    iteration = models.ForeignKey(EventIteration, on_delete=models.CASCADE)
 
     class Serialization:
         FIELDS = ["id", "name", "icon", "invite", "points"]

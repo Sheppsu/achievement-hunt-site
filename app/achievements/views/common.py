@@ -206,7 +206,7 @@ def create_team(req, data, iteration):
 
     try:
         invite = secrets.token_urlsafe(12)
-        team = Team(name=data["name"], icon="", invite=invite, iteration=current_iteration)
+        team = Team(name=data["name"], icon="", invite=invite, iteration=iteration)
         team.save()
     except:
         return error("team name taken")

@@ -50,7 +50,6 @@ function CreateTeamComponent({
 }) {
   const dispatchEventMsg = useContext(EventContext);
   const createTeam = useCreateTeam();
-  const { setPopup } = useContext(PopupContext) as PopupContextType;
 
   const onCreateTeam = (evt: FormEvent<HTMLFormElement>) => {
     evt.preventDefault();
@@ -66,16 +65,15 @@ function CreateTeamComponent({
     createTeam.mutate(
       { name },
       {
-        onSuccess: () => createTeam.reset(),
+        onSuccess: () => {
+          createTeam.reset();
+          dispatchEventMsg({
+            type: "info",
+            msg: `Team '${name}' successfully created!`,
+          });
+        },
       },
     );
-
-    dispatchEventMsg({
-      type: "info",
-      msg: `Team '${name}' successfully created!`,
-    });
-
-    setPopup(null);
   };
 
   return (
@@ -162,7 +160,6 @@ function JoinTeamComponent({
 }) {
   const dispatchEventMsg = useContext(EventContext);
   const joinTeam = useJoinTeam();
-  const { setPopup } = useContext(PopupContext) as PopupContextType;
 
   const onJoinTeam = (evt: FormEvent<HTMLFormElement>) => {
     evt.preventDefault();
@@ -181,8 +178,6 @@ function JoinTeamComponent({
         onSuccess: () => joinTeam.reset(),
       },
     );
-
-    setPopup(null);
   };
 
   return (
