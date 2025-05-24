@@ -8,14 +8,13 @@ import AchievementNavigationBar, {
 import AchievementProgress from "components/achievements/AchievementProgress.tsx";
 import { SessionContext } from "contexts/SessionContext";
 import {
-  StateDispatch,
   useDispatchStateContext,
   useStateContext,
 } from "contexts/StateContext.ts";
 import { AnimationScope, useAnimate } from "motion/react";
 import { useContext, useEffect, useState } from "react";
 import { Helmet } from "react-helmet";
-import { WebsocketState } from "types/WebsocketStateType.ts";
+import { AppState } from "types/AppStateType.ts";
 import { getMyTeam } from "util/helperFunctions";
 
 function getTimeStr(delta: number) {
@@ -49,7 +48,7 @@ function LimitedAchievementCompletionPage({
   state,
   scope,
 }: {
-  state: WebsocketState;
+  state: AppState;
   scope: AnimationScope;
 }) {
   return <AchievementContainer scope={scope} state={state} />;
@@ -59,25 +58,18 @@ function FullAchievementCompletionPage({
   team,
   state,
   scope,
-  dispatchState,
   hidden,
 }: {
   team: AchievementTeamExtendedType | null;
-  state: WebsocketState;
+  state: AppState;
   scope: AnimationScope;
-  dispatchState: StateDispatch;
   hidden: boolean;
 }) {
   return (
     <>
       <AchievementContainer scope={scope} state={state} />
       <div className="achievements-progress">
-        <AchievementProgress
-          state={state}
-          dispatchState={dispatchState}
-          team={team}
-          hidden={hidden}
-        />
+        <AchievementProgress team={team} />
       </div>
     </>
   );
@@ -171,7 +163,6 @@ export default function AchievementCompletionPage() {
             <FullAchievementCompletionPage
               scope={scope}
               state={state}
-              dispatchState={dispatchState}
               team={team}
               hidden={!showContent}
             />

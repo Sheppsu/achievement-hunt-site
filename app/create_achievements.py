@@ -1,16 +1,21 @@
-import django
 import os
 from datetime import datetime, timezone
+
+import django
 from dotenv import load_dotenv
 
 load_dotenv()
+
+if os.getenv("OSU_DEV_SERVER") == "1":
+    print("This script won't work on the osu! dev server, please provide API credentials for osu.ppy.sh")
+    exit(1)
+    
 os.environ["DJANGO_SETTINGS_MODULE"] = "app.settings"
 django.setup()
 
 
 from achievements.models import *
 from django.conf import settings
-
 
 client = settings.OSU_CLIENT
 

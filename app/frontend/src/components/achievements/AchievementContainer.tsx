@@ -5,7 +5,7 @@ import "assets/css/achievements.css";
 import { SessionContext } from "contexts/SessionContext.ts";
 import { AnimationScope } from "motion/react";
 import { useContext } from "react";
-import { WebsocketState } from "types/WebsocketStateType.ts";
+import { AppState } from "types/AppStateType.ts";
 import { getSortedAchievements } from "util/achievementSorting.ts";
 import {
   calculateScore,
@@ -46,7 +46,7 @@ export default function AchievementContainer({
   state,
   scope,
 }: {
-  state: WebsocketState;
+  state: AppState;
   scope: AnimationScope;
 }) {
   const session = useContext(SessionContext);

@@ -1,7 +1,7 @@
 import { useContext, useReducer, useState } from "react";
 import { Link, NavLink, useLocation, useOutlet } from "react-router-dom";
 
-import { EventContext, eventReducer, EventState } from "contexts/EventContext";
+import { EventContext, eventReducer } from "contexts/EventContext";
 import { SessionContext } from "contexts/SessionContext";
 import { getSessionData } from "util/auth";
 import Footer from "./Footer";
@@ -15,18 +15,21 @@ import { PopupContext, PopupState } from "contexts/PopupContext";
 import {
   StateContext,
   StateDispatchContext,
-  wsReducer,
+  stateReducer,
 } from "contexts/StateContext.ts";
-import { AnimatePresence, motion } from "motion/react";
+import { WebsocketContextProvider } from "contexts/WebsocketContext.tsx";
+import { AnimatePresence } from "motion/react";
 import React from "react";
 import {
   IoIosArrowDropdown,
   IoIosArrowDropup,
   IoIosNotifications,
 } from "react-icons/io";
-import { defaultState } from "types/WebsocketStateType.ts";
+import { defaultState } from "types/AppStateType.ts";
+
 import PopupContainer from "./popups/PopupContainer.tsx";
 import classNames from "classnames";
+import { motion } from "motion/react";
 
 function Header({
   mobile,
@@ -162,7 +165,11 @@ export default function PageLayout({
     events: [],
     pastEvents: [],
   });
-  const [wsState, dispatchWsState] = useReducer(wsReducer, null, defaultState);
+  const [appState, dispatchAppState] = useReducer(
+    stateReducer,
+    null,
+    defaultState,
+  );
   const [popup, setPopup] = useState<PopupState>(null);
   const [showNotifications, setShowNotifications] = useState(false);
 
@@ -186,27 +193,28 @@ export default function PageLayout({
           <PopupContainer />
           <EventContainer events={eventsState.events} />
           <SessionContext.Provider value={getSessionData()}>
-            <StateContext.Provider value={wsState}>
-              <StateDispatchContext.Provider value={dispatchWsState}>
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    id="page-content"
-                    key={location.pathname}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    {children}
-                  </motion.div>
-                </AnimatePresence>
+            <StateContext.Provider value={appState}>
+              <StateDispatchContext.Provider value={dispatchAppState}>
+                <WebsocketContextProvider>
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      id="page-content"
+                      key={location.pathname}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      {children}
+                    </motion.div>
+                    <Footer />
+                  </AnimatePresence>
+                </WebsocketContextProvider>
               </StateDispatchContext.Provider>
             </StateContext.Provider>
           </SessionContext.Provider>
         </PopupContext.Provider>
       </EventContext.Provider>
-
-      <Footer />
     </>
   );
 }

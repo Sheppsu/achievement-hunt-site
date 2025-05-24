@@ -1,13 +1,11 @@
-from django.db import models
-from django.conf import settings
+import time
 
 import requests
-import time
-from osu import Client
-
-from common.util import create_auth_handler
 from common.serializer import SerializableModel
-
+from common.util import create_auth_handler
+from django.conf import settings
+from django.db import models
+from osu import Client
 
 osu_client = settings.OSU_CLIENT
 
@@ -255,6 +253,15 @@ class Player(SerializableModel):
     class Serialization:
         FIELDS = ["id", "user_id", "team_admin"]
 
+class ChatMessage(SerializableModel):
+    player = models.ForeignKey(Player, on_delete=models.CASCADE)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    sent_at = models.DateTimeField(auto_now_add=True)
+    message = models.CharField(max_length=512)
+
+    class Serialization:
+        FIELDS = ["id", "sent_at", "message"]
+    
 
 class Registration(SerializableModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

@@ -1,47 +1,79 @@
 import discordLogo from "assets/images/discord-logo.png";
+import { WebsocketContext } from "contexts/WebsocketContext";
+import { useContext } from "react";
 import { Link } from "react-router-dom";
 
 export default function Footer() {
+  const { wsState } = useContext(WebsocketContext)!;
+
   return (
     <footer>
       <div className="footer">
-        <a
-          className="footer-img-link"
-          href="https://discord.gg/wY9U8h6Hgj"
-          target="_blank"
-        >
-          <img className="footer-image prevent-select" src={discordLogo}></img>
-        </a>
-        <p className="footer-text prevent-select">
-          developed by{" "}
+        <div className="footer-left_container">
           <a
-            href="https://github.com/Sheppsu"
+            className="footer-img-link"
+            href="https://discord.gg/wY9U8h6Hgj"
             target="_blank"
-            className="external-link"
+            rel="noopener noreferrer"
           >
-            sheppsu
+            <img
+              className="footer-image prevent-select"
+              src={discordLogo}
+              alt="Discord Logo"
+            />
           </a>
-          {", "}
-          <a
-            href="https://github.com/hrfarmer"
-            target="_blank"
-            className="external-link"
-          >
-            aychar
-          </a>
-          {", and "}
-          <a
-            href="https://github.com/Rinne0333"
-            target="_blank"
-            className="external-link"
-          >
-            Rinne
-          </a>
-          {" | "}
-          <Link to="/credits" className="external-link">
-            See all staff
-          </Link>
-        </p>
+          <p className="footer-text prevent-select">
+            developed by{" "}
+            <a
+              href="https://github.com/Sheppsu"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="external-link"
+            >
+              sheppsu
+            </a>
+            {", "}
+            <a
+              href="https://github.com/hrfarmer"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="external-link"
+            >
+              aychar
+            </a>
+            {", and "}
+            <a
+              href="https://github.com/Rinne0333"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="external-link"
+            >
+              Rinne
+            </a>
+            {" | "}
+            <Link to="/credits" className="external-link">
+              See all staff
+            </Link>
+          </p>
+        </div>
+
+        <div className="footer-ws_container">
+          {wsState.authenticated ? (
+            <>
+              <svg width="10" height="10">
+                <circle cx="5" cy="5" r="4" fill="green" />
+              </svg>
+              <p>Connected to websocket</p>
+            </>
+          ) : (
+            <>
+              <svg width="10" height="10">
+                <circle cx="5" cy="5" r="4" fill="red" />
+              </svg>
+              <p>Disconnected from websocket</p>
+            </>
+          )}
+        </div>
       </div>
     </footer>
   );
