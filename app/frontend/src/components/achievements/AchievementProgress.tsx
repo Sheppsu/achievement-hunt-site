@@ -1,10 +1,10 @@
 import { useGetAchievements } from "api/query";
 import { AchievementTeamExtendedType } from "api/types/AchievementTeamType";
 import { AchievementExtendedType } from "api/types/AchievementType";
-import { SessionContext } from "contexts/SessionContext";
 import { WebsocketContext } from "contexts/WebsocketContext";
 import { useContext } from "react";
 import { EventIterationType } from "api/types/EventIterationType.ts";
+import { StateContext } from "contexts/StateContext.ts";
 
 export default function AchievementProgress({
   team,
@@ -13,8 +13,8 @@ export default function AchievementProgress({
   team: AchievementTeamExtendedType | null;
   iteration: EventIterationType;
 }) {
-  const session = useContext(SessionContext);
   const { wsState, sendSubmit } = useContext(WebsocketContext)!;
+  const appState = useContext(StateContext);
 
   const { data: achievements } = useGetAchievements();
 
@@ -38,10 +38,7 @@ export default function AchievementProgress({
   }
 
   const submitDisabled =
-    wsState.ws === null ||
-    !wsState.authenticated ||
-    eventEnded ||
-    !wsState.submitEnabled;
+    !wsState?.connected || eventEnded || !appState?.submitEnabled;
   const submitCls = "submit-button" + (submitDisabled ? " disabled" : "");
 
   function onSubmit() {

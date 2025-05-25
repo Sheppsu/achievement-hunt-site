@@ -5,7 +5,7 @@ import { FormEvent, useContext, useEffect, useRef, useState } from "react";
 export default function TeamChatCard() {
   const [value, setValue] = useState<string>("");
   const { wsState, sendChatMessage } = useContext(WebsocketContext)!;
-  const { data } = useGetTeamMessages();
+  const { data: messages } = useGetTeamMessages();
   const msgsEndRef = useRef<HTMLDivElement>(null);
 
   const onChatSend = (e: FormEvent<HTMLFormElement>) => {
@@ -22,15 +22,17 @@ export default function TeamChatCard() {
         block: "nearest",
       });
     }
-  }, [data]);
+  }, [messages]);
+
+  const connected = wsState?.connected;
 
   return (
     <div className="card">
       <p className="card--teams__title">Chat</p>
       <div className="team-chat">
         <div className="team-chat__messages">
-          {data && data.length > 0 ? (
-            data.map((msg, idx) => (
+          {messages && messages.length > 0 ? (
+            messages.map((msg, idx) => (
               <p key={idx}>
                 <span className="team-chat__messages--time">
                   {new Date(msg.sent_at).toLocaleTimeString()}
@@ -55,11 +57,9 @@ export default function TeamChatCard() {
           onChange={(e) => setValue(e.currentTarget.value)}
           autoComplete="off"
           placeholder={
-            wsState.authenticated
-              ? "Type your message..."
-              : "Websocket server disconnected"
+            connected ? "Type your message..." : "Websocket server disconnected"
           }
-          disabled={!wsState.authenticated}
+          disabled={!connected}
         />
       </form>
     </div>

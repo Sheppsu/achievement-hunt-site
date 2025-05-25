@@ -1,8 +1,4 @@
-import {
-  QueryClient,
-  QueryClientContext,
-  useQuery,
-} from "@tanstack/react-query";
+import { QueryClient, QueryClientContext } from "@tanstack/react-query";
 import { AchievementCompletionPlacementType } from "api/types/AchievementCompletionType";
 import { AchievementPlayerType } from "api/types/AchievementPlayerType";
 import {
@@ -10,7 +6,13 @@ import {
   AchievementTeamType,
 } from "api/types/AchievementTeamType";
 import { AchievementExtendedType } from "api/types/AchievementType";
-import { createContext, ReactNode, useContext, useReducer } from "react";
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useReducer,
+} from "react";
 import { AppState } from "types/AppStateType";
 import { Session } from "types/SessionType";
 import { timeAgo } from "util/helperFunctions";
@@ -30,66 +32,59 @@ interface BaseStateActionType {
 
 interface ConnectingType extends BaseStateActionType {
   id: 1;
-  ws: WebSocket | undefined;
+  ws: WebSocket;
 }
 
 interface DisconnectionType extends BaseStateActionType {
   id: 2;
 }
 
-interface AuthType extends BaseStateActionType {
+interface ConnectionStatusType extends BaseStateActionType {
   id: 3;
-}
-
-interface SubmitType extends BaseStateActionType {
-  id: 4;
-  disable: boolean;
+  connected: boolean;
 }
 
 type WsStateActionType =
   | ConnectingType
-  | AuthType
   | DisconnectionType
-  | SubmitType;
+  | ConnectionStatusType;
 
 export type WebsocketState = {
-  ws: WebSocket | null | undefined;
-  authenticated: boolean;
+  ws: WebSocket | null;
   lastDisconnect: number;
-  submitEnabled: boolean;
+  connected: boolean;
 };
 
 export type WebsocketStateDispatch = React.Dispatch<WsStateActionType>;
 
 function wsStateReducer(
-  state: WebsocketState,
+  state: WebsocketState | null,
   action: WsStateActionType,
-): WebsocketState {
+): WebsocketState | null {
   switch (action.id) {
-    case 1: // connection
+    case 1: // connecting
       return {
-        ...state,
         ws: action.ws,
+        lastDisconnect: state === null ? 0 : state.lastDisconnect,
+        connected: state === null ? false : state.connected,
       };
     case 2: // disconnection
       return {
-        ...state,
         ws: null,
-        authenticated: false,
-        submitEnabled: false,
         lastDisconnect: Date.now(),
+        connected: false,
       };
-    case 3: // authenticated
+    case 3: {
+      // connection status change
+      if (state === null) {
+        return null;
+      }
+
       return {
         ...state,
-        authenticated: true,
-        submitEnabled: true,
+        connected: action.connected,
       };
-    case 4: // submission
-      return {
-        ...state,
-        submitEnabled: !action.disable,
-      };
+    }
   }
 }
 
@@ -195,14 +190,6 @@ function handleMessage(
   }
 
   switch (data.code) {
-    case 0: {
-      dispatchWsState({ id: 3 });
-      dispatchEventMsg({
-        type: "info",
-        msg: "You are now authenticated with the websocket server",
-      });
-      break;
-    }
     case 1: {
       const achievements = data.achievements as WSAchievementType[];
       let msg =
@@ -240,45 +227,14 @@ function handleMessage(
   }
 }
 
-function connect(
-  uri: string,
-  dispatchEventMsg: React.Dispatch<{ type: EventType; msg: string }>,
-  dispatchWsState: WebsocketStateDispatch,
-  queryClient: QueryClient,
-  data: object,
-): WebSocket {
-  const ws = new WebSocket(uri);
-
-  ws.addEventListener("open", (_) => {
-    ws.send(JSON.stringify(data));
-  });
-  ws.addEventListener("close", (_) => {
-    dispatchWsState({ id: 2 });
-  });
-  ws.addEventListener("message", (evt) => {
-    handleMessage(evt, dispatchEventMsg, dispatchWsState, queryClient);
-  });
-
-  return ws;
-}
-
-function _sendSubmit(
-  wsState: WebsocketState,
-  dispatchWsState: WebsocketStateDispatch,
-  appState: AppState,
-) {
-  if (
-    wsState.ws === null ||
-    wsState.ws === undefined ||
-    !wsState.authenticated
-  ) {
+function _sendSubmit(wsState: WebsocketState, appState: AppState) {
+  if (wsState.ws === null || !appState.submitEnabled) {
     return;
   }
 
   wsState.ws.send(JSON.stringify({ code: 1, mode: appState.mode }));
 
-  dispatchWsState({ id: 4, disable: true });
-  setTimeout(() => dispatchWsState({ id: 4, disable: false }), 5000);
+  // TODO disable submit button for 5 seconds
 }
 
 function _sendChatMessage(
@@ -286,12 +242,7 @@ function _sendChatMessage(
   session: Session,
   msg: string,
 ) {
-  if (
-    wsState.ws === null ||
-    wsState.ws === undefined ||
-    !wsState.authenticated ||
-    !session.user
-  ) {
+  if (wsState.ws === null || !session.user) {
     return;
   }
 
@@ -299,7 +250,7 @@ function _sendChatMessage(
 }
 
 export const WebsocketContext = createContext<{
-  wsState: WebsocketState;
+  wsState: WebsocketState | null;
   dispatchWsState: WebsocketStateDispatch;
   sendSubmit: () => void;
   sendChatMessage: (msg: string) => void;
@@ -315,42 +266,46 @@ export function WebsocketContextProvider({
   const session = useContext(SessionContext);
   const appState = useStateContext();
 
-  const [wsState, dispatchWsState] = useReducer(wsStateReducer, {
-    ws: null,
-    authenticated: false,
-    lastDisconnect: 0,
-    submitEnabled: false,
-  });
+  const [wsState, dispatchWsState] = useReducer(wsStateReducer, null);
 
-  const { data: authData } = useQuery({
-    queryKey: ["wsauth"],
-    queryFn: () => fetch("/api/wsauth/").then((resp) => resp.json()),
-  });
+  const loggedIn = session.user !== null;
+  const currentWs = wsState === null ? null : wsState.ws;
+  useEffect(() => {
+    if (currentWs !== null || !loggedIn) {
+      return;
+    }
 
-  if (authData !== undefined && !("error" in authData) && wsState.ws === null) {
-    // mark connecting
-    dispatchWsState({ id: 1, ws: undefined });
+    const ws = new WebSocket(session.wsUri);
 
-    setTimeout(
-      () => {
-        const ws = connect(
-          session.wsUri,
-          dispatchEventMsg,
-          dispatchWsState,
-          queryClient,
-          authData,
-        );
-        dispatchWsState({ id: 1, ws });
-      },
-      Math.max(0, 3000 - (Date.now() - wsState.lastDisconnect)),
-    );
-  }
+    ws.addEventListener("open", () => {
+      dispatchWsState({ id: 3, connected: true });
+    });
+    ws.addEventListener("close", (_) => {
+      dispatchWsState({ id: 2 });
+    });
+    ws.addEventListener("message", (evt) => {
+      handleMessage(evt, dispatchEventMsg, dispatchWsState, queryClient);
+    });
+
+    dispatchWsState({
+      id: 1,
+      ws,
+    });
+  }, [currentWs, loggedIn]);
 
   const sendSubmit = () => {
-    _sendSubmit(wsState, dispatchWsState, appState);
+    if (wsState === null) {
+      return;
+    }
+
+    _sendSubmit(wsState, appState);
   };
 
   const sendChatMessage = (msg: string) => {
+    if (wsState === null) {
+      return;
+    }
+
     _sendChatMessage(wsState, session, msg);
   };
 

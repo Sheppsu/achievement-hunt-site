@@ -6,6 +6,8 @@ import { Link } from "react-router-dom";
 export default function Footer() {
   const { wsState } = useContext(WebsocketContext)!;
 
+  console.log(wsState);
+
   return (
     <footer>
       <div className="footer">
@@ -58,7 +60,7 @@ export default function Footer() {
         </div>
 
         <div className="footer-ws_container">
-          {wsState.authenticated ? (
+          {wsState?.connected ? (
             <>
               <svg width="10" height="10">
                 <circle cx="5" cy="5" r="4" fill="green" />
