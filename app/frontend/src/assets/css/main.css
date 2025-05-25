@@ -271,7 +271,7 @@ a.rendered-text:hover {
   padding-top: 10px;
 
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
 }
@@ -323,19 +323,18 @@ a.rendered-text:hover {
 
 .header__container__left-box__links {
   height: 80%;
-  width: 375px;
 
   border-radius: 100px;
 
   display: flex;
   align-items: center;
-  justify-content: space-evenly;
 
   background-color: var(--site-background-color);
 }
 
 .header__container__left-box__links__link {
   flex-grow: 1;
+  padding: 0 10px;
 
   display: flex;
   justify-content: center;
