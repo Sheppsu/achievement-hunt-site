@@ -8,6 +8,7 @@ import Credit from "routes/credit.tsx";
 import Staff from "routes/staff";
 import StaffAchievement from "routes/staff/achievement.tsx";
 import ErrorBoundary from "../errors/ErrorBoundary.tsx";
+import AdminPage from "routes/admin.tsx";
 
 export const routes: RouteObject[] = [
   {
@@ -43,6 +44,10 @@ export const routes: RouteObject[] = [
             element: <Staff />,
           },
           {
+            path: "admin",
+            element: <AdminPage />,
+          },
+          {
             path: "staff/achievements/:achievementId",
             element: <StaffAchievement />,
           },
@@ -60,6 +65,10 @@ export const routes: RouteObject[] = [
               {
                 path: "achievements",
                 element: <AchievementCompletionPage />,
+              },
+              {
+                path: "admin",
+                element: <AdminPage />,
               },
             ],
           },

@@ -20,7 +20,7 @@ export default function RegisterButton({
     register.mutate(
       { register: !registered },
       {
-        onSuccess: () => setDebounce(false),
+        onSettled: () => setDebounce(false),
       },
     );
   };

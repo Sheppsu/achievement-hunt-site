@@ -221,6 +221,10 @@ a.rendered-text:hover {
   color: #97a5d6;
 }
 
+.clickable:hover {
+  cursor: pointer;
+}
+
 /* Card layout classes */
 
 .cards-container {

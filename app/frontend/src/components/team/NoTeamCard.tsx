@@ -66,11 +66,13 @@ function CreateTeamComponent({
       { name },
       {
         onSuccess: () => {
-          createTeam.reset();
           dispatchEventMsg({
             type: "info",
             msg: `Team '${name}' successfully created!`,
           });
+        },
+        onSettled: () => {
+          createTeam.reset();
         },
       },
     );

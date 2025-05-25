@@ -37,18 +37,29 @@ def serialize_full_achievement(req, achievement: Achievement):
 @require_staff
 @require_GET
 def achievements(req):
+    batch = req.GET.get("batch", "0")
+    if batch not in ("0", "1"):
+        return error("Invalid value for batch")
+
+    batch = int(batch) == 1
+
+    query = Achievement.objects.prefetch_related(
+        "comments__user",
+        "votes",
+        "beatmaps__info"
+    ).select_related(
+        "creator",
+    )
+
+    if batch:
+        query = query.filter(batch_id__isnull=False)
+    else:
+        query = query.filter(batch_id__isnull=True)
+
     return success(
         [
             serialize_full_achievement(req, achievement)
-            for achievement in Achievement.objects.prefetch_related(
-                "comments__user",
-                "votes",
-                "beatmaps__info"
-            ).select_related(
-                "creator"
-            ).filter(
-                batch_id=None
-            ).all()
+            for achievement in query.all()
         ]
     )
 

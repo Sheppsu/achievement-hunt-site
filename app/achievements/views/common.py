@@ -267,6 +267,7 @@ def rename_team(req, data, iteration):
     
     return success(name)
 
+
 @require_user
 @require_iteration
 def chat_messages(req, iteration):
@@ -285,6 +286,7 @@ def chat_messages(req, iteration):
             "sent_at": message.sent_at.isoformat()
         } for message in reversed(messages)
     ])
+
 
 @require_GET
 @require_iteration
@@ -385,7 +387,7 @@ def player_stats(req, iteration):
 def get_announcements(req, iteration):
     return success([
         announcement.serialize()
-        for announcement in Announcement.objects.filter(iteration_id=iteration.id)
+        for announcement in Announcement.objects.filter(iteration_id=iteration.id).order_by("-created_at")
     ])
 
 
