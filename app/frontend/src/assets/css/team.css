@@ -239,7 +239,7 @@
   width: 100%;
   padding: 5px 0;
 
-  overflow-y: scroll;
+  overflow-y: auto;
 
   background-color: var(--site-background-color);
   border: solid 2px var(--border-color);

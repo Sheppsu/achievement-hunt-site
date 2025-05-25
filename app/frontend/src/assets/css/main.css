@@ -247,6 +247,7 @@ a.rendered-text:hover {
 
 .card {
   width: calc(100% - 30px);
+  max-height: 60vh;
   padding: 15px;
   margin: 0;
 
@@ -261,6 +262,8 @@ a.rendered-text:hover {
   gap: 5px;
 
   word-break: break-word;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* header */
