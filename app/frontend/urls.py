@@ -17,11 +17,12 @@ def index_view(req):
     return render(req, 'index.html', {"data": data})
 
 
-def invalid_static(req):
+def not_found(req):
     raise Http404()
 
 
 urlpatterns = [
-    re_path(r"static/.*", invalid_static),
+    re_path(r"static/.*", not_found),
+    re_path(r"api/.*", not_found),
     re_path(r".*", index_view, name="index")
 ]

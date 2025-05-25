@@ -26,7 +26,7 @@ function VoteContainer({ achievement }: { achievement: StaffAchievementType }) {
     vote.mutate(
       { add: !achievement.has_voted },
       {
-        onSuccess: () => vote.reset(),
+        onSettled: () => vote.reset(),
       },
     );
   };

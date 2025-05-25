@@ -170,7 +170,8 @@ class Achievement(SerializableModel):
             "tags",
             "release_time",
             "created_at",
-            "last_edited_at"
+            "last_edited_at",
+            "batch_id"
         ]
 
 
@@ -252,6 +253,7 @@ class Player(SerializableModel):
 
     class Serialization:
         FIELDS = ["id", "user_id", "team_admin"]
+
 
 class ChatMessage(SerializableModel):
     player = models.ForeignKey(Player, on_delete=models.CASCADE)

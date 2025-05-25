@@ -75,11 +75,13 @@ export default function TeamCard({
       { name },
       {
         onSuccess: () => {
-          renameTeam.reset();
           dispatchEventMsg({
             type: "info",
             msg: `Team ${team.name} successfully renamed to ${name}`,
           });
+        },
+        onSettled: () => {
+          renameTeam.reset();
         },
       },
     );

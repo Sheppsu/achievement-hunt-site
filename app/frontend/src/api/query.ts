@@ -26,6 +26,7 @@ import {
 } from "./types/AchievementType";
 import { EventIterationType } from "api/types/EventIterationType.ts";
 import { AnnouncementType } from "api/types/AnnouncementType.ts";
+import { AchievementBatchType } from "api/types/AchievementBatchType.ts";
 
 function getIterationParams() {
   const path = location.pathname;
@@ -36,9 +37,21 @@ function getIterationParams() {
   return ["iterations", path.split("/")[2]];
 }
 
-function getUrl(endpoint: string): string {
+function getUrl(key: string[]): string {
+  let params: string | null = null;
+  if ((key[key.length - 1] as string).startsWith("?")) {
+    params = key[key.length - 1] as string;
+    key = key.slice(0, key.length - 1);
+  }
+
+  let endpoint = key.join("/");
   endpoint = endpoint.startsWith("/") ? endpoint : "/" + endpoint;
   endpoint = endpoint.endsWith("/") ? endpoint : endpoint + "/";
+
+  if (params !== null) {
+    endpoint += params;
+  }
+
   return "/api" + endpoint;
 }
 
@@ -48,10 +61,11 @@ async function doFetch<T>(
     msg?: string | undefined;
     id?: number | undefined;
   }>,
-  endpoint: string,
+  key: string[],
   init?: RequestInit,
 ): Promise<T> {
-  const resp = await fetch(getUrl(endpoint), init);
+  const url = getUrl(key);
+  const resp = await fetch(url, init);
 
   if (resp.status !== 200) {
     let errorMsg = null;
@@ -65,7 +79,7 @@ async function doFetch<T>(
       type: "error",
       msg: `Request error${errorMsg === null ? "" : ": " + errorMsg}`,
     });
-    console.error(`Error fetching ${endpoint}: `, errorMsg);
+    console.error(`Error fetching ${url}: `, errorMsg);
     throw Error(errorMsg);
   }
 
@@ -77,9 +91,9 @@ export function useMakeQuery<T>(
   init?: RequestInit,
 ): UseQueryResult<T> {
   const dispatchEventMsg = useContext(EventContext);
-  const endpoint = query.queryKey.join("/");
 
-  query.queryFn = () => doFetch(dispatchEventMsg, endpoint, init);
+  query.queryFn = () =>
+    doFetch(dispatchEventMsg, query.queryKey as string[], init);
 
   return useQuery(queryOptions(query));
 }
@@ -91,10 +105,9 @@ export function useMakeMutation<T>(
   init?: RequestInit,
 ): SpecificUseMutationResult<T> {
   const dispatchEventMsg = useContext(EventContext);
-  const endpoint = (mutation.mutationKey as MutationKey).join("/");
 
   mutation.mutationFn = (data: object) =>
-    doFetch(dispatchEventMsg, endpoint, {
+    doFetch(dispatchEventMsg, mutation.mutationKey as string[], {
       body: JSON.stringify(data),
       ...init,
     });
@@ -341,10 +354,17 @@ export function useGetAnnouncements(): UseQueryResult<AnnouncementType[]> {
 }
 
 export function useGetStaffAchievements(
+  batch: boolean = false,
   enabled: boolean = true,
 ): UseQueryResult<StaffAchievementType[]> {
+  const params = new URLSearchParams({ batch: batch ? "1" : "0" });
   return useMakeQuery({
-    queryKey: [...getIterationParams(), "staff", "achievements"],
+    queryKey: [
+      ...getIterationParams(),
+      "staff",
+      "achievements",
+      "?" + params.toString(),
+    ],
     enabled,
     refetchInterval: 60000,
   });
@@ -470,12 +490,16 @@ function onAchievementCreation(
   queryClient?.setQueryData(
     ["staff", "achievements"],
     (achievements: StaffAchievementType[] | undefined) =>
-      achievements?.concat({
-        ...achievement,
-        comments: [],
-        vote_count: 0,
-        has_voted: false,
-      }),
+      achievements?.concat([
+        {
+          ...achievement,
+          batch: null,
+          batch_id: null,
+          comments: [],
+          has_voted: false,
+          vote_count: 0,
+        },
+      ]),
   );
 }
 
@@ -594,5 +618,62 @@ export function useGetStaffAchievement(
 export function useGetTeamMessages(): UseQueryResult<ChatMessage[]> {
   return useMakeQuery({
     queryKey: ["teams", "messages"],
+  });
+}
+
+export function useCreateAnnouncement(): SpecificUseMutationResult<AnnouncementType> {
+  const iteration = getIterationParams();
+  const queryClient = useContext(QueryClientContext);
+
+  return useMakeMutation({
+    mutationKey: [...iteration, "announcements", "create"],
+    onSuccess: (announcement) => {
+      queryClient?.setQueryData(
+        [...iteration, "announcements"],
+        (announcements: AnnouncementType[]) =>
+          [announcement].concat(announcements),
+      );
+    },
+  });
+}
+
+export function useGetBatches(): UseQueryResult<AchievementBatchType[]> {
+  return useMakeQuery({
+    queryKey: [...getIterationParams(), "batches"],
+  });
+}
+
+export function useCreateBatch(): SpecificUseMutationResult<AchievementBatchType> {
+  const iteration = getIterationParams();
+  const queryClient = useContext(QueryClientContext);
+
+  function onBatchCreated(batch: AchievementBatchType) {
+    queryClient?.setQueryData(
+      [...iteration, "batches"],
+      (batches: AchievementBatchType[]) => batches.concat([batch]),
+    );
+  }
+
+  return useMakeMutation(
+    {
+      mutationKey: [...iteration, "batches", "create"],
+      onSuccess: onBatchCreated,
+    },
+    {
+      method: "POST",
+    },
+  );
+}
+
+export function useMoveAchievement(
+  achievementId: number,
+): SpecificUseMutationResult<AchievementType> {
+  // const queryClient = useContext(QueryClientContext);
+
+  function onAchievementMoved(achievement: AchievementType) {}
+
+  return useMakeMutation({
+    mutationKey: ["achievements", achievementId.toString(), "move"],
+    onSuccess: onAchievementMoved,
   });
 }

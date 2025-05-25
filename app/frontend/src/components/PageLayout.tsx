@@ -98,6 +98,11 @@ function Header({
           </div>
           <NavLink to={iterationPath + "/teams"}>Teams</NavLink>
           <NavLink to={iterationPath + "/achievements"}>Achievements</NavLink>
+          {session.user?.is_admin ? (
+            <NavLink to={iterationPath + "/admin"}>Admin</NavLink>
+          ) : (
+            ""
+          )}
         </div>
       </div>
     );
@@ -122,6 +127,16 @@ function Header({
             >
               Achievements
             </NavLink>
+            {session.user?.is_admin ? (
+              <NavLink
+                to={iterationPath + "/admin"}
+                className="header__container__left-box__links__link"
+              >
+                Admin
+              </NavLink>
+            ) : (
+              ""
+            )}
           </div>
         </div>
         <div className="header__container__right-box">

@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from django.views.decorators.http import require_POST, require_http_methods
+from django.views.decorators.http import require_POST, require_http_methods, require_GET
 
 from common.validation import *
 from .util import *
@@ -21,6 +21,14 @@ def create_announcement(req, data, iteration):
         created_at=datetime.now(tz=timezone.utc)
     )
     return success(announcement.serialize())
+
+
+@require_GET
+@require_admin
+@require_iteration
+def get_batches(req, iteration):
+    batches = AchievementBatch.objects.filter(iteration=iteration).all()
+    return success([batch.serialize() for batch in batches])
 
 
 @require_POST

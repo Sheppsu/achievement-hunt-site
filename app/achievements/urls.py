@@ -17,7 +17,9 @@ iteration_urls = [
     path("register/", common.register),
     path("registration/", common.get_registration),
     path("announcements/", common.get_announcements),
-    path("announcements/create/", admin.create_announcement)
+    path("announcements/create/", admin.create_announcement),
+    path("batches/", admin.get_batches),
+    path("batches/create/", admin.create_batch)
 ]
 
 urlpatterns = [
@@ -34,7 +36,7 @@ urlpatterns = [
     path("staff/achievements/create/", staff.create_achievement),
     path("staff/achievements/<int:achievement_id>/edit/", staff.edit_achievement),
     path("staff/achievements/<int:achievement_id>/delete/", staff.delete_achievement),
-    path("staff/achievements/<int:achievement_id>/move/", admin.change_achievement_batch)
+    path("staff/achievements/<int:achievement_id>/move/", admin.change_achievement_batch),
 ] + iteration_urls + [
     path("iterations/<int:iteration_id>/" + url.pattern._route, url.callback)
     for url in iteration_urls
