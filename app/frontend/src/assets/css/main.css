@@ -322,8 +322,6 @@ a.rendered-text:hover {
 }
 
 .header__container__left-box__links {
-  height: 80%;
-
   border-radius: 100px;
 
   display: flex;
@@ -334,7 +332,7 @@ a.rendered-text:hover {
 
 .header__container__left-box__links__link {
   flex-grow: 1;
-  padding: 0 10px;
+  padding: 5px 10px;
 
   display: flex;
   justify-content: center;
