@@ -29,7 +29,7 @@ export default function AnnouncementsCard() {
   }
 
   return (
-    <div className="card fill">
+    <div className="card">
       <h1 className="card--teams__title">Announcements</h1>
       <div className="announcements-container">{element}</div>
     </div>

@@ -51,18 +51,20 @@ export default function AchievementContainer({
 }) {
   const session = useContext(SessionContext);
   const { data: baseAchievements } = useGetAchievements();
-  const { data: teams } = useGetTeams();
+  const { data: teamData } = useGetTeams();
 
   if (
     state.achievementsFilter === null ||
     baseAchievements === undefined ||
-    teams === undefined
+    teamData === undefined
   )
     return (
       <div ref={scope} className="achievements__container">
         <div>Loading achievements...</div>
       </div>
     );
+
+  const teams = teamData.teams;
 
   const nTeams = teams.filter((t) => t.points > 0).length;
   const achievements: CompletedAchievementType[] = baseAchievements.map(

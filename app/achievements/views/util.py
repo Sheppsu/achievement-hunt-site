@@ -122,6 +122,18 @@ def require_user(func):
     return wrapper
 
 
+def require_registered(func):
+    @require_user
+    def wrapper(req, *args, iteration, **kwargs):
+        registration = Registration.objects.filter(user=req.user, iteration=iteration).first()
+        if registration is None:
+            return error("Must be registered")
+
+        return func(req, *args, iteration=iteration, **kwargs)
+
+    return wrapper
+
+
 def require_iteration(func):
     def wrapper(req, iteration_id=None, *args, **kwargs):
         if iteration_id is None:

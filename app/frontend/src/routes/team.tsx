@@ -18,18 +18,16 @@ export default function AchievementsIndex() {
   const session = useContext(SessionContext);
   const { data: registration, isLoading: registrationLoading } =
     useGetRegistration();
-  const { data: teams, isLoading: teamsLoading } = useGetTeams();
+  const { data: teamData, isLoading: teamsLoading } = useGetTeams();
 
   // look for the current user's team
   let ownTeam: AchievementTeamExtendedType | null = null;
-  let ownPlacement: number | null = null;
-  if (Array.isArray(teams))
-    for (const [i, team] of teams.entries()) {
+  if (teamData !== undefined)
+    for (const [i, team] of teamData.teams.entries()) {
       if ("players" in team) {
         for (const player of team.players) {
           if (player.user.id === session.user?.id) {
             ownTeam = team as AchievementTeamExtendedType;
-            ownPlacement = i + 1;
           }
         }
       }
@@ -42,7 +40,7 @@ export default function AchievementsIndex() {
     cardsColumns[0].push(<UnauthenticatedCard />);
   } else if (teamsLoading || registrationLoading) {
     cardsColumns[0].push(<TextCard text="Loading..." />);
-  } else if (teams === undefined || registration === undefined) {
+  } else if (teamData === undefined || registration === undefined) {
     cardsColumns[0].push(<TextCard text="Failed to load" />);
   } else if (!registration.registered) {
     cardsColumns[0].push(<RegisterButton registered={false} />);
@@ -57,16 +55,24 @@ export default function AchievementsIndex() {
 
   cardsColumns.push([<AnnouncementsCard />]);
 
-  if (teams !== undefined && teams.length > 0) {
-    cardsColumns[1].push(<LeaderboardCard teams={teams} />);
+  if (teamData !== undefined && teamData.teams.length > 0) {
+    cardsColumns[1].push(
+      <LeaderboardCard placement={teamData.placement} teams={teamData.teams} />,
+    );
   }
 
   // show teams listing for admins
-  if (session.user !== null && session.user.is_admin && teams !== undefined) {
-    cardsColumns[0].push(
-      <TeamListingsCard teams={teams as AchievementTeamExtendedType[]} />,
-    );
-  }
+  // if (
+  //   session.user !== null &&
+  //   session.user.is_admin &&
+  //   teamData !== undefined
+  // ) {
+  //   cardsColumns[0].push(
+  //     <TeamListingsCard
+  //       teams={teamData.teams as AchievementTeamExtendedType[]}
+  //     />,
+  //   );
+  // }
 
   return (
     <>

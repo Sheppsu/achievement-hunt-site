@@ -58,6 +58,14 @@ def logout(req):
 
 @require_iteration_after_start
 def achievements(req, iteration):
+    if not iteration.has_ended():
+        if not req.user.is_authenticated:
+            return error("not logged in", status=403)
+
+        registration = Registration.objects.filter(user=req.user, iteration=iteration).first()
+        if registration is None:
+            return error("must be registered", status=403)
+
     team = (
         Team.objects.prefetch_related("players").filter(
             players__user_id=req.user.id,
@@ -119,6 +127,7 @@ def achievements(req, iteration):
 @require_iteration
 def teams(req, iteration):
     if iteration.has_ended() or (req.user.is_authenticated and req.user.is_admin):
+        my_team_i = -1
         serialized_teams = list(map(serialize_team, select_teams(iteration.id, many=True, sort=True)))
     else:
         teams = select_teams(iteration.id, many=True, sort=True)
@@ -128,19 +137,23 @@ def teams(req, iteration):
         ), None)
 
         if my_team_item is None:
-            return success([])
+            return success({"placement": 0, "teams": []})
 
         my_team_i, my_team = my_team_item
 
         # localized leaderboard
         # (teams above and below you)
         serialized_teams = [serialize_team(my_team)]
+        excludes = ["name", "icon", "invite"]
         if my_team_i > 0:
-            serialized_teams.insert(0, serialize_team(teams[my_team_i-1]))
+            serialized_teams.insert(0, teams[my_team_i-1].serialize(excludes=excludes))
         if my_team_i < len(teams) - 1:
-            serialized_teams.append(serialize_team(teams[my_team_i+1]))
+            serialized_teams.append(teams[my_team_i+1].serialize(excludes=excludes))
 
-    return success(serialized_teams)
+    return success({
+        "placement": my_team_i + 1,
+        "teams": serialized_teams
+    })
 
 
 @require_POST
@@ -148,7 +161,7 @@ def teams(req, iteration):
 @accepts_json_data(
     DictionaryType({"invite": StringType()})
 )
-@require_user
+@require_registered
 def join_team(req, data, iteration):
     team = select_teams(iteration.id, invite=data["invite"])
     if team is None:
@@ -170,7 +183,7 @@ def join_team(req, data, iteration):
 
 @require_http_methods(["DELETE"])
 @require_iteration_before_start
-@require_user
+@require_registered
 def leave_team(req, iteration):
     team = Team.objects.prefetch_related("players__user").filter(
         players__user_id=req.user.id,
@@ -198,7 +211,7 @@ def leave_team(req, iteration):
 @accepts_json_data(
     DictionaryType({"name": StringType(min_length=1, max_length=32)})
 )
-@require_user
+@require_registered
 def create_team(req, data, iteration):
     player = select_current_player(req.user.id, iteration.id)
     if player is not None:

@@ -6,9 +6,15 @@ import { AchievementTeamType } from "api/types/AchievementTeamType.ts";
 
 export default function LeaderboardCard({
   teams,
+  placement,
 }: {
   teams: AchievementTeamType[];
+  placement: number;
 }) {
+  if (placement === 0) {
+    placement = 2;
+  }
+
   return (
     <div className="card">
       <h1 className="card--teams__title">Leaderboard</h1>
@@ -16,7 +22,7 @@ export default function LeaderboardCard({
         {teams.map((team, i) => (
           <>
             <p>
-              #{i + 1}: {getAnonName(team.id)}
+              #{placement + i - 1}: {getAnonName(team.id)}
             </p>
             <p>{team.points}pts</p>
           </>

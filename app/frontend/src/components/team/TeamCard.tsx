@@ -99,7 +99,7 @@ export default function TeamCard({
   };
 
   return (
-    <div className="card fill">
+    <div className="card">
       <div className="card--teams__container your-team">
         <p className="card--teams__container__text center grow">
           {team.name} | {getAnonName(team.id)} - {team.points}pts
