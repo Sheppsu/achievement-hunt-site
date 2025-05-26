@@ -639,16 +639,21 @@ export function useCreateAnnouncement(): SpecificUseMutationResult<AnnouncementT
   const iteration = getIterationParams();
   const queryClient = useContext(QueryClientContext);
 
-  return useMakeMutation({
-    mutationKey: [...iteration, "announcements", "create"],
-    onSuccess: (announcement) => {
-      queryClient?.setQueryData(
-        [...iteration, "announcements"],
-        (announcements: AnnouncementType[]) =>
-          [announcement].concat(announcements),
-      );
+  return useMakeMutation(
+    {
+      mutationKey: [...iteration, "announcements", "create"],
+      onSuccess: (announcement) => {
+        queryClient?.setQueryData(
+          [...iteration, "announcements"],
+          (announcements: AnnouncementType[]) =>
+            [announcement].concat(announcements),
+        );
+      },
     },
-  });
+    {
+      method: "POST",
+    },
+  );
 }
 
 export function useGetBatches(): UseQueryResult<AchievementBatchType[]> {
@@ -682,12 +687,32 @@ export function useCreateBatch(): SpecificUseMutationResult<AchievementBatchType
 export function useMoveAchievement(
   achievementId: number,
 ): SpecificUseMutationResult<AchievementType> {
-  // const queryClient = useContext(QueryClientContext);
+  const queryClient = useContext(QueryClientContext);
 
-  function onAchievementMoved(achievement: AchievementType) {}
+  function onAchievementMoved(updatedAchievement: AchievementType) {
+    queryClient?.setQueryData(
+      ["staff", "achievements", "?batch=0"],
+      (achievements: StaffAchievementType[]) => {
+        const newAchievements = [];
 
-  return useMakeMutation({
-    mutationKey: ["achievements", achievementId.toString(), "move"],
-    onSuccess: onAchievementMoved,
-  });
+        for (const achievement of achievements) {
+          if (achievement.id !== updatedAchievement.id) {
+            newAchievements.push(achievement);
+          }
+        }
+
+        return newAchievements;
+      },
+    );
+  }
+
+  return useMakeMutation(
+    {
+      mutationKey: ["staff", "achievements", achievementId.toString(), "move"],
+      onSuccess: onAchievementMoved,
+    },
+    {
+      method: "PATCH",
+    },
+  );
 }

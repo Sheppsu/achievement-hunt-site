@@ -9,8 +9,8 @@ export default function InfoCard({
   iteration: EventIterationType;
 }) {
   return (
-    <div className="card">
-      <h1 className="card--teams__title">{iteration.name}</h1>
+    <div className="card no-scroll">
+      <h1 className="card__title">{iteration.name}</h1>
       <p className="info-text">
         Starts {dateToText(iteration.start)} - Ends {dateToText(iteration.end)}
       </p>

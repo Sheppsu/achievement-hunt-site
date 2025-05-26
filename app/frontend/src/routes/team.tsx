@@ -84,7 +84,7 @@ export default function AchievementsIndex() {
           <>
             <div className="cards-container__column teams">{cards}</div>
             {i !== cardsColumns.length - 1 ? (
-              <div className="vertical-divider"></div>
+              <div className="card-vertical-divider"></div>
             ) : (
               ""
             )}

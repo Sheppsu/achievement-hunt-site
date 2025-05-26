@@ -1,6 +1,9 @@
 import { splitProps } from "components/inputs/util.ts";
+import { useEffect, useRef } from "react";
 
 type TextAreaProps = {
+  value: string;
+  setValue: React.Dispatch<React.SetStateAction<string>>;
   className?: string;
   placeholder?: string;
   hidden?: boolean;
@@ -17,6 +20,7 @@ const elementDefaults = {
 const otherDefaults = {
   hidden: false,
   onInput: null,
+  setValue: undefined,
 };
 
 export default function TextArea(props: TextAreaProps) {
@@ -26,19 +30,33 @@ export default function TextArea(props: TextAreaProps) {
     otherDefaults,
   );
 
+  const elmRef = useRef<HTMLTextAreaElement | null>(null);
+
   if (otherProps.hidden) {
     elementProps.className += " hide";
   }
 
-  // resize text area
-  elementProps.onInput = (e: React.FormEvent<HTMLTextAreaElement>) => {
-    e.currentTarget.style.height = "auto";
-    e.currentTarget.style.height = e.currentTarget.scrollHeight + "px";
+  function adjustHeight() {
+    if (elmRef.current === null) {
+      return;
+    }
 
-    if (otherProps.onInput !== null) {
-      otherProps.onInput(e);
+    elmRef.current.style.height = "auto";
+    elmRef.current.style.height =
+      Math.max(40, elmRef.current.scrollHeight) + "px";
+  }
+
+  elementProps.onChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    otherProps.setValue(e.target.value);
+
+    if (props.onChange !== undefined) {
+      props.onChange(e);
     }
   };
 
-  return <textarea {...elementProps} />;
+  useEffect(() => {
+    adjustHeight();
+  }, [elementProps.value]);
+
+  return <textarea ref={elmRef} {...elementProps} />;
 }

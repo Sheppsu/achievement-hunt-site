@@ -1,4 +1,4 @@
-import { createContext, Dispatch, ReactElement, SetStateAction } from "react";
+import { createContext, Dispatch, SetStateAction } from "react";
 
 export type PopupState = {
   title: string;

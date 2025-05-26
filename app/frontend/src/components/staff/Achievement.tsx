@@ -2,6 +2,8 @@ import { StaffAchievementType } from "api/types/AchievementType.ts";
 import { BiSolidUpArrow, BiUpArrow } from "react-icons/bi";
 import {
   useDeleteAchievement,
+  useGetBatches,
+  useMoveAchievement,
   useSendComment,
   useVoteAchievement,
 } from "api/query.ts";
@@ -14,6 +16,7 @@ import AchievementCreation from "components/staff/AchievementCreation.tsx";
 import classNames from "classnames";
 import { parseTags } from "util/helperFunctions.ts";
 import RenderedText from "components/common/RenderedText.tsx";
+import { PopupContext } from "contexts/PopupContext.ts";
 
 function VoteContainer({ achievement }: { achievement: StaffAchievementType }) {
   const session = useContext(SessionContext);
@@ -52,6 +55,7 @@ export default function Achievement(props: AchievementProps) {
   const achievement = props.achievement;
 
   const session = useContext(SessionContext);
+  const popupCtx = useContext(PopupContext)!;
 
   const [isCommenting, setIsCommenting] = useState(false);
   const [canSendComment, setCanSendComment] = useState(false);
@@ -59,8 +63,11 @@ export default function Achievement(props: AchievementProps) {
   const [sendingComment, setSendingComment] = useState(false);
   const [editing, setEditing] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
   const sendComment = useSendComment(achievement.id);
   const deleteAchievement = useDeleteAchievement(achievement.id);
+  const moveAchievement = useMoveAchievement(achievement.id);
+  const { data: batches, isLoading: batchesLoading } = useGetBatches();
 
   const onCommentStart = () => {
     setIsCommenting(true);
@@ -133,6 +140,48 @@ export default function Achievement(props: AchievementProps) {
     );
   };
 
+  const doMoveToBatch = (batchId: number) => {
+    console.log(batchId);
+    moveAchievement.mutate(
+      { batch_id: batchId },
+      {
+        onSettled: () => {
+          moveAchievement.reset();
+          popupCtx.setPopup(null);
+        },
+      },
+    );
+  };
+
+  const doMoveAchievement = () => {
+    let content;
+    if (batchesLoading) {
+      content = <h1>Loading...</h1>;
+    } else if (batches === undefined) {
+      content = <h1>Failed to load</h1>;
+    } else {
+      content = (
+        <div className="staff-batches-listing">
+          {batches
+            .sort(
+              (a, b) => Date.parse(a.release_time) - Date.parse(b.release_time),
+            )
+            .map((batch, i) => (
+              <Button
+                children={`Batch ${i + 1}`}
+                onClick={() => doMoveToBatch(batch.id)}
+              />
+            ))}
+        </div>
+      );
+    }
+
+    popupCtx.setPopup({
+      title: "Batches",
+      content,
+    });
+  };
+
   return (
     <div>
       <div className={classNames("staff__achievement", { hide: editing })}>
@@ -198,10 +247,8 @@ export default function Achievement(props: AchievementProps) {
           placeholder="Type comment here"
           hidden={!isCommenting}
           onInput={onCommentInput}
-          onChange={(e: React.FormEvent<HTMLTextAreaElement>) =>
-            setCommentText(e.currentTarget.value)
-          }
           value={commentText}
+          setValue={setCommentText}
         />
         <div className="staff__achievement__comment-container__row">
           <Button
@@ -238,6 +285,11 @@ export default function Achievement(props: AchievementProps) {
             children="Cancel"
             onClick={onCommentCancel}
             hidden={!isCommenting || sendingComment}
+          />
+          <Button
+            children="Move"
+            onClick={doMoveAchievement}
+            hidden={!session.user?.is_admin}
           />
         </div>
       </div>

@@ -9,6 +9,7 @@
 }
 
 .staff__text-input {
+  width: 100%;
   height: 25px;
   padding: 0;
   font-size: 15px;
@@ -272,4 +273,12 @@
 
 .staff__achievement__comment__content__time-ago {
   color: #d3d3d3;
+}
+
+.staff-batches-listing {
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+  justify-content: center;
+  flex-wrap: wrap;
 }

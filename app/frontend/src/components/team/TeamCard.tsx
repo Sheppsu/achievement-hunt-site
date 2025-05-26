@@ -105,7 +105,7 @@ export default function TeamCard({
           {team.name} | {getAnonName(team.id)} - {team.points}pts
         </p>
       </div>
-      <h1 className="card--teams__title">Players</h1>
+      <h1 className="card__title">Players</h1>
       <div className="card--teams__container players">
         {team.players.map((player, i) => (
           <Player key={i} player={player} />

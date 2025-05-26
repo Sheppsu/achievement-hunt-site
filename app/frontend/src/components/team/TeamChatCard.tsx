@@ -28,7 +28,7 @@ export default function TeamChatCard() {
 
   return (
     <div className="card">
-      <p className="card--teams__title">Chat</p>
+      <p className="card__title">Chat</p>
       <div className="team-chat">
         <div className="team-chat__messages">
           {messages && messages.length > 0 ? (

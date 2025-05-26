@@ -138,7 +138,6 @@ export default function AchievementCreation(props: AchievementCreationProps) {
     >
       <TextInput
         placeholder="Type achievement name"
-        style={{ width: "auto" }}
         className="staff__text-input"
         value={achievementName}
         onChange={(e: React.FormEvent<HTMLInputElement>) => {
@@ -149,21 +148,16 @@ export default function AchievementCreation(props: AchievementCreationProps) {
         className="staff__textarea"
         placeholder="Type description here"
         value={achievementDescription}
-        onChange={(e: React.FormEvent<HTMLTextAreaElement>) => {
-          setAchievementDescription(e.currentTarget.value);
-        }}
+        setValue={setAchievementDescription}
       />
       <TextArea
         className="staff__textarea"
         placeholder="Type solution here (for non-explicit achievements)"
         value={achievementSolution}
-        onChange={(e: React.FormEvent<HTMLTextAreaElement>) => {
-          setAchievementSolution(e.currentTarget.value);
-        }}
+        setValue={setAchievementSolution}
       />
       <TextInput
         placeholder="Type tags here (e.g. 'gimmick,lazer,reading')"
-        style={{ width: "auto" }}
         className="staff__text-input"
         value={achievementTags}
         onChange={(e: React.FormEvent<HTMLInputElement>) => {

@@ -17,7 +17,7 @@ export default function LeaderboardCard({
 
   return (
     <div className="card">
-      <h1 className="card--teams__title">Leaderboard</h1>
+      <h1 className="card__title">Leaderboard</h1>
       <div className="card--teams__container leaderboard">
         {teams.map((team, i) => (
           <>

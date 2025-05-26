@@ -15,7 +15,7 @@ export default function NoTeamCard() {
 
   return (
     <div className="card">
-      <h1 className="card--teams__title">No team</h1>
+      <h1 className="card__title">No team</h1>
       {currentTab === "default" ? (
         <>
           <div className="card--teams__row">

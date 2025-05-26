@@ -10,7 +10,7 @@ export default function TeamListingsCard({
 }) {
   return (
     <div className="card">
-      <h1 className="card--teams__title">All Teams</h1>
+      <h1 className="card__title">All Teams</h1>
       {teams.map((team, idx) => (
         <div key={idx}>
           <p className="card--teams__subtitle">

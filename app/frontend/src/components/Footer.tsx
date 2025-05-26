@@ -6,8 +6,6 @@ import { Link } from "react-router-dom";
 export default function Footer() {
   const { wsState } = useContext(WebsocketContext)!;
 
-  console.log(wsState);
-
   return (
     <footer>
       <div className="footer">

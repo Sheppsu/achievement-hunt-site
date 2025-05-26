@@ -28,6 +28,7 @@ export default function PopupContainer() {
       document.removeEventListener("mousedown", handleOutsideClick);
     };
   }, []);
+
   return (
     <AnimatePresence>
       {popup && (
