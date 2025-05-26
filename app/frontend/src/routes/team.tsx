@@ -45,7 +45,10 @@ export default function AchievementsIndex() {
   } else if (registration === null) {
     cardsColumns[0].push(<RegisterButton registered={false} />);
   } else if (ownTeam === null) {
-    cardsColumns[0].push(<RegisterButton registered={true} />, <NoTeamCard />);
+    cardsColumns[0].push(
+      <RegisterButton registered={true} />,
+      <NoTeamCard registration={registration} />,
+    );
   } else {
     cardsColumns[0].push(<TeamCard team={ownTeam} />, <TeamChatCard />);
   }

@@ -349,13 +349,30 @@ export function useRegister(): SpecificUseMutationResult<{
 
   return useMakeMutation(
     {
-      mutationKey: [...iteration, "register"],
+      mutationKey: [...iteration, "registration", "change"],
       onSuccess: (data) => {
         queryClient?.setQueryData([...iteration, "registration"], () => data);
       },
     },
     {
       method: "POST",
+    },
+  );
+}
+
+export function useChangeFreeAgent(): SpecificUseMutationResult<RegistrationType> {
+  const iteration = getIterationParams();
+  const queryClient = useContext(QueryClientContext);
+
+  return useMakeMutation(
+    {
+      mutationKey: [...iteration, "registration", "free-agent", "change"],
+      onSuccess: (data) => {
+        queryClient?.setQueryData([...iteration, "registration"], () => data);
+      },
+    },
+    {
+      method: "PATCH",
     },
   );
 }

@@ -162,7 +162,7 @@ def teams(req, iteration):
     DictionaryType({"invite": StringType()})
 )
 @require_registered
-def join_team(req, data, iteration):
+def join_team(req, data, iteration, registration):
     team = select_teams(iteration.id, invite=data["invite"])
     if team is None:
         return error("invalid invite")
@@ -184,7 +184,7 @@ def join_team(req, data, iteration):
 @require_http_methods(["DELETE"])
 @require_iteration_before_start
 @require_registered
-def leave_team(req, iteration):
+def leave_team(req, iteration, registration):
     team = Team.objects.prefetch_related("players__user").filter(
         players__user_id=req.user.id,
         iteration_id=iteration.id
@@ -212,7 +212,7 @@ def leave_team(req, iteration):
     DictionaryType({"name": StringType(min_length=1, max_length=32)})
 )
 @require_registered
-def create_team(req, data, iteration):
+def create_team(req, data, iteration, registration):
     player = select_current_player(req.user.id, iteration.id)
     if player is not None:
         return error("already on a team")
@@ -321,7 +321,7 @@ def get_registration(req, iteration):
 )
 @require_iteration_before_registration_end
 @require_user
-def register(req, data, iteration):
+def change_registration(req, data, iteration):
     registration = Registration.objects.filter(user_id=req.user.id, iteration_id=iteration.id).first()
     reg = data["register"]
 
@@ -337,6 +337,18 @@ def register(req, data, iteration):
         Registration.objects.create(user=req.user, iteration=iteration)
 
     return success({"registered": reg})
+
+
+@require_http_methods(["PATCH"])
+@require_iteration_before_start
+@accepts_json_data(
+    DictionaryType({"free_agent": BoolType()})
+)
+@require_registered
+def change_free_agent(req, data, iteration, registration):
+    registration.is_free_agent = data["free_agent"]
+    registration.save()
+    return success(registration.serialize())
 
 
 @require_iteration_after_end

@@ -129,7 +129,7 @@ def require_registered(func):
         if registration is None:
             return error("Must be registered")
 
-        return func(req, *args, iteration=iteration, **kwargs)
+        return func(req, *args, iteration=iteration, registration=registration, **kwargs)
 
     return wrapper
 

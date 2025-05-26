@@ -4,14 +4,37 @@ import Button from "components/inputs/Button.tsx";
 import { MdArrowBack } from "react-icons/md";
 import Dropdown from "components/inputs/Dropdown.tsx";
 import { IoWarning } from "react-icons/io5";
-import { useCreateTeam, useJoinTeam } from "api/query.ts";
+import { useChangeFreeAgent, useCreateTeam, useJoinTeam } from "api/query.ts";
 import { EventContext } from "contexts/EventContext.ts";
-import { PopupContext, PopupContextType } from "contexts/PopupContext.ts";
+import { RegistrationType } from "api/types/RegistrationType.ts";
 
-export default function NoTeamCard() {
+export default function NoTeamCard({
+  registration,
+}: {
+  registration: RegistrationType;
+}) {
   const [currentTab, setCurrentTab] = useState<"create" | "join" | "default">(
     "default",
   );
+  const [debounce, setDebounce] = useState(false);
+
+  const changeFreeAgent = useChangeFreeAgent();
+
+  function doChangeFreeAgent() {
+    if (debounce) {
+      return;
+    }
+
+    setDebounce(true);
+    changeFreeAgent.mutate(
+      { free_agent: !registration.is_free_agent },
+      {
+        onSettled: () => {
+          setDebounce(false);
+        },
+      },
+    );
+  }
 
   return (
     <div className="card">
@@ -31,6 +54,21 @@ export default function NoTeamCard() {
             <Button
               children="Join a Team"
               onClick={() => setCurrentTab("join")}
+            />
+          </div>
+          <div className="horizontal-divider"></div>
+          <div className="card--teams__row">
+            <p className="card--teams__description">
+              If you are not on a team when the event starts, you will be
+              automatically placed on a team. You have the option to opt out of
+              this, but will not be able to participate unless you find a team
+              before then.
+            </p>
+            <Button
+              className="team-rigid-btn"
+              children={registration.is_free_agent ? "Opt out" : "Opt in"}
+              unavailable={debounce}
+              onClick={doChangeFreeAgent}
             />
           </div>
         </>
@@ -201,16 +239,6 @@ function JoinTeamComponent({
           <Button children="Join Team" type="submit" />
         </div>
       </form>
-      <div className="card--teams__form__item">
-        <p className="card--teams__label">Looking for Team</p>
-        <Button children="Mark as LFT" /> {/* TODO: Change to switch input */}
-        <p className="card--teams__description">
-          Mark yourself as looking for a team. Team owners will be able to
-          invite random players in the LFT list, and once you accept you'll join
-          the team. If you don't find a team by the end of registration, we'll
-          put you in a team with other LFT players.
-        </p>
-      </div>
       <div className="card--teams__invites">
         <p className="card--teams__label">Invites</p>
         <div className="card--teams__invites__container">
