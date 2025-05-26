@@ -122,7 +122,10 @@ export default function TeamCard({
       {user?.team_admin && (
         <div className="card--teams__container buttons">
           <Button children="Rename Team" onClick={renameTeamPopup} />
-          <Button children="Transfer Index" onClick={transferTeamAdminPopup} />
+          <Button
+            children="Transfer Leadership"
+            onClick={transferTeamAdminPopup}
+          />
         </div>
       )}
     </div>

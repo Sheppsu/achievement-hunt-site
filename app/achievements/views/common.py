@@ -144,7 +144,7 @@ def teams(req, iteration):
         # localized leaderboard
         # (teams above and below you)
         serialized_teams = [serialize_team(my_team)]
-        excludes = ["name", "icon", "invite"]
+        excludes = ["name", "icon", "invite", "accepts_free_agents"]
         if my_team_i > 0:
             serialized_teams.insert(0, teams[my_team_i-1].serialize(excludes=excludes))
         if my_team_i < len(teams) - 1:
@@ -312,7 +312,7 @@ def get_iteration(req, iteration):
 @require_user
 def get_registration(req, iteration):
     registration = Registration.objects.filter(user_id=req.user.id, iteration_id=iteration.id).first()
-    return success({"registered": registration is not None})
+    return success(None if registration is None else registration.serialize())
 
 
 @require_POST

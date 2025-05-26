@@ -42,13 +42,10 @@ export default function AchievementsIndex() {
     cardsColumns[0].push(<TextCard text="Loading..." />);
   } else if (teamData === undefined || registration === undefined) {
     cardsColumns[0].push(<TextCard text="Failed to load" />);
-  } else if (!registration.registered) {
+  } else if (registration === null) {
     cardsColumns[0].push(<RegisterButton registered={false} />);
   } else if (ownTeam === null) {
-    cardsColumns[0].push(
-      <RegisterButton registered={registration.registered} />,
-      <NoTeamCard />,
-    );
+    cardsColumns[0].push(<RegisterButton registered={true} />, <NoTeamCard />);
   } else {
     cardsColumns[0].push(<TeamCard team={ownTeam} />, <TeamChatCard />);
   }

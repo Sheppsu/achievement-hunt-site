@@ -27,6 +27,7 @@ import {
 import { EventIterationType } from "api/types/EventIterationType.ts";
 import { AnnouncementType } from "api/types/AnnouncementType.ts";
 import { AchievementBatchType } from "api/types/AchievementBatchType.ts";
+import { RegistrationType } from "api/types/RegistrationType.ts";
 
 function getIterationParams() {
   const path = location.pathname;
@@ -332,7 +333,7 @@ export function useGetIteration(): UseQueryResult<EventIterationType> {
   });
 }
 
-export function useGetRegistration(): UseQueryResult<{ registered: boolean }> {
+export function useGetRegistration(): UseQueryResult<RegistrationType | null> {
   const iteration = getIterationParams();
 
   return useMakeQuery({

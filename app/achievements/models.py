@@ -236,9 +236,10 @@ class Team(SerializableModel):
     invite = models.CharField(max_length=16)
     points = models.PositiveIntegerField(default=0)
     iteration = models.ForeignKey(EventIteration, on_delete=models.CASCADE)
+    accepts_free_agents = models.BooleanField(default=False)
 
     class Serialization:
-        FIELDS = ["id", "name", "icon", "invite", "points"]
+        FIELDS = ["id", "name", "icon", "invite", "points", "accepts_free_agents"]
 
 
 class Player(SerializableModel):
@@ -269,6 +270,7 @@ class Registration(SerializableModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     iteration = models.ForeignKey(EventIteration, on_delete=models.CASCADE)
     is_screened = models.BooleanField(default=False)
+    is_free_agent = models.BooleanField(default=True)
 
     class Meta:
         constraints = [
@@ -276,7 +278,7 @@ class Registration(SerializableModel):
         ]
 
     class Serialization:
-        FIELDS = ["is_screened"]
+        FIELDS = ["is_screened", "is_free_agent"]
 
 
 class Announcement(SerializableModel):
