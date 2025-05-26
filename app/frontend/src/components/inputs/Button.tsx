@@ -29,6 +29,10 @@ const otherDefaults = {
   onClick: undefined,
 };
 
+function holdProgressCurve(value: number): number {
+  return 10 * Math.sqrt(value);
+}
+
 export default function Button(props: ButtonProps) {
   const timeoutId = useRef<null | number>(null);
   const intervalId = useRef<null | number>(null);
@@ -73,7 +77,8 @@ export default function Button(props: ButtonProps) {
     }
   };
 
-  const bgWidth = progress === null ? undefined : `${progress}%`;
+  const bgWidth =
+    progress === null ? undefined : `${holdProgressCurve(progress)}%`;
 
   return (
     <button
