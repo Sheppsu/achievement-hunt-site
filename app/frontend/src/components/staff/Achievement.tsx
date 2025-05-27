@@ -87,8 +87,8 @@ export default function Achievement(props: AchievementProps) {
     setEditing(false);
   };
 
-  const isCommentTextValid = () => {
-    return commentText.trim().length !== 0;
+  const isCommentTextValid = (text: string) => {
+    return text.trim().length !== 0;
   };
 
   const onSendComment = () => {
@@ -98,7 +98,7 @@ export default function Achievement(props: AchievementProps) {
 
     setSendingComment(true);
 
-    if (!isCommentTextValid()) {
+    if (!isCommentTextValid(commentText)) {
       return;
     }
 
@@ -116,8 +116,9 @@ export default function Achievement(props: AchievementProps) {
     );
   };
 
-  const onCommentInput = () => {
-    const isValid = isCommentTextValid();
+  const onCommentInput = (evt: React.ChangeEvent<HTMLTextAreaElement>) => {
+    console.log(evt.target.value);
+    const isValid = isCommentTextValid(evt.target.value);
     if (isValid && !canSendComment) {
       setCanSendComment(true);
     } else if (!isValid && canSendComment) {
@@ -248,7 +249,7 @@ export default function Achievement(props: AchievementProps) {
           name="msg"
           placeholder="Type comment here"
           hidden={!isCommenting}
-          onInput={onCommentInput}
+          onChange={onCommentInput}
           value={commentText}
           setValue={setCommentText}
         />

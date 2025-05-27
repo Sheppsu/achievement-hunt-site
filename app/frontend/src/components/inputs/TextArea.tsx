@@ -19,7 +19,6 @@ const elementDefaults = {
 
 const otherDefaults = {
   hidden: false,
-  onInput: null,
   setValue: undefined,
 };
 
@@ -47,6 +46,7 @@ export default function TextArea(props: TextAreaProps) {
   }
 
   elementProps.onChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    console.log(e.target.value);
     otherProps.setValue(e.target.value);
 
     if (props.onChange !== undefined) {
