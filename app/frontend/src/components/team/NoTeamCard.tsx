@@ -1,27 +1,25 @@
-import { BsPeopleFill, BsPlusCircleFill } from "react-icons/bs";
-import React, { FormEvent, useContext, useState } from "react";
-import Button from "components/inputs/Button.tsx";
-import { MdArrowBack } from "react-icons/md";
-import Dropdown from "components/inputs/Dropdown.tsx";
-import { IoWarning } from "react-icons/io5";
 import {
   useChangeFreeAgent,
   useCreateTeam,
   useGetUserInvites,
   useResolveInvite,
 } from "api/query.ts";
-import { EventContext } from "contexts/EventContext.ts";
-import { RegistrationType } from "api/types/RegistrationType.ts";
 import { UserInviteType } from "api/types/InviteType.ts";
+import { RegistrationType } from "api/types/RegistrationType.ts";
+import Button from "components/inputs/Button.tsx";
+import Dropdown from "components/inputs/Dropdown.tsx";
+import { EventContext } from "contexts/EventContext.ts";
+import { FormEvent, useContext, useState } from "react";
+import { BsPlusCircleFill } from "react-icons/bs";
+import { IoWarning } from "react-icons/io5";
+import { MdArrowBack } from "react-icons/md";
 
 export default function NoTeamCard({
   registration,
 }: {
   registration: RegistrationType;
 }) {
-  const [currentTab, setCurrentTab] = useState<"create" | "join" | "default">(
-    "default",
-  );
+  const [currentTab, setCurrentTab] = useState<"create" | "default">("default");
   const [debounce, setDebounce] = useState(false);
 
   const changeFreeAgent = useChangeFreeAgent();
@@ -55,14 +53,9 @@ export default function NoTeamCard({
             />
           </div>
           <div className="horizontal-divider"></div>
-          <div className="card--teams__row">
-            <BsPeopleFill size={100} />
-            <Button
-              children="Join a Team"
-              onClick={() => setCurrentTab("join")}
-            />
-          </div>
-          <div className="horizontal-divider"></div>
+          <h1 className="card__title">Invites</h1>
+          <JoinTeamComponent />
+          <div className="horizontal-divider" />
           <div className="card--teams__row">
             <p className="card--teams__description">
               If you are not on a team when the event starts, you will be
@@ -78,10 +71,8 @@ export default function NoTeamCard({
             />
           </div>
         </>
-      ) : currentTab === "create" ? (
-        <CreateTeamComponent setCurrentTab={setCurrentTab} />
       ) : (
-        <JoinTeamComponent setCurrentTab={setCurrentTab} />
+        <CreateTeamComponent setCurrentTab={setCurrentTab} />
       )}
     </div>
   );
@@ -90,7 +81,7 @@ export default function NoTeamCard({
 function CreateTeamComponent({
   setCurrentTab,
 }: {
-  setCurrentTab: (tab: "create" | "join" | "default") => void;
+  setCurrentTab: (tab: "create" | "default") => void;
 }) {
   const dispatchEventMsg = useContext(EventContext);
   const createTeam = useCreateTeam();
@@ -199,11 +190,7 @@ function CreateTeamComponent({
   );
 }
 
-function JoinTeamComponent({
-  setCurrentTab,
-}: {
-  setCurrentTab: (tab: "create" | "join" | "default") => void;
-}) {
+function JoinTeamComponent() {
   const dispatchEventMsg = useContext(EventContext);
   const { data: invites, isLoading: invitesLoading } = useGetUserInvites();
 
@@ -222,12 +209,6 @@ function JoinTeamComponent({
 
   return (
     <>
-      <div className="card--teams__header">
-        <button onClick={() => setCurrentTab("default")}>
-          <MdArrowBack size={24} color="white" />
-        </button>
-        <h1>Invites</h1>
-      </div>
       <div className="card--teams__invites">
         <div className="card--teams__invites__item">{inviteElements}</div>
       </div>
