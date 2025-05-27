@@ -4,9 +4,15 @@ import Button from "components/inputs/Button.tsx";
 import { MdArrowBack } from "react-icons/md";
 import Dropdown from "components/inputs/Dropdown.tsx";
 import { IoWarning } from "react-icons/io5";
-import { useChangeFreeAgent, useCreateTeam, useJoinTeam } from "api/query.ts";
+import {
+  useChangeFreeAgent,
+  useCreateTeam,
+  useGetUserInvites,
+  useResolveInvite,
+} from "api/query.ts";
 import { EventContext } from "contexts/EventContext.ts";
 import { RegistrationType } from "api/types/RegistrationType.ts";
+import { UserInviteType } from "api/types/InviteType.ts";
 
 export default function NoTeamCard({
   registration,
@@ -199,26 +205,20 @@ function JoinTeamComponent({
   setCurrentTab: (tab: "create" | "join" | "default") => void;
 }) {
   const dispatchEventMsg = useContext(EventContext);
-  const joinTeam = useJoinTeam();
+  const { data: invites, isLoading: invitesLoading } = useGetUserInvites();
 
-  const onJoinTeam = (evt: FormEvent<HTMLFormElement>) => {
-    evt.preventDefault();
-
-    const invite = new FormData(evt.currentTarget).get("invite") as string;
-    if (invite === "") {
-      return dispatchEventMsg({
-        type: "error",
-        msg: "Input an invite code first",
-      });
-    }
-
-    joinTeam.mutate(
-      { invite },
-      {
-        onSuccess: () => joinTeam.reset(),
-      },
-    );
-  };
+  let inviteElements;
+  if (invitesLoading) {
+    inviteElements = <h1>Loading...</h1>;
+  } else if (invites === undefined) {
+    inviteElements = <h1>Failed to load</h1>;
+  } else if (invites.length === 0) {
+    inviteElements = <h1>No invites</h1>;
+  } else {
+    inviteElements = invites.map((invite) => (
+      <TeamInviteItem key={invite.id} invite={invite} />
+    ));
+  }
 
   return (
     <>
@@ -226,31 +226,52 @@ function JoinTeamComponent({
         <button onClick={() => setCurrentTab("default")}>
           <MdArrowBack size={24} color="white" />
         </button>
-        <h1>Enter Code</h1>
+        <h1>Invites</h1>
       </div>
-      <form className="card--teams__form fill" onSubmit={onJoinTeam}>
-        <div className="card--teams__form__item">
-          <p className="card--teams__label">Team Name</p>
-          <input
-            type="text"
-            name="invite"
-            placeholder="Enter invite code here..."
-          />
-          <Button children="Join Team" type="submit" />
-        </div>
-      </form>
       <div className="card--teams__invites">
-        <p className="card--teams__label">Invites</p>
-        <div className="card--teams__invites__container">
-          <div className="card--teams__invites__container__item">
-            <p>Team Name</p>
-            <div className="card--teams__invites__container__item__actions">
-              <p>Accept</p>
-              <p>Decline</p>
-            </div>
-          </div>
-        </div>
+        <div className="card--teams__invites__item">{inviteElements}</div>
       </div>
     </>
+  );
+}
+
+function TeamInviteItem({ invite }: { invite: UserInviteType }) {
+  const resolveInvite = useResolveInvite(invite.id);
+  const [debounce, setDebounce] = useState(false);
+
+  function doResolveInvite(accept: boolean) {
+    if (debounce) {
+      return;
+    }
+
+    setDebounce(true);
+
+    resolveInvite.mutate(
+      { accept },
+      {
+        onSettled: () => {
+          setDebounce(false);
+          resolveInvite.reset();
+        },
+      },
+    );
+  }
+
+  return (
+    <div className="card--teams__invites__item">
+      <p>{invite.team_name}</p>
+      <div className="card--teams__invites__item__actions">
+        <Button
+          children="Accept"
+          onClick={() => doResolveInvite(true)}
+          unavailable={debounce}
+        />
+        <Button
+          children="Decline"
+          onClick={() => doResolveInvite(false)}
+          unavailable={debounce}
+        />
+      </div>
+    </div>
   );
 }

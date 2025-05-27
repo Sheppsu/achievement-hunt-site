@@ -10,6 +10,5 @@ export type AchievementTeamExtendedType = {
   name: string;
   icon: string | null;
   players: AchievementPlayerType[];
-  invite: string;
   accepts_free_agents: boolean;
 } & AchievementTeamType;

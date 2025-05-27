@@ -135,28 +135,56 @@
 /* Join Team */
 
 .card--teams__invites {
-  width: 100%;
-}
+  width: calc(100% - 20px);
+  padding: 10px;
 
-.card--teams__invites__container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
   background-color: var(--site-background-color);
   border: solid 2px var(--border-color);
-  height: 150px;
-  width: 100%;
 }
 
-.card--teams__invites__container__item {
-  height: 42px;
+.card--teams__invites__item {
   width: 100%;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-.card--teams__invites__container__item__actions {
+.card--teams__invites--outgoing {
+  width: calc(100% - 20px);
+  padding: 10px;
+
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+
+  background-color: var(--site-background-color);
+  border: solid 2px var(--border-color);
+}
+
+.card--teams__invites__item--outgoing {
+  width: 190px;
+  padding: 5px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 5px;
+
+  border: solid 1px var(--border-color);
+}
+
+.card--teams__invites__item__actions {
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 5px;
 }
 
 /* Player */
@@ -308,7 +336,3 @@ hr.announcement-divider {
 
   background-color: var(--border-color);
 }
-
-/* Layout */
-
-
