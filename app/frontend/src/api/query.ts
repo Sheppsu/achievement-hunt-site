@@ -1,5 +1,4 @@
 import {
-  MutationKey,
   QueryClient,
   QueryClientContext,
   UseMutationOptions,
@@ -28,6 +27,7 @@ import { EventIterationType } from "api/types/EventIterationType.ts";
 import { AnnouncementType } from "api/types/AnnouncementType.ts";
 import { AchievementBatchType } from "api/types/AchievementBatchType.ts";
 import { RegistrationType } from "api/types/RegistrationType.ts";
+import { TeamInviteType, UserInviteType } from "api/types/InviteType.ts";
 
 function getIterationParams() {
   const path = location.pathname;
@@ -122,7 +122,6 @@ export function useGetAchievements(
   return useMakeQuery({
     queryKey: [...getIterationParams(), "achievements"],
     enabled,
-    refetchInterval: 60000,
   });
 }
 
@@ -141,13 +140,15 @@ export function useGetTeams(
   });
 }
 
-function onRenameTeam(teamData: TeamDataType, newTeamName: string) {
+function onRenameTeam(teamData: TeamDataType, teamId: number, newName: string) {
   const newTeams = [];
 
   for (const team of teamData.teams) {
     // team to rename
-    if ("invite" in team) {
-      team.name = newTeamName;
+    if (team.id === teamId) {
+      if ("name" in team) {
+        team.name = newName;
+      }
       newTeams.push(team);
       continue;
     }
@@ -158,14 +159,17 @@ function onRenameTeam(teamData: TeamDataType, newTeamName: string) {
   return { placement: teamData.placement, teams: newTeams };
 }
 
-export function useRenameTeam(): SpecificUseMutationResult<string> {
+export function useRenameTeam(): SpecificUseMutationResult<{
+  id: number;
+  name: string;
+}> {
   const queryClient = useContext(QueryClientContext);
   return useMakeMutation(
     {
       mutationKey: [...getIterationParams(), "teams", "rename"],
-      onSuccess: (newTeamName) => {
+      onSuccess: (team) => {
         queryClient?.setQueryData(["teams"], (teamData: TeamDataType) =>
-          onRenameTeam(teamData, newTeamName),
+          onRenameTeam(teamData, team.id, team.name),
         );
       },
     },
@@ -186,7 +190,7 @@ function onTransferTeamAdmin(
 
   for (const team of teamData.teams) {
     // team to switch admin
-    if ("invite" in team) {
+    if ("players" in team) {
       for (const player of team.players) {
         if (player.user.id === data.prevAdminId) {
           player.team_admin = false;
@@ -194,9 +198,6 @@ function onTransferTeamAdmin(
           player.team_admin = true;
         }
       }
-      newTeams.push(team);
-
-      continue;
     }
 
     newTeams.push(team);
@@ -220,77 +221,55 @@ export function useTransferTeamAdmin(): SpecificUseMutationResult<TransferTeamAd
   );
 }
 
-function onLeaveTeam(teamData: TeamDataType) {
+type TeamLeaveDataType = {
+  team_id: number;
+  user_id: number;
+};
+
+function onLeaveTeam(teamData: TeamDataType, leaveData: TeamLeaveDataType) {
+  console.log(teamData);
   const newTeams = [];
 
   for (const team of teamData.teams) {
-    // is the team we're leaving
-    if ("invite" in team) {
-      // push "minimal" version of team data (if it still exists even)
-      if (team.players.length !== 1)
-        newTeams.push({
-          id: team.id,
-          name: team.name,
-          icon: team.icon,
-          points: team.points,
-        });
+    if (team.id === leaveData.team_id) {
+      if ((team as AchievementTeamExtendedType).players.length === 1) {
+        continue;
+      }
 
+      newTeams.push({
+        ...team,
+        players: (team as AchievementTeamExtendedType).players.filter(
+          (player) => player.user.id !== leaveData.user_id,
+        ),
+      });
       continue;
     }
 
     newTeams.push(team);
   }
 
+  console.log(newTeams);
+
   return { placement: teamData.placement, teams: newTeams };
 }
 
-export function useLeaveTeam(): SpecificUseMutationResult<null> {
+export function useLeaveTeam(): SpecificUseMutationResult<TeamLeaveDataType> {
   const iteration = getIterationParams();
   const queryClient = useContext(QueryClientContext);
 
   return useMakeMutation(
     {
       mutationKey: [...iteration, "teams", "leave"],
-      onSuccess: () => {
+      onSuccess: (leaveData: TeamLeaveDataType) => {
         // remove players or team
-        queryClient?.setQueryData([...iteration, "teams"], onLeaveTeam);
+        queryClient?.setQueryData(
+          [...iteration, "teams"],
+          (teamData: TeamDataType) => onLeaveTeam(teamData, leaveData),
+        );
       },
     },
     {
       method: "DELETE",
-    },
-  );
-}
-
-export function useJoinTeam(): SpecificUseMutationResult<AchievementTeamExtendedType> {
-  const iteration = getIterationParams();
-  const queryClient = useContext(QueryClientContext);
-
-  function onJoinTeam(joinedTeam: AchievementTeamExtendedType) {
-    // update team data for team being joined
-    queryClient?.setQueryData(
-      [...iteration, "teams"],
-      (teamData: TeamDataType | undefined) => {
-        if (teamData === undefined) {
-          return;
-        }
-
-        return {
-          placement: teamData.placement,
-          teams: teamData.teams.concat([joinedTeam]),
-        };
-      },
-    );
-    return;
-  }
-
-  return useMakeMutation(
-    {
-      mutationKey: [...iteration, "teams", "join"],
-      onSuccess: onJoinTeam,
-    },
-    {
-      method: "POST",
     },
   );
 }
@@ -302,25 +281,130 @@ export function useCreateTeam(): SpecificUseMutationResult<AchievementTeamExtend
   return useMakeMutation(
     {
       mutationKey: [...iteration, "teams", "create"],
-      onSuccess: (newTeam) => {
-        // add team to team list
-        queryClient?.setQueryData(
-          [...iteration, "teams"],
-          (teamData: TeamDataType | undefined) => {
-            if (teamData === undefined) {
-              return;
-            }
+      onSuccess: () => {
+        queryClient?.invalidateQueries({
+          queryKey: [...iteration, "teams"],
+        });
+      },
+    },
+    {
+      method: "POST",
+    },
+  );
+}
 
-            return {
-              placement: teamData.placement,
-              teams: teamData.teams.concat([newTeam]),
-            };
-          },
+export function useGetTeamInvites(
+  enabled: boolean = true,
+): UseQueryResult<TeamInviteType[]> {
+  const iteration = getIterationParams();
+
+  return useMakeQuery({
+    queryKey: [...iteration, "teams", "invites"],
+    refetchInterval: 60000,
+    enabled,
+  });
+}
+
+export function useGetUserInvites(): UseQueryResult<UserInviteType[]> {
+  const iteration = getIterationParams();
+
+  return useMakeQuery({
+    queryKey: [...iteration, "invites"],
+  });
+}
+
+export function useSendTeamInvite(): SpecificUseMutationResult<TeamInviteType> {
+  const iteration = getIterationParams();
+  const queryClient = useContext(QueryClientContext);
+
+  return useMakeMutation(
+    {
+      mutationKey: [...iteration, "teams", "invites", "create"],
+      onSuccess: (invite) => {
+        queryClient?.setQueryData(
+          [...iteration, "teams", "invites"],
+          (invites: TeamInviteType[]) => invites.concat([invite]),
         );
       },
     },
     {
       method: "POST",
+    },
+  );
+}
+
+function onInviteDeleted(
+  queryKey: string[],
+  queryClient: QueryClient | undefined,
+  iteration: string[],
+  inviteId: number,
+) {
+  queryClient?.setQueryData(queryKey, (invites: TeamInviteType[]) => {
+    const newInvites = [];
+
+    for (const invite of invites) {
+      if (invite.id !== inviteId) {
+        newInvites.push(invite);
+      }
+    }
+
+    return newInvites;
+  });
+}
+
+export function useRescindTeamInvite(
+  inviteId: number,
+): SpecificUseMutationResult<null> {
+  const iteration = getIterationParams();
+  const queryClient = useContext(QueryClientContext);
+
+  return useMakeMutation(
+    {
+      mutationKey: ["invites", inviteId.toString(), "rescind"],
+      onSuccess: () =>
+        onInviteDeleted(
+          [...iteration, "teams", "invites"],
+          queryClient,
+          iteration,
+          inviteId,
+        ),
+    },
+    {
+      method: "DELETE",
+    },
+  );
+}
+
+export function useResolveInvite(
+  inviteId: number,
+): SpecificUseMutationResult<AchievementTeamType | null> {
+  const iteration = getIterationParams();
+  const queryClient = useContext(QueryClientContext);
+
+  function onInviteResolved(team: AchievementTeamType | null) {
+    onInviteDeleted(
+      [...iteration, "invites"],
+      queryClient,
+      iteration,
+      inviteId,
+    );
+
+    if (team === null) {
+      return;
+    }
+
+    queryClient?.invalidateQueries({
+      queryKey: [...iteration, "teams"],
+    });
+  }
+
+  return useMakeMutation(
+    {
+      mutationKey: ["invites", inviteId.toString(), "resolve"],
+      onSuccess: onInviteResolved,
+    },
+    {
+      method: "DELETE",
     },
   );
 }

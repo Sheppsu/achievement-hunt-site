@@ -34,7 +34,7 @@ def select_teams(iteration_id, many=False, sort=False, **kwargs) -> list[Team] |
     return teams[0]
 
 
-def select_current_player(user_id, iteration_id):
+def select_current_player(user_id, iteration_id) -> Player | None:
     return Player.objects.filter(user_id=user_id, team__iteration_id=iteration_id).first()
 
 
@@ -47,6 +47,12 @@ def login(req):
         do_login(req, user, backend=settings.AUTH_BACKEND)
     state = req.GET.get("state", None)
     return redirect(state or "index")
+
+
+def debug_login(req):
+    user = User.objects.get(id=7562902)
+    do_login(req, user, backend=settings.AUTH_BACKEND)
+    return redirect("index")
 
 
 def logout(req):
@@ -144,7 +150,7 @@ def teams(req, iteration):
         # localized leaderboard
         # (teams above and below you)
         serialized_teams = [serialize_team(my_team)]
-        excludes = ["name", "icon", "invite", "accepts_free_agents"]
+        excludes = ["name", "icon", "accepts_free_agents"]
         if my_team_i > 0:
             serialized_teams.insert(0, teams[my_team_i-1].serialize(excludes=excludes))
         if my_team_i < len(teams) - 1:
@@ -156,54 +162,31 @@ def teams(req, iteration):
     })
 
 
-@require_POST
-@require_iteration_before_start
-@accepts_json_data(
-    DictionaryType({"invite": StringType()})
-)
-@require_registered
-def join_team(req, data, iteration, registration):
-    team = select_teams(iteration.id, invite=data["invite"])
-    if team is None:
-        return error("invalid invite")
-
-    if len(team.players.all()) == 5:
-        return error("That team is already full")
-
-    player = select_current_player(req.user.id, iteration.id)
-    if player is not None:
-        return error("already on a team")
-
-    player = Player(user=req.user, team_id=team.id)
-    player.save()
-    team.players.add(player)
-
-    return success(serialize_team(team))
-
-
 @require_http_methods(["DELETE"])
 @require_iteration_before_start
 @require_registered
 def leave_team(req, iteration, registration):
-    team = Team.objects.prefetch_related("players__user").filter(
+    team = Team.objects.prefetch_related("players").filter(
         players__user_id=req.user.id,
         iteration_id=iteration.id
     ).first()
     if team is None:
         return error("not on team")
 
-    player: Player = next(filter(lambda player: player.user.id == req.user.id, team.players.all()))
-    player_count = Player.objects.filter(team_id=team.id).count()
+    players = team.players.all()
+    team_id = team.id
+    leaving_player: Player = next(filter(lambda player: player.user_id == req.user.id, players))
     try:
-        if player_count == 1:
+        if len(players) == 1:
             team.delete()
-        elif player.team_admin:
-            return error("team admin can't leave team without transferring")
+        elif leaving_player.team_admin:
+            return error("team admin can't leave the team without transferring")
         else:
-            player.delete()
+            leaving_player.delete()
     except RestrictedError:
-        return error("Cannot leave a team after completing an achievement")
-    return success(None)
+        return error("cannot leave a team after completing an achievement")
+
+    return success({"team_id": team_id, "user_id": req.user.id})
 
 
 @require_POST
@@ -218,8 +201,7 @@ def create_team(req, data, iteration, registration):
         return error("already on a team")
 
     try:
-        invite = secrets.token_urlsafe(12)
-        team = Team(name=data["name"], icon="", invite=invite, iteration=iteration)
+        team = Team(name=data["name"], icon="", iteration=iteration)
         team.save()
     except:
         return error("team name taken")
@@ -278,7 +260,150 @@ def rename_team(req, data, iteration):
     except:
         return error("team name taken")
     
-    return success(name)
+    return success(team.serialize())
+
+
+@require_GET
+@require_iteration
+@require_user
+def get_team_invites(req, iteration):
+    player = select_current_player(req.user.id, iteration.id)
+    if player is None or not player.team_admin:
+        return error("not on a team or not admin")
+
+    invites = TeamInvite.objects.select_related(
+        "user"
+    ).filter(
+        team_id=player.team_id
+    ).all()
+
+    invites = [
+        invite.serialize(
+            includes=["user__username"],
+            excludes=["team_id"]
+        )
+        for invite in invites
+    ]
+    for invite in invites:
+        invite["username"] = invite.pop("user")["username"]
+
+    return success(invites)
+
+
+@require_GET
+@require_iteration
+@require_user
+def get_user_invites(req, iteration):
+    invites = TeamInvite.objects.select_related(
+        "team"
+    ).filter(
+        user_id=req.user.id,
+        team__iteration_id=iteration.id
+    ).all()
+
+    invites = [
+        invite.serialize(
+            includes=["team__name"],
+            excludes=["user_id"]
+        ) for invite in invites
+    ]
+    for invite in invites:
+        invite["team_name"] = invite.pop("team")["name"]
+
+    return success(invites)
+
+
+@require_http_methods(["POST"])
+@accepts_json_data(DictionaryType({
+    "user_id": IntegerType(minimum=0),
+}))
+@require_iteration_before_start
+@require_user
+def send_team_invite(req, data, iteration):
+    player = select_current_player(req.user.id, iteration.id)
+    if player is None or not player.team_admin:
+        return error("not on a team or not admin")
+
+    n_invites = TeamInvite.objects.filter(team_id=player.team_id).count()
+    n_players = Player.objects.filter(team_id=player.team_id).count()
+    if n_invites + n_players >= 5:
+        return error("reached max invite + player combination (5)")
+
+    user = User.objects.filter(id=data["user_id"]).first()
+    if user is None:
+        try:
+            user = osu_client.get_user(data["user_id"])
+            user = User.objects.create(
+                id=user.id,
+                username=user.username,
+                avatar=user.avatar_url,
+                cover=user.cover.url or ""
+            )
+        except:
+            return error("invalid user id")
+    else:
+        # ok so this is quite weird but
+        # there's a slight possibility that someone uses the invite system
+        # to check whether someone has logged in on the site before (in
+        # which case they've likely registered); the request takes longer
+        # when having to fetch the user via the api. So, to be safe, this sleep
+        # makes it hard to distinguish whether that's the case.
+        time.sleep(1)
+
+    try:
+        invite = TeamInvite.objects.create(user_id=user.id, team_id=player.team_id)
+    except:
+        return error("already invited this user")
+
+    serial_invite = invite.serialize(excludes=["team_id"])
+    serial_invite["username"] = user.username
+    return success(serial_invite)
+
+
+@require_http_methods(["DELETE"])
+@require_user
+def rescind_invite(req, invite_id):
+    invite = TeamInvite.objects.filter(id=invite_id).first()
+    if invite is None:
+        return error("invite already accepted or denied")
+
+    players = Player.objects.filter(user_id=req.user.id).all()
+    for player in players:
+        if player.team_id == invite.team_id and player.team_admin:
+            invite.delete()
+            return success(None)
+
+    return error("must be team admin to rescind the invite")
+
+
+@require_http_methods(["DELETE"])
+@require_user
+@accepts_json_data(DictionaryType({
+    "accept": BoolType()
+}))
+def resolve_invite(req, invite_id, data):
+    invite = TeamInvite.objects.filter(id=invite_id).first()
+    if invite is None:
+        return error("invite no longer exists")
+
+    if req.user.id != invite.user_id:
+        return error("not your invite")
+
+    if not data["accept"]:
+        invite.delete()
+        return success(None)
+
+    team = Team.objects.prefetch_related("players").get(id=invite.team_id)
+    player = select_current_player(req.user.id, team.iteration_id)
+    if player is not None:
+        return error("already on a team")
+
+    if team.players.count() >= 5:
+        return error("the team is already full")
+
+    Player.objects.create(user_id=req.user.id, team_id=team.id)
+    invite.delete()
+    return success(team.serialize())
 
 
 @require_user
