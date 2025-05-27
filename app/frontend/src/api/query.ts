@@ -674,9 +674,12 @@ export function useCreateAnnouncement(): SpecificUseMutationResult<AnnouncementT
   );
 }
 
-export function useGetBatches(): UseQueryResult<AchievementBatchType[]> {
+export function useGetBatches(
+  enabled: boolean = false,
+): UseQueryResult<AchievementBatchType[]> {
   return useMakeQuery({
     queryKey: [...getIterationParams(), "batches"],
+    enabled,
   });
 }
 

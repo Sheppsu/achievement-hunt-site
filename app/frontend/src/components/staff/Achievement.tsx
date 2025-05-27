@@ -67,7 +67,9 @@ export default function Achievement(props: AchievementProps) {
   const sendComment = useSendComment(achievement.id);
   const deleteAchievement = useDeleteAchievement(achievement.id);
   const moveAchievement = useMoveAchievement(achievement.id);
-  const { data: batches, isLoading: batchesLoading } = useGetBatches();
+  const { data: batches, isLoading: batchesLoading } = useGetBatches(
+    session.user!.is_admin,
+  );
 
   const onCommentStart = () => {
     setIsCommenting(true);
@@ -286,11 +288,15 @@ export default function Achievement(props: AchievementProps) {
             onClick={onCommentCancel}
             hidden={!isCommenting || sendingComment}
           />
-          <Button
-            children="Move"
-            onClick={doMoveAchievement}
-            hidden={!session.user?.is_admin}
-          />
+          {session.user!.is_admin ? (
+            <Button
+              children="Move"
+              onClick={doMoveAchievement}
+              hidden={!session.user?.is_admin}
+            />
+          ) : (
+            ""
+          )}
         </div>
       </div>
     </div>
