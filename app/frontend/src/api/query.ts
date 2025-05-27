@@ -502,7 +502,7 @@ export function useVoteAchievement(
     });
 
     queryClient?.setQueryData(
-      ["staff", "achievements"],
+      ["staff", "achievements", "?batch=0"],
       (achievements: StaffAchievementType[] | undefined) => {
         if (achievements === undefined) return;
 
@@ -550,8 +550,9 @@ function onCommented(
   });
 
   queryClient?.setQueryData(
-    ["staff", "achievements"],
+    ["staff", "achievements", "?batch=0"],
     (achievements: StaffAchievementType[] | undefined) => {
+      console.log(achievements);
       if (achievements === undefined) return;
 
       const newAchievements = [];
@@ -607,7 +608,7 @@ function onAchievementCreation(
   achievement: AchievementCreationReturn,
 ) {
   queryClient?.setQueryData(
-    ["staff", "achievements"],
+    ["staff", "achievements", "?batch=0"],
     (achievements: StaffAchievementType[] | undefined) =>
       achievements?.concat([
         {
@@ -648,7 +649,7 @@ function onAchievementEdit(
   });
 
   queryClient?.setQueryData(
-    ["staff", "achievements"],
+    ["staff", "achievements", "?batch=0"],
     (achievements: StaffAchievementType[] | undefined) => {
       if (achievements === undefined) return;
 
@@ -695,7 +696,7 @@ function onAchievementDeleted(
   achievementId: number,
 ) {
   queryClient?.setQueryData(
-    ["staff", "achievements"],
+    ["staff", "achievements", "?batch=0"],
     (achievements: StaffAchievementType[] | undefined) =>
       achievements?.filter((achievement) => achievement.id != achievementId),
   );
