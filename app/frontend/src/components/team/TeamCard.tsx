@@ -1,6 +1,9 @@
 import {
+  useGetTeamInvites,
   useLeaveTeam,
   useRenameTeam,
+  useRescindTeamInvite,
+  useSendTeamInvite,
   useTransferTeamAdmin,
 } from "api/query.ts";
 import React, { FormEvent, useContext, useState } from "react";
@@ -15,6 +18,9 @@ import { SessionContext } from "contexts/SessionContext.ts";
 import { getAnonName } from "util/helperFunctions.ts";
 import Player from "components/team/Player.tsx";
 import Button from "components/inputs/Button.tsx";
+import { TeamInviteType } from "api/types/InviteType.ts";
+import TextInput from "components/inputs/TextInput.tsx";
+import { IoIosCloseCircle, IoIosCloseCircleOutline } from "react-icons/io";
 
 export default function TeamCard({
   team,
@@ -25,25 +31,48 @@ export default function TeamCard({
   const dispatchEventMsg = useContext(EventContext);
   const { setPopup } = useContext(PopupContext) as PopupContextType;
 
+  let player = null;
+  if (session.user !== null) {
+    const players = team.players.filter((p) => p.user.id === session.user!.id);
+    if (players.length === 1) {
+      player = players[0];
+    }
+  }
+
+  const showInvites = player !== null && player.team_admin;
+
+  const { data: invites, isLoading: invitesLoading } =
+    useGetTeamInvites(showInvites);
   const renameTeam = useRenameTeam();
   const leaveTeam = useLeaveTeam();
+  const sendTeamInvite = useSendTeamInvite();
+
+  const [debounce, setDebounce] = useState(false);
 
   const user = team.players.find(
     (player) => player.user.id === session.user?.id,
   );
-  const copyInvite = () => {
-    navigator.clipboard.writeText(team.invite);
-    dispatchEventMsg({
-      type: "info",
-      msg: "Copied team code to clipboard!",
-    });
-  };
+
+  let invitesElement;
+  if (!showInvites) {
+    invitesElement = "";
+  } else if (invitesLoading) {
+    invitesElement = <h1>Loading...</h1>;
+  } else if (invites === undefined) {
+    invitesElement = <h1>Failed to load</h1>;
+  } else if (invites.length === 0) {
+    invitesElement = <h1>No out-going invites</h1>;
+  } else {
+    invitesElement = invites.map((invite) => (
+      <InviteItem key={invite.id} invite={invite} />
+    ));
+  }
 
   const renameTeamPopup = () => {
     setPopup({
       title: "Rename Team",
       content: (
-        <SimplePromptPopup prompt="New team name" onSubmit={onRenameTeam} />
+        <SimplePromptPopup prompt="New team name" onSubmit={doRenameTeam} />
       ),
     });
   };
@@ -60,8 +89,12 @@ export default function TeamCard({
     });
   };
 
-  const onRenameTeam = (evt: FormEvent<HTMLFormElement>) => {
+  const doRenameTeam = (evt: FormEvent<HTMLFormElement>) => {
     evt.preventDefault();
+
+    if (debounce) {
+      return;
+    }
 
     const name = new FormData(evt.currentTarget).get("prompt-value") as string;
     if (name.length < 1 || name.length > 32) {
@@ -70,6 +103,8 @@ export default function TeamCard({
         msg: "Team name must be between 1 and 32 characters",
       });
     }
+
+    setDebounce(true);
 
     renameTeam.mutate(
       { name },
@@ -82,6 +117,7 @@ export default function TeamCard({
         },
         onSettled: () => {
           renameTeam.reset();
+          setDebounce(false);
         },
       },
     );
@@ -89,11 +125,58 @@ export default function TeamCard({
     setPopup(null);
   };
 
-  const onLeaveTeam = () => {
+  const doLeaveTeam = () => {
+    if (debounce) {
+      return;
+    }
+
+    setDebounce(true);
+
     leaveTeam.mutate(
       {},
       {
-        onSuccess: () => leaveTeam.reset(),
+        onSettled: () => {
+          leaveTeam.reset();
+          setDebounce(false);
+        },
+      },
+    );
+  };
+
+  const doSendInvite = (evt: FormEvent<HTMLFormElement>) => {
+    evt.preventDefault();
+
+    if (debounce) {
+      return;
+    }
+
+    let userIdStr = (
+      new FormData(evt.currentTarget).get("user-id") as string
+    ).trim();
+    if (userIdStr.length === 0) {
+      return;
+    }
+
+    if (userIdStr.endsWith("/")) {
+      userIdStr = userIdStr.slice(0, userIdStr.length - 1);
+    }
+    const userIdSplit = userIdStr.split("/");
+    const userId = parseInt(userIdSplit[userIdSplit.length - 1]);
+
+    if (isNaN(userId)) {
+      dispatchEventMsg({ type: "error", msg: "Invalid user id/link" });
+      return;
+    }
+
+    setDebounce(true);
+
+    sendTeamInvite.mutate(
+      { user_id: userId },
+      {
+        onSettled: () => {
+          sendTeamInvite.reset();
+          setDebounce(false);
+        },
       },
     );
   };
@@ -114,19 +197,97 @@ export default function TeamCard({
       <div className="card--teams__container buttons">
         <Button
           children="Leave team"
-          onClick={onLeaveTeam}
-          unavailable={user?.team_admin && team.players.length > 1}
+          onClick={doLeaveTeam}
+          holdToUse={true}
+          unavailable={
+            (user?.team_admin && team.players.length > 1) || debounce
+          }
         />
-        <Button children="Invite code" onClick={copyInvite} />
       </div>
       {user?.team_admin && (
-        <div className="card--teams__container buttons">
-          <Button children="Rename Team" onClick={renameTeamPopup} />
-          <Button
-            children="Transfer Leadership"
-            onClick={transferTeamAdminPopup}
-          />
-        </div>
+        <>
+          <div className="card--teams__container buttons">
+            <Button
+              children="Rename Team"
+              onClick={renameTeamPopup}
+              unavailable={debounce}
+            />
+            <Button
+              children="Transfer Leadership"
+              onClick={transferTeamAdminPopup}
+              unavailable={debounce}
+            />
+          </div>
+          {team.players.length === 5 || !showInvites ? (
+            ""
+          ) : (
+            <>
+              <h1 className="card__title">Invites</h1>
+              <div className="card--teams__invites--outgoing">
+                {invitesElement}
+              </div>
+              <form
+                className="card--teams__container buttons"
+                onSubmit={doSendInvite}
+              >
+                <TextInput
+                  style={{ flexGrow: 1 }}
+                  placeholder="User id/link"
+                  name="user-id"
+                />
+                <Button
+                  children="Invite"
+                  type="submit"
+                  unavailable={debounce}
+                />
+              </form>
+            </>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+function InviteItem({ invite }: { invite: TeamInviteType }) {
+  const rescindTeamInvite = useRescindTeamInvite(invite.id);
+  const [debounce, setDebounce] = useState(false);
+
+  const doRescindTeamInvite = () => {
+    if (debounce) {
+      return;
+    }
+
+    setDebounce(true);
+
+    rescindTeamInvite.mutate(
+      {},
+      {
+        onSettled: () => {
+          rescindTeamInvite.reset();
+          setDebounce(false);
+        },
+      },
+    );
+  };
+
+  return (
+    <div className="card--teams__invites__item--outgoing">
+      <a href={`https://osu.ppy.sh/u/${invite.user_id}`} target="_blank">
+        {invite.username}
+      </a>
+      {debounce ? (
+        <IoIosCloseCircle
+          size={32}
+          onClick={doRescindTeamInvite}
+          className="clickable"
+        />
+      ) : (
+        <IoIosCloseCircleOutline
+          size={32}
+          onClick={doRescindTeamInvite}
+          className="clickable"
+        />
       )}
     </div>
   );
@@ -187,37 +348,3 @@ function TransferTeamAdminComponent({
     </div>
   );
 }
-
-// function PlacementCard({
-//   placement,
-//   numberTeams,
-// }: {
-//   placement: number;
-//   numberTeams: number;
-// }) {
-//   return (
-//     <motion.div
-//       className="card"
-//       layout
-//       initial={{ height: 0, opacity: 0 }}
-//       animate={{ height: "auto", opacity: 1 }}
-//       exit={{ height: 0, opacity: 0 }}
-//     >
-//       <div className="card--teams__container placement">
-//         <div className="card--teams__container--placement__column">
-//           <div className="card--teams__container--placement__column__container">
-//             <p className="card--teams__title placement">#{placement}</p>
-//           </div>
-//           <p className="card--teams__subtitle">Current placement</p>
-//         </div>
-//         <div className="vertical-divider"></div>
-//         <div className="card--teams__container--placement__column">
-//           <div className="card--teams__container--placement__column__container">
-//             <p className="card--teams__title placement">{numberTeams}</p>
-//           </div>
-//           <p className="card--teams__subtitle">Registered teams</p>
-//         </div>
-//       </div>
-//     </motion.div>
-//   );
-// }

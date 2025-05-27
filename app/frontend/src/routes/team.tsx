@@ -13,8 +13,9 @@ import TeamListingsCard from "components/team/TeamListingsCard.tsx";
 import TextCard from "components/cards/TextCard.tsx";
 import RegisterButton from "components/team/RegisterButton.tsx";
 import AnnouncementsCard from "components/team/AnnouncementsCard.tsx";
+import { getMyTeam } from "util/helperFunctions.ts";
 
-export default function AchievementsIndex() {
+export default function TeamPage() {
   const session = useContext(SessionContext);
   const { data: registration, isLoading: registrationLoading } =
     useGetRegistration();
@@ -22,16 +23,8 @@ export default function AchievementsIndex() {
 
   // look for the current user's team
   let ownTeam: AchievementTeamExtendedType | null = null;
-  if (teamData !== undefined)
-    for (const [i, team] of teamData.teams.entries()) {
-      if ("players" in team) {
-        for (const player of team.players) {
-          if (player.user.id === session.user?.id) {
-            ownTeam = team as AchievementTeamExtendedType;
-          }
-        }
-      }
-    }
+  if (teamData !== undefined && session.user !== null)
+    ownTeam = getMyTeam(session.user.id, teamData.teams);
 
   // show different layout of cards depending on current user state
   const cardsColumns: React.ReactNode[][] = [[]];
@@ -62,17 +55,17 @@ export default function AchievementsIndex() {
   }
 
   // show teams listing for admins
-  // if (
-  //   session.user !== null &&
-  //   session.user.is_admin &&
-  //   teamData !== undefined
-  // ) {
-  //   cardsColumns[0].push(
-  //     <TeamListingsCard
-  //       teams={teamData.teams as AchievementTeamExtendedType[]}
-  //     />,
-  //   );
-  // }
+  if (
+    session.user !== null &&
+    session.user.is_admin &&
+    teamData !== undefined
+  ) {
+    cardsColumns[0].push(
+      <TeamListingsCard
+        teams={teamData.teams as AchievementTeamExtendedType[]}
+      />,
+    );
+  }
 
   return (
     <>

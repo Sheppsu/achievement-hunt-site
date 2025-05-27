@@ -233,13 +233,12 @@ class AchievementVote(SerializableModel):
 class Team(SerializableModel):
     name = models.CharField(max_length=32, unique=True)
     icon = models.CharField(max_length=64, null=True)
-    invite = models.CharField(max_length=16)
     points = models.PositiveIntegerField(default=0)
     iteration = models.ForeignKey(EventIteration, on_delete=models.CASCADE)
     accepts_free_agents = models.BooleanField(default=False)
 
     class Serialization:
-        FIELDS = ["id", "name", "icon", "invite", "points", "accepts_free_agents"]
+        FIELDS = ["id", "name", "icon", "points", "accepts_free_agents"]
 
 
 class Player(SerializableModel):
@@ -289,3 +288,16 @@ class Announcement(SerializableModel):
 
     class Serialization:
         FIELDS = ["id", "created_at", "title", "message"]
+
+
+class TeamInvite(SerializableModel):
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name="invites")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="invites")
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["team", "user"], name="unique_team_invite"),
+        ]
+
+    class Serialization:
+        FIELDS = ["id", "team_id", "user_id"]

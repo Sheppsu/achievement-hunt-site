@@ -40,7 +40,6 @@ for _ in range(10):
         team, created = Team.objects.get_or_create(
             name=f"Team {team_counter}",
             defaults={
-                "invite": secrets.token_urlsafe(12),
                 "points": random.randint(0, 9999),
                 "iteration": iteration
             }

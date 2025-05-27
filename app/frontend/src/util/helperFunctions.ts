@@ -6,8 +6,6 @@ import {
   AchievementCompletionType,
   AnonymousAchievementCompletionType,
 } from "api/types/AchievementCompletionType.ts";
-import { useContext, useEffect, useState } from "react";
-import { WebsocketContext } from "contexts/WebsocketContext.tsx";
 
 export function toTitleCase(str: string) {
   switch (str) {

@@ -24,7 +24,7 @@ export default function AnnouncementsCard() {
     element = <h1>Failed to load</h1>;
   } else {
     element = announcements.map((announcement) => (
-      <Announcement announcement={announcement} />
+      <Announcement key={announcement.id} announcement={announcement} />
     ));
   }
 
