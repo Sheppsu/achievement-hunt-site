@@ -417,11 +417,14 @@ export function useGetIteration(): UseQueryResult<EventIterationType> {
   });
 }
 
-export function useGetRegistration(): UseQueryResult<RegistrationType | null> {
+export function useGetRegistration(
+  enabled: boolean = false,
+): UseQueryResult<RegistrationType | null> {
   const iteration = getIterationParams();
 
   return useMakeQuery({
     queryKey: [...iteration, "registration"],
+    enabled,
   });
 }
 

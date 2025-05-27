@@ -18,7 +18,7 @@ import { getMyTeam } from "util/helperFunctions.ts";
 export default function TeamPage() {
   const session = useContext(SessionContext);
   const { data: registration, isLoading: registrationLoading } =
-    useGetRegistration();
+    useGetRegistration(session.user !== null);
   const { data: teamData, isLoading: teamsLoading } = useGetTeams();
 
   // look for the current user's team
