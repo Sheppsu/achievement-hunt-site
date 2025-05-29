@@ -6,6 +6,7 @@ import { StateDispatch } from "contexts/StateContext.ts";
 import { useState } from "react";
 import { AppState } from "types/AppStateType.ts";
 import { parseTags, toTitleCase } from "util/helperFunctions.ts";
+import { AnimationScope } from "motion/react";
 
 export type NavItem = {
   label: string;
@@ -136,12 +137,14 @@ function AchievementNavigationBarRow({
 export default function AchievementNavigationBar({
   state,
   animate,
+  scope,
   dispatchState,
   achievements,
   isStaff,
 }: {
   state: AppState | null;
   animate: Function;
+  scope: AnimationScope;
   dispatchState: StateDispatch;
   achievements: AchievementType[] | undefined;
   isStaff: boolean;
@@ -154,8 +157,8 @@ export default function AchievementNavigationBar({
 
     setAnimating(true);
 
-    await animate("div", { y: 10, opacity: 0 }, { duration: 0.2 });
-    await animate("div", { y: 0, opacity: 100 }, { duration: 0.2 });
+    await animate(scope.current, { y: 10, opacity: 0 }, { duration: 0.2 });
+    await animate(scope.current, { y: 0, opacity: 100 }, { duration: 0.2 });
 
     setAnimating(false);
   }
