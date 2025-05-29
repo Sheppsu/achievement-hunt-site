@@ -154,6 +154,7 @@ export default function AchievementCompletionPage() {
         <AchievementNavigationBar
           state={state}
           animate={animate}
+          scope={scope}
           dispatchState={dispatchState}
           achievements={achievements}
           isStaff={false}
