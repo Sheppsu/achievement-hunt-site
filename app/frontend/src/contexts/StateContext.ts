@@ -9,6 +9,11 @@ interface BaseStateActionType {
   id: number;
 }
 
+interface ToggleSubmission extends BaseStateActionType {
+  id: 3;
+  enable: boolean;
+}
+
 interface ModeType extends BaseStateActionType {
   id: 4;
   mode: number | null;
@@ -53,6 +58,7 @@ interface HideMyAchievements extends BaseStateActionType {
 }
 
 type StateActionType =
+  | ToggleSubmission
   | ModeType
   | FilterType
   | SearchFilterType
@@ -67,6 +73,11 @@ export function stateReducer(
   action: StateActionType,
 ): AppState {
   switch (action.id) {
+    case 3:
+      return {
+        ...state,
+        submitEnabled: action.enable,
+      };
     case 4: // mode
       return {
         ...state,

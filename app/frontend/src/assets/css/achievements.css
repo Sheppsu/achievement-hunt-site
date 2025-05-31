@@ -23,7 +23,7 @@ p {
   width: 100%;
 
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   gap: 30px;
 }
 
@@ -36,7 +36,7 @@ p {
   flex-direction: column;
   gap: 20px;
 
-  order: 1;
+  order: 2;
 }
 
 .achievement {
@@ -189,28 +189,22 @@ p {
 /* Progress container */
 
 .achievements-progress {
-  min-width: 400px;
+  min-width: 380px;
+  padding: 10px;
 
   display: flex;
   flex-direction: column;
   gap: 20px;
 
-  order: 2;
-}
-
-.achievements-progress__container {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
+  order: 1;
 
   border-radius: var(--border-rounding);
 
   background-color: var(--background-color);
 }
 
-.achievements-progress__container__left-box {
+.achievements-progress__left-box {
   flex-grow: 1;
-  padding: 10px;
 
   display: flex;
   flex-direction: column;
@@ -452,22 +446,22 @@ p {
   color: #ffffff;
 }
 
-@media (max-width: 1260px) {
-  .achievements {
-    flex-direction: column;
-  }
+/*@media (max-width: 1260px) {*/
+/*  .achievements {*/
+/*    flex-direction: column;*/
+/*  }*/
 
-  .achievements__container {
-    order: 2;
-  }
+/*  .achievements__container {*/
+/*    order: 2;*/
+/*  }*/
 
-  .achievements-progress {
-    order: 1;
-  }
-}
+/*  .achievements-progress {*/
+/*    order: 1;*/
+/*  }*/
+/*}*/
 
-@media (min-width: 1261px) {
-  .achievement {
-    max-width: 760px;
-  }
-}
+/*@media (min-width: 1261px) {*/
+/*  .achievement {*/
+/*    max-width: 760px;*/
+/*  }*/
+/*}*/

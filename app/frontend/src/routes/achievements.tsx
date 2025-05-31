@@ -68,10 +68,8 @@ function FullAchievementCompletionPage({
 }) {
   return (
     <>
+      <AchievementProgress team={team} iteration={iteration} />
       <AchievementContainer scope={scope} state={state} />
-      <div className="achievements-progress">
-        <AchievementProgress team={team} iteration={iteration} />
-      </div>
     </>
   );
 }

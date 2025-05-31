@@ -5,6 +5,7 @@ import { WebsocketContext } from "contexts/WebsocketContext";
 import { useContext } from "react";
 import { EventIterationType } from "api/types/EventIterationType.ts";
 import { StateContext } from "contexts/StateContext.ts";
+import Button from "components/inputs/Button.tsx";
 
 export default function AchievementProgress({
   team,
@@ -41,7 +42,7 @@ export default function AchievementProgress({
     !wsState?.connected || eventEnded || !appState?.submitEnabled;
   const submitCls = "submit-button" + (submitDisabled ? " disabled" : "");
 
-  function onSubmit() {
+  function doSubmit() {
     if (submitDisabled) return;
     sendSubmit();
   }
@@ -56,8 +57,8 @@ export default function AchievementProgress({
   )`;
 
   return (
-    <div className="achievements-progress__container">
-      <div className="achievements-progress__container__left-box">
+    <div className="achievements-progress">
+      <div className="achievements-progress__left-box">
         <h1>Achievement progress</h1>
         <h1>{`${achievementCount}/${
           (achievements as AchievementExtendedType[]).length
@@ -71,9 +72,12 @@ export default function AchievementProgress({
           <div className="achievements-progress-bar__inner"></div>
         </div>
       </div>
-      <div className={submitCls} onClick={onSubmit}>
-        Submit
-      </div>
+      <Button
+        children="Submit"
+        className={submitCls}
+        onClick={doSubmit}
+        unavailable={submitDisabled}
+      />
     </div>
   );
 }

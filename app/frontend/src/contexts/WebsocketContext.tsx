@@ -18,7 +18,11 @@ import { Session } from "types/SessionType";
 import { timeAgo } from "util/helperFunctions";
 import { EventContext, EventType } from "./EventContext";
 import { SessionContext } from "./SessionContext";
-import { useStateContext } from "./StateContext";
+import {
+  StateDispatch,
+  useDispatchStateContext,
+  useStateContext,
+} from "./StateContext";
 
 export type ChatMessage = {
   name: string;
@@ -227,14 +231,28 @@ function handleMessage(
   }
 }
 
-function _sendSubmit(wsState: WebsocketState, appState: AppState) {
+function _sendSubmit(
+  wsState: WebsocketState,
+  appState: AppState,
+  dispatchAppState: StateDispatch,
+) {
   if (wsState.ws === null || !appState.submitEnabled) {
     return;
   }
 
   wsState.ws.send(JSON.stringify({ code: 1, mode: appState.mode }));
 
-  // TODO disable submit button for 5 seconds
+  // disable submission for 5 seconds
+  dispatchAppState({
+    id: 3,
+    enable: false,
+  });
+  setTimeout(() => {
+    dispatchAppState({
+      id: 3,
+      enable: true,
+    });
+  }, 5000);
 }
 
 function _sendChatMessage(
@@ -265,6 +283,7 @@ export function WebsocketContextProvider({
   const dispatchEventMsg = useContext(EventContext);
   const session = useContext(SessionContext);
   const appState = useStateContext();
+  const dispatchAppState = useDispatchStateContext();
 
   const [wsState, dispatchWsState] = useReducer(wsStateReducer, null);
 
@@ -298,7 +317,7 @@ export function WebsocketContextProvider({
       return;
     }
 
-    _sendSubmit(wsState, appState);
+    _sendSubmit(wsState, appState, dispatchAppState);
   };
 
   const sendChatMessage = (msg: string) => {
