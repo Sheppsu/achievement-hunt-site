@@ -203,6 +203,7 @@ class AchievementCompletion(SerializableModel):
     achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE, related_name="completions")
     time_completed = models.DateTimeField()
     placement = models.ForeignKey(AchievementCompletionPlacement, on_delete=models.CASCADE, null=True)
+    time_placement = models.PositiveSmallIntegerField()
 
     class Meta:
         constraints = [
