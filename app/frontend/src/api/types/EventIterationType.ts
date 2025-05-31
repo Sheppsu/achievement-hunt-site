@@ -5,4 +5,5 @@ export type EventIterationType = {
   end: string;
   registration_end: string;
   description: { [_: string]: string };
+  banner: string | null;
 };

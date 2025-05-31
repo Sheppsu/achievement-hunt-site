@@ -74,6 +74,7 @@ class EventIteration(SerializableModel):
     end = models.DateTimeField()
     registration_end = models.DateTimeField()
     description = models.JSONField(default=dict)
+    banner = models.CharField(max_length=32, null=True, default=None)
 
     def has_registration_ended(self):
         return time.time() >= self.registration_end.timestamp()
@@ -85,7 +86,7 @@ class EventIteration(SerializableModel):
         return time.time() >= self.start.timestamp() - 5
 
     class Serialization:
-        FIELDS = ["id", "name", "start", "end", "registration_end", "description"]
+        FIELDS = ["id", "name", "start", "end", "registration_end", "description", "banner"]
 
 
 class AchievementBatch(SerializableModel):
@@ -233,7 +234,8 @@ class AchievementVote(SerializableModel):
 class Team(SerializableModel):
     name = models.CharField(max_length=32, unique=True)
     icon = models.CharField(max_length=64, null=True)
-    points = models.PositiveIntegerField(default=0)
+    points = models.PositiveIntegerField(default=0)  # points displayed to the user
+    hidden_points = models.PositiveIntegerField(default=0)  # real-time points
     iteration = models.ForeignKey(EventIteration, on_delete=models.CASCADE)
     accepts_free_agents = models.BooleanField(default=False)
 

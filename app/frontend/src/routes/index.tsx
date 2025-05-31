@@ -2,7 +2,7 @@ import { Helmet } from "react-helmet";
 import InfoCard from "components/achievements/InfoCard";
 
 import "assets/css/index.css";
-import banner from "assets/images/banner.png";
+import banner from "../../../static/assets/banner.png";
 import { useGetIteration } from "api/query.ts";
 import TextCard from "components/cards/TextCard.tsx";
 
@@ -25,9 +25,17 @@ export default function App() {
       <Helmet>
         <title>{title}</title>
       </Helmet>
-      <div className="banner-wrapper">
-        <img className="banner" src={banner} alt="banner"></img>
-      </div>
+      {iteration?.banner ? (
+        <div className="banner-wrapper">
+          <img
+            className="banner"
+            src={`/static/assets/${iteration.banner}`}
+            alt="banner"
+          ></img>
+        </div>
+      ) : (
+        ""
+      )}
       <div className="cards-container">
         <div className="cards-container__column">{card}</div>
       </div>
