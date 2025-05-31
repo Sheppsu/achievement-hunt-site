@@ -29,10 +29,6 @@ def _create_error_embeds(req, exc):
         "color": 0xff0000,
     })
     embeds.append(header_embed())
-    for name, value in req.headers.items():
-        if len(embeds[-1]["fields"]) == 25:
-            embeds.append(header_embed())
-        embeds[-1]["fields"].append({"name": name, "value": value})
 
     return embeds
 
