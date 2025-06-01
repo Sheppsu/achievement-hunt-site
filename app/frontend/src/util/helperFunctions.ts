@@ -73,7 +73,7 @@ export function dateToText(timestamp: string) {
     "December",
   ];
   const date = new Date(Date.parse(timestamp));
-  return `${months[date.getUTCMonth() - 1]} ${date.getUTCDay()} (${date.getUTCHours().toString().padStart(2, "0")}:${date.getUTCMinutes().toString().padStart(2, "0")} UTC)`;
+  return `${months[date.getUTCMonth()]} ${date.getUTCDate()} (${date.getUTCHours().toString().padStart(2, "0")}:${date.getUTCMinutes().toString().padStart(2, "0")} UTC)`;
 }
 
 export function getMyTeam(
