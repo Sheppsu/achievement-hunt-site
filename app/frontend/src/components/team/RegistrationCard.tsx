@@ -16,7 +16,7 @@ export default function RegistrationCard({
   if (Date.parse(iteration.registration_end) <= Date.now()) {
     registrationText = "Registration closed";
   } else if (!iteration.registration_open) {
-    registrationText = "Registration open";
+    registrationText = "Registration not yet open";
   } else {
     registrationText = "Registration open";
     registrationOpen = true;
