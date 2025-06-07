@@ -4,7 +4,7 @@ import { Helmet } from "react-helmet";
 import TeamChatCard from "components/team/TeamChatCard.tsx";
 import "assets/css/team.css";
 import { AchievementTeamExtendedType } from "api/types/AchievementTeamType.ts";
-import { useGetRegistration, useGetTeams } from "api/query.ts";
+import { useGetIteration, useGetRegistration, useGetTeams } from "api/query.ts";
 import { useContext } from "react";
 import { SessionContext } from "contexts/SessionContext.ts";
 import UnauthenticatedCard from "components/team/UnauthenticatedCard.tsx";
@@ -20,6 +20,7 @@ export default function TeamPage() {
   const { data: registration, isLoading: registrationLoading } =
     useGetRegistration(session.user !== null);
   const { data: teamData, isLoading: teamsLoading } = useGetTeams();
+  const { data: iteration, isLoading: iterationLoading } = useGetIteration();
 
   // look for the current user's team
   let ownTeam: AchievementTeamExtendedType | null = null;
@@ -31,10 +32,20 @@ export default function TeamPage() {
 
   if (session.user === null) {
     cardsColumns[0].push(<UnauthenticatedCard />);
-  } else if (teamsLoading || registrationLoading) {
+  } else if (teamsLoading || registrationLoading || iterationLoading) {
     cardsColumns[0].push(<TextCard text="Loading..." />);
-  } else if (teamData === undefined || registration === undefined) {
+  } else if (
+    teamData === undefined ||
+    registration === undefined ||
+    iteration === undefined
+  ) {
     cardsColumns[0].push(<TextCard text="Failed to load" />);
+  } else if (!iteration.registration_open) {
+    cardsColumns[0].push(
+      <div className="card">
+        <h1>Registration not yet open</h1>
+      </div>,
+    );
   } else if (registration === null) {
     cardsColumns[0].push(<RegisterButton registered={false} />);
   } else if (ownTeam === null) {
