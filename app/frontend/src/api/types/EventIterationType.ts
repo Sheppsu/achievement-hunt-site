@@ -5,6 +5,6 @@ export type EventIterationType = {
   end: string;
   registration_end: string;
   registration_open: boolean;
-  description: { [_: string]: string };
+  description: { heading: string; text: string; order: number }[];
   banner: string | null;
 };

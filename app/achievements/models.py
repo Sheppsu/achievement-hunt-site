@@ -74,7 +74,7 @@ class EventIteration(SerializableModel):
     end = models.DateTimeField()
     registration_end = models.DateTimeField()
     registration_open = models.BooleanField(default=False)
-    description = models.JSONField(default=dict)
+    description = models.JSONField(default=list)
     banner = models.CharField(max_length=32, null=True, default=None)
 
     def has_registration_ended(self):

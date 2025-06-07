@@ -14,14 +14,16 @@ export default function InfoCard({
       <p className="info-text">
         Starts {dateToText(iteration.start)} - Ends {dateToText(iteration.end)}
       </p>
-      {Object.entries(iteration.description).map(([section, text]) => (
-        <>
-          <p className="card--teams__subtitle">{section}</p>
-          <p className="info-text">
-            <RenderedText text={text}></RenderedText>
-          </p>
-        </>
-      ))}
+      {iteration.description
+        .sort((a, b) => a.order - b.order)
+        .map((section) => (
+          <>
+            <p className="card--teams__subtitle">{section.heading}</p>
+            <p className="info-text">
+              <RenderedText text={section.text}></RenderedText>
+            </p>
+          </>
+        ))}
     </div>
   );
 }
