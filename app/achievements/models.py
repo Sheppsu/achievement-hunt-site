@@ -73,15 +73,12 @@ class EventIteration(SerializableModel):
     start = models.DateTimeField()
     end = models.DateTimeField()
     registration_end = models.DateTimeField()
-    registration_start = models.DateTimeField()
+    registration_open = models.BooleanField(default=False)
     description = models.JSONField(default=dict)
     banner = models.CharField(max_length=32, null=True, default=None)
 
     def has_registration_ended(self):
         return time.time() >= self.registration_end.timestamp()
-
-    def has_registration_started(self):
-        return time.time() >= self.registration_start.timestamp()
 
     def has_ended(self):
         return time.time() >= self.end.timestamp()
@@ -90,7 +87,7 @@ class EventIteration(SerializableModel):
         return time.time() >= self.start.timestamp() - 5
 
     class Serialization:
-        FIELDS = ["id", "name", "start", "end", "registration_end", "registration_start", "description", "banner"]
+        FIELDS = ["id", "name", "start", "end", "registration_end", "registration_open", "description", "banner"]
 
 
 class AchievementBatch(SerializableModel):

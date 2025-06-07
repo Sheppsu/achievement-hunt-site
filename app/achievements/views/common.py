@@ -447,7 +447,7 @@ def get_registration(req, iteration):
 @require_iteration_before_registration_end
 @require_user
 def change_registration(req, data, iteration):
-    if not iteration.has_registration_started():
+    if not iteration.registration_open:
         return error("registration is not yet open")
 
     if req.user.is_achievement_creator or req.user.is_admin:
