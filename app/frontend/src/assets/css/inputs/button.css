@@ -31,3 +31,17 @@
 .button.unavailable:hover {
   cursor: not-allowed;
 }
+
+.button-circle {
+  width: 20px;
+  height: 20px;
+  top: -10px;
+  left: -10px;
+
+  position: absolute;
+
+  border-radius: 50%;
+  border: solid white 1px;
+
+  background-image: conic-gradient(#fff 50%, var(--generic-button-color) 50%, var(--generic-button-color) 100%);
+}

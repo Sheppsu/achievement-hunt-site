@@ -1,6 +1,7 @@
 import "assets/css/inputs/button.css";
 import React, { useRef, useState } from "react";
 import { splitProps } from "components/inputs/util.ts";
+import classNames from "classnames";
 
 type ButtonProps = {
   children: React.ReactNode | string;
@@ -28,10 +29,6 @@ const otherDefaults = {
   holdToUse: false,
   onClick: undefined,
 };
-
-function holdProgressCurve(value: number): number {
-  return 10 * Math.sqrt(value);
-}
 
 export default function Button(props: ButtonProps) {
   const timeoutId = useRef<null | number>(null);
@@ -77,32 +74,39 @@ export default function Button(props: ButtonProps) {
     }
   };
 
-  const bgWidth =
-    progress === null ? undefined : `${holdProgressCurve(progress)}%`;
-
   return (
-    <button
+    <div
       style={{
         width: otherProps.width,
         height: otherProps.height,
-        background:
-          bgWidth === undefined
-            ? undefined
-            : `linear-gradient(to right, var(--generic-button-color), var(--generic-button-color) ${bgWidth}, var(--generic-button-hover-color) ${bgWidth}, var(--generic-button-hover-color) 100%)`,
+        position: "relative",
       }}
-      onClick={
-        otherProps.unavailable || otherProps.holdToUse
-          ? undefined
-          : otherProps.onClick
-      }
-      onMouseDown={otherProps.holdToUse ? onMouseDown : undefined}
-      onMouseUp={otherProps.holdToUse ? onMouseUp : undefined}
-      onMouseLeave={otherProps.holdToUse ? onMouseUp : undefined}
-      onTouchStart={otherProps.holdToUse ? onMouseDown : undefined}
-      onTouchEnd={otherProps.holdToUse ? onMouseUp : undefined}
-      {...elementProps}
     >
-      {otherProps.children}
-    </button>
+      <div
+        className={classNames("button-circle", { hide: progress === null })}
+        style={{
+          backgroundImage: `conic-gradient(#fff ${progress}%, var(--generic-button-color) ${progress}%, var(--generic-button-color) 100%)`,
+        }}
+      ></div>
+      <button
+        style={{
+          width: "100%",
+          height: "100%",
+        }}
+        onClick={
+          otherProps.unavailable || otherProps.holdToUse
+            ? undefined
+            : otherProps.onClick
+        }
+        onMouseDown={otherProps.holdToUse ? onMouseDown : undefined}
+        onMouseUp={otherProps.holdToUse ? onMouseUp : undefined}
+        onMouseLeave={otherProps.holdToUse ? onMouseUp : undefined}
+        onTouchStart={otherProps.holdToUse ? onMouseDown : undefined}
+        onTouchEnd={otherProps.holdToUse ? onMouseUp : undefined}
+        {...elementProps}
+      >
+        {otherProps.children}
+      </button>
+    </div>
   );
 }
