@@ -414,6 +414,7 @@ export function useGetIteration(): UseQueryResult<EventIterationType> {
 
   return useMakeQuery({
     queryKey: iteration.length === 0 ? ["iteration"] : iteration,
+    refetchOnMount: false,
   });
 }
 
