@@ -13,14 +13,6 @@ __all__ = (
 _log = logging.getLogger(__name__)
 
 
-def header_embed():
-    return dict({
-        "title": "Headers",
-        "fields": list(),
-        "color": 0x0000ff
-    })
-
-
 def _create_error_embeds(req, exc):
     embeds = []
     embeds.append({
@@ -28,7 +20,6 @@ def _create_error_embeds(req, exc):
         "description": str(exc),
         "color": 0xff0000,
     })
-    embeds.append(header_embed())
 
     return embeds
 
