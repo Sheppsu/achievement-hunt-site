@@ -428,9 +428,7 @@ export function useGetRegistration(
   });
 }
 
-export function useRegister(): SpecificUseMutationResult<{
-  registered: boolean;
-}> {
+export function useRegister(): SpecificUseMutationResult<RegistrationType | null> {
   const iteration = getIterationParams();
   const queryClient = useContext(QueryClientContext);
 

@@ -11,7 +11,7 @@ import UnauthenticatedCard from "components/team/UnauthenticatedCard.tsx";
 import NoTeamCard from "components/team/NoTeamCard.tsx";
 import TeamListingsCard from "components/team/TeamListingsCard.tsx";
 import TextCard from "components/cards/TextCard.tsx";
-import RegisterButton from "components/team/RegisterButton.tsx";
+import RegistrationCard from "components/team/RegistrationCard.tsx";
 import AnnouncementsCard from "components/team/AnnouncementsCard.tsx";
 import { getMyTeam } from "util/helperFunctions.ts";
 
@@ -31,28 +31,25 @@ export default function TeamPage() {
   const cardsColumns: React.ReactNode[][] = [[]];
 
   if (session.user === null) {
+    // not logged in
     cardsColumns[0].push(<UnauthenticatedCard />);
   } else if (teamsLoading || registrationLoading || iterationLoading) {
+    // requests in progress
     cardsColumns[0].push(<TextCard text="Loading..." />);
   } else if (
     teamData === undefined ||
     registration === undefined ||
     iteration === undefined
   ) {
+    // something went wrong with requests
     cardsColumns[0].push(<TextCard text="Failed to load" />);
-  } else if (!iteration.registration_open) {
-    cardsColumns[0].push(
-      <div className="card">
-        <h1>Registration not yet open</h1>
-      </div>,
-    );
-  } else if (registration === null) {
-    cardsColumns[0].push(<RegisterButton registered={false} />);
   } else if (ownTeam === null) {
     cardsColumns[0].push(
-      <RegisterButton registered={true} />,
-      <NoTeamCard registration={registration} />,
+      <RegistrationCard iteration={iteration} registration={registration} />,
     );
+    if (registration !== null) {
+      cardsColumns[0].push(<NoTeamCard registration={registration} />);
+    }
   } else {
     cardsColumns[0].push(<TeamCard team={ownTeam} />, <TeamChatCard />);
   }

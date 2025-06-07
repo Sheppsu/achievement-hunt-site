@@ -464,10 +464,10 @@ def change_registration(req, data, iteration):
 
     if not reg:
         registration.delete()
+        return success(None)
     else:
-        Registration.objects.create(user=req.user, iteration=iteration)
-
-    return success({"registered": reg})
+        reg = Registration.objects.create(user=req.user, iteration=iteration)
+        return success(reg.serialize())
 
 
 @require_http_methods(["PATCH"])
