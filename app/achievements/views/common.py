@@ -96,7 +96,7 @@ def achievements(req, iteration):
             [
                 SerializableField(
                     "beatmaps",
-                    condition=lambda b: not b.hide
+                    filter=lambda b: not b.hide
                 ),
                 "beatmaps__info",
                 "completion_count",
@@ -106,7 +106,7 @@ def achievements(req, iteration):
                 ),
                 SerializableField(
                     "completions__player",
-                    condition=team_completion
+                    condition=team_completion  # TODO: maybe replace condition with something else
                 ),
                 SerializableField(
                     "completions__time_completed",
