@@ -262,7 +262,7 @@ a.rendered-text:hover {
   gap: 5px;
 
   word-break: break-word;
-  overflow-y: auto;
+  overflow-y: hidden;
   overflow-x: hidden;
 }
 

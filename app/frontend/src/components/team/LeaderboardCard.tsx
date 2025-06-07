@@ -20,12 +20,12 @@ export default function LeaderboardCard({
       <h1 className="card__title">Leaderboard</h1>
       <div className="card--teams__container leaderboard">
         {teams.map((team, i) => (
-          <>
+          <div key={team.id}>
             <p>
               #{placement + i - 1}: {getAnonName(team.id)}
             </p>
             <p>{team.points}pts</p>
-          </>
+          </div>
         ))}
       </div>
     </div>
