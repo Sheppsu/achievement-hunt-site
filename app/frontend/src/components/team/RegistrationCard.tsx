@@ -13,10 +13,10 @@ export default function RegistrationCard({
 }) {
   let registrationText;
   let registrationOpen = false;
-  if (!iteration.registration_open) {
-    registrationText = "Registration open";
-  } else if (Date.parse(iteration.registration_end) <= Date.now()) {
+  if (Date.parse(iteration.registration_end) <= Date.now()) {
     registrationText = "Registration closed";
+  } else if (!iteration.registration_open) {
+    registrationText = "Registration open";
   } else {
     registrationText = "Registration open";
     registrationOpen = true;
