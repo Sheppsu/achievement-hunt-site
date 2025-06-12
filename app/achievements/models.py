@@ -234,15 +234,22 @@ class AchievementVote(SerializableModel):
 
 
 class Team(SerializableModel):
-    name = models.CharField(max_length=32, unique=True)
+    name = models.CharField(max_length=32)
+    anonymous_name = models.CharField(max_length=32)
     icon = models.CharField(max_length=64, null=True)
     points = models.PositiveIntegerField(default=0)  # points displayed to the user
     hidden_points = models.PositiveIntegerField(default=0)  # real-time points
     iteration = models.ForeignKey(EventIteration, on_delete=models.CASCADE)
     accepts_free_agents = models.BooleanField(default=False)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["name", "iteration_id"], name="unique_iteration_team_name"),
+            # models.UniqueConstraint(fields=["anonymous_name", "iteration_id"], name="unique_iteration_anon_team_name")
+        ]
+
     class Serialization:
-        FIELDS = ["id", "name", "icon", "points", "accepts_free_agents"]
+        FIELDS = ["id", "name", "anonymous_name", "icon", "points", "accepts_free_agents"]
 
 
 class Player(SerializableModel):

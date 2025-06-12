@@ -1,8 +1,3 @@
-import base64
-import random
-import secrets
-import struct
-
 from common.serializer import SerializableField
 from common.validation import *
 from django.contrib.auth import login as do_login
@@ -11,9 +6,9 @@ from django.db.models.deletion import RestrictedError
 from django.http import HttpResponseBadRequest
 from django.shortcuts import redirect
 from django.views.decorators.http import require_http_methods, require_POST, require_GET
-from nacl.secret import SecretBox
 
 from .util import *
+from .anonymous_names import verify_name
 
 
 def serialize_team(team: Team):
@@ -192,7 +187,10 @@ def leave_team(req, iteration, registration):
 @require_POST
 @require_iteration_before_start
 @accepts_json_data(
-    DictionaryType({"name": StringType(min_length=1, max_length=32)})
+    DictionaryType({
+        "name": StringType(min_length=1, max_length=32),
+        "anonymous_name": StringType(min_length=1, max_length=32)
+    })
 )
 @require_registered
 def create_team(req, data, iteration, registration):
@@ -200,10 +198,19 @@ def create_team(req, data, iteration, registration):
     if player is not None:
         return error("already on a team")
 
+    if not verify_name(data["anonymous_name"]):
+        return error("invalid anonymous name")
+
     try:
-        team = Team(name=data["name"], icon="", iteration=iteration)
+        team = Team(
+            name=data["name"],
+            anonymous_name=data["anonymous_name"],
+            icon="",
+            iteration=iteration
+        )
         team.save()
-    except:
+    except Exception as e:
+        print(e)
         return error("team name taken")
 
     player = Player(user=req.user, team_id=team.id, team_admin=True)
@@ -545,21 +552,3 @@ def get_announcements(req, iteration):
         announcement.serialize()
         for announcement in Announcement.objects.filter(iteration_id=iteration.id).order_by("-created_at")
     ])
-
-
-@require_user
-@require_iteration
-def get_auth_packet(req, iteration):
-    player = select_current_player(req.user.id, iteration.id)
-    if player is None:
-        return error("no associated player")
-
-    packet = settings.WS_CONNECTION_VALIDATOR.encode("ascii") + struct.pack("<II", player.id,
-                                                                            random.randint(0, 0xFFFFFFFF))
-    msg = SecretBox(settings.SECRET_KEY[:32].encode('ascii')).encrypt(packet)
-
-    return JsonResponse({
-        "code": 0,
-        "data": base64.b64encode(msg.ciphertext).decode("ascii"),
-        "nonce": base64.b64encode(msg.nonce).decode("ascii")
-    }, safe=False)

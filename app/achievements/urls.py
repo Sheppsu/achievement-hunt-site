@@ -16,7 +16,6 @@ iteration_urls = [
     path("teams/invites/create/", common.send_team_invite),
     path("invites/", common.get_user_invites),
     path("stats/", common.player_stats),
-    path("wsauth/", common.get_auth_packet),
     path("registration/change/", common.change_registration),
     path("registration/", common.get_registration),
     path("registration/free-agent/change/", common.change_free_agent),
