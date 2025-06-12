@@ -2,8 +2,6 @@ import django
 import os
 from dotenv import load_dotenv
 
-from achievements.views import anonymous_names
-
 load_dotenv()
 os.environ["DJANGO_SETTINGS_MODULE"] = "app.settings"
 django.setup()
