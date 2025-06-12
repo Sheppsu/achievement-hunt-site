@@ -245,7 +245,7 @@ class Team(SerializableModel):
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=["name", "iteration_id"], name="unique_iteration_team_name"),
-            # models.UniqueConstraint(fields=["anonymous_name", "iteration_id"], name="unique_iteration_anon_team_name")
+            models.UniqueConstraint(fields=["anonymous_name", "iteration_id"], name="unique_iteration_anon_team_name")
         ]
 
     class Serialization:
