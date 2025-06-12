@@ -3,6 +3,7 @@ import { AchievementPlayerType } from "api/types/AchievementPlayerType.ts";
 export type AchievementTeamType = {
   id: number;
   points: number;
+  anonymous_name: string;
 };
 
 export type AchievementTeamExtendedType = {

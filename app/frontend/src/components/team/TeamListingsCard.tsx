@@ -1,5 +1,4 @@
 import { AchievementTeamExtendedType } from "api/types/AchievementTeamType.ts";
-import { getAnonName } from "util/helperFunctions.ts";
 import React from "react";
 import Player from "components/team/Player.tsx";
 
@@ -15,7 +14,7 @@ export default function TeamListingsCard({
         {teams.map((team, idx) => (
           <div key={idx}>
             <p className="card--teams__subtitle">
-              {team.name} ({getAnonName(team.id)}) - {team.points}pts
+              {team.name} ({team.anonymous_name}) - {team.points}pts
             </p>
             <div className="card--teams__container players">
               {team.players

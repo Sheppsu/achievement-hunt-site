@@ -1,7 +1,5 @@
 import "assets/css/team.css";
 
-import { useGetTeams } from "api/query.ts";
-import { getAnonName } from "util/helperFunctions.ts";
 import { AchievementTeamType } from "api/types/AchievementTeamType.ts";
 
 export default function LeaderboardCard({
@@ -22,7 +20,7 @@ export default function LeaderboardCard({
         {teams.map((team, i) => (
           <div key={team.id}>
             <p>
-              #{placement + i - 1}: {getAnonName(team.id)}
+              #{placement + i - 1}: {team.anonymous_name}
             </p>
             <p>{team.points}pts</p>
           </div>

@@ -15,7 +15,6 @@ import { SimplePromptPopup } from "components/popups/PopupContent.tsx";
 import { EventContext, EventDispatch } from "contexts/EventContext.ts";
 import { PopupContext, PopupContextType } from "contexts/PopupContext.ts";
 import { SessionContext } from "contexts/SessionContext.ts";
-import { getAnonName } from "util/helperFunctions.ts";
 import Player from "components/team/Player.tsx";
 import Button from "components/inputs/Button.tsx";
 import { TeamInviteType } from "api/types/InviteType.ts";
@@ -185,7 +184,7 @@ export default function TeamCard({
     <div className="card">
       <div className="card--teams__container your-team">
         <p className="card--teams__container__text center grow">
-          {team.name} | {getAnonName(team.id)} - {team.points}pts
+          {team.name} | {team.anonymous_name} - {team.points}pts
         </p>
       </div>
       <h1 className="card__title">Players</h1>

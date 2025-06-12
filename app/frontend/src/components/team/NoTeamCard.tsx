@@ -13,6 +13,7 @@ import { FormEvent, useContext, useState } from "react";
 import { BsPlusCircleFill } from "react-icons/bs";
 import { IoWarning } from "react-icons/io5";
 import { MdArrowBack } from "react-icons/md";
+import { randomChoice } from "util/helperFunctions.ts";
 
 export default function NoTeamCard({
   registration,
@@ -86,6 +87,11 @@ function CreateTeamComponent({
   const dispatchEventMsg = useContext(EventContext);
   const createTeam = useCreateTeam();
 
+  const [nameAdjective, setNameAdjective] = useState(
+    randomChoice(anonNameAdjectives),
+  );
+  const [nameNoun, setNameNoun] = useState(randomChoice(anonNameNouns));
+
   const onCreateTeam = (evt: FormEvent<HTMLFormElement>) => {
     evt.preventDefault();
 
@@ -98,7 +104,7 @@ function CreateTeamComponent({
     }
 
     createTeam.mutate(
-      { name },
+      { name, anonymous_name: nameAdjective + " " + nameNoun },
       {
         onSuccess: () => {
           dispatchEventMsg({
@@ -139,28 +145,18 @@ function CreateTeamComponent({
             <p className="card--teams__label">Anonymous Team Name</p>
             <div className="card--teams__form__item__row">
               <Dropdown
-                options={{
-                  test: "test",
-                  test2: "test2",
-                  test3: "test3",
-                  test4: "test4",
-                  test5: "test5",
-                  test6: "test6",
-                  test7: "test7",
-                  test8: "test8",
-                }}
+                options={Object.fromEntries(
+                  anonNameAdjectives.map((word) => [word, word]),
+                )}
+                value={nameAdjective}
+                onChange={(e) => setNameAdjective(e.currentTarget.value)}
               />
               <Dropdown
-                options={{
-                  test: "test",
-                  test2: "test2",
-                  test3: "test3",
-                  test4: "test4",
-                  test5: "test5",
-                  test6: "test6",
-                  test7: "test7",
-                  test8: "test8",
-                }}
+                options={Object.fromEntries(
+                  anonNameNouns.map((word) => [word, word]),
+                )}
+                value={nameNoun}
+                onChange={(e) => setNameNoun(e.currentTarget.value)}
               />
             </div>
             <p className="card--teams__description">
@@ -178,9 +174,7 @@ function CreateTeamComponent({
               <span style={{ fontWeight: 600 }}>DO NOT</span> let others know
               what team you're on, or who your teammates are. We cannot
               completely prevent people from profile stalking to get solutions
-              to achievements, so anonymity is your best defense against it. DM
-              a staff member if you suspect that someone is profile stalking
-              (this is against the rules).
+              to achievements, so anonymity is your best defense against it.
             </p>
           </div>
           <Button children="Create Team" type="submit" />
@@ -256,3 +250,208 @@ function TeamInviteItem({ invite }: { invite: UserInviteType }) {
     </div>
   );
 }
+
+const anonNameAdjectives = [
+  "Wobbly",
+  "Fluffy",
+  "Bouncy",
+  "Giggly",
+  "Soggy",
+  "Lumpy",
+  "Jiggly",
+  "Snazzy",
+  "Cranky",
+  "Zany",
+  "Goofy",
+  "Wacky",
+  "Squishy",
+  "Sassy",
+  "Dizzy",
+  "Itchy",
+  "Clumsy",
+  "Slippery",
+  "Sneaky",
+  "Grumpy",
+  "Nifty",
+  "Silky",
+  "Sparkly",
+  "Funky",
+  "Smelly",
+  "Puffy",
+  "Snappy",
+  "Pokey",
+  "Skippy",
+  "Gummy",
+  "Tipsy",
+  "Noisy",
+  "Spicy",
+  "Nutty",
+  "Lanky",
+  "Peppy",
+  "Yappy",
+  "Sleepy",
+  "Chirpy",
+  "Sniffy",
+  "Toasty",
+  "Zesty",
+  "Breezy",
+  "Bubbly",
+  "Slinky",
+  "Jumpy",
+  "Crusty",
+  "Wiggly",
+  "Brassy",
+  "Chatty",
+  "Meaty",
+  "Quirky",
+  "Greasy",
+  "Cheesy",
+  "Soggy",
+  "Drowsy",
+  "Grubby",
+  "Mothy",
+  "Blobby",
+  "Shaggy",
+  "Noodly",
+  "Boogery",
+  "Gassy",
+  "Snotty",
+  "Snarky",
+  "Shrimpy",
+  "Tippy",
+  "Stinky",
+  "Dorky",
+  "Scurvy",
+  "Twangy",
+  "Whoopee",
+  "Zippy",
+  "Puffy",
+  "Chunky",
+  "Blustery",
+  "Puny",
+  "Spooky",
+  "Moochy",
+  "Squirmy",
+  "Ducky",
+  "Rusty",
+  "Warty",
+  "Wiggly",
+  "Frizzy",
+  "Sloppy",
+  "Crumbly",
+  "Groovy",
+  "Ditsy",
+  "Witty",
+  "Quacky",
+  "Burpy",
+  "Sweaty",
+  "Raspy",
+  "Yucky",
+  "Waily",
+  "Dippy",
+  "Whiny",
+  "Brawny",
+  "Chirpy",
+];
+const anonNameNouns = [
+  "Pickles",
+  "Bananas",
+  "Ferrets",
+  "Noodles",
+  "Pigeons",
+  "Muffins",
+  "Wombats",
+  "Unicorns",
+  "Spatulas",
+  "Cupcakes",
+  "Tacos",
+  "Chickens",
+  "Lemurs",
+  "Sausages",
+  "Narwhals",
+  "Giraffes",
+  "Potatoes",
+  "Platypuses",
+  "Llamas",
+  "Meerkats",
+  "Turnips",
+  "Donuts",
+  "Weasels",
+  "Blenders",
+  "Goblins",
+  "Marshmallows",
+  "Dodos",
+  "Walruses",
+  "Hamsters",
+  "Puddings",
+  "Trolls",
+  "Octopi",
+  "Boogers",
+  "Fuzzballs",
+  "Bagels",
+  "Gnomes",
+  "Picklejars",
+  "Ogres",
+  "Crayons",
+  "Snails",
+  "Penguins",
+  "Gumballs",
+  "Trombones",
+  "Marshes",
+  "Jellies",
+  "Zombies",
+  "Poptarts",
+  "Burritos",
+  "Flapjacks",
+  "Lintballs",
+  "Dingbats",
+  "Frogs",
+  "Cupboards",
+  "Chimichangas",
+  "Yaks",
+  "Owls",
+  "Teacups",
+  "Hippos",
+  "Spoons",
+  "Niblets",
+  "Kiwis",
+  "Mopheads",
+  "Parrots",
+  "Lobsters",
+  "Baboons",
+  "Waffles",
+  "Hornets",
+  "Trousers",
+  "Jellybeans",
+  "Toasters",
+  "Monkeys",
+  "Sardines",
+  "Chickpeas",
+  "Beets",
+  "Flippers",
+  "Sprinkles",
+  "Pickaxes",
+  "Balloons",
+  "Platters",
+  "Slinkies",
+  "Farts",
+  "Coconuts",
+  "Acorns",
+  "Trombones",
+  "Whiskers",
+  "Pigeons",
+  "Drumsticks",
+  "Cabbages",
+  "Doodles",
+  "Butternuts",
+  "Eggplants",
+  "Nuggets",
+  "Raccoons",
+  "Pajamas",
+  "Tiaras",
+  "Turtles",
+  "Anchovies",
+  "Gurgles",
+  "Pompoms",
+  "Zucchinis",
+];
