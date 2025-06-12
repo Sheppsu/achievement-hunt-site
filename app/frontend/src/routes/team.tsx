@@ -47,7 +47,7 @@ export default function TeamPage() {
     cardsColumns[0].push(
       <RegistrationCard iteration={iteration} registration={registration} />,
     );
-    if (registration !== null) {
+    if (registration !== null && Date.parse(iteration.start) > Date.now()) {
       cardsColumns[0].push(<NoTeamCard registration={registration} />);
     }
   } else {
