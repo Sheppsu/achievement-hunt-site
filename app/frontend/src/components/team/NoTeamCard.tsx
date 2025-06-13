@@ -69,6 +69,7 @@ export default function NoTeamCard({
               children={registration.is_free_agent ? "Opt out" : "Opt in"}
               unavailable={debounce}
               onClick={doChangeFreeAgent}
+              holdToUse={registration.is_free_agent}
             />
           </div>
         </>

@@ -266,6 +266,14 @@ a.rendered-text:hover {
   overflow-x: hidden;
 }
 
+.card.no-scroll {
+  max-height: none;
+}
+
+.card.scroll {
+  overflow-y: auto;
+}
+
 .card__title {
   padding-left: 18px;
   margin: 5px 0;
@@ -273,10 +281,6 @@ a.rendered-text:hover {
   font-size: 30px;
   font-weight: 700;
   text-align: left;
-}
-
-.card.no-scroll {
-  max-height: none;
 }
 
 @media (max-width: 1100px) {

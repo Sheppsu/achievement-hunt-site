@@ -30,7 +30,7 @@ def select_teams(iteration_id, many=False, sort=False, **kwargs) -> list[Team] |
 
 
 def select_current_player(user_id, iteration_id) -> Player | None:
-    return Player.objects.filter(user_id=user_id, team__iteration_id=iteration_id).first()
+    return Player.objects.select_related("team").filter(user_id=user_id, team__iteration_id=iteration_id).first()
 
 
 def login(req):
@@ -268,6 +268,26 @@ def rename_team(req, data, iteration):
         return error("team name taken")
     
     return success(team.serialize())
+
+
+@require_http_methods(["PATCH"])
+@require_iteration_before_start
+@require_user
+@accepts_json_data(DictionaryType({
+    "enable": BoolType()
+}))
+def change_accepting_free_agents(req, data, iteration):
+    player = select_current_player(req.user.id, iteration.id)
+    if player is None or not player.team_admin:
+        return error("not on a team or not admin")
+
+    enable = data["enable"]
+
+    team = player.team
+    team.accepts_free_agents = enable
+    team.save()
+
+    return success({"id": team.id, "enabled": enable})
 
 
 @require_GET

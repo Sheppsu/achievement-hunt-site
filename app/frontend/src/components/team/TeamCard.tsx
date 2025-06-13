@@ -1,4 +1,5 @@
 import {
+  useChangeAcceptingFreeAgents,
   useGetTeamInvites,
   useLeaveTeam,
   useRenameTeam,
@@ -45,6 +46,7 @@ export default function TeamCard({
   const renameTeam = useRenameTeam();
   const leaveTeam = useLeaveTeam();
   const sendTeamInvite = useSendTeamInvite();
+  const changeAcceptingFreeAgents = useChangeAcceptingFreeAgents();
 
   const [debounce, setDebounce] = useState(false);
 
@@ -180,8 +182,26 @@ export default function TeamCard({
     );
   };
 
+  const doChangeAcceptingFreeAgent = () => {
+    if (debounce) {
+      return;
+    }
+
+    setDebounce(true);
+
+    changeAcceptingFreeAgents.mutate(
+      { enable: !team.accepts_free_agents },
+      {
+        onSettled: () => {
+          changeAcceptingFreeAgents.reset();
+          setDebounce(false);
+        },
+      },
+    );
+  };
+
   return (
-    <div className="card">
+    <div className="card scroll">
       <div className="card--teams__container your-team">
         <p className="card--teams__container__text center grow">
           {team.name} | {team.anonymous_name} - {team.points}pts
@@ -242,6 +262,20 @@ export default function TeamCard({
               </form>
             </>
           )}
+          <div className="card--teams__row">
+            <p className="card--teams__description">
+              You may opt into accepting free agents (players without a team).
+              When the event starts, free agents will be automatically assigned
+              to teams.
+            </p>
+            <Button
+              className="team-rigid-btn"
+              children={team.accepts_free_agents ? "Opt out" : "Opt in"}
+              unavailable={debounce}
+              onClick={doChangeAcceptingFreeAgent}
+              holdToUse={team.accepts_free_agents}
+            />
+          </div>
         </>
       )}
     </div>

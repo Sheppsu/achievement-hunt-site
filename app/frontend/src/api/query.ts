@@ -164,16 +164,63 @@ export function useRenameTeam(): SpecificUseMutationResult<{
   name: string;
 }> {
   const queryClient = useContext(QueryClientContext);
+  const iteration = getIterationParams();
   return useMakeMutation(
     {
-      mutationKey: [...getIterationParams(), "teams", "rename"],
+      mutationKey: [...iteration, "teams", "rename"],
       onSuccess: (team) => {
-        queryClient?.setQueryData(["teams"], (teamData: TeamDataType) =>
-          onRenameTeam(teamData, team.id, team.name),
+        queryClient?.setQueryData(
+          [...iteration, "teams"],
+          (teamData: TeamDataType) =>
+            onRenameTeam(teamData, team.id, team.name),
         );
       },
     },
     { method: "PATCH" },
+  );
+}
+
+function onChangeAcceptingFreeAgents(
+  teamData: TeamDataType,
+  teamId: number,
+  enabled: boolean,
+) {
+  const newTeams = [];
+
+  for (const team of teamData.teams) {
+    if (team.id === teamId) {
+      if ("name" in team) {
+        team.accepts_free_agents = enabled;
+      }
+      newTeams.push(team);
+      continue;
+    }
+
+    newTeams.push(team);
+  }
+
+  return { placement: teamData.placement, teams: newTeams };
+}
+
+export function useChangeAcceptingFreeAgents(): SpecificUseMutationResult<{
+  id: number;
+  enabled: boolean;
+}> {
+  const queryClient = useContext(QueryClientContext);
+  const iteration = getIterationParams();
+  return useMakeMutation(
+    {
+      mutationKey: [...iteration, "teams", "accept-free-agents"],
+      onSuccess: (result) =>
+        queryClient?.setQueryData(
+          [...iteration, "teams"],
+          (teamData: TeamDataType) =>
+            onChangeAcceptingFreeAgents(teamData, result.id, result.enabled),
+        ),
+    },
+    {
+      method: "PATCH",
+    },
   );
 }
 
