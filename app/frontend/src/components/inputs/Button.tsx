@@ -70,7 +70,7 @@ export default function Button(props: ButtonProps) {
     if (intervalId.current !== null) {
       clearInterval(intervalId.current);
       intervalId.current = null;
-      setProgress(null);
+      setTimeout(() => setProgress(null), 500);
     }
   };
 
@@ -83,7 +83,9 @@ export default function Button(props: ButtonProps) {
       }}
     >
       <div
-        className={classNames("button-circle", { hide: progress === null })}
+        className={classNames("button-circle", {
+          hide: progress === null,
+        })}
         style={{
           backgroundImage: `conic-gradient(#fff ${progress}%, var(--generic-button-color) ${progress}%, var(--generic-button-color) 100%)`,
         }}
