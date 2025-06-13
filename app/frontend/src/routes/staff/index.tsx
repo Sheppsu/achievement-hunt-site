@@ -76,6 +76,7 @@ export default function Index() {
 
   return (
     <div className="staff__page">
+      <h1>{achievements.length} Achievements</h1>
       <div className="staff__interaction-bar">
         <Button
           children="Create achievement"
