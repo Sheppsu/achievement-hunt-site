@@ -3,6 +3,7 @@ import { RegistrationType } from "api/types/RegistrationType.ts";
 import { useRegister } from "api/query.ts";
 import React, { useState } from "react";
 import Button from "components/inputs/Button.tsx";
+import { dateToText } from "util/helperFunctions.ts";
 
 export default function RegistrationCard({
   iteration,
@@ -18,7 +19,8 @@ export default function RegistrationCard({
   } else if (!iteration.registration_open) {
     registrationText = "Registration not yet open";
   } else {
-    registrationText = "Registration open";
+    registrationText =
+      "Registration open until " + dateToText(iteration.registration_end);
     registrationOpen = true;
   }
 
