@@ -14,6 +14,7 @@ import { BsPlusCircleFill } from "react-icons/bs";
 import { IoWarning } from "react-icons/io5";
 import { MdArrowBack } from "react-icons/md";
 import { randomChoice } from "util/helperFunctions.ts";
+import classNames from "classnames";
 
 export default function NoTeamCard({
   registration,
@@ -42,7 +43,9 @@ export default function NoTeamCard({
   }
 
   return (
-    <div className="card">
+    <div
+      className={classNames("card", { "no-scroll": currentTab !== "default" })}
+    >
       <h1 className="card__title">No team</h1>
       {currentTab === "default" ? (
         <>
@@ -129,42 +132,42 @@ function CreateTeamComponent({
         <h1>Create Team</h1>
       </div>
       <form className="card--teams__form" onSubmit={onCreateTeam}>
-        <div>
-          <div className="card--teams__form__item">
-            <p className="card--teams__label">Team Name</p>
-            <input
-              type="text"
-              name="prompt-value"
-              placeholder="Enter team name here..."
-            />
-            <p className="card--teams__description">
-              This will be hidden from other teams during the tournament to keep
-              anonymity
-            </p>
-          </div>
-          <div className="card--teams__form__item">
-            <p className="card--teams__label">Anonymous Team Name</p>
-            <div className="card--teams__form__item__row">
-              <Dropdown
-                options={Object.fromEntries(
-                  anonNameAdjectives.map((word) => [word, word]),
-                )}
-                value={nameAdjective}
-                onChange={(e) => setNameAdjective(e.currentTarget.value)}
-              />
-              <Dropdown
-                options={Object.fromEntries(
-                  anonNameNouns.map((word) => [word, word]),
-                )}
-                value={nameNoun}
-                onChange={(e) => setNameNoun(e.currentTarget.value)}
-              />
-            </div>
-            <p className="card--teams__description">
-              This will be what other teams see throughout the tournament
-            </p>
-          </div>
+        {/*<div>*/}
+        <div className="card--teams__form__item">
+          <p className="card--teams__label">Team Name</p>
+          <input
+            type="text"
+            name="prompt-value"
+            placeholder="Enter team name here..."
+          />
+          <p className="card--teams__description">
+            This will be hidden from other teams during the tournament to keep
+            anonymity
+          </p>
         </div>
+        <div className="card--teams__form__item">
+          <p className="card--teams__label">Anonymous Team Name</p>
+          <div className="card--teams__form__item__row">
+            <Dropdown
+              options={Object.fromEntries(
+                anonNameAdjectives.map((word) => [word, word]),
+              )}
+              value={nameAdjective}
+              onChange={(e) => setNameAdjective(e.currentTarget.value)}
+            />
+            <Dropdown
+              options={Object.fromEntries(
+                anonNameNouns.map((word) => [word, word]),
+              )}
+              value={nameNoun}
+              onChange={(e) => setNameNoun(e.currentTarget.value)}
+            />
+          </div>
+          <p className="card--teams__description">
+            This will be what other teams see throughout the tournament
+          </p>
+        </div>
+        {/*</div>*/}
         <div className="card--teams__form__bottom-container">
           <div className="warning-box">
             <div className="warning-box__heading">
@@ -174,7 +177,7 @@ function CreateTeamComponent({
             <p className="warning-box__content">
               <span style={{ fontWeight: 600 }}>DO NOT</span> let others know
               what team you're on, or who your teammates are. We cannot
-              completely prevent people from profile stalking to get solutions
+              completely prevent people from "profile stalking" to get solutions
               to achievements, so anonymity is your best defense against it.
             </p>
           </div>

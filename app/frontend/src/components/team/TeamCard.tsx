@@ -151,6 +151,8 @@ export default function TeamCard({
       return;
     }
 
+    console.log(evt);
+
     let userIdStr = (
       new FormData(evt.currentTarget).get("user-id") as string
     ).trim();
@@ -177,6 +179,9 @@ export default function TeamCard({
         onSettled: () => {
           sendTeamInvite.reset();
           setDebounce(false);
+          (
+            (evt.target as HTMLFormElement).children.item(0) as HTMLInputElement
+          ).value = "";
         },
       },
     );
