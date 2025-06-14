@@ -35,6 +35,7 @@ type DebounceType = 0 | 1 | 2;
 
 export default function Button(props: ButtonProps) {
   const intervalId = useRef<null | number>(null);
+  const holdOverId = useRef<null | number>(null);
   const [progress, setProgress] = useState<null | number>(null);
   const [debounce, setDebounce] = useState<DebounceType>(0);
 
@@ -61,6 +62,12 @@ export default function Button(props: ButtonProps) {
     setDebounce(otherProps.holdToUse ? 2 : 1);
 
     if (!otherProps.holdToUse) return;
+
+    setProgress(0);
+
+    if (holdOverId.current !== null) {
+      clearTimeout(holdOverId.current);
+    }
 
     intervalId.current = setInterval(() => {
       setProgress((p) => {
@@ -98,7 +105,10 @@ export default function Button(props: ButtonProps) {
       if (Math.round(progress) === 100) {
         setProgress(null);
       } else {
-        setTimeout(() => setProgress(null), 500);
+        holdOverId.current = setTimeout(() => {
+          holdOverId.current = null;
+          setProgress(null);
+        }, 500);
       }
     }
   };
