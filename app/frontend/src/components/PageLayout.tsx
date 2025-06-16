@@ -96,7 +96,7 @@ function Header({
               <IoIosNotifications size={24} />
             </div>
           </div>
-          <NavLink to={iterationPath + "/teams"}>Teams</NavLink>
+          <NavLink to={iterationPath + "/teams"}>Dashboard</NavLink>
           <NavLink to={iterationPath + "/achievements"}>Achievements</NavLink>
           {session.user?.is_achievement_creator || session.user?.is_admin ? (
             <NavLink to={iterationPath + "/staff"}>Staff</NavLink>
