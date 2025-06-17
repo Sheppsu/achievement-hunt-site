@@ -12,7 +12,22 @@ __all__ = (
 
 
 class SerializableField:
-    __slots__ = ("field", "serial_key", "serialize_condition", "serialize_filter", "post_serial_filter", "post_transform")
+    __slots__ = (
+        "field",
+        "serial_key",
+        "serialize_condition",
+        "serialize_filter",
+        "post_serial_filter",
+        "post_transform",
+        "is_passive"
+    )
+
+    non_passive_attrs = (
+        "serialize_condition",
+        "serialize_filter",
+        "post_serial_filter",
+        "post_transform",
+    )
 
     def __init__(
         self,
@@ -30,15 +45,25 @@ class SerializableField:
         self.post_serial_filter = post_serial_filter
         self.post_transform = post_transform
 
-    @property
-    def is_passive(self):
-        return self.serialize_condition is None and \
-            self.serialize_filter is None and \
-            self.post_serial_filter is None and \
-            self.post_transform is None
+        self.is_passive = self._check_is_passive()
 
-    def split(self, sep=None, maxsplit=-1):
-        result = list(map(SerializableField, self.field.split(sep=sep, maxsplit=maxsplit)))
+    def __setattr__(self, key, value):
+        super().__setattr__(key, value)
+
+        if getattr(self, "is_passive", None) is not None and key in self.non_passive_attrs:
+            if value is None:
+                super().__setattr__("is_passive", self._check_is_passive())
+            else:
+                super().__setattr__("is_passive", False)
+
+    def _check_is_passive(self):
+        return all((
+            getattr(self, f) is None
+            for f in self.non_passive_attrs
+        ))
+
+    def split(self):
+        result = list(map(SerializableField, self.field.split(sep="__", maxsplit=1)))
         # only carry properties along with the last field
         result[-1] = self.clone(result[-1].field)
         return result
@@ -53,17 +78,17 @@ class SerializableField:
             self.post_transform
         )
 
-    def __eq__(self, other: str):
-        return self.field == other and self.is_passive
-
     def __str__(self):
         return self.field
 
     def __repr__(self):
-        return f"SerializableField({self.field!r})"
+        return f"SerializableField({self.field!r}, passive={self.is_passive!r})"
 
     def __hash__(self):
         return hash(self.field)
+
+    def __eq__(self, other: "SerializableField"):
+        return self.field == other.field
 
 
 def _separate_field_args(fields: list[str | SerializableField | None], only_include_last=False) -> tuple[
@@ -74,14 +99,17 @@ def _separate_field_args(fields: list[str | SerializableField | None], only_incl
     now = []
     later = defaultdict(list)
     for field in fields:
-        if field is None or field == "":
+        if field is None:
             continue
 
         if isinstance(field, str):
+            if field == "":
+                continue
+
             field = SerializableField(field)
 
-        split = field.split("__", 1)
-        if len(split) > 1:
+        split = field.split()
+        if len(split) == 2:
             later[split[0]].append(split[1])
         if not only_include_last or len(split) == 1:
             now.append(split[0])
@@ -105,14 +133,22 @@ class SerializableModel(models.Model):
     ) -> dict | None:
         field_transforms = getattr(self.Serialization, "TRANSFORM", {})
 
+        # for caching condition results
+        condition_results = {}
+
         data = {}
         for field in fields:
             str_field = str(field)
 
-            # conditional inclusion
-            serialize_condition = getattr(field, "serialize_condition", None)
-            if serialize_condition is not None and not serialize_condition(self):
-                continue
+            # conditional inclusion based on this object
+            condition = field.serialize_condition
+            if condition is not None:
+                result = condition_results.get(condition, None)
+                if result is None:
+                    condition_results[condition] = result = condition(self)
+
+                if not result:
+                    continue
 
             value = getattr(self, str_field)
             if isinstance(value, SerializableModel):
@@ -120,8 +156,10 @@ class SerializableModel(models.Model):
             elif isinstance(value, datetime):
                 value = value.isoformat()
             elif value.__class__.__name__ == "RelatedManager":
+                field_includes = includes.get(field)
+                field_excludes = excludes.get(field)
                 value = (
-                    obj.serialize(includes.get(field), excludes.get(field))
+                    obj.serialize(field_includes, field_excludes)
                     for obj in value.all()
                     if field.serialize_filter is None or field.serialize_filter(obj)
                 )

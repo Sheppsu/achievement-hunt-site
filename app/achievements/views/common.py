@@ -77,7 +77,7 @@ def achievements(req, iteration):
 
     def team_completion(c) -> bool:
         return (
-            any((player.id == c.player.id for player in team.players.all()))
+            any((player.id == c.player_id for player in team.players.all()))
             if team is not None else
             False
         )
@@ -96,19 +96,15 @@ def achievements(req, iteration):
                 "beatmaps__info",
                 "completion_count",
                 SerializableField(
-                    "completions",
-                    post_serial_filter=lambda c: len(c) > 0
-                ),
-                SerializableField(
                     "completions__player",
-                    condition=team_completion  # TODO: maybe replace condition with something else
+                    condition=team_completion
                 ),
                 SerializableField(
                     "completions__time_completed",
                     condition=team_completion
                 ),
                 "completions__player__user",
-                "completions__placement" if "competition" in achievement.tags.lower().split(",") else None
+                "completions__placement"
             ],
         )
         for achievement in Achievement.objects.select_related(
