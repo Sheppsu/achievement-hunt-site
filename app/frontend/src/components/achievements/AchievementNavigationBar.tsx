@@ -57,7 +57,8 @@ export function getDefaultNav(
       ];
 
   let modes = [
-    { label: "standard", active: true },
+    { label: "any", active: false },
+    { label: "standard", active: false },
     { label: "taiko", active: false },
     { label: "mania", active: false },
     { label: "catch", active: false },
@@ -153,7 +154,7 @@ export default function AchievementNavigationBar({
   const [searchField, setSearchField] = useState<string>("");
 
   async function doAnimation() {
-    if (animating) return;
+    if (animating || !scope.current) return;
 
     setAnimating(true);
 
@@ -183,17 +184,8 @@ export default function AchievementNavigationBar({
       id: 10,
       label: label,
       item: itemLabel,
-      multiSelect: label !== "mode" && label !== "sort",
+      multiSelect: label !== "sort",
     });
-
-    if (label === "mode")
-      dispatchState({
-        id: 4,
-        mode:
-          itemLabel === "any"
-            ? null
-            : ["standard", "taiko", "catch", "mania"].indexOf(itemLabel),
-      });
 
     doAnimation();
   }

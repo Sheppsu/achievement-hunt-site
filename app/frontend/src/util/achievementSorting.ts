@@ -9,7 +9,10 @@ import {
 } from "api/types/AchievementCompletionType.ts";
 import { AchievementTeamExtendedType } from "api/types/AchievementTeamType.ts";
 import { getMyCompletion } from "util/helperFunctions.ts";
-import { NavItems } from "components/achievements/AchievementNavigationBar.tsx";
+import {
+  NavItems,
+  NavRowItems,
+} from "components/achievements/AchievementNavigationBar.tsx";
 
 function intersects(a: string[], b: string[]): boolean {
   for (const item of b) {
@@ -42,15 +45,20 @@ function matchesSearch(achievement: AchievementType, searchFilter: string[]) {
 
 function matchesMode(
   achievement: AchievementType,
-  mode: number,
-  exclusive: boolean,
+  modes: NavRowItems,
 ): boolean {
+  // if nothing is checked
+  if (modes.items.filter((item) => item.active).length === 0) return true;
+
   for (const tag of achievement.tags.split(",")) {
     if (tag.startsWith("mode-"))
-      return ["o", "t", "f", "m"].indexOf(tag[tag.length - 1]) == mode;
+      // corresponding mode tag is active
+      return modes.items[["o", "t", "m", "f"].indexOf(tag[tag.length - 1]) + 1]
+        .active;
   }
 
-  return !exclusive;
+  // any mode tag is active
+  return modes.items[0].active;
 }
 
 function getGrouping(
@@ -165,10 +173,8 @@ export function getSortedAchievements<T extends AchievementType>(
   achievements: T[],
   filters: NavItems,
   searchText: string,
-  mode: number | null = null,
   hideCompletedAchievements: boolean = false,
   team: AchievementTeamExtendedType | null = null,
-  exclusiveModeFiltering: boolean = false,
 ): { [_k: string]: T[] } {
   const activeTags = filters.rows.tags.items
     .filter((item) => item.active)
@@ -180,8 +186,7 @@ export function getSortedAchievements<T extends AchievementType>(
   const sortedAchievements: { [key: string]: T[] } = {};
 
   for (const achievement of achievements) {
-    if (mode != null && !matchesMode(achievement, mode, exclusiveModeFiltering))
-      continue;
+    if (!matchesMode(achievement, filters.rows.mode)) continue;
 
     if (!matchesSearch(achievement, searchFilter)) continue;
 

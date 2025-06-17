@@ -2,7 +2,6 @@ import { NavItems } from "components/achievements/AchievementNavigationBar.tsx";
 
 export function defaultState(): AppState {
   return {
-    mode: 0,
     submitEnabled: true,
     achievementsFilter: null,
     achievementsSearchFilter: "",
@@ -16,7 +15,6 @@ export function defaultState(): AppState {
 }
 
 export type AppState = {
-  mode: number | null;
   submitEnabled: boolean;
   achievementsFilter: NavItems | null;
   achievementsSearchFilter: string;

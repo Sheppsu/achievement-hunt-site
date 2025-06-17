@@ -59,7 +59,7 @@ export default function AchievementContainer({
     teamData === undefined
   )
     return (
-      <div ref={scope} className="achievements__container">
+      <div className="achievements__container">
         <div>Loading achievements...</div>
       </div>
     );
@@ -83,7 +83,6 @@ export default function AchievementContainer({
     achievements,
     state.achievementsFilter,
     state.achievementsSearchFilter,
-    state.mode,
     state.hideCompletedAchievements,
     myTeam,
   );

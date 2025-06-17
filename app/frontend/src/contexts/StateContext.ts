@@ -14,11 +14,6 @@ interface ToggleSubmission extends BaseStateActionType {
   enable: boolean;
 }
 
-interface ModeType extends BaseStateActionType {
-  id: 4;
-  mode: number | null;
-}
-
 interface FilterType extends BaseStateActionType {
   id: 5;
   achievementsFilter: NavItems;
@@ -59,7 +54,6 @@ interface HideMyAchievements extends BaseStateActionType {
 
 type StateActionType =
   | ToggleSubmission
-  | ModeType
   | FilterType
   | SearchFilterType
   | CheckboxType
@@ -77,11 +71,6 @@ export function stateReducer(
       return {
         ...state,
         submitEnabled: action.enable,
-      };
-    case 4: // mode
-      return {
-        ...state,
-        mode: action.mode,
       };
     case 5: // filter change
       return {

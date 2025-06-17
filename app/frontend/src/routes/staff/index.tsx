@@ -68,10 +68,8 @@ export default function Index() {
     filteredAchievements,
     state.achievementsFilter,
     state.achievementsSearchFilter,
-    state.mode,
     false,
     null,
-    true,
   );
 
   return (
