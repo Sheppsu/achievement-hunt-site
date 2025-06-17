@@ -41,11 +41,6 @@ export default function Index() {
       id: 5,
       achievementsFilter: getDefaultNav(achievements, true),
     });
-    // default is standard, so set it to null
-    dispatchState({
-      id: 4,
-      mode: null,
-    });
     return <div>Loading...</div>;
   }
 
