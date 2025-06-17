@@ -63,9 +63,10 @@ export default function TeamPage() {
   }
 
   // show teams listing for admins
+  // or at the end of the event
   if (
-    session.user !== null &&
-    session.user.is_admin &&
+    ((session.user !== null && session.user.is_admin) ||
+      (iteration !== undefined && Date.parse(iteration.end) <= Date.now())) &&
     teamData !== undefined
   ) {
     cardsColumns[0].push(
