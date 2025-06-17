@@ -97,13 +97,11 @@ export default function Achievement({
           <hr
             className={classNames({
               hide:
-                achievement.beatmaps.length == 0 || completions.length === 0,
+                achievement.beatmaps.length == 0 ||
+                completions.length === 0 ||
+                !showCompletions,
             })}
           />
-          {/*<Button*/}
-          {/*  children={showCompletions ? "Hide completions" : "Show completions"}*/}
-          {/*  onClick={() => setShowCompletions((v) => !v)}*/}
-          {/*/>*/}
 
           {completions.length == 0 || !showCompletions ? (
             ""
