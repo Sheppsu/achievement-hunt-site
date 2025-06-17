@@ -240,7 +240,7 @@ function _sendSubmit(
     return;
   }
 
-  wsState.ws.send(JSON.stringify({ code: 1, mode: appState.mode }));
+  wsState.ws.send(JSON.stringify({ code: 1 }));
 
   // disable submission for 5 seconds
   dispatchAppState({
