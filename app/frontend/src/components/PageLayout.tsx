@@ -54,7 +54,7 @@ function Header({
           onClick={() => setDropdownOpen((val) => !val)}
         >
           <div className="header__container__left-box">
-            <Link to={iterationPath + "/"}>
+            <Link to="/">
               <h1 className="header__container__left-box__title">CTA2</h1>
             </Link>
           </div>
