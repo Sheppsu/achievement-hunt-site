@@ -210,8 +210,9 @@ def create_team(req, data, iteration, registration):
         )
         team.save()
     except Exception as e:
-        print(e)
-        return error("team name taken")
+        if "unique_iteration_team_name" in str(e):
+            return error("team name taken")
+        return error("anonymous team name taken")
 
     player = Player(user=req.user, team_id=team.id, team_admin=True)
     player.save()
