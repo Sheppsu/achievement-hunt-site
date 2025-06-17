@@ -446,22 +446,4 @@ p {
   color: #ffffff;
 }
 
-/*@media (max-width: 1260px) {*/
-/*  .achievements {*/
-/*    flex-direction: column;*/
-/*  }*/
 
-/*  .achievements__container {*/
-/*    order: 2;*/
-/*  }*/
-
-/*  .achievements-progress {*/
-/*    order: 1;*/
-/*  }*/
-/*}*/
-
-/*@media (min-width: 1261px) {*/
-/*  .achievement {*/
-/*    max-width: 760px;*/
-/*  }*/
-/*}*/

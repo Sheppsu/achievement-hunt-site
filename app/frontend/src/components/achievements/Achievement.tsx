@@ -5,6 +5,13 @@ import AchievementCompletionEntry from "components/achievements/AchievementCompl
 import AudioPlayer from "components/audio/AudioPlayer.tsx";
 import { AppState } from "types/AppStateType.ts";
 import { parseTags, toTitleCase } from "util/helperFunctions";
+import { useState } from "react";
+import Button from "components/inputs/Button.tsx";
+import {
+  IoIosArrowDown,
+  IoIosArrowDropdown,
+  IoIosArrowUp,
+} from "react-icons/io";
 
 export default function Achievement({
   achievement,
@@ -17,11 +24,19 @@ export default function Achievement({
   points: number | null;
   state: AppState;
 }) {
+  const [showCompletions, setShowCompletions] = useState(false);
+
   const completions = achievement.completions;
   const tags = parseTags(achievement.tags);
 
   const infoCls =
     "achievement__container " + (completed ? "complete" : "incomplete");
+
+  const dropdownArrowProps = {
+    size: 36,
+    onClick: () => setShowCompletions((v) => !v),
+    className: "clickable",
+  };
 
   return (
     <>
@@ -43,6 +58,12 @@ export default function Achievement({
                 {tags.map((tag) => (
                   <div className="achievement-tag">{toTitleCase(tag)}</div>
                 ))}
+                <div style={{ flexGrow: 1 }}></div>
+                {showCompletions ? (
+                  <IoIosArrowUp {...dropdownArrowProps} />
+                ) : (
+                  <IoIosArrowDown {...dropdownArrowProps} />
+                )}
               </div>
             </div>
           </div>
@@ -79,7 +100,12 @@ export default function Achievement({
                 achievement.beatmaps.length == 0 || completions.length === 0,
             })}
           />
-          {completions.length == 0 ? (
+          {/*<Button*/}
+          {/*  children={showCompletions ? "Hide completions" : "Show completions"}*/}
+          {/*  onClick={() => setShowCompletions((v) => !v)}*/}
+          {/*/>*/}
+
+          {completions.length == 0 || !showCompletions ? (
             ""
           ) : (
             <div className="achievement__players">
