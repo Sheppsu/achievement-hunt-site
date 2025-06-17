@@ -116,7 +116,7 @@ function Header({
     <div className="header">
       <div className="prevent-select header__container">
         <div className="header__container__left-box">
-          <Link to={iterationPath + "/"}>
+          <Link to="/">
             <h1 className="header__container__left-box__title">CTA2</h1>
           </Link>
           <div className="header__container__left-box__links">
