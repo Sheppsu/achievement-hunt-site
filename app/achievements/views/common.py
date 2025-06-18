@@ -10,6 +10,8 @@ from django.views.decorators.http import require_http_methods, require_POST, req
 from .util import *
 from .anonymous_names import verify_name
 
+from datetime import datetime, timezone
+
 
 def serialize_team(team: Team):
     return team.serialize(includes=["players__user"])
@@ -59,7 +61,7 @@ def logout(req):
 
 @require_iteration_after_start
 def achievements(req, iteration):
-    if not iteration.has_ended():
+    if not (iteration_ended := iteration.has_ended()):
         if not req.user.is_authenticated:
             return error("not logged in", status=403)
 
@@ -67,13 +69,56 @@ def achievements(req, iteration):
         if registration is None:
             return error("must be registered", status=403)
 
-    team = (
-        Team.objects.prefetch_related("players").filter(
-            players__user_id=req.user.id,
-            iteration_id=iteration.id
-        ).first()
-        if req.user.is_authenticated else None
+    team = Team.objects.prefetch_related("players").filter(
+        players__user_id=req.user.id,
+        iteration_id=iteration.id
+    ).first()
+
+    # shouldn't be possible, but let's check anyway
+    if not iteration_ended and team is None:
+        return error("must be on a team", status=403)
+
+    completion_prefetch = models.Prefetch(
+        "completions",
+        queryset=AchievementCompletion.objects.select_related(
+            "player",
+            "placement"
+        )
     )
+
+    query = Achievement.objects.select_related(
+        "batch"
+    ).prefetch_related(
+        models.Prefetch(
+            "beatmaps",
+            queryset=BeatmapConnection.objects.select_related(
+                "info"
+            ).filter(
+                hide=True
+            )
+        )
+    ).filter(
+        batch__iteration_id=iteration.id,
+        batch__release_time__lte=datetime.now(tz=timezone.utc)
+    )
+
+    if (req.user.is_authenticated and req.user.is_admin) or iteration_ended:
+        query = query.prefetch_related(
+            completion_prefetch
+        ).annotate(
+            completion_count=models.Count("completions")
+        )
+        return success([
+            achievement.serialize([
+                "completions__player__user",
+                "completions__placement",
+                "beatmaps__info",
+                "completion_count"
+            ])
+            for achievement in query.all()
+        ])
+
+    completion_counts = Achievement.objects.annotate(completion_count=models.Count("completions")).all()
 
     def team_completion(c) -> bool:
         return (
@@ -82,19 +127,14 @@ def achievements(req, iteration):
             False
         )
 
-    is_admin = req.user.is_authenticated and req.user.is_admin
+    completion_prefetch.queryset = completion_prefetch.queryset.filter(
+        models.Q(player__team_id=team.id) | models.Q(placement__isnull=False, placement__place__lte=5)
+    )
 
-    return success([
+    result = [
         achievement.serialize(
-            ["beatmaps__info", "completion_count", "completions__player__user", "completions__placement"]
-            if iteration.has_ended() or is_admin else
             [
-                SerializableField(
-                    "beatmaps",
-                    filter=lambda b: not b.hide
-                ),
                 "beatmaps__info",
-                "completion_count",
                 SerializableField(
                     "completions__player",
                     condition=team_completion
@@ -107,18 +147,16 @@ def achievements(req, iteration):
                 "completions__placement"
             ],
         )
-        for achievement in Achievement.objects.select_related(
-            "batch"
-        ).prefetch_related(
-            "completions__player__user",
-            "completions__placement",
-            "beatmaps__info"
-        ).annotate(
-            completion_count=models.Count("completions"),
-        ).filter(
-            batch__iteration_id=iteration.id
-        ).all()
-    ])
+        for achievement in query.prefetch_related(completion_prefetch).all()
+    ]
+
+    for achievement in result:
+        for completion_count_achievement in completion_counts:
+            if completion_count_achievement.id == achievement["id"]:
+                achievement["completion_count"] = completion_count_achievement.completion_count
+                break
+
+    return success(result)
 
 
 @require_iteration
