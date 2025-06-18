@@ -128,7 +128,7 @@ def achievements(req, iteration):
         )
 
     completion_prefetch.queryset = completion_prefetch.queryset.filter(
-        models.Q(player__team_id=team.id) | models.Q(placement__isnull=False, placement__place__lte=5)
+        models.Q(player__team_id=team.id) | models.Q(placement__isnull=False)
     )
 
     result = [
