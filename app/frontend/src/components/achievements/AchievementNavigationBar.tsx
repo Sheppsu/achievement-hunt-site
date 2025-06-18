@@ -63,10 +63,6 @@ export function getDefaultNav(
     { label: "mania", active: false },
     { label: "catch", active: false },
   ];
-  if (isStaff) {
-    modes[0].active = false;
-    modes = [{ label: "any", active: true }].concat(modes);
-  }
 
   return {
     rows: {
