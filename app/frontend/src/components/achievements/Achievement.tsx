@@ -59,10 +59,14 @@ export default function Achievement({
                   <div className="achievement-tag">{toTitleCase(tag)}</div>
                 ))}
                 <div style={{ flexGrow: 1 }}></div>
-                {showCompletions ? (
-                  <IoIosArrowUp {...dropdownArrowProps} />
+                {completions.length > 0 ? (
+                  showCompletions ? (
+                    <IoIosArrowUp {...dropdownArrowProps} />
+                  ) : (
+                    <IoIosArrowDown {...dropdownArrowProps} />
+                  )
                 ) : (
-                  <IoIosArrowDown {...dropdownArrowProps} />
+                  ""
                 )}
               </div>
             </div>
