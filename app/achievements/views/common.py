@@ -18,7 +18,12 @@ def serialize_team(team: Team):
 
 
 def select_teams(iteration_id, many=False, sort=False, **kwargs) -> list[Team] | Team | None:
-    teams = Team.objects.prefetch_related("players__user").filter(
+    teams = Team.objects.prefetch_related(
+        models.Prefetch(
+            "players",
+            Player.objects.select_related("user")
+        )
+    ).filter(
         iteration_id=iteration_id,
         **kwargs
     )

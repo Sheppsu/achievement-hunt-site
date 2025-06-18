@@ -44,9 +44,15 @@ def achievements(req):
     batch = int(batch) == 1
 
     query = Achievement.objects.prefetch_related(
-        "comments__user",
+        models.Prefetch(
+            "comments",
+            AchievementComment.objects.select_related("user")
+        ),
+        models.Prefetch(
+            "beatmaps",
+            BeatmapConnection.objects.select_related("info")
+        ),
         "votes",
-        "beatmaps__info"
     ).select_related(
         "creator",
     )
