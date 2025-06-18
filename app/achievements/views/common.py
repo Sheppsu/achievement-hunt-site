@@ -81,7 +81,7 @@ def achievements(req, iteration):
     completion_prefetch = models.Prefetch(
         "completions",
         queryset=AchievementCompletion.objects.select_related(
-            "player",
+            "player__user",
             "placement"
         )
     )
