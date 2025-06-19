@@ -166,7 +166,7 @@ def create_achievement(req, data, achievement=None):
             last_edited_at=date_now
         )
         discord_logger.submit_achievement(achievement)
-    elif achievement.creator_id != req.user.id:
+    elif achievement.creator_id != req.user.id and not req.user.is_admin:
         return error("cannot edit an achievement that's not yours")
     else:
         achievement.name = data["name"]
@@ -206,7 +206,7 @@ def edit_achievement(req, achievement):
 @require_http_methods(["DELETE"])
 @require_achievement()
 def delete_achievement(req, achievement):
-    if achievement.creator_id != req.user.id:
+    if achievement.creator_id != req.user.id and not req.user.is_admin:
         return error("cannot delete an achievement that's not yours")
 
     achievement.delete()

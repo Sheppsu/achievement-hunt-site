@@ -71,6 +71,10 @@ export default function Achievement(props: AchievementProps) {
     session.user!.is_admin,
   );
 
+  const canEdit =
+    achievement.creator !== null &&
+    (achievement.creator.id == session.user!.id || session.user!.is_admin);
+
   const onCommentStart = () => {
     setIsCommenting(true);
   };
@@ -256,23 +260,12 @@ export default function Achievement(props: AchievementProps) {
         <div className="staff__achievement__comment-container__row">
           <Button
             children="Delete"
-            hidden={
-              achievement.creator === null ||
-              achievement.creator.id !== session.user!.id
-            }
+            hidden={!canEdit}
             unavailable={deleting}
             onClick={onDeleteAchievement}
             holdToUse={true}
           />
-          <Button
-            children="Edit"
-            hidden={
-              achievement.creator === null ||
-              achievement.creator.id !== session.user!.id ||
-              editing
-            }
-            onClick={onStartEdit}
-          />
+          <Button children="Edit" hidden={!canEdit} onClick={onStartEdit} />
           <Button
             children="Comment"
             onClick={onCommentStart}
