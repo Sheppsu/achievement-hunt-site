@@ -165,7 +165,7 @@ def create_achievement(req, data, achievement=None):
             created_at=(date_now := datetime.now(tz=timezone.utc)),
             last_edited_at=date_now
         )
-        discord_logger.submit_achievement(achievement)
+        discord_logger.submit_achievement(req, achievement)
     elif achievement.creator_id != req.user.id and not req.user.is_admin:
         return error("cannot edit an achievement that's not yours")
     else:
@@ -175,7 +175,7 @@ def create_achievement(req, data, achievement=None):
         achievement.tags = data["tags"]
         achievement.last_edited_at = datetime.now(tz=timezone.utc)
         achievement.save()
-        discord_logger.submit_achievement(achievement, edited=True)
+        discord_logger.submit_achievement(req, achievement, edited=True)
 
     resp_beatmaps = []
 

@@ -64,7 +64,7 @@ class DiscordLogger:
 
         self.submit_embeds(_create_error_embeds(req, exc), self.WEBHOOK_URL)
 
-    def submit_achievement(self, achievement, edited=False):
+    def submit_achievement(self, req, achievement, edited=False):
         if self.STAFF_WEBHOOK_URL is None:
             _log.warning("Unable to log new achievement, STAFF_WEBHOOK_URL is None")
             return
@@ -75,8 +75,8 @@ class DiscordLogger:
             "description": achievement.name,
             "color": 0xF6AF49 if edited else 0x2DD286,
             "footer": {
-                "text": achievement.creator.username,
-                "icon_url": achievement.creator.avatar
+                "text": req.user.username,
+                "icon_url": req.user.avatar
             }
         }
 
