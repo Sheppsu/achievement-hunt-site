@@ -88,7 +88,7 @@ class SerializableField:
         return hash(self.field)
 
     def __eq__(self, other: "SerializableField"):
-        return self.field == other.field
+        return self.field == other.field and self.serial_key == other.serial_key
 
 
 def _separate_field_args(fields: list[str | SerializableField | None], only_include_last=False) -> tuple[
