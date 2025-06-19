@@ -38,6 +38,6 @@ export type StaffAchievementType = {
   comments: AchievementCommentType[];
   vote_count: number;
   has_voted: boolean;
-  creator: UserType;
+  creator: UserType | null;
   batch: AchievementBatchType | null;
 } & AchievementType;

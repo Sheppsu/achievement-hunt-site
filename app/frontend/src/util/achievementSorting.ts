@@ -24,7 +24,10 @@ function intersects(a: string[], b: string[]): boolean {
   return false;
 }
 
-function matchesSearch(achievement: AchievementType, searchFilter: string[]) {
+function matchesSearch(
+  achievement: AchievementType | StaffAchievementType,
+  searchFilter: string[],
+) {
   for (const word of searchFilter) {
     if (
       word != "" &&
@@ -35,7 +38,12 @@ function matchesSearch(achievement: AchievementType, searchFilter: string[]) {
           bm.info.artist.toLowerCase().includes(word) ||
           bm.info.title.toLowerCase().includes(word) ||
           bm.info.version.toLowerCase().includes(word),
-      ).length == 0
+      ).length == 0 &&
+      !(
+        "creator" in achievement &&
+        achievement.creator !== null &&
+        achievement.creator.username.toLowerCase().includes(word)
+      )
     )
       return false;
   }
