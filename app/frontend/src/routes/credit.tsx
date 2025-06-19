@@ -164,6 +164,13 @@ export default function Credit() {
               >
                 Remyria
               </a>
+              <a
+                href="https://osu.ppy.sh/users/3228967"
+                target="_blank"
+                className="external-link staff"
+              >
+                Jing Yuan
+              </a>
             </div>
           </div>
           <div className="card no-scroll">
