@@ -1,5 +1,5 @@
 const urlRe = new RegExp(
-  /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9]{1,6}\b([-a-zA-Z0-9@:%_\+~#?&//=]*)/,
+  /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9]{1,6}\b([-a-zA-Z0-9@:%._\+#?&//=]*)/,
   "dgi",
 );
 
@@ -21,7 +21,11 @@ export default function RenderedText({ text }: { text: string }) {
   for (const match of matches) {
     elements.push(formatLines(text.substring(lastI, match.index)));
 
-    const url = match[0];
+    let url = match[0];
+    if (url.endsWith(".")) {
+      url = url.substring(0, url.length - 1);
+    }
+
     elements.push(
       <a className="rendered-text" href={url} target="_blank">
         {url}
