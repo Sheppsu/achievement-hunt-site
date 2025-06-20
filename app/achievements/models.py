@@ -1,11 +1,14 @@
 import time
 
 import requests
-from common.serializer import SerializableModel
-from common.util import create_auth_handler
+
 from django.conf import settings
 from django.db import models
 from osu import Client
+
+from common.serializer import SerializableModel
+from common.util import create_auth_handler
+from common.comm import get_osu_user
 
 osu_client = settings.OSU_CLIENT
 
@@ -17,26 +20,26 @@ class UserManager(models.Manager):
             auth.get_auth_token(code)
             client = Client(auth)
             user = client.get_own_data()
-            return self._create_user(user)
+            return self._create_user(user.id, user.username, user.avatar_url, user.cover.url)
         except requests.HTTPError:
             return
 
     def create_user_from_id(self, user_id):
-        user = osu_client.get_user(user_id)
-        return self._create_user(user)
+        user = get_osu_user(user_id)
+        return self._create_user(user["id"], user["username"], user["avatar"], user["cover"])
 
-    def _create_user(self, user):
+    def _create_user(self, user_id, username, avatar, cover):
         try:
-            user_obj = self.get(id=user.id)
-            user_obj.username = user.username
-            user_obj.avatar = user.avatar_url
-            user_obj.cover = user.cover.url or ""
+            user_obj = self.get(id=user_id)
+            user_obj.username = username
+            user_obj.avatar = avatar
+            user_obj.cover = cover or ""
         except User.DoesNotExist:
             user_obj = User(
-                user.id,
-                user.username,
-                user.avatar_url,
-                user.cover.url or ""
+                id,
+                username,
+                avatar,
+                cover or ""
             )
         user_obj.save()
 
