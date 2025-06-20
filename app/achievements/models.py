@@ -36,7 +36,7 @@ class UserManager(models.Manager):
             user_obj.cover = cover or ""
         except User.DoesNotExist:
             user_obj = User(
-                id,
+                user_id,
                 username,
                 avatar,
                 cover or ""
