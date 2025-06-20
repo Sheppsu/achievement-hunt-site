@@ -267,12 +267,21 @@ function _sendChatMessage(
   wsState.ws.send(JSON.stringify({ code: 2, msg: msg }));
 }
 
-export const WebsocketContext = createContext<{
+function _resetConnection(state: WebsocketState) {
+  if (state !== null && state.ws !== null) {
+    state.ws.close();
+  }
+}
+
+export type WebsocketContextType = {
   wsState: WebsocketState | null;
   dispatchWsState: WebsocketStateDispatch;
   sendSubmit: () => void;
   sendChatMessage: (msg: string) => void;
-} | null>(null);
+  resetConnection: () => void;
+} | null;
+
+export const WebsocketContext = createContext<WebsocketContextType>(null);
 
 export function WebsocketContextProvider({
   children,
@@ -328,9 +337,23 @@ export function WebsocketContextProvider({
     _sendChatMessage(wsState, session, msg);
   };
 
+  const resetConnection = () => {
+    if (wsState === null) {
+      return;
+    }
+
+    _resetConnection(wsState);
+  };
+
   return (
     <WebsocketContext.Provider
-      value={{ wsState, dispatchWsState, sendSubmit, sendChatMessage }}
+      value={{
+        wsState,
+        dispatchWsState,
+        sendSubmit,
+        sendChatMessage,
+        resetConnection,
+      }}
     >
       {children}
     </WebsocketContext.Provider>

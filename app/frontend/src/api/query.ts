@@ -11,7 +11,11 @@ import {
 import { AchievementCommentType } from "api/types/AchievementCommentType.ts";
 import { UserType } from "api/types/UserType.ts";
 import { EventContext, EventType } from "contexts/EventContext";
-import { ChatMessage } from "contexts/WebsocketContext";
+import {
+  ChatMessage,
+  WebsocketContext,
+  WebsocketContextType,
+} from "contexts/WebsocketContext";
 import { UndefinedInitialDataOptions } from "node_modules/@tanstack/react-query/build/legacy";
 import { useContext } from "react";
 import {
@@ -273,8 +277,11 @@ type TeamLeaveDataType = {
   user_id: number;
 };
 
-function onLeaveTeam(teamData: TeamDataType, leaveData: TeamLeaveDataType) {
-  console.log(teamData);
+function onLeaveTeam(
+  wsCtx: WebsocketContextType,
+  teamData: TeamDataType,
+  leaveData: TeamLeaveDataType,
+) {
   const newTeams = [];
 
   for (const team of teamData.teams) {
@@ -295,7 +302,7 @@ function onLeaveTeam(teamData: TeamDataType, leaveData: TeamLeaveDataType) {
     newTeams.push(team);
   }
 
-  console.log(newTeams);
+  wsCtx?.resetConnection();
 
   return { placement: teamData.placement, teams: newTeams };
 }
@@ -303,6 +310,7 @@ function onLeaveTeam(teamData: TeamDataType, leaveData: TeamLeaveDataType) {
 export function useLeaveTeam(): SpecificUseMutationResult<TeamLeaveDataType> {
   const iteration = getIterationParams();
   const queryClient = useContext(QueryClientContext);
+  const wsCtx = useContext(WebsocketContext);
 
   return useMakeMutation(
     {
@@ -311,7 +319,7 @@ export function useLeaveTeam(): SpecificUseMutationResult<TeamLeaveDataType> {
         // remove players or team
         queryClient?.setQueryData(
           [...iteration, "teams"],
-          (teamData: TeamDataType) => onLeaveTeam(teamData, leaveData),
+          (teamData: TeamDataType) => onLeaveTeam(wsCtx, teamData, leaveData),
         );
       },
     },
@@ -324,6 +332,7 @@ export function useLeaveTeam(): SpecificUseMutationResult<TeamLeaveDataType> {
 export function useCreateTeam(): SpecificUseMutationResult<AchievementTeamExtendedType> {
   const iteration = getIterationParams();
   const queryClient = useContext(QueryClientContext);
+  const wsCtx = useContext(WebsocketContext);
 
   return useMakeMutation(
     {
@@ -332,6 +341,8 @@ export function useCreateTeam(): SpecificUseMutationResult<AchievementTeamExtend
         queryClient?.invalidateQueries({
           queryKey: [...iteration, "teams"],
         });
+
+        wsCtx?.resetConnection();
       },
     },
     {
@@ -383,7 +394,6 @@ export function useSendTeamInvite(): SpecificUseMutationResult<TeamInviteType> {
 function onInviteDeleted(
   queryKey: string[],
   queryClient: QueryClient | undefined,
-  iteration: string[],
   inviteId: number,
 ) {
   queryClient?.setQueryData(queryKey, (invites: TeamInviteType[]) => {
@@ -412,7 +422,6 @@ export function useRescindTeamInvite(
         onInviteDeleted(
           [...iteration, "teams", "invites"],
           queryClient,
-          iteration,
           inviteId,
         ),
     },
@@ -427,14 +436,10 @@ export function useResolveInvite(
 ): SpecificUseMutationResult<AchievementTeamType | null> {
   const iteration = getIterationParams();
   const queryClient = useContext(QueryClientContext);
+  const wsCtx = useContext(WebsocketContext);
 
   function onInviteResolved(team: AchievementTeamType | null) {
-    onInviteDeleted(
-      [...iteration, "invites"],
-      queryClient,
-      iteration,
-      inviteId,
-    );
+    onInviteDeleted([...iteration, "invites"], queryClient, inviteId);
 
     if (team === null) {
       return;
@@ -443,6 +448,8 @@ export function useResolveInvite(
     queryClient?.invalidateQueries({
       queryKey: [...iteration, "teams"],
     });
+
+    wsCtx?.resetConnection();
   }
 
   return useMakeMutation(
@@ -598,7 +605,6 @@ function onCommented(
   queryClient?.setQueryData(
     ["staff", "achievements", "?batch=0"],
     (achievements: StaffAchievementType[] | undefined) => {
-      console.log(achievements);
       if (achievements === undefined) return;
 
       const newAchievements = [];
