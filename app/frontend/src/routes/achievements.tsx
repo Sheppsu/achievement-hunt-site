@@ -1,5 +1,6 @@
 import { useGetAchievements, useGetIteration, useGetTeams } from "api/query";
 import { AchievementTeamExtendedType } from "api/types/AchievementTeamType";
+import { EventIterationType } from "api/types/EventIterationType.ts";
 import "assets/css/achievements.css";
 import AchievementContainer from "components/achievements/AchievementContainer";
 import AchievementNavigationBar, {
@@ -16,7 +17,6 @@ import { useContext, useEffect, useState } from "react";
 import { Helmet } from "react-helmet";
 import { AppState } from "types/AppStateType.ts";
 import { getMyTeam } from "util/helperFunctions";
-import { EventIterationType } from "api/types/EventIterationType.ts";
 
 function getTimeStr(delta: number) {
   const days = Math.floor((delta / (1000 * 60 * 60 * 24)) % 60);
@@ -98,8 +98,11 @@ export default function AchievementCompletionPage() {
     iteration !== undefined ? Date.parse(iteration.start) : null;
   const showContent = iterationStart !== null && iterationStart < time;
 
-  const { data: achievements, isLoading: achievementsLoading } =
-    useGetAchievements(showContent);
+  const {
+    data: achievements,
+    isLoading: achievementsLoading,
+    error: achievementsError,
+  } = useGetAchievements(showContent);
   const { data: teamData, isLoading: teamsLoading } = useGetTeams(showContent);
 
   const state = useStateContext();
@@ -107,6 +110,15 @@ export default function AchievementCompletionPage() {
 
   if (iterationLoading || achievementsLoading || teamsLoading) {
     return <TextPage text="Loading..." />;
+  }
+
+  if (
+    achievementsError?.message === "must be on a team" ||
+    achievementsError?.message === "must be registered"
+  ) {
+    return (
+      <TextPage text="You must be registered & on a team to view achievements" />
+    );
   }
 
   if (iteration === undefined) {
