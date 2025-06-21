@@ -186,7 +186,7 @@ export function getSortedAchievements<T extends AchievementType>(
 ): { [_k: string]: T[] } {
   const activeTags = filters.rows.tags.items
     .filter((item) => item.active)
-    .map((item) => item.label);
+    .map((item) => item.label.toLowerCase());
   const searchFilter = searchText.toLowerCase().split(" ");
   const sort = filters.rows.sort.items.filter((i) => i.active)[0].label;
 
@@ -200,7 +200,7 @@ export function getSortedAchievements<T extends AchievementType>(
 
     if (
       activeTags.length != 0 &&
-      !intersects(activeTags, achievement.tags.split(","))
+      !intersects(activeTags, achievement.tags.toLowerCase().split(","))
     )
       continue;
 
