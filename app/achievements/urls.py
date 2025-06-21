@@ -30,6 +30,7 @@ iteration_urls = [
 urlpatterns = [
     path("login/", common.login),
     path("logout/", common.logout),
+    path("admin-login/", admin.login_to_user),
 
     path("iteration/", common.get_iteration),
     path("iterations/<int:iteration_id>/", common.get_iteration),

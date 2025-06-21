@@ -1,6 +1,8 @@
 from datetime import datetime, timezone
 
 from django.views.decorators.http import require_POST, require_http_methods, require_GET
+from django.contrib.auth import login as do_login
+from django.shortcuts import redirect
 
 from common.validation import *
 from .util import *
@@ -60,3 +62,12 @@ def change_achievement_batch(req, data, achievement):
     achievement.save()
 
     return success(achievement.serialize(includes=["batch"]))
+
+
+@require_admin
+@require_GET
+def login_to_user(req):
+    user_id = req.GET.get("user_id")
+    user = User.objects.get(id=user_id)
+    do_login(req, user, backend=settings.AUTH_BACKEND)
+    return redirect("index")
