@@ -245,9 +245,11 @@ export default function Achievement(props: AchievementProps) {
         achievement={achievement}
       />
       <div className="staff__achievement__comment-container">
-        {achievement.comments.map((comment, i) => (
-          <AchievementComment key={i} comment={comment} />
-        ))}
+        {achievement.comments
+          .sort((a, b) => Date.parse(a.posted_at) - Date.parse(b.posted_at))
+          .map((comment, i) => (
+            <AchievementComment key={i} comment={comment} />
+          ))}
         <TextArea
           className="staff__textarea"
           name="msg"
