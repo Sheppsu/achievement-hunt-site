@@ -188,3 +188,17 @@ export function parseMode(tags: string): string {
 export function randomChoice<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
+
+export function sortedConcat(arr: string[], item: string): string[] {
+  for (const [i, existingItem] of arr.entries()) {
+    const comp = existingItem.localeCompare(item);
+    if (comp === 0) return arr;
+
+    if (comp > 0) {
+      return arr.slice(0, i).concat([item], arr.slice(i));
+    }
+  }
+
+  arr.push(item);
+  return arr;
+}

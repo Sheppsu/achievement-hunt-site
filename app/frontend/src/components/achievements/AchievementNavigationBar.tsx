@@ -5,7 +5,7 @@ import TextInput from "components/inputs/TextInput.tsx";
 import { StateDispatch } from "contexts/StateContext.ts";
 import { useState } from "react";
 import { AppState } from "types/AppStateType.ts";
-import { parseTags, toTitleCase } from "util/helperFunctions.ts";
+import { parseTags, sortedConcat, toTitleCase } from "util/helperFunctions.ts";
 
 export type NavItem = {
   label: string;
@@ -33,12 +33,10 @@ export function getDefaultNav(
   achievements: AchievementType[],
   isStaff: boolean = false,
 ): NavItems {
-  const tags: string[] = [];
+  let tags: string[] = [];
   for (const achievement of achievements) {
     for (const tag of parseTags(achievement.tags, false)) {
-      if (!tags.includes(tag)) {
-        tags.push(tag);
-      }
+      tags = sortedConcat(tags, tag);
     }
   }
 
