@@ -148,11 +148,15 @@ def vote_achievement(req, data, achievement):
 def create_achievement(req, data, achievement=None):
     beatmaps = data["beatmaps"]
     if len(beatmaps) > 0:
+        beatmap_objs = BeatmapInfo.bulk_get_or_create(
+            [beatmap["id"] for beatmap in beatmaps]
+        )
+        if beatmap_objs is None:
+            return error("invalid beatmap id")
+
         beatmaps = [
             (beatmap, next((item["hide"] for item in beatmaps if item["id"] == beatmap.id)))
-            for beatmap in BeatmapInfo.bulk_get_or_create(
-                [beatmap["id"] for beatmap in beatmaps]
-            )
+            for beatmap in beatmap_objs
         ]
 
     if achievement is None:
