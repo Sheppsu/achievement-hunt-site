@@ -3,7 +3,6 @@ import { AchievementTeamExtendedType } from "api/types/AchievementTeamType.ts";
 import { CompletedAchievementType } from "api/types/AchievementType";
 import "assets/css/achievements.css";
 import { SessionContext } from "contexts/SessionContext.ts";
-import { AnimationScope } from "motion/react";
 import { useContext } from "react";
 import { AppState } from "types/AppStateType.ts";
 import { getSortedAchievements } from "util/achievementSorting.ts";
@@ -42,13 +41,7 @@ function extendAchievementData(
   }
 }
 
-export default function AchievementContainer({
-  state,
-  scope,
-}: {
-  state: AppState;
-  scope: AnimationScope;
-}) {
+export default function AchievementContainer({ state }: { state: AppState }) {
   const session = useContext(SessionContext);
   const { data: baseAchievements } = useGetAchievements();
   const { data: teamData } = useGetTeams();
@@ -88,7 +81,7 @@ export default function AchievementContainer({
   );
 
   return (
-    <div ref={scope} className="achievements__container">
+    <div className="achievements__container">
       {Object.entries(sortedAchievements).map(([group, achievements]) => {
         return (
           <>

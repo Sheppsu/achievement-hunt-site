@@ -6,7 +6,6 @@ import { StateDispatch } from "contexts/StateContext.ts";
 import { useState } from "react";
 import { AppState } from "types/AppStateType.ts";
 import { parseTags, toTitleCase } from "util/helperFunctions.ts";
-import { AnimationScope } from "motion/react";
 
 export type NavItem = {
   label: string;
@@ -133,32 +132,16 @@ function AchievementNavigationBarRow({
 
 export default function AchievementNavigationBar({
   state,
-  animate,
-  scope,
   dispatchState,
   achievements,
   isStaff,
 }: {
   state: AppState | null;
-  animate: Function;
-  scope: AnimationScope;
   dispatchState: StateDispatch;
   achievements: AchievementType[] | undefined;
   isStaff: boolean;
 }) {
-  const [animating, setAnimating] = useState(false);
   const [searchField, setSearchField] = useState<string>("");
-
-  async function doAnimation() {
-    if (animating || !scope.current) return;
-
-    setAnimating(true);
-
-    await animate(scope.current, { y: 10, opacity: 0 }, { duration: 0.2 });
-    await animate(scope.current, { y: 0, opacity: 100 }, { duration: 0.2 });
-
-    setAnimating(false);
-  }
 
   function onReset() {
     if (!achievements) return;
@@ -169,8 +152,6 @@ export default function AchievementNavigationBar({
     });
     dispatchState({ id: 6, achievementsSearchFilter: "" });
     setSearchField("");
-
-    doAnimation();
   }
 
   function onItemClick(label: keyof NavItems["rows"], itemLabel: string) {
@@ -182,8 +163,6 @@ export default function AchievementNavigationBar({
       item: itemLabel,
       multiSelect: label !== "sort",
     });
-
-    doAnimation();
   }
 
   function onLabelClick(label: keyof NavItems["rows"]) {
@@ -203,8 +182,6 @@ export default function AchievementNavigationBar({
       id: 7,
       hideCompletedAchievements: e.target.checked,
     });
-
-    doAnimation();
   }
 
   function onShowMyAchievements(e: React.ChangeEvent<HTMLInputElement>) {
@@ -212,8 +189,6 @@ export default function AchievementNavigationBar({
       id: 12,
       hideMyAchievements: e.target.checked,
     });
-
-    doAnimation();
   }
 
   // reset navigator when switching pages (staff vs achievements)

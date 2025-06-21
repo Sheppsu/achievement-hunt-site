@@ -12,7 +12,6 @@ import {
   useDispatchStateContext,
   useStateContext,
 } from "contexts/StateContext.ts";
-import { useAnimate } from "motion/react";
 import { useContext, useState } from "react";
 import { getSortedAchievements } from "util/achievementSorting.ts";
 import { useAuthEnsurer } from "util/auth.ts";
@@ -23,7 +22,6 @@ export default function Index() {
   const { data: achievements, isLoading } = useGetStaffAchievements();
   const state = useStateContext();
   const dispatchState = useDispatchStateContext();
-  const [scope, animate] = useAnimate();
   const session = useContext(SessionContext);
 
   const [creationOpen, setCreationOpen] = useState(false);
@@ -79,8 +77,6 @@ export default function Index() {
       </div>
       <AchievementNavigationBar
         state={state}
-        animate={animate}
-        scope={scope}
         dispatchState={dispatchState}
         achievements={achievements}
         isStaff={true}
@@ -90,7 +86,7 @@ export default function Index() {
         onCancelCreation={onCancelCreation}
         submitText="Create"
       />
-      <div className="staff__achievement-container" ref={scope}>
+      <div className="staff__achievement-container">
         {/* sorting for staff page puts everything under the 'values' category */}
         {(sortedAchievements["values"] ?? []).map((a) => (
           <Achievement key={a.id} achievement={a} />

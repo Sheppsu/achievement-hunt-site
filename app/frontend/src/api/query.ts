@@ -820,6 +820,7 @@ export function useGetBatches(
   return useMakeQuery({
     queryKey: [...getIterationParams(), "batches"],
     enabled,
+    refetchOnMount: false,
   });
 }
 
