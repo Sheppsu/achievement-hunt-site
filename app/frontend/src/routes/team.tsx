@@ -22,6 +22,10 @@ export default function TeamPage() {
   const { data: teamData, isLoading: teamsLoading } = useGetTeams();
   const { data: iteration, isLoading: iterationLoading } = useGetIteration();
 
+  const isStaff =
+    session.user !== null &&
+    (session.user.is_admin || session.user.is_achievement_creator);
+
   // look for the current user's team
   let ownTeam: AchievementTeamExtendedType | null = null;
   if (teamData !== undefined && session.user !== null)
@@ -65,7 +69,7 @@ export default function TeamPage() {
   // show teams listing for admins
   // or at the end of the event
   if (
-    ((session.user !== null && session.user.is_admin) ||
+    (isStaff ||
       (iteration !== undefined && Date.parse(iteration.end) <= Date.now())) &&
     teamData !== undefined
   ) {

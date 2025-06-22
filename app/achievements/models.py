@@ -64,6 +64,10 @@ class User(SerializableModel):
     USERNAME_FIELD = "id"
     objects = UserManager()
 
+    @property
+    def is_staff(self):
+        return self.is_admin or self.is_achievement_creator
+
     class Serialization:
         FIELDS = ["id", "username", "avatar", "cover", "is_admin", "is_achievement_creator"]
 

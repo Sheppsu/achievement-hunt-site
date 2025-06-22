@@ -168,7 +168,7 @@ def achievements(req, iteration):
 
 @require_iteration
 def teams(req, iteration):
-    if iteration.has_ended() or (req.user.is_authenticated and req.user.is_admin):
+    if iteration.has_ended() or (req.user.is_authenticated and req.user.is_staff):
         my_team_i = -1
         serialized_teams = list(map(serialize_team, select_teams(iteration.id, many=True, sort=True)))
     else:
