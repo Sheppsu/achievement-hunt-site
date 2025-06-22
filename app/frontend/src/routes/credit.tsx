@@ -171,6 +171,13 @@ export default function Credit() {
               >
                 Jing Yuan
               </a>
+              <a
+                href="https://osu.ppy.sh/users/11354436"
+                target="_blank"
+                className="external-link staff"
+              >
+                Utiba
+              </a>
             </div>
           </div>
           <div className="card no-scroll">
