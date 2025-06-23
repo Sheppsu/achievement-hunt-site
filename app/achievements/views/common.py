@@ -50,7 +50,7 @@ def login(req):
             return HttpResponseBadRequest()
         do_login(req, user, backend=settings.AUTH_BACKEND)
     state = req.GET.get("state", None)
-    return redirect(state or "index")
+    return redirect(state or "/teams")
 
 
 def debug_login(req):
