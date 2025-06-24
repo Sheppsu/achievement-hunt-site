@@ -21,9 +21,11 @@ export default function AllRegistrationsCard() {
           className="card--teams__container players"
           style={{ overflow: "auto" }}
         >
-          {registrations.registrations.map((reg) => (
-            <UserCard key={reg.user.id} user={reg.user} />
-          ))}
+          {registrations.registrations
+            .sort((a, b) => a.user.username.localeCompare(b.user.username))
+            .map((reg) => (
+              <UserCard key={reg.user.id} user={reg.user} />
+            ))}
         </div>
       ) : (
         ""
