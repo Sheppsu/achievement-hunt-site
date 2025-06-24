@@ -1,8 +1,12 @@
 import { useGetAllRegistrations } from "api/query.ts";
 import TextCard from "components/cards/TextCard.tsx";
 import UserCard from "components/common/UserCard.tsx";
+import { useState } from "react";
+import Button from "components/inputs/Button.tsx";
 
 export default function AllRegistrationsCard() {
+  const [showPlayers, setShowPlayers] = useState(false);
+
   const { data: registrations, isLoading } = useGetAllRegistrations();
 
   if (isLoading) {
@@ -13,10 +17,22 @@ export default function AllRegistrationsCard() {
     return <TextCard text="Failed to load registrations" />;
   }
 
+  if (registrations.registrations === undefined) {
+    return (
+      <div className="card">
+        <h1>{registrations.registration_count} registrations</h1>
+      </div>
+    );
+  }
+
   return (
     <div className="card">
       <h1>{registrations.registration_count} registrations</h1>
-      {registrations.registrations !== undefined ? (
+      <Button
+        children={showPlayers ? "Hide" : "Show"}
+        onClick={() => setShowPlayers(!showPlayers)}
+      />
+      {showPlayers ? (
         <div
           className="card--teams__container players"
           style={{ overflow: "auto" }}
