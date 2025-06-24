@@ -3,6 +3,7 @@ import TextCard from "components/cards/TextCard.tsx";
 import UserCard from "components/common/UserCard.tsx";
 import { useState } from "react";
 import Button from "components/inputs/Button.tsx";
+import classNames from "classnames";
 
 export default function AllRegistrationsCard() {
   const [showPlayers, setShowPlayers] = useState(false);
@@ -32,20 +33,18 @@ export default function AllRegistrationsCard() {
         children={showPlayers ? "Hide" : "Show"}
         onClick={() => setShowPlayers(!showPlayers)}
       />
-      {showPlayers ? (
-        <div
-          className="card--teams__container players"
-          style={{ overflow: "auto" }}
-        >
-          {registrations.registrations
-            .sort((a, b) => a.user.username.localeCompare(b.user.username))
-            .map((reg) => (
-              <UserCard key={reg.user.id} user={reg.user} />
-            ))}
-        </div>
-      ) : (
-        ""
-      )}
+      <div
+        className={classNames("card--teams__container players", {
+          hide: !showPlayers,
+        })}
+        style={{ overflow: "auto" }}
+      >
+        {registrations.registrations
+          .sort((a, b) => a.user.username.localeCompare(b.user.username))
+          .map((reg) => (
+            <UserCard key={reg.user.id} user={reg.user} />
+          ))}
+      </div>
     </div>
   );
 }
