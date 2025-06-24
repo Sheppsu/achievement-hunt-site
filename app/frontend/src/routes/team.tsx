@@ -14,13 +14,18 @@ import TextCard from "components/cards/TextCard.tsx";
 import RegistrationCard from "components/team/RegistrationCard.tsx";
 import AnnouncementsCard from "components/team/AnnouncementsCard.tsx";
 import { getMyTeam } from "util/helperFunctions.ts";
+import AllRegistrationsCard from "components/team/AllRegistrationsCard.tsx";
 
 export default function TeamPage() {
   const session = useContext(SessionContext);
   const { data: registration, isLoading: registrationLoading } =
     useGetRegistration(session.user !== null);
-  const { data: teamData, isLoading: teamsLoading } = useGetTeams();
-  const { data: iteration, isLoading: iterationLoading } = useGetIteration();
+  const { data: teamData, isLoading: teamsLoading } = useGetTeams(
+    session.user !== null,
+  );
+  const { data: iteration, isLoading: iterationLoading } = useGetIteration(
+    session.user !== null,
+  );
 
   const isStaff =
     session.user !== null &&
@@ -32,7 +37,7 @@ export default function TeamPage() {
     ownTeam = getMyTeam(session.user.id, teamData.teams);
 
   // show different layout of cards depending on current user state
-  const cardsColumns: React.ReactNode[][] = [[]];
+  const cardsColumns: React.ReactNode[][] = [[], []];
 
   if (session.user === null) {
     // not logged in
@@ -58,7 +63,15 @@ export default function TeamPage() {
     cardsColumns[0].push(<TeamCard team={ownTeam} />, <TeamChatCard />);
   }
 
-  cardsColumns.push([<AnnouncementsCard />]);
+  if (
+    session.user !== null &&
+    iteration !== undefined &&
+    Date.parse(iteration.registration_end) > Date.now()
+  ) {
+    cardsColumns[1].push(<AllRegistrationsCard />);
+  }
+
+  cardsColumns[1].push(<AnnouncementsCard />);
 
   if (teamData !== undefined && teamData.teams.length > 0) {
     cardsColumns[1].push(

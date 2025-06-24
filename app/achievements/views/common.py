@@ -510,6 +510,31 @@ def get_registration(req, iteration):
     return success(None if registration is None else registration.serialize())
 
 
+@require_GET
+@require_iteration
+@require_user
+def get_all_registrations(req, iteration):
+    if req.user.is_staff:
+        regs = [
+            registration.serialize(includes=["user"])
+            for registration in Registration.objects.select_related(
+                "user"
+            ).filter(
+                iteration_id=iteration.id
+            )
+        ]
+        return success({
+            "registration_count": len(regs),
+            "registrations": regs
+        })
+
+    return success({
+        "registration_count": Registration.objects.filter(
+            iteration_id=iteration.id
+        ).count(),
+    })
+
+
 @require_POST
 @accepts_json_data(
     DictionaryType({"register": BoolType()})

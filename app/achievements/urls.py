@@ -19,6 +19,7 @@ iteration_urls = [
     path("stats/", common.player_stats),
     path("registration/change/", common.change_registration),
     path("registration/", common.get_registration),
+    path("registrations/", common.get_all_registrations),
     path("registration/free-agent/change/", common.change_free_agent),
     path("announcements/", common.get_announcements),
     path("announcements/create/", admin.create_announcement),

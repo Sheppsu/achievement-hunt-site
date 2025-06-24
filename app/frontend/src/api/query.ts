@@ -32,6 +32,7 @@ import { AnnouncementType } from "api/types/AnnouncementType.ts";
 import { AchievementBatchType } from "api/types/AchievementBatchType.ts";
 import { RegistrationType } from "api/types/RegistrationType.ts";
 import { TeamInviteType, UserInviteType } from "api/types/InviteType.ts";
+import { AllRegistrationsType } from "api/types/AllRegistrationsType.ts";
 
 function getIterationParams() {
   const path = location.pathname;
@@ -463,12 +464,15 @@ export function useResolveInvite(
   );
 }
 
-export function useGetIteration(): UseQueryResult<EventIterationType> {
+export function useGetIteration(
+  enabled: boolean = true,
+): UseQueryResult<EventIterationType> {
   const iteration = getIterationParams();
 
   return useMakeQuery({
     queryKey: iteration.length === 0 ? ["iteration"] : iteration,
     refetchOnMount: false,
+    enabled,
   });
 }
 
@@ -480,6 +484,15 @@ export function useGetRegistration(
   return useMakeQuery({
     queryKey: [...iteration, "registration"],
     enabled,
+  });
+}
+
+export function useGetAllRegistrations(): UseQueryResult<AllRegistrationsType> {
+  const iteration = getIterationParams();
+
+  return useMakeQuery({
+    queryKey: [...iteration, "registrations"],
+    refetchOnMount: false,
   });
 }
 
