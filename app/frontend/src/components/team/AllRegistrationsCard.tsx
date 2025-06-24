@@ -22,7 +22,7 @@ export default function AllRegistrationsCard() {
           style={{ overflow: "auto" }}
         >
           {registrations.registrations.map((reg) => (
-            <UserCard user={reg.user} />
+            <UserCard key={reg.user.id} user={reg.user} />
           ))}
         </div>
       ) : (
