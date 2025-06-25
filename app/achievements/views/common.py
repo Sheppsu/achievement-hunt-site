@@ -101,7 +101,7 @@ def achievements(req, iteration):
             queryset=BeatmapConnection.objects.select_related(
                 "info"
             ).filter(
-                hide=True
+                hide=False
             )
         )
     ).filter(
