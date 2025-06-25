@@ -6,12 +6,7 @@ import AudioPlayer from "components/audio/AudioPlayer.tsx";
 import { AppState } from "types/AppStateType.ts";
 import { parseTags, toTitleCase } from "util/helperFunctions";
 import { useState } from "react";
-import Button from "components/inputs/Button.tsx";
-import {
-  IoIosArrowDown,
-  IoIosArrowDropdown,
-  IoIosArrowUp,
-} from "react-icons/io";
+import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 
 export default function Achievement({
   achievement,
