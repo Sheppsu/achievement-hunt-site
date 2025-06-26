@@ -275,6 +275,10 @@ a.rendered-text:hover {
   overflow-y: auto;
 }
 
+.card.expand {
+  flex-grow: 1;
+}
+
 .card__title {
   padding-left: 18px;
   margin: 5px 0;
@@ -298,6 +302,18 @@ a.rendered-text:hover {
   div.card-vertical-divider {
     display: none;
   }
+}
+
+.card__row {
+  padding: 10px 0;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.card__row.spaced {
+  justify-content: space-between;
 }
 
 /* header */

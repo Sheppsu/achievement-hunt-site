@@ -82,6 +82,7 @@ class EventIteration(SerializableModel):
     registration_end = models.DateTimeField()
     registration_open = models.BooleanField(default=False)
     description = models.JSONField(default=list)
+    faq = models.JSONField(default=list)
     banner = models.CharField(max_length=32, null=True, default=None)
 
     def has_registration_ended(self):
@@ -94,7 +95,7 @@ class EventIteration(SerializableModel):
         return time.time() >= self.start.timestamp() - 5
 
     class Serialization:
-        FIELDS = ["id", "name", "start", "end", "registration_end", "registration_open", "description", "banner"]
+        FIELDS = ["id", "name", "start", "end", "registration_end", "registration_open", "description", "faq", "banner"]
 
 
 class AchievementBatch(SerializableModel):

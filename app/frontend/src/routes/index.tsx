@@ -2,22 +2,23 @@ import { Helmet } from "react-helmet";
 import InfoCard from "components/achievements/InfoCard";
 
 import "assets/css/index.css";
-import banner from "../../../static/assets/banner.png";
 import { useGetIteration } from "api/query.ts";
 import TextCard from "components/cards/TextCard.tsx";
+import FAQCard from "components/achievements/FAQCard.tsx";
 
 export default function App() {
   const { data: iteration, isLoading: iterationLoading } = useGetIteration();
 
   const title = iteration === undefined ? "CTA" : iteration.name;
 
-  let card;
+  const cards = [];
   if (iterationLoading) {
-    card = <TextCard text="Loading..." />;
+    cards.push(<TextCard text="Loading..." />);
   } else if (iteration === undefined) {
-    card = <TextCard text="Failed to load iteration" />;
+    cards.push(<TextCard text="Failed to load iteration" />);
   } else {
-    card = <InfoCard iteration={iteration} />;
+    cards.push(<InfoCard iteration={iteration} />);
+    if (iteration.faq.length > 0) cards.push(<FAQCard iteration={iteration} />);
   }
 
   return (
@@ -37,7 +38,13 @@ export default function App() {
         ""
       )}
       <div className="cards-container">
-        <div className="cards-container__column">{card}</div>
+        <div className="cards-container__column">{cards[0]}</div>
+        {cards.length == 2 && (
+          <>
+            <div className="card-vertical-divider"></div>
+            <div className="cards-container__column">{cards[1]}</div>
+          </>
+        )}
       </div>
     </>
   );
