@@ -89,8 +89,12 @@ def get_screening_info(req, iteration):
     content = io.StringIO()
     writer = csv.writer(content)
 
+    rows = []
     for reg in registrations:
-        writer.writerow([reg.user.username, get_team_name(reg.user.id), reg.user.id])
+        rows.append([reg.user.username, get_team_name(reg.user.id), reg.user.id])
+
+    for row in sorted(rows, key=lambda x: x[1]):
+        writer.writerow(row)
 
     response = HttpResponse(content.getvalue(), content_type="text/csv")
     response["Content-Disposition"] = "attachment; filename=\"screening.csv\""
