@@ -341,6 +341,11 @@
   background-color: var(--site-background-color);
 }
 
+.announcement__time-ago {
+  font-size: 1em;
+  text-align: left;
+}
+
 hr.announcement-divider {
   width: 100%;
 

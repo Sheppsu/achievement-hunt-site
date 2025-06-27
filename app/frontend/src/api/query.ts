@@ -816,8 +816,10 @@ export function useCreateAnnouncement(): SpecificUseMutationResult<AnnouncementT
       onSuccess: (announcement) => {
         queryClient?.setQueryData(
           [...iteration, "announcements"],
-          (announcements: AnnouncementType[]) =>
-            [announcement].concat(announcements),
+          (announcements: AnnouncementType[] | undefined) =>
+            announcements === undefined
+              ? [announcement]
+              : [announcement].concat(announcements),
         );
       },
     },
