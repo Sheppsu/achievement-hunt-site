@@ -5,8 +5,9 @@ from .views import common, staff, admin
 
 # endpoints that depend on the iteration
 iteration_urls = [
-    path("teams/", common.teams),
     path("achievements/", common.achievements),
+
+    path("teams/", common.teams),
     path("teams/leave/", common.leave_team),
     path("teams/create/", common.create_team),
     path("teams/rename/", common.rename_team),
@@ -16,15 +17,21 @@ iteration_urls = [
     path("teams/invites/create/", common.send_team_invite),
     path("teams/accept-free-agents/", common.change_accepting_free_agents),
     path("invites/", common.get_user_invites),
+
     path("stats/", common.player_stats),
+
     path("registration/change/", common.change_registration),
     path("registration/", common.get_registration),
     path("registrations/", common.get_all_registrations),
     path("registration/free-agent/change/", common.change_free_agent),
+
     path("announcements/", common.get_announcements),
     path("announcements/create/", admin.create_announcement),
+
     path("batches/", admin.get_batches),
-    path("batches/create/", admin.create_batch)
+    path("batches/create/", admin.create_batch),
+
+    path("screening/", admin.get_screening_info)
 ]
 
 # these do not depend on the iteration
