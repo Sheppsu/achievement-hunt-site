@@ -71,20 +71,27 @@ class DiscordLogger:
 
         self.submit_embeds(_create_error_embeds(req, exc), self.ERROR_WEBHOOK_URL)
 
-    def submit_achievement(self, req, achievement, edited=False):
+    def submit_achievement(self, req, achievement, action):
         if self.STAFF_WEBHOOK_URL is None:
             _log.warning("Unable to log new achievement, STAFF_WEBHOOK_URL is None")
             return
 
+        title, color = {
+            "created": ("New achievement", 0x2DD286),
+            "edited": ("Achievement edited", 0xF6AF49),
+            "moved": ("Achievement moved for release", 0x744DFF)
+        }[action]
+
         embed = {
-            "title": "Achievement edited" if edited else "New achievement",
+            "title": title,
             "url": f"https://cta.sheppsu.me/staff/achievements/{achievement.id}",
             "description": achievement.name,
-            "color": 0xF6AF49 if edited else 0x2DD286,
+            "color": color,
             "footer": {
                 "text": req.user.username,
                 "icon_url": req.user.avatar
-            }
+            },
+            "timestamp": datetime.now(tz=timezone.utc).isoformat()
         }
 
         self.submit_embeds([embed], self.STAFF_WEBHOOK_URL)

@@ -173,7 +173,7 @@ def create_achievement(req, data, achievement=None):
             created_at=(date_now := datetime.now(tz=timezone.utc)),
             last_edited_at=date_now
         )
-        discord_logger.submit_achievement(req, achievement)
+        discord_logger.submit_achievement(req, achievement, "created")
     elif achievement.creator_id != req.user.id and not req.user.is_admin:
         return error("cannot edit an achievement that's not yours")
     else:
@@ -187,7 +187,7 @@ def create_achievement(req, data, achievement=None):
         achievement.last_edited_at = datetime.now(tz=timezone.utc)
         achievement.save()
 
-        discord_logger.submit_achievement(req, achievement, edited=True)
+        discord_logger.submit_achievement(req, achievement, "edited")
         if achievement.batch_id is not None:
             refresh_achievements_on_server()
 

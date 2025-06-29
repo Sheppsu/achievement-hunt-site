@@ -63,6 +63,8 @@ def change_achievement_batch(req, data, achievement):
 
     refresh_achievements_on_server()
 
+    discord_logger.submit_achievement(req, achievement, "moved")
+
     return success(achievement.serialize(includes=["batch"]))
 
 
