@@ -1,7 +1,8 @@
 .staff__page {
-  width: 100%;
+  width: calc(100% - 20px);
   max-width: 1000px;
   margin: auto;
+  padding: 10px 0;
 
   display: flex;
   flex-direction: column;
