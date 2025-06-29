@@ -205,7 +205,7 @@ def create_achievement(req, data, achievement=None):
         )
         resp_beatmaps.append(obj.serialize(includes=["info"]))
 
-    resp_data = achievement.serialize(includes=["creator", "solution"])
+    resp_data = achievement.serialize(includes=["creator", "solution", "batch"])
     resp_data["beatmaps"] = resp_beatmaps
 
     return success(resp_data)

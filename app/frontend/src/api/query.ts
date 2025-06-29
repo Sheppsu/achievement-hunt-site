@@ -673,7 +673,7 @@ function onAchievementCreation(
   achievement: AchievementCreationReturn,
 ) {
   queryClient?.setQueryData(
-    ["staff", "achievements", "?batch=0"],
+    [...getIterationParams(), "staff", "achievements", "?batch=0"],
     (achievements: StaffAchievementType[] | undefined) =>
       achievements?.concat([
         {
@@ -713,7 +713,12 @@ function onAchievementEdit(
   });
 
   queryClient?.setQueryData(
-    ["staff", "achievements", "?batch=0"],
+    [
+      ...getIterationParams(),
+      "staff",
+      "achievements",
+      editedAchievement.batch === null ? "?batch=0" : "?batch=1",
+    ],
     (achievements: StaffAchievementType[] | undefined) => {
       if (achievements === undefined) return;
 
