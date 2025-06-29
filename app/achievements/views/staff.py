@@ -20,6 +20,7 @@ def serialize_full_achievement(req, achievement: Achievement):
             "beatmaps__info",
             "solution",
             "creator",
+            "batch",
             SerializableField(
                 "votes",
                 serial_key="has_voted",
@@ -55,6 +56,7 @@ def achievements(req):
         "votes",
     ).select_related(
         "creator",
+        "batch"
     )
 
     if batch:

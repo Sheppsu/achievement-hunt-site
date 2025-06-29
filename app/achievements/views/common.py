@@ -120,7 +120,13 @@ def achievements(req, iteration):
                 "completions__player__user",
                 "completions__placement",
                 "beatmaps__info",
-                "completion_count"
+                "completion_count",
+                "batch"
+            ], [
+                "completions__player__team_admin",
+                "completions__player__user_id",
+                "completions__player__user__is_admin",
+                "completions__player__user__is_achievement_creator",
             ])
             for achievement in query.all()
         ])
@@ -151,8 +157,15 @@ def achievements(req, iteration):
                     condition=team_completion
                 ),
                 "completions__player__user",
-                "completions__placement"
+                "completions__placement",
+                "batch"
             ],
+            [
+                "completions__player__team_admin",
+                "completions__player__user_id",
+                "completions__player__user__is_admin",
+                "completions__player__user__is_achievement_creator",
+            ]
         )
         for achievement in query.prefetch_related(completion_prefetch).all()
     ]

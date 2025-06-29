@@ -31,15 +31,12 @@ export default function BatchesCard() {
   }
 
   // batch sorting/grouping
-  let sortedBatches: [AchievementBatchType, StaffAchievementType[]][] = [];
-
-  for (const batch of batches) {
-    sortedBatches.push([batch, []]);
-  }
+  let sortedBatches: [AchievementBatchType, StaffAchievementType[]][] =
+    batches.map((b) => [b, []]);
 
   for (const achievement of achievements) {
     for (const batch of sortedBatches) {
-      if (batch[0].id == achievement.batch_id) {
+      if (batch[0].id == achievement.batch!.id) {
         batch[1].push(achievement);
         break;
       }

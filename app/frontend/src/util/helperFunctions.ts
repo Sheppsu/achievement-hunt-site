@@ -189,9 +189,13 @@ export function randomChoice<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-export function sortedConcat(arr: string[], item: string): string[] {
+export function sortedConcat<T>(
+  arr: T[],
+  item: T,
+  compFunc: (a: T, b: T) => number,
+): T[] {
   for (const [i, existingItem] of arr.entries()) {
-    const comp = existingItem.localeCompare(item);
+    const comp = compFunc(existingItem, item);
     if (comp === 0) return arr;
 
     if (comp > 0) {

@@ -36,7 +36,7 @@ export function getDefaultNav(
   let tags: string[] = [];
   for (const achievement of achievements) {
     for (const tag of parseTags(achievement.tags, false)) {
-      tags = sortedConcat(tags, tag);
+      tags = sortedConcat(tags, tag, (a, b) => a.localeCompare(b));
     }
   }
 
@@ -50,7 +50,7 @@ export function getDefaultNav(
         { label: "completions", active: true },
         { label: "player", active: false },
         { label: "date completed", active: false },
-        { label: "batch", active: false },
+        { label: "release", active: false },
       ];
 
   let modes = [

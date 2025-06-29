@@ -17,7 +17,7 @@ export type AchievementType = {
   release_time: string | null;
   created_at: string;
   last_edited_at: string;
-  batch_id: number | null;
+  batch: AchievementBatchType | null;
 };
 
 export type AchievementExtendedType = {
@@ -39,5 +39,4 @@ export type StaffAchievementType = {
   vote_count: number;
   has_voted: boolean;
   creator: UserType | null;
-  batch: AchievementBatchType | null;
 } & AchievementType;

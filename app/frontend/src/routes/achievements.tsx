@@ -140,6 +140,7 @@ export default function AchievementCompletionPage() {
         </div>
 
         <AchievementNavigationBar
+          key="achievements"
           state={state}
           dispatchState={dispatchState}
           achievements={achievements}

@@ -8,11 +8,12 @@ import {
   AnonymousAchievementCompletionType,
 } from "api/types/AchievementCompletionType.ts";
 import { AchievementTeamExtendedType } from "api/types/AchievementTeamType.ts";
-import { getMyCompletion } from "util/helperFunctions.ts";
+import { getMyCompletion, sortedConcat } from "util/helperFunctions.ts";
 import {
   NavItems,
   NavRowItems,
 } from "components/achievements/AchievementNavigationBar.tsx";
+import { AchievementBatchType } from "api/types/AchievementBatchType.ts";
 
 function intersects(a: string[], b: string[]): boolean {
   for (const item of b) {
@@ -72,6 +73,7 @@ function matchesMode(
 function getGrouping(
   sort: string,
   myTeam: AchievementTeamExtendedType | null,
+  achievements: AchievementType[],
 ): [
   string[],
   (
@@ -141,14 +143,27 @@ function getGrouping(
         (a: CompletedAchievementType, b: CompletedAchievementType) =>
           getTimestamp(a.completions) - getTimestamp(b.completions),
       ];
-    case "batch":
+    case "release": {
+      let batches: AchievementBatchType[] = [];
+      for (const achievement of achievements) {
+        if (batches.findIndex((b) => b.id == achievement.batch!.id) === -1)
+          batches = sortedConcat(
+            batches,
+            achievement.batch!,
+            (a, b) => Date.parse(b.release_time) - Date.parse(a.release_time),
+          );
+      }
+
+      const batchIds = batches.map((b) => b.id);
+
       return [
-        [1, 2, 3, 4, 5, 6, 7, 8].map((n) => `Batch ${n}`),
+        batchIds.map((_, i) => `Release ${batchIds.length - i}`),
         (a: CompletedAchievementType) =>
-          `Batch ${Math.ceil(Math.max(0, a.id - 30) / 10) + 1}`,
+          `Release ${batchIds.length - batchIds.indexOf(a.batch!.id)}`,
         (a: CompletedAchievementType, b: CompletedAchievementType) =>
           a.id - b.id,
       ];
+    }
     case "votes":
       return [
         ["*"],
@@ -190,7 +205,11 @@ export function getSortedAchievements<T extends AchievementType>(
   const searchFilter = searchText.toLowerCase().split(" ");
   const sort = filters.rows.sort.items.filter((i) => i.active)[0].label;
 
-  const [groupSort, groupFunc, sortFunc] = getGrouping(sort, team);
+  const [groupSort, groupFunc, sortFunc] = getGrouping(
+    sort,
+    team,
+    achievements,
+  );
   const sortedAchievements: { [key: string]: T[] } = {};
 
   for (const achievement of achievements) {

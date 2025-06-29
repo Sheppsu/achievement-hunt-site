@@ -104,7 +104,7 @@ type RefreshReturnType = {
   achievements: WSAchievementType[];
   score: number;
   player: AchievementPlayerType;
-  last_score: string;
+  last_score?: string;
   score_gain: number;
 };
 
@@ -181,7 +181,6 @@ function onCompletedAchievement(
 function handleMessage(
   evt: MessageEvent<string>,
   dispatchEventMsg: React.Dispatch<{ type: EventType; msg: string }>,
-  dispatchWsState: WebsocketStateDispatch,
   queryClient: QueryClient,
 ) {
   const data = JSON.parse(evt.data);
@@ -202,9 +201,13 @@ function handleMessage(
           : `You completed ${achievements.length} achievement(s)! ${achievements
               .map((achievement) => achievement.name)
               .join(", ")}.`;
-      msg +=
-        " Last score: " +
-        (data.last_score === null ? "no scores" : timeAgo(data.last_score));
+
+      if (data.last_score !== undefined) {
+        msg +=
+          " Last score: " +
+          (data.last_score === null ? "no scores" : timeAgo(data.last_score));
+      }
+
       dispatchEventMsg({ type: "info", msg: msg });
 
       if (achievements.length > 0) {
@@ -240,7 +243,7 @@ function _sendSubmit(
     return;
   }
 
-  wsState.ws.send(JSON.stringify({ code: 1 }));
+  wsState.ws.send(JSON.stringify({ code: 1, mode: "any" }));
 
   // disable submission for 5 seconds
   dispatchAppState({
@@ -252,7 +255,7 @@ function _sendSubmit(
       id: 3,
       enable: true,
     });
-  }, 5000);
+  }, 60000);
 }
 
 function _sendChatMessage(
@@ -312,7 +315,7 @@ export function WebsocketContextProvider({
       dispatchWsState({ id: 2 });
     });
     ws.addEventListener("message", (evt) => {
-      handleMessage(evt, dispatchEventMsg, dispatchWsState, queryClient);
+      handleMessage(evt, dispatchEventMsg, queryClient);
     });
 
     dispatchWsState({

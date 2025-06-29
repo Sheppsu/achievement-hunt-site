@@ -76,6 +76,7 @@ export default function Index() {
         />
       </div>
       <AchievementNavigationBar
+        key="staff"
         state={state}
         dispatchState={dispatchState}
         achievements={achievements}
