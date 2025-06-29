@@ -9,6 +9,7 @@ from django.http.response import HttpResponse
 
 from common.validation import *
 from .util import *
+from common.comm import refresh_achievements_on_server
 
 
 @require_POST
@@ -63,6 +64,8 @@ def change_achievement_batch(req, data, achievement):
 
     achievement.batch = batch
     achievement.save()
+
+    refresh_achievements_on_server()
 
     return success(achievement.serialize(includes=["batch"]))
 
