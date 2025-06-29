@@ -211,7 +211,7 @@ function ReleasesView() {
       <h1>{achievements.length} Achievements</h1>
       <div
         className={classNames("batch-input-row", {
-          hide: session.user!.is_admin,
+          hide: !session.user!.is_admin,
         })}
       >
         <input
