@@ -15,6 +15,7 @@ import {
 import { useContext, useState } from "react";
 import { getSortedAchievements } from "util/achievementSorting.ts";
 import { useAuthEnsurer } from "util/auth.ts";
+import { Helmet } from "react-helmet";
 
 export default function Index() {
   useAuthEnsurer().ensureStaff();
@@ -66,33 +67,38 @@ export default function Index() {
   );
 
   return (
-    <div className="staff__page">
-      <h1>{achievements.length} Achievements</h1>
-      <div className="staff__interaction-bar">
-        <Button
-          children="Create achievement"
-          hidden={creationOpen}
-          onClick={onOpenCreation}
+    <>
+      <Helmet>
+        <title>CTA - Staff</title>
+      </Helmet>
+      <div className="staff__page">
+        <h1>{achievements.length} Achievements</h1>
+        <div className="staff__interaction-bar">
+          <Button
+            children="Create achievement"
+            hidden={creationOpen}
+            onClick={onOpenCreation}
+          />
+        </div>
+        <AchievementNavigationBar
+          key="staff"
+          state={state}
+          dispatchState={dispatchState}
+          achievements={achievements}
+          isStaff={true}
         />
+        <AchievementCreation
+          hidden={!creationOpen}
+          onCancelCreation={onCancelCreation}
+          submitText="Create"
+        />
+        <div className="staff__achievement-container">
+          {/* sorting for staff page puts everything under the 'values' category */}
+          {(sortedAchievements["values"] ?? []).map((a) => (
+            <Achievement key={a.id} achievement={a} />
+          ))}
+        </div>
       </div>
-      <AchievementNavigationBar
-        key="staff"
-        state={state}
-        dispatchState={dispatchState}
-        achievements={achievements}
-        isStaff={true}
-      />
-      <AchievementCreation
-        hidden={!creationOpen}
-        onCancelCreation={onCancelCreation}
-        submitText="Create"
-      />
-      <div className="staff__achievement-container">
-        {/* sorting for staff page puts everything under the 'values' category */}
-        {(sortedAchievements["values"] ?? []).map((a) => (
-          <Achievement key={a.id} achievement={a} />
-        ))}
-      </div>
-    </div>
+    </>
   );
 }

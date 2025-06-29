@@ -96,7 +96,7 @@ export default function TeamPage() {
   return (
     <>
       <Helmet>
-        <title>CTA Teams</title>
+        <title>CTA - Dashboard</title>
       </Helmet>
       <div className="cards-container">
         {cardsColumns.map((cards, i) => (

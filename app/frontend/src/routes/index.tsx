@@ -24,7 +24,7 @@ export default function App() {
   return (
     <>
       <Helmet>
-        <title>{title}</title>
+        <title>CTA - {title}</title>
       </Helmet>
       {iteration?.banner ? (
         <div className="banner-wrapper">

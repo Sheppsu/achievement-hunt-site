@@ -127,7 +127,7 @@ export default function AchievementCompletionPage() {
   return (
     <>
       <Helmet>
-        <title>CTA - Completions</title>
+        <title>CTA - Achievements</title>
       </Helmet>
 
       <div className="achievements-layout">
