@@ -4,7 +4,6 @@ import {
   useGetStaffAchievements,
 } from "api/query.ts";
 import Achievement from "components/staff/Achievement.tsx";
-
 import "assets/css/staff.css";
 import AchievementNavigationBar, {
   getDefaultNav,
@@ -43,7 +42,7 @@ function getView(view: ViewType) {
 export default function Index() {
   useAuthEnsurer().ensureStaff();
 
-  const [view, setView] = useState<ViewType>("releases");
+  const [view, setView] = useState<ViewType>("achievements");
 
   return (
     <div className="staff__page">
