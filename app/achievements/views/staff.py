@@ -177,12 +177,16 @@ def create_achievement(req, data, achievement=None):
     elif achievement.creator_id != req.user.id and not req.user.is_admin:
         return error("cannot edit an achievement that's not yours")
     else:
+        if achievement.batch_id is not None and not req.user.is_admin:
+            return error("only admins can edit achievements when the release is set")
+
         achievement.name = data["name"]
         achievement.description = data["description"]
         achievement.solution = data["solution"]
         achievement.tags = data["tags"]
         achievement.last_edited_at = datetime.now(tz=timezone.utc)
         achievement.save()
+
         discord_logger.submit_achievement(req, achievement, edited=True)
         if achievement.batch_id is not None:
             refresh_achievements_on_server()
@@ -221,3 +225,11 @@ def delete_achievement(req, achievement):
 
     achievement.delete()
     return success(None)
+
+
+@require_GET
+@require_staff
+@require_iteration
+def get_batches(req, iteration):
+    batches = AchievementBatch.objects.filter(iteration=iteration).all()
+    return success([batch.serialize() for batch in batches])

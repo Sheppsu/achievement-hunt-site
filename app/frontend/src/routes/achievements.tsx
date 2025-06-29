@@ -131,7 +131,7 @@ export default function AchievementCompletionPage() {
       </Helmet>
 
       <div className="achievements-layout">
-        <div style={{ margin: "auto", textAlign: "center", marginTop: "20px" }}>
+        <div style={{ margin: "auto", textAlign: "center" }}>
           <h1 style={{ fontSize: "3em" }}>
             {time < iterationEnd
               ? `Ends in: ${getTimeStr(iterationEnd - time)}`

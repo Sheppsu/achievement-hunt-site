@@ -170,7 +170,7 @@ export default function Achievement(props: AchievementProps) {
       content = <h1>Failed to load</h1>;
     } else {
       content = (
-        <div className="staff-batches-listing">
+        <div className="staff-batch-move-container">
           {batches
             .sort(
               (a, b) => Date.parse(a.release_time) - Date.parse(b.release_time),

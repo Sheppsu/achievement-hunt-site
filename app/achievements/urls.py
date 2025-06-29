@@ -29,9 +29,8 @@ iteration_urls = [
     path("announcements/create/", admin.create_announcement),
 
     path("staff/achievements/", staff.achievements),
-
-    path("batches/", admin.get_batches),
-    path("batches/create/", admin.create_batch),
+    path("staff/batches/", staff.get_batches),
+    path("staff/batches/create/", admin.create_batch),
 
     path("screening/", admin.get_screening_info),
 ]

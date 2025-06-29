@@ -15,16 +15,16 @@ export default function AchievementsBatch({
   const [showAchievement, setShowAchievements] = useState(false);
 
   return (
-    <div className="batch">
+    <div className="staff-batch">
       <h1
-        className="batch__title"
+        className="staff-batch__title"
         onClick={() => setShowAchievements((val) => !val)}
       >
         {title}
       </h1>
       <p>{new Date(Date.parse(batch.release_time)).toString()}</p>
       {showAchievement ? (
-        <div className="batch__achievements">
+        <div className="staff-batch__achievements">
           {achievements.map((achievement) => (
             <Achievement achievement={achievement} />
           ))}

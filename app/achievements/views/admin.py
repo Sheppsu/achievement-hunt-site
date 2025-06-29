@@ -33,14 +33,6 @@ def create_announcement(req, data, iteration):
     return success(announcement.serialize())
 
 
-@require_GET
-@require_admin
-@require_iteration
-def get_batches(req, iteration):
-    batches = AchievementBatch.objects.filter(iteration=iteration).all()
-    return success([batch.serialize() for batch in batches])
-
-
 @require_POST
 @require_admin
 @require_iteration

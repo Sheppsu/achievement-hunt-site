@@ -832,7 +832,7 @@ export function useGetBatches(
   enabled: boolean = true,
 ): UseQueryResult<AchievementBatchType[]> {
   return useMakeQuery({
-    queryKey: [...getIterationParams(), "batches"],
+    queryKey: [...getIterationParams(), "staff", "batches"],
     enabled,
     refetchOnMount: false,
   });
@@ -844,14 +844,14 @@ export function useCreateBatch(): SpecificUseMutationResult<AchievementBatchType
 
   function onBatchCreated(batch: AchievementBatchType) {
     queryClient?.setQueryData(
-      [...iteration, "batches"],
+      [...iteration, "staff", "batches"],
       (batches: AchievementBatchType[]) => batches.concat([batch]),
     );
   }
 
   return useMakeMutation(
     {
-      mutationKey: [...iteration, "batches", "create"],
+      mutationKey: [...iteration, "staff", "batches", "create"],
       onSuccess: onBatchCreated,
     },
     {

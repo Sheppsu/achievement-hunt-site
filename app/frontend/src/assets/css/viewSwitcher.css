@@ -1,0 +1,46 @@
+:root {
+  --inactive-color: #cccccc;
+  --active-color: #fff;
+}
+
+.view-switcher {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
+.view-switcher__item {
+  display: flex;
+  flex-direction: column;
+}
+
+.view-switcher__item:hover {
+  cursor: pointer;
+}
+
+h2.view-switcher__label {
+  margin: 0;
+
+  font-size: 24px;
+  font-weight: 200;
+  color: var(--inactive-color);
+
+  transition: color 0.5s;
+}
+
+h2.view-switcher__label.active {
+  font-weight: 400;
+  color: var(--active-color);
+}
+
+hr.view-switcher__underline {
+  width: 100%;
+
+  background-color: var(--inactive-color);
+
+  transition: background-color 0.5s;
+}
+
+hr.view-switcher__underline.active {
+  background-color: var(--active-color);
+}
