@@ -28,10 +28,12 @@ iteration_urls = [
     path("announcements/", common.get_announcements),
     path("announcements/create/", admin.create_announcement),
 
+    path("staff/achievements/", staff.achievements),
+
     path("batches/", admin.get_batches),
     path("batches/create/", admin.create_batch),
 
-    path("screening/", admin.get_screening_info)
+    path("screening/", admin.get_screening_info),
 ]
 
 # these do not depend on the iteration
@@ -46,7 +48,6 @@ urlpatterns = [
     path("invites/<int:invite_id>/rescind/", common.rescind_invite),
     path("invites/<int:invite_id>/resolve/", common.resolve_invite),
 
-    path("staff/achievements/", staff.achievements),
     path("staff/achievements/<int:achievement_id>/", staff.show_achievement),
     path("staff/achievements/<int:achievement_id>/vote/", staff.vote_achievement),
     path("staff/achievements/<int:achievement_id>/comment/", staff.create_comment),

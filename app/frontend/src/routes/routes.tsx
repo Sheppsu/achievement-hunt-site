@@ -9,6 +9,58 @@ import Staff from "routes/staff";
 import StaffAchievement from "routes/staff/achievement.tsx";
 import ErrorBoundary from "../errors/ErrorBoundary.tsx";
 import AdminPage from "routes/admin.tsx";
+import AchievementReleasesPage from "routes/staff/releases.tsx";
+
+const defaultRoutes: RouteObject[] = [
+  {
+    index: true,
+    element: <Index />,
+  },
+  {
+    path: "logout",
+    element: <Logout />,
+  },
+  {
+    path: "teams",
+    element: <TeamPage />,
+  },
+  {
+    path: "achievements",
+    element: <AchievementCompletionPage />,
+  },
+  {
+    path: "credits",
+    element: <Credit />,
+  },
+  {
+    path: "staff",
+    children: [
+      {
+        index: true,
+        element: <Staff />,
+      },
+      {
+        path: "achievements/:achievementId",
+        element: <StaffAchievement />,
+      },
+      {
+        path: "releases",
+        element: <AchievementReleasesPage />,
+      },
+    ],
+  },
+  {
+    path: "admin",
+    element: <AdminPage />,
+  },
+];
+
+const iterationRoutes: RouteObject[] = [
+  {
+    path: "iterations/:iterationId",
+    children: defaultRoutes,
+  },
+];
 
 export const routes: RouteObject[] = [
   {
@@ -18,61 +70,7 @@ export const routes: RouteObject[] = [
     children: [
       {
         ErrorBoundary,
-        children: [
-          {
-            index: true,
-            element: <Index />,
-          },
-          {
-            path: "logout",
-            element: <Logout />,
-          },
-          {
-            path: "teams",
-            element: <TeamPage />,
-          },
-          {
-            path: "achievements",
-            element: <AchievementCompletionPage />,
-          },
-          {
-            path: "credits",
-            element: <Credit />,
-          },
-          {
-            path: "staff",
-            element: <Staff />,
-          },
-          {
-            path: "admin",
-            element: <AdminPage />,
-          },
-          {
-            path: "staff/achievements/:achievementId",
-            element: <StaffAchievement />,
-          },
-          {
-            path: "iterations/:iterationId",
-            children: [
-              {
-                index: true,
-                element: <Index />,
-              },
-              {
-                path: "teams",
-                element: <TeamPage />,
-              },
-              {
-                path: "achievements",
-                element: <AchievementCompletionPage />,
-              },
-              {
-                path: "admin",
-                element: <AdminPage />,
-              },
-            ],
-          },
-        ],
+        children: defaultRoutes.concat(iterationRoutes),
       },
     ],
   },

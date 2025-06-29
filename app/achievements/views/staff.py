@@ -37,8 +37,9 @@ def serialize_full_achievement(req, achievement: Achievement):
 
 
 @require_staff
+@require_iteration
 @require_GET
-def achievements(req):
+def achievements(req, iteration):
     batch = req.GET.get("batch", "0")
     if batch not in ("0", "1"):
         return error("Invalid value for batch")
@@ -61,7 +62,7 @@ def achievements(req):
     )
 
     if batch:
-        query = query.filter(batch_id__isnull=False)
+        query = query.filter(batch_id__isnull=False, batch__iteration_id=iteration.id)
     else:
         query = query.filter(batch_id__isnull=True)
 
