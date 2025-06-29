@@ -679,7 +679,6 @@ function onAchievementCreation(
         {
           ...achievement,
           batch: null,
-          batch_id: null,
           comments: [],
           has_voted: false,
           vote_count: 0,
