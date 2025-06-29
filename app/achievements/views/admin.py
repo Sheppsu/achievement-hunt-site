@@ -12,6 +12,9 @@ from .util import *
 from common.comm import refresh_achievements_on_server
 
 
+discord_logger = settings.DISCORD_LOGGER
+
+
 @require_POST
 @require_admin
 @require_iteration
@@ -26,6 +29,7 @@ def create_announcement(req, data, iteration):
         message=data["message"],
         created_at=datetime.now(tz=timezone.utc)
     )
+    discord_logger.submit_announcement(announcement)
     return success(announcement.serialize())
 
 

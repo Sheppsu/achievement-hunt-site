@@ -3,6 +3,7 @@ from django.views.decorators.http import require_POST, require_GET, require_http
 from .util import *
 from common.serializer import SerializableField
 from common.validation import *
+from common.comm import refresh_achievements_on_server
 
 from datetime import datetime, timezone
 
@@ -182,6 +183,8 @@ def create_achievement(req, data, achievement=None):
         achievement.last_edited_at = datetime.now(tz=timezone.utc)
         achievement.save()
         discord_logger.submit_achievement(req, achievement, edited=True)
+        if achievement.batch_id is not None:
+            refresh_achievements_on_server()
 
     resp_beatmaps = []
 

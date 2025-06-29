@@ -3,6 +3,7 @@ import threading
 import requests
 import queue
 import logging
+from datetime import datetime, timezone
 
 
 __all__ = (
@@ -25,8 +26,9 @@ def _create_error_embeds(req, exc):
 
 
 class DiscordLogger:
-    WEBHOOK_URL = os.getenv("WEBHOOK_URL")
+    ERROR_WEBHOOK_URL = os.getenv("ERROR_WEBHOOK_URL")
     STAFF_WEBHOOK_URL = os.getenv("STAFF_WEBHOOK_URL")
+    ANNOUNCEMENT_WEBHOOK_URL = os.getenv("ANNOUNCEMENT_WEBHOOK_URL")
 
     def __init__(self):
         self._queue: queue.Queue = queue.Queue()
@@ -41,8 +43,13 @@ class DiscordLogger:
     def _loop(self):
         while self._running.is_set():
             try:
-                embeds, url = self._queue.get(timeout=3)
-                resp = requests.post(url, json={"embeds": embeds})
+                embeds, url, ping = self._queue.get(timeout=3)
+
+                payload = {"embeds": embeds}
+                if ping is not None:
+                    payload["content"] = f"<@&{ping}>"
+
+                resp = requests.post(url, json=payload)
                 resp.raise_for_status()
             except queue.Empty:
                 pass
@@ -51,18 +58,18 @@ class DiscordLogger:
 
         self._running.clear()
 
-    def submit_embeds(self, embeds, url):
-        self._queue.put((embeds, url))
+    def submit_embeds(self, embeds, url, ping=None):
+        self._queue.put((embeds, url, ping))
 
         if not self._running.is_set():
             self.run()
 
     def submit_err(self, req, exc):
-        if self.WEBHOOK_URL is None:
+        if self.ERROR_WEBHOOK_URL is None:
             _log.warning("Unable to log error, WEBHOOK_URL is None", exc_info=exc)
             return
 
-        self.submit_embeds(_create_error_embeds(req, exc), self.WEBHOOK_URL)
+        self.submit_embeds(_create_error_embeds(req, exc), self.ERROR_WEBHOOK_URL)
 
     def submit_achievement(self, req, achievement, edited=False):
         if self.STAFF_WEBHOOK_URL is None:
@@ -99,6 +106,27 @@ class DiscordLogger:
         }
 
         self.submit_embeds([embed], self.STAFF_WEBHOOK_URL)
+
+    def submit_announcement(self, announcement):
+        if self.ANNOUNCEMENT_WEBHOOK_URL is None:
+            _log.warning("Unable to log announcement, ANNOUNCEMENT_WEBHOOK_URL is None")
+            return
+
+        is_bug = announcement.title.startswith("[BUG]")
+
+        embed = {
+            "title": announcement.title,
+            "description": announcement.message,
+            "timestamp": datetime.now(tz=timezone.utc).isoformat(),
+            "color": 0xFCCB38 if is_bug else 0x1281FF,
+            "footer": {
+                "text": announcement.iteration.name
+            }
+        }
+
+        ping = 1307176728019603548 if is_bug else None
+
+        self.submit_embeds([embed], self.ANNOUNCEMENT_WEBHOOK_URL, ping)
 
     def stop(self):
         self._running.clear()
