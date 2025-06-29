@@ -17,6 +17,7 @@ import classNames from "classnames";
 import { parseTags } from "util/helperFunctions.ts";
 import RenderedText from "components/common/RenderedText.tsx";
 import { PopupContext } from "contexts/PopupContext.ts";
+import { EventContext } from "contexts/EventContext.ts";
 
 function VoteContainer({ achievement }: { achievement: StaffAchievementType }) {
   const session = useContext(SessionContext);
@@ -53,9 +54,11 @@ type AchievementProps = {
 
 export default function Achievement(props: AchievementProps) {
   const achievement = props.achievement;
+  const achievementUrl = `https://${window.location.host}/staff/achievements/${achievement.id}`;
 
   const session = useContext(SessionContext);
   const popupCtx = useContext(PopupContext)!;
+  const dispatchEventMsg = useContext(EventContext);
 
   const [isCommenting, setIsCommenting] = useState(false);
   const [canSendComment, setCanSendComment] = useState(false);
@@ -148,7 +151,6 @@ export default function Achievement(props: AchievementProps) {
   };
 
   const doMoveToBatch = (batchId: number) => {
-    console.log(batchId);
     moveAchievement.mutate(
       { batch_id: batchId },
       {
@@ -187,6 +189,11 @@ export default function Achievement(props: AchievementProps) {
       title: "Batches",
       content,
     });
+  };
+
+  const copyAchievementUrl = () => {
+    navigator.clipboard.writeText(achievementUrl);
+    dispatchEventMsg({ type: "info", msg: "Copied!" });
   };
 
   return (
@@ -284,15 +291,12 @@ export default function Achievement(props: AchievementProps) {
             onClick={onCommentCancel}
             hidden={!isCommenting || sendingComment}
           />
-          {session.user!.is_admin ? (
-            <Button
-              children="Move"
-              onClick={doMoveAchievement}
-              hidden={!session.user?.is_admin}
-            />
-          ) : (
-            ""
-          )}
+          <Button
+            children="Move"
+            onClick={doMoveAchievement}
+            hidden={!session.user?.is_admin}
+          />
+          <Button children="Copy URL" onClick={copyAchievementUrl} />
         </div>
       </div>
     </div>
