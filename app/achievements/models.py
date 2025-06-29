@@ -180,8 +180,7 @@ class Achievement(SerializableModel):
             "tags",
             "release_time",
             "created_at",
-            "last_edited_at",
-            "batch_id"
+            "last_edited_at"
         ]
 
 
@@ -220,7 +219,7 @@ class AchievementCompletion(SerializableModel):
         ]
 
     class Serialization:
-        FIELDS = ["time_completed"]
+        FIELDS = ["time_completed", "time_placement"]
 
 
 class AchievementComment(SerializableModel):
@@ -245,8 +244,8 @@ class Team(SerializableModel):
     name = models.CharField(max_length=32)
     anonymous_name = models.CharField(max_length=32)
     icon = models.CharField(max_length=64, null=True)
-    points = models.PositiveIntegerField(default=0)  # points displayed to the user
-    hidden_points = models.PositiveIntegerField(default=0)  # real-time points
+    points = models.PositiveIntegerField(default=0)  # real-time points
+    frozen_points = models.PositiveIntegerField(default=0)  # points displayed to the user
     iteration = models.ForeignKey(EventIteration, on_delete=models.CASCADE)
     accepts_free_agents = models.BooleanField(default=False)
 
