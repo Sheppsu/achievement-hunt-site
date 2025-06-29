@@ -69,7 +69,7 @@ class User(SerializableModel):
         return self.is_admin or self.is_achievement_creator
 
     class Serialization:
-        FIELDS = ["id", "username", "avatar", "cover", "is_admin", "is_achievement_creator"]
+        FIELDS = ["id", "username", "avatar", "is_admin", "is_achievement_creator"]
 
     def __str__(self):
         return self.username
