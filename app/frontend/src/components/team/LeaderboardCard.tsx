@@ -9,9 +9,7 @@ export default function LeaderboardCard({
   teams: AchievementTeamType[];
   placement: number;
 }) {
-  if (placement === 0) {
-    placement = 2;
-  }
+  const enumOffset = placement <= 1 ? 2 : placement;
 
   return (
     <div className="card">
@@ -20,7 +18,7 @@ export default function LeaderboardCard({
         {teams.map((team, i) => (
           <div key={team.id}>
             <p>
-              #{placement + i - 1}: {team.anonymous_name}
+              #{enumOffset + i - 1}: {team.anonymous_name}
             </p>
             <p>{team.points}pts</p>
           </div>

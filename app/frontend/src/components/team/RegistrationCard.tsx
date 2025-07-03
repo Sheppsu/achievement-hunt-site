@@ -12,7 +12,7 @@ export default function RegistrationCard({
   iteration: EventIterationType;
   registration: RegistrationType | null;
 }) {
-  let registrationText;
+  let registrationText = "";
   let registrationOpen = false;
   if (Date.parse(iteration.registration_end) <= Date.now()) {
     registrationText = "Registration closed";
@@ -24,9 +24,17 @@ export default function RegistrationCard({
     registrationOpen = true;
   }
 
+  let subtext = "";
+  if (registration?.is_screened) {
+    subtext =
+      "Unfortunately, you have been screened and are unable to participate. " +
+      "If you have any questions about this, contact accounts@ppy.sh.";
+  }
+
   return (
     <div className="card">
       <h1>{registrationText}</h1>
+      <p>{subtext}</p>
       {registrationOpen ? (
         <RegisterButton registered={registration !== null} />
       ) : (

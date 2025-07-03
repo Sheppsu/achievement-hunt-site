@@ -316,12 +316,11 @@ export function useLeaveTeam(): SpecificUseMutationResult<TeamLeaveDataType> {
   return useMakeMutation(
     {
       mutationKey: [...iteration, "teams", "leave"],
-      onSuccess: (leaveData: TeamLeaveDataType) => {
-        // remove players or team
-        queryClient?.setQueryData(
-          [...iteration, "teams"],
-          (teamData: TeamDataType) => onLeaveTeam(wsCtx, teamData, leaveData),
-        );
+      onSuccess: () => {
+        queryClient?.invalidateQueries({
+          queryKey: [...iteration, "teams"],
+          exact: true,
+        });
       },
     },
     {
@@ -341,6 +340,7 @@ export function useCreateTeam(): SpecificUseMutationResult<AchievementTeamExtend
       onSuccess: () => {
         queryClient?.invalidateQueries({
           queryKey: [...iteration, "teams"],
+          exact: true,
         });
 
         wsCtx?.resetConnection();
@@ -448,6 +448,7 @@ export function useResolveInvite(
 
     queryClient?.invalidateQueries({
       queryKey: [...iteration, "teams"],
+      exact: true,
     });
 
     wsCtx?.resetConnection();
@@ -772,6 +773,7 @@ function onAchievementDeleted(
 
   queryClient?.invalidateQueries({
     queryKey: ["staff", "achievements", achievementId.toString()],
+    exact: true,
   });
 }
 

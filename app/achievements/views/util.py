@@ -127,7 +127,10 @@ def require_registered(func):
     def wrapper(req, *args, iteration, **kwargs):
         registration = Registration.objects.filter(user=req.user, iteration=iteration).first()
         if registration is None:
-            return error("Must be registered")
+            return error("Must be registered", status=403)
+
+        if registration.is_screened:
+            return error("You are unable to perform this action because you have been screened out", status=403)
 
         return func(req, *args, iteration=iteration, registration=registration, **kwargs)
 

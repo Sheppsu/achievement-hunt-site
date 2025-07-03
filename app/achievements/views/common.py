@@ -480,9 +480,14 @@ def resolve_invite(req, invite_id, data):
     player = select_current_player(req.user.id, team.iteration_id)
     if player is not None:
         return error("already on a team")
-
     if team.players.count() >= 5:
         return error("the team is already full")
+
+    registration = Registration.objects.filter(user_id=req.user.id, iteration_id=team.iteration_id).first()
+    if registration is None:
+        return error("must be registered", status=403)
+    if registration.is_screened:
+        return error("you've been screened out", status=403)
 
     Player.objects.create(user_id=req.user.id, team_id=team.id)
     invite.delete()
