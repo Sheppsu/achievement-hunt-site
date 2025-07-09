@@ -1,6 +1,5 @@
 from common.serializer import SerializableField
 from common.validation import *
-from common.comm import get_osu_user
 
 from django.contrib.auth import login as do_login
 from django.contrib.auth import logout as do_logout
@@ -13,6 +12,7 @@ from .util import *
 from .anonymous_names import verify_name
 
 from datetime import datetime, timezone
+import itertools
 
 
 def serialize_team(team: Team):
@@ -153,15 +153,15 @@ def achievements(req, iteration):
 
 @require_iteration
 def teams(req, iteration):
+    all_teams = select_teams(iteration.id, many=True, sort=True)
     if iteration.has_ended() or (req.user.is_authenticated and req.user.is_staff):
         my_team_i = -1
-        serialized_teams = list(map(serialize_team, select_teams(iteration.id, many=True, sort=True)))
+        serialized_teams = list(map(serialize_team, all_teams))
     else:
-        teams = select_teams(iteration.id, many=True, sort=True)
         my_team_item = next(
             (
                 (i, team)
-                for i, team in enumerate(teams)
+                for i, team in enumerate(all_teams)
                 if any((player.user_id == req.user.id for player in team.players.all()))
             ),
             None,
@@ -177,11 +177,20 @@ def teams(req, iteration):
         serialized_teams = [serialize_team(my_team)]
         excludes = ["name", "icon", "accepts_free_agents"]
         if my_team_i > 0:
-            serialized_teams.insert(0, teams[my_team_i - 1].serialize(excludes=excludes))
-        if my_team_i < len(teams) - 1:
-            serialized_teams.append(teams[my_team_i + 1].serialize(excludes=excludes))
+            serialized_teams.insert(0, all_teams[my_team_i - 1].serialize(excludes=excludes))
+        if my_team_i < len(all_teams) - 1:
+            serialized_teams.append(all_teams[my_team_i + 1].serialize(excludes=excludes))
 
-    return success({"placement": my_team_i + 1, "teams": serialized_teams})
+    return success(
+        {
+            "placement": my_team_i + 1,
+            "teams": serialized_teams,
+            "effective_team_count": AchievementCompletion.objects.select_related("player")
+            .values("player__team_id")
+            .distinct()
+            .count(),
+        }
+    )
 
 
 @require_http_methods(["DELETE"])

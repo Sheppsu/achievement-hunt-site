@@ -67,14 +67,14 @@ for achievement in achievements:
     is_competition = "competition" in tags
     total_completions = len(achievement["completions"])
 
-    if is_secret:
+    if is_competition:
+        for completion in achievement["completions"]:
+            add_points(completion["player"]["id"], round(calculate_p(completion["placement"]["place"])))
+    elif is_secret:
         scalar = calculate_s(total_completions)
         for completion in achievement["completions"]:
             points = max(round(calculate_p(completion["time_placement"]) * scalar), 10)
             add_points(completion["player"]["id"], points)
-    elif is_competition:
-        for completion in achievement["completions"]:
-            add_points(completion["player"]["id"], round(calculate_p(completion["placement"]["place"])))
     else:
         amount = round(calculate_p(total_completions))
         for completion in achievement["completions"]:

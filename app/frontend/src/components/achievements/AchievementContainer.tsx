@@ -20,24 +20,29 @@ function extendAchievementData(
 ) {
   for (const achievement of achievements) {
     const completion = getMyCompletion(achievement.completions, myTeam);
+    const tags = achievement.tags.toLowerCase().split(",");
+    const isCompetition = tags.includes("competition");
+    const isSecret = tags.includes("secret");
 
     achievement.completed = completion !== null;
 
-    if (
-      achievement.tags.split(",").includes("competition") &&
-      completion === null
-    )
-      continue;
+    if (isCompetition && completion === null) continue;
 
-    achievement.points = calculateScore(
-      nTeams,
-      completion === null ||
-        completion.placement === undefined ||
-        completion.placement === null
-        ? achievement.completion_count
-        : completion.placement.place,
-      achievement.completed,
-    );
+    if (completion === null) {
+      achievement.points = calculateScore(
+        nTeams,
+        achievement.completion_count + 1,
+        achievement.completion_count + 1,
+        isSecret,
+      );
+    } else {
+      achievement.points = calculateScore(
+        nTeams,
+        achievement.completion_count,
+        completion.time_placement,
+        isSecret,
+      );
+    }
   }
 }
 
@@ -59,7 +64,6 @@ export default function AchievementContainer({ state }: { state: AppState }) {
 
   const teams = teamData.teams;
 
-  const nTeams = teams.filter((t) => t.points > 0).length;
   const achievements: CompletedAchievementType[] = baseAchievements.map(
     (a) => ({
       ...a,
@@ -70,7 +74,7 @@ export default function AchievementContainer({ state }: { state: AppState }) {
 
   const myTeam = getMyTeam(session.user?.id ?? undefined, teams);
 
-  extendAchievementData(achievements, nTeams, myTeam);
+  extendAchievementData(achievements, teamData.effective_team_count, myTeam);
 
   const sortedAchievements = getSortedAchievements(
     achievements,

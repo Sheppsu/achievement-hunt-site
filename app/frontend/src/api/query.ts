@@ -133,6 +133,7 @@ export function useGetAchievements(
 type TeamDataType = {
   placement: number;
   teams: (AchievementTeamType | AchievementTeamExtendedType)[];
+  effective_team_count: number;
 };
 
 export function useGetTeams(
