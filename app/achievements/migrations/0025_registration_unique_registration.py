@@ -12,8 +12,6 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddConstraint(
             model_name="registration",
-            constraint=models.UniqueConstraint(
-                fields=("user", "iteration"), name="unique_registration"
-            ),
+            constraint=models.UniqueConstraint(fields=("user", "iteration"), name="unique_registration"),
         ),
     ]

@@ -23,8 +23,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AddConstraint(
             model_name="team",
-            constraint=models.UniqueConstraint(
-                fields=("name", "iteration_id"), name="unique_iteration_team_name"
-            ),
+            constraint=models.UniqueConstraint(fields=("name", "iteration_id"), name="unique_iteration_team_name"),
         ),
     ]

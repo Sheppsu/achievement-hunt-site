@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('achievements', '0008_alter_achievement_name'),
+        ("achievements", "0008_alter_achievement_name"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='player',
-            name='team_admin',
+            model_name="player",
+            name="team_admin",
             field=models.BooleanField(default=False),
         ),
     ]

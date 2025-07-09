@@ -17,9 +17,7 @@ class Migration(migrations.Migration):
             model_name="eventiteration",
             name="registration_end",
             field=models.DateTimeField(
-                default=datetime.datetime(
-                    2025, 4, 17, 7, 8, 32, 474779, tzinfo=datetime.timezone.utc
-                )
+                default=datetime.datetime(2025, 4, 17, 7, 8, 32, 474779, tzinfo=datetime.timezone.utc)
             ),
             preserve_default=False,
         ),

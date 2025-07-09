@@ -2,9 +2,7 @@ from django.conf import settings
 from django.http.response import Http404
 
 
-__all__ = (
-    "ExceptionLoggingMiddleware",
-)
+__all__ = ("ExceptionLoggingMiddleware",)
 
 
 class ExceptionLoggingMiddleware:

@@ -13,7 +13,7 @@ def get_current_iteration() -> EventIteration:
     global current_iteration
 
     if current_iteration is None:
-        current_iteration = EventIteration.objects.order_by('-id').first()
+        current_iteration = EventIteration.objects.order_by("-id").first()
     return current_iteration
 
 

@@ -6,9 +6,7 @@ import logging
 from datetime import datetime, timezone
 
 
-__all__ = (
-    "DiscordLogger",
-)
+__all__ = ("DiscordLogger",)
 
 
 _log = logging.getLogger(__name__)
@@ -16,11 +14,13 @@ _log = logging.getLogger(__name__)
 
 def _create_error_embeds(req, exc):
     embeds = []
-    embeds.append({
-        "title": f"{req.method} {req.path}",
-        "description": str(exc),
-        "color": 0xff0000,
-    })
+    embeds.append(
+        {
+            "title": f"{req.method} {req.path}",
+            "description": str(exc),
+            "color": 0xFF0000,
+        }
+    )
 
     return embeds
 
@@ -79,7 +79,7 @@ class DiscordLogger:
         title, color = {
             "created": ("New achievement", 0x2DD286),
             "edited": ("Achievement edited", 0xF6AF49),
-            "moved": ("Achievement moved for release", 0x744DFF)
+            "moved": ("Achievement moved for release", 0x744DFF),
         }[action]
 
         embed = {
@@ -87,11 +87,8 @@ class DiscordLogger:
             "url": f"https://cta.sheppsu.me/staff/achievements/{achievement.id}",
             "description": achievement.name,
             "color": color,
-            "footer": {
-                "text": req.user.username,
-                "icon_url": req.user.avatar
-            },
-            "timestamp": datetime.now(tz=timezone.utc).isoformat()
+            "footer": {"text": req.user.username, "icon_url": req.user.avatar},
+            "timestamp": datetime.now(tz=timezone.utc).isoformat(),
         }
 
         self.submit_embeds([embed], self.STAFF_WEBHOOK_URL)
@@ -106,10 +103,7 @@ class DiscordLogger:
             "url": f"https://cta.sheppsu.me/staff/achievements/{comment.achievement_id}",
             "description": f"Reply to **{comment.achievement.name}**:\n" + comment.msg,
             "color": 0x31A6CE,
-            "footer": {
-                "text": comment.user.username,
-                "icon_url": comment.user.avatar
-            }
+            "footer": {"text": comment.user.username, "icon_url": comment.user.avatar},
         }
 
         self.submit_embeds([embed], self.STAFF_WEBHOOK_URL)
@@ -126,9 +120,7 @@ class DiscordLogger:
             "description": announcement.message,
             "timestamp": datetime.now(tz=timezone.utc).isoformat(),
             "color": 0xFCCB38 if is_bug else 0x1281FF,
-            "footer": {
-                "text": announcement.iteration.name
-            }
+            "footer": {"text": announcement.iteration.name},
         }
 
         ping = 1307176728019603548 if is_bug else None

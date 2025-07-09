@@ -20,14 +20,8 @@ def serialize_team(team: Team):
 
 
 def select_teams(iteration_id, many=False, sort=False, **kwargs) -> list[Team] | Team | None:
-    teams = Team.objects.prefetch_related(
-        models.Prefetch(
-            "players",
-            Player.objects.select_related("user")
-        )
-    ).filter(
-        iteration_id=iteration_id,
-        **kwargs
+    teams = Team.objects.prefetch_related(models.Prefetch("players", Player.objects.select_related("user"))).filter(
+        iteration_id=iteration_id, **kwargs
     )
     if sort:
         teams = teams.order_by("-points")
@@ -76,69 +70,53 @@ def achievements(req, iteration):
         if registration is None:
             return error("must be registered", status=403)
 
-    team = Team.objects.prefetch_related("players").filter(
-        players__user_id=req.user.id,
-        iteration_id=iteration.id
-    ).first()
+    team = (
+        Team.objects.prefetch_related("players").filter(players__user_id=req.user.id, iteration_id=iteration.id).first()
+    )
 
     # shouldn't be possible, but let's check anyway
     if not iteration_ended and team is None:
         return error("must be on a team", status=403)
 
     completion_prefetch = models.Prefetch(
-        "completions",
-        queryset=AchievementCompletion.objects.select_related(
-            "player__user",
-            "placement"
-        )
+        "completions", queryset=AchievementCompletion.objects.select_related("player__user", "placement")
     )
 
-    query = Achievement.objects.select_related(
-        "batch"
-    ).prefetch_related(
-        models.Prefetch(
-            "beatmaps",
-            queryset=BeatmapConnection.objects.select_related(
-                "info"
-            ).filter(
-                hide=False
-            )
+    query = (
+        Achievement.objects.select_related("batch")
+        .prefetch_related(
+            models.Prefetch("beatmaps", queryset=BeatmapConnection.objects.select_related("info").filter(hide=False))
         )
-    ).filter(
-        batch__iteration_id=iteration.id,
-        batch__release_time__lte=datetime.now(tz=timezone.utc)
+        .filter(batch__iteration_id=iteration.id, batch__release_time__lte=datetime.now(tz=timezone.utc))
     )
 
     if (req.user.is_authenticated and req.user.is_admin) or iteration_ended:
-        query = query.prefetch_related(
-            completion_prefetch
-        ).annotate(
-            completion_count=models.Count("completions")
+        query = query.prefetch_related(completion_prefetch).annotate(completion_count=models.Count("completions"))
+        return success(
+            [
+                achievement.serialize(
+                    [
+                        "completions__player__user",
+                        "completions__placement",
+                        "beatmaps__info",
+                        "completion_count",
+                        "batch",
+                    ],
+                    [
+                        "completions__player__team_admin",
+                        "completions__player__user_id",
+                        "completions__player__user__is_admin",
+                        "completions__player__user__is_achievement_creator",
+                    ],
+                )
+                for achievement in query.all()
+            ]
         )
-        return success([
-            achievement.serialize([
-                "completions__player__user",
-                "completions__placement",
-                "beatmaps__info",
-                "completion_count",
-                "batch"
-            ], [
-                "completions__player__team_admin",
-                "completions__player__user_id",
-                "completions__player__user__is_admin",
-                "completions__player__user__is_achievement_creator",
-            ])
-            for achievement in query.all()
-        ])
 
     completion_counts = Achievement.objects.annotate(completion_count=models.Count("completions")).all()
 
     def team_completion(c) -> bool:
-        return (
-            any((player.id == c.player_id for player in team.players.all()))
-            if team is not None else
-            False
-        )
+        return any((player.id == c.player_id for player in team.players.all())) if team is not None else False
 
     completion_prefetch.queryset = completion_prefetch.queryset.filter(
         models.Q(player__team_id=team.id) | models.Q(placement__isnull=False)
@@ -148,24 +126,18 @@ def achievements(req, iteration):
         achievement.serialize(
             [
                 "beatmaps__info",
-                SerializableField(
-                    "completions__player",
-                    condition=team_completion
-                ),
-                SerializableField(
-                    "completions__time_completed",
-                    condition=team_completion
-                ),
+                SerializableField("completions__player", condition=team_completion),
+                SerializableField("completions__time_completed", condition=team_completion),
                 "completions__player__user",
                 "completions__placement",
-                "batch"
+                "batch",
             ],
             [
                 "completions__player__team_admin",
                 "completions__player__user_id",
                 "completions__player__user__is_admin",
                 "completions__player__user__is_achievement_creator",
-            ]
+            ],
         )
         for achievement in query.prefetch_related(completion_prefetch).all()
     ]
@@ -186,10 +158,14 @@ def teams(req, iteration):
         serialized_teams = list(map(serialize_team, select_teams(iteration.id, many=True, sort=True)))
     else:
         teams = select_teams(iteration.id, many=True, sort=True)
-        my_team_item = next((
-            (i, team) for i, team in enumerate(teams)
-            if any((player.user_id == req.user.id for player in team.players.all()))
-        ), None)
+        my_team_item = next(
+            (
+                (i, team)
+                for i, team in enumerate(teams)
+                if any((player.user_id == req.user.id for player in team.players.all()))
+            ),
+            None,
+        )
 
         if my_team_item is None:
             return success({"placement": 0, "teams": []})
@@ -201,24 +177,20 @@ def teams(req, iteration):
         serialized_teams = [serialize_team(my_team)]
         excludes = ["name", "icon", "accepts_free_agents"]
         if my_team_i > 0:
-            serialized_teams.insert(0, teams[my_team_i-1].serialize(excludes=excludes))
+            serialized_teams.insert(0, teams[my_team_i - 1].serialize(excludes=excludes))
         if my_team_i < len(teams) - 1:
-            serialized_teams.append(teams[my_team_i+1].serialize(excludes=excludes))
+            serialized_teams.append(teams[my_team_i + 1].serialize(excludes=excludes))
 
-    return success({
-        "placement": my_team_i + 1,
-        "teams": serialized_teams
-    })
+    return success({"placement": my_team_i + 1, "teams": serialized_teams})
 
 
 @require_http_methods(["DELETE"])
 @require_iteration_before_start
 @require_registered
 def leave_team(req, iteration, registration):
-    team = Team.objects.prefetch_related("players").filter(
-        players__user_id=req.user.id,
-        iteration_id=iteration.id
-    ).first()
+    team = (
+        Team.objects.prefetch_related("players").filter(players__user_id=req.user.id, iteration_id=iteration.id).first()
+    )
     if team is None:
         return error("not on team")
 
@@ -241,10 +213,9 @@ def leave_team(req, iteration, registration):
 @require_POST
 @require_iteration_before_start
 @accepts_json_data(
-    DictionaryType({
-        "name": StringType(min_length=1, max_length=32),
-        "anonymous_name": StringType(min_length=1, max_length=32)
-    })
+    DictionaryType(
+        {"name": StringType(min_length=1, max_length=32), "anonymous_name": StringType(min_length=1, max_length=32)}
+    )
 )
 @require_registered
 def create_team(req, data, iteration, registration):
@@ -256,12 +227,7 @@ def create_team(req, data, iteration, registration):
         return error("invalid anonymous name")
 
     try:
-        team = Team(
-            name=data["name"],
-            anonymous_name=data["anonymous_name"],
-            icon="",
-            iteration=iteration
-        )
+        team = Team(name=data["name"], anonymous_name=data["anonymous_name"], icon="", iteration=iteration)
         team.save()
     except Exception as e:
         if "unique_iteration_team_name" in str(e):
@@ -279,20 +245,18 @@ def create_team(req, data, iteration, registration):
 
 
 @require_http_methods(["PATCH"])
-@accepts_json_data(
-    DictionaryType({"newAdminId": IntegerType()})
-)
+@accepts_json_data(DictionaryType({"newAdminId": IntegerType()}))
 @require_iteration_before_start
 @require_user
 def transfer_admin(req, data, iteration):
     current_admin = select_current_player(req.user.id, iteration.id)
     if current_admin is None or not current_admin.team_admin:
         return error("not on a team or not admin")
-    
+
     new_admin = select_current_player(data["newAdminId"], iteration.id)
     if new_admin is None or current_admin.team_id != new_admin.team_id:
         return error("users not on the same team")
-    
+
     current_admin.team_admin = False
     current_admin.save()
 
@@ -303,9 +267,7 @@ def transfer_admin(req, data, iteration):
 
 
 @require_http_methods(["PATCH"])
-@accepts_json_data(
-    DictionaryType({"name": StringType(min_length=1, max_length=32)})
-)
+@accepts_json_data(DictionaryType({"name": StringType(min_length=1, max_length=32)}))
 @require_iteration_before_start
 @require_user
 def rename_team(req, data, iteration):
@@ -321,16 +283,14 @@ def rename_team(req, data, iteration):
         team.save()
     except:
         return error("team name taken")
-    
+
     return success(team.serialize())
 
 
 @require_http_methods(["PATCH"])
 @require_iteration_before_start
 @require_user
-@accepts_json_data(DictionaryType({
-    "enable": BoolType()
-}))
+@accepts_json_data(DictionaryType({"enable": BoolType()}))
 def change_accepting_free_agents(req, data, iteration):
     player = select_current_player(req.user.id, iteration.id)
     if player is None or not player.team_admin:
@@ -353,19 +313,9 @@ def get_team_invites(req, iteration):
     if player is None or not player.team_admin:
         return error("not on a team or not admin")
 
-    invites = TeamInvite.objects.select_related(
-        "user"
-    ).filter(
-        team_id=player.team_id
-    ).all()
+    invites = TeamInvite.objects.select_related("user").filter(team_id=player.team_id).all()
 
-    invites = [
-        invite.serialize(
-            includes=["user__username"],
-            excludes=["team_id"]
-        )
-        for invite in invites
-    ]
+    invites = [invite.serialize(includes=["user__username"], excludes=["team_id"]) for invite in invites]
     for invite in invites:
         invite["username"] = invite.pop("user")["username"]
 
@@ -376,19 +326,11 @@ def get_team_invites(req, iteration):
 @require_iteration
 @require_user
 def get_user_invites(req, iteration):
-    invites = TeamInvite.objects.select_related(
-        "team"
-    ).filter(
-        user_id=req.user.id,
-        team__iteration_id=iteration.id
-    ).all()
+    invites = (
+        TeamInvite.objects.select_related("team").filter(user_id=req.user.id, team__iteration_id=iteration.id).all()
+    )
 
-    invites = [
-        invite.serialize(
-            includes=["team__name"],
-            excludes=["user_id"]
-        ) for invite in invites
-    ]
+    invites = [invite.serialize(includes=["team__name"], excludes=["user_id"]) for invite in invites]
     for invite in invites:
         invite["team_name"] = invite.pop("team")["name"]
 
@@ -396,9 +338,13 @@ def get_user_invites(req, iteration):
 
 
 @require_http_methods(["POST"])
-@accepts_json_data(DictionaryType({
-    "user_id": IntegerType(minimum=0),
-}))
+@accepts_json_data(
+    DictionaryType(
+        {
+            "user_id": IntegerType(minimum=0),
+        }
+    )
+)
 @require_iteration_before_start
 @require_user
 def send_team_invite(req, data, iteration):
@@ -418,10 +364,7 @@ def send_team_invite(req, data, iteration):
             return error("invalid user id")
 
         user = User.objects.create(
-            id=user["id"],
-            username=user["username"],
-            avatar=user["avatar"],
-            cover=user["cover"] or ""
+            id=user["id"], username=user["username"], avatar=user["avatar"], cover=user["cover"] or ""
         )
 
     else:
@@ -461,9 +404,7 @@ def rescind_invite(req, invite_id):
 
 @require_http_methods(["DELETE"])
 @require_user
-@accepts_json_data(DictionaryType({
-    "accept": BoolType()
-}))
+@accepts_json_data(DictionaryType({"accept": BoolType()}))
 def resolve_invite(req, invite_id, data):
     invite = TeamInvite.objects.filter(id=invite_id).first()
     if invite is None:
@@ -500,18 +441,17 @@ def chat_messages(req, iteration):
     player = select_current_player(req.user.id, iteration.id)
     if player is None:
         return error("Not on a team")
-    
-    messages = ChatMessage.objects.select_related("player__user").filter(
-        team_id=player.team_id
-    ).order_by("-sent_at")[:50]
 
-    return success([
-        {
-            "name": message.player.user.username,
-            "message": message.message,
-            "sent_at": message.sent_at.isoformat()
-        } for message in reversed(messages)
-    ])
+    messages = (
+        ChatMessage.objects.select_related("player__user").filter(team_id=player.team_id).order_by("-sent_at")[:50]
+    )
+
+    return success(
+        [
+            {"name": message.player.user.username, "message": message.message, "sent_at": message.sent_at.isoformat()}
+            for message in reversed(messages)
+        ]
+    )
 
 
 @require_GET
@@ -535,28 +475,19 @@ def get_all_registrations(req, iteration):
     if req.user.is_staff:
         regs = [
             registration.serialize(includes=["user"])
-            for registration in Registration.objects.select_related(
-                "user"
-            ).filter(
-                iteration_id=iteration.id
-            )
+            for registration in Registration.objects.select_related("user").filter(iteration_id=iteration.id)
         ]
-        return success({
-            "registration_count": len(regs),
-            "registrations": regs
-        })
+        return success({"registration_count": len(regs), "registrations": regs})
 
-    return success({
-        "registration_count": Registration.objects.filter(
-            iteration_id=iteration.id
-        ).count(),
-    })
+    return success(
+        {
+            "registration_count": Registration.objects.filter(iteration_id=iteration.id).count(),
+        }
+    )
 
 
 @require_POST
-@accepts_json_data(
-    DictionaryType({"register": BoolType()})
-)
+@accepts_json_data(DictionaryType({"register": BoolType()}))
 @require_iteration_before_registration_end
 @require_user
 def change_registration(req, data, iteration):
@@ -585,9 +516,7 @@ def change_registration(req, data, iteration):
 
 @require_http_methods(["PATCH"])
 @require_iteration_before_start
-@accepts_json_data(
-    DictionaryType({"free_agent": BoolType()})
-)
+@accepts_json_data(DictionaryType({"free_agent": BoolType()}))
 @require_registered
 def change_free_agent(req, data, iteration, registration):
     registration.is_free_agent = data["free_agent"]
@@ -597,14 +526,11 @@ def change_free_agent(req, data, iteration, registration):
 
 @require_iteration_after_end
 def player_stats(req, iteration):
-    most_completions = Player.objects.select_related(
-        "user"
-    ).filter(
-        team__iteration_id=iteration.id
-    ).annotate(
-        completion_count=models.Count("completions")
-    ).order_by(
-        "-completion_count"
+    most_completions = (
+        Player.objects.select_related("user")
+        .filter(team__iteration_id=iteration.id)
+        .annotate(completion_count=models.Count("completions"))
+        .order_by("-completion_count")
     )
 
     most_first_completions = Player.objects.raw(
@@ -642,19 +568,23 @@ def player_stats(req, iteration):
         """
     )
 
-    return success({
-        "most_completions": list(
-            (completion.serialize(includes=["user", "completion_count"]) for completion in most_completions)
-        ),
-        "most_first_completions": list(
-            (player.serialize(includes=["user", "completion_count"]) for player in most_first_completions)
-        )
-    })
+    return success(
+        {
+            "most_completions": list(
+                (completion.serialize(includes=["user", "completion_count"]) for completion in most_completions)
+            ),
+            "most_first_completions": list(
+                (player.serialize(includes=["user", "completion_count"]) for player in most_first_completions)
+            ),
+        }
+    )
 
 
 @require_iteration
 def get_announcements(req, iteration):
-    return success([
-        announcement.serialize()
-        for announcement in Announcement.objects.filter(iteration_id=iteration.id).order_by("-created_at")
-    ])
+    return success(
+        [
+            announcement.serialize()
+            for announcement in Announcement.objects.filter(iteration_id=iteration.id).order_by("-created_at")
+        ]
+    )

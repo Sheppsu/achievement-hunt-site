@@ -35,12 +35,7 @@ class UserManager(models.Manager):
             user_obj.avatar = avatar
             user_obj.cover = cover or ""
         except User.DoesNotExist:
-            user_obj = User(
-                user_id,
-                username,
-                avatar,
-                cover or ""
-            )
+            user_obj = User(user_id, username, avatar, cover or "")
         user_obj.save()
 
         return user_obj
@@ -124,7 +119,7 @@ class BeatmapInfo(SerializableModel):
                 title=info.beatmapset.title,
                 version=info.version,
                 cover=info.beatmapset.covers.cover,
-                star_rating=info.difficulty_rating
+                star_rating=info.difficulty_rating,
             )
         else:
             beatmap.artist = info.beatmapset.artist
@@ -159,12 +154,7 @@ class Achievement(SerializableModel):
     solution = models.CharField(max_length=2048)
     audio = models.CharField(default="")
     tags = models.CharField(max_length=128)
-    beatmap = models.ForeignKey(
-        BeatmapInfo,
-        related_name="achievements",
-        on_delete=models.PROTECT,
-        null=True
-    )
+    beatmap = models.ForeignKey(BeatmapInfo, related_name="achievements", on_delete=models.PROTECT, null=True)
     release_time = models.DateTimeField(null=True)
     creator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, default=None)
     created_at = models.DateTimeField()
@@ -172,16 +162,7 @@ class Achievement(SerializableModel):
     batch = models.ForeignKey(AchievementBatch, on_delete=models.SET_NULL, null=True, default=None)
 
     class Serialization:
-        FIELDS = [
-            "id",
-            "name",
-            "description",
-            "audio",
-            "tags",
-            "release_time",
-            "created_at",
-            "last_edited_at"
-        ]
+        FIELDS = ["id", "name", "description", "audio", "tags", "release_time", "created_at", "last_edited_at"]
 
 
 class BeatmapConnection(SerializableModel):
@@ -251,7 +232,7 @@ class Team(SerializableModel):
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=["name", "iteration_id"], name="unique_iteration_team_name"),
-            models.UniqueConstraint(fields=["anonymous_name", "iteration_id"], name="unique_iteration_anon_team_name")
+            models.UniqueConstraint(fields=["anonymous_name", "iteration_id"], name="unique_iteration_anon_team_name"),
         ]
 
     class Serialization:
@@ -263,9 +244,7 @@ class Player(SerializableModel):
     team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name="players")
     team_admin = models.BooleanField(default=False)
     completed_achievements = models.ManyToManyField(
-        Achievement,
-        through=AchievementCompletion,
-        related_name="players_completed"
+        Achievement, through=AchievementCompletion, related_name="players_completed"
     )
 
     class Serialization:
@@ -280,7 +259,7 @@ class ChatMessage(SerializableModel):
 
     class Serialization:
         FIELDS = ["id", "sent_at", "message"]
-    
+
 
 class Registration(SerializableModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -289,9 +268,7 @@ class Registration(SerializableModel):
     is_free_agent = models.BooleanField(default=True)
 
     class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=["user", "iteration"], name="unique_registration")
-        ]
+        constraints = [models.UniqueConstraint(fields=["user", "iteration"], name="unique_registration")]
 
     class Serialization:
         FIELDS = ["is_screened", "is_free_agent"]

@@ -7,21 +7,21 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('achievements', '0021_eventiteration_description_eventiteration_name'),
+        ("achievements", "0021_eventiteration_description_eventiteration_name"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='ChatMessage',
+            name="ChatMessage",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('sent_at', models.DateTimeField(auto_now_add=True)),
-                ('message', models.CharField(max_length=512)),
-                ('player', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='achievements.player')),
-                ('team', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='achievements.team')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("sent_at", models.DateTimeField(auto_now_add=True)),
+                ("message", models.CharField(max_length=512)),
+                ("player", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="achievements.player")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="achievements.team")),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
     ]

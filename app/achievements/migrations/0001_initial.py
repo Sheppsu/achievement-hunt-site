@@ -9,76 +9,101 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='User',
+            name="User",
             fields=[
-                ('id', models.PositiveBigIntegerField(primary_key=True, serialize=False, unique=True)),
-                ('username', models.CharField(max_length=15)),
-                ('avatar', models.CharField()),
-                ('cover', models.CharField()),
-                ('is_admin', models.BooleanField(default=False)),
-                ('is_achievement_creator', models.BooleanField(default=False)),
+                ("id", models.PositiveBigIntegerField(primary_key=True, serialize=False, unique=True)),
+                ("username", models.CharField(max_length=15)),
+                ("avatar", models.CharField()),
+                ("cover", models.CharField()),
+                ("is_admin", models.BooleanField(default=False)),
+                ("is_achievement_creator", models.BooleanField(default=False)),
             ],
         ),
         migrations.CreateModel(
-            name='Achievement',
+            name="Achievement",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=64)),
-                ('category', models.CharField(max_length=32)),
-                ('description', models.CharField(max_length=256)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("name", models.CharField(max_length=64)),
+                ("category", models.CharField(max_length=32)),
+                ("description", models.CharField(max_length=256)),
             ],
         ),
         migrations.CreateModel(
-            name='AchievementCompletion',
+            name="AchievementCompletion",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('time_completed', models.DateTimeField()),
-                ('achievement', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='completions', to='achievements.achievement')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("time_completed", models.DateTimeField()),
+                (
+                    "achievement",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="completions",
+                        to="achievements.achievement",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='BeatmapInfo',
+            name="BeatmapInfo",
             fields=[
-                ('id', models.PositiveIntegerField(primary_key=True, serialize=False)),
-                ('artist', models.CharField()),
-                ('version', models.CharField()),
-                ('title', models.CharField()),
-                ('cover', models.CharField()),
-                ('star_rating', models.FloatField()),
+                ("id", models.PositiveIntegerField(primary_key=True, serialize=False)),
+                ("artist", models.CharField()),
+                ("version", models.CharField()),
+                ("title", models.CharField()),
+                ("cover", models.CharField()),
+                ("star_rating", models.FloatField()),
             ],
         ),
         migrations.CreateModel(
-            name='Team',
+            name="Team",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=32, unique=True)),
-                ('icon', models.CharField(max_length=64, null=True)),
-                ('invite', models.CharField(max_length=16)),
-                ('points', models.PositiveIntegerField(default=0)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("name", models.CharField(max_length=32, unique=True)),
+                ("icon", models.CharField(max_length=64, null=True)),
+                ("invite", models.CharField(max_length=16)),
+                ("points", models.PositiveIntegerField(default=0)),
             ],
         ),
         migrations.CreateModel(
-            name='Player',
+            name="Player",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('completed_achievements', models.ManyToManyField(related_name='players_completed', through='achievements.AchievementCompletion', to='achievements.achievement')),
-                ('team', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='players', to='achievements.team')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to=settings.AUTH_USER_MODEL)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "completed_achievements",
+                    models.ManyToManyField(
+                        related_name="players_completed",
+                        through="achievements.AchievementCompletion",
+                        to="achievements.achievement",
+                    ),
+                ),
+                (
+                    "team",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="players", to="achievements.team"
+                    ),
+                ),
+                ("user", models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.AddField(
-            model_name='achievementcompletion',
-            name='player',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, related_name='completions', to='achievements.player'),
+            model_name="achievementcompletion",
+            name="player",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.RESTRICT, related_name="completions", to="achievements.player"
+            ),
         ),
         migrations.AddField(
-            model_name='achievement',
-            name='beatmap',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, related_name='achievements', to='achievements.beatmapinfo'),
+            model_name="achievement",
+            name="beatmap",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="achievements",
+                to="achievements.beatmapinfo",
+            ),
         ),
     ]

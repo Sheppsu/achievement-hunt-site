@@ -8,6 +8,7 @@ django.setup()
 
 
 from achievements.models import *
+
 AchievementCompletion.objects.all().delete()
 Player.objects.all().delete()
 Team.objects.all().delete()

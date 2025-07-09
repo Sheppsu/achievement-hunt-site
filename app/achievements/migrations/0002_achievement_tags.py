@@ -6,14 +6,14 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('achievements', '0001_initial'),
+        ("achievements", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='achievement',
-            name='tags',
-            field=models.CharField(default='', max_length=128),
+            model_name="achievement",
+            name="tags",
+            field=models.CharField(default="", max_length=128),
             preserve_default=False,
         ),
     ]
