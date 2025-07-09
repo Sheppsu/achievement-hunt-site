@@ -244,8 +244,7 @@ class Team(SerializableModel):
     name = models.CharField(max_length=32)
     anonymous_name = models.CharField(max_length=32)
     icon = models.CharField(max_length=64, null=True)
-    points = models.PositiveIntegerField(default=0)  # real-time points
-    frozen_points = models.PositiveIntegerField(default=0)  # points displayed to the user
+    points = models.PositiveIntegerField(default=0)
     iteration = models.ForeignKey(EventIteration, on_delete=models.CASCADE)
     accepts_free_agents = models.BooleanField(default=False)
 
