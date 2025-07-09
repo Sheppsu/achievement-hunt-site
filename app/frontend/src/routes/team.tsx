@@ -64,7 +64,10 @@ export default function TeamPage() {
       cardsColumns[0].push(<NoTeamCard registration={registration} />);
     }
   } else {
-    cardsColumns[0].push(<TeamCard team={ownTeam} />, <TeamChatCard />);
+    cardsColumns[0].push(
+      <TeamCard iteration={iteration} team={ownTeam} />,
+      <TeamChatCard />,
+    );
   }
 
   if (

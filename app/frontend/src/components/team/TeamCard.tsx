@@ -21,11 +21,14 @@ import Button from "components/inputs/Button.tsx";
 import { TeamInviteType } from "api/types/InviteType.ts";
 import TextInput from "components/inputs/TextInput.tsx";
 import { IoIosCloseCircle, IoIosCloseCircleOutline } from "react-icons/io";
+import { EventIterationType } from "api/types/EventIterationType.ts";
 
 export default function TeamCard({
   team,
+  iteration,
 }: {
   team: AchievementTeamExtendedType;
+  iteration: EventIterationType;
 }) {
   const session = useContext(SessionContext);
   const dispatchEventMsg = useContext(EventContext);
@@ -39,7 +42,12 @@ export default function TeamCard({
     }
   }
 
-  const showInvites = player !== null && player.team_admin;
+  const iterationStarted = Date.parse(iteration.start) <= Date.now();
+  const showInvites =
+    player !== null &&
+    player.team_admin &&
+    !iterationStarted &&
+    team.players.length != 5;
 
   const { data: invites, isLoading: invitesLoading } =
     useGetTeamInvites(showInvites);
@@ -224,7 +232,9 @@ export default function TeamCard({
           onClick={doLeaveTeam}
           holdToUse={true}
           unavailable={
-            (user?.team_admin && team.players.length > 1) || debounce
+            (user?.team_admin && team.players.length > 1) ||
+            debounce ||
+            iterationStarted
           }
         />
       </div>
@@ -242,7 +252,7 @@ export default function TeamCard({
               unavailable={debounce}
             />
           </div>
-          {team.players.length === 5 || !showInvites ? (
+          {!showInvites ? (
             ""
           ) : (
             <>
@@ -265,22 +275,22 @@ export default function TeamCard({
                   unavailable={debounce}
                 />
               </form>
+              <div className="card--teams__row">
+                <p className="card--teams__description">
+                  You may opt into accepting free agents (players without a
+                  team). When the event starts, free agents will be
+                  automatically assigned to teams.
+                </p>
+                <Button
+                  className="team-rigid-btn"
+                  children={team.accepts_free_agents ? "Opt out" : "Opt in"}
+                  unavailable={debounce}
+                  onClick={doChangeAcceptingFreeAgent}
+                  holdToUse={team.accepts_free_agents}
+                />
+              </div>
             </>
           )}
-          <div className="card--teams__row">
-            <p className="card--teams__description">
-              You may opt into accepting free agents (players without a team).
-              When the event starts, free agents will be automatically assigned
-              to teams.
-            </p>
-            <Button
-              className="team-rigid-btn"
-              children={team.accepts_free_agents ? "Opt out" : "Opt in"}
-              unavailable={debounce}
-              onClick={doChangeAcceptingFreeAgent}
-              holdToUse={team.accepts_free_agents}
-            />
-          </div>
         </>
       )}
     </div>
