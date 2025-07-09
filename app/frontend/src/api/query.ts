@@ -21,6 +21,7 @@ import { useContext } from "react";
 import {
   AchievementTeamExtendedType,
   AchievementTeamType,
+  TeamDataType,
 } from "./types/AchievementTeamType";
 import {
   AchievementExtendedType,
@@ -129,12 +130,6 @@ export function useGetAchievements(
     enabled,
   });
 }
-
-type TeamDataType = {
-  placement: number;
-  teams: (AchievementTeamType | AchievementTeamExtendedType)[];
-  effective_team_count: number;
-};
 
 export function useGetTeams(
   enabled: boolean = true,

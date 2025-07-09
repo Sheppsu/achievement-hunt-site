@@ -4,6 +4,7 @@ import { AchievementPlayerType } from "api/types/AchievementPlayerType";
 import {
   AchievementTeamExtendedType,
   AchievementTeamType,
+  TeamDataType,
 } from "api/types/AchievementTeamType";
 import { AchievementExtendedType } from "api/types/AchievementType";
 import {
@@ -98,6 +99,7 @@ type WSAchievementType = {
   category: string;
   time: string;
   placement: AchievementCompletionPlacementType | null;
+  time_placement: number;
 };
 
 type RefreshReturnType = {
@@ -128,6 +130,7 @@ function onCompletedAchievement(
             achievement.completion_count += 1;
             achievement.completions.push({
               time_completed: completed.time,
+              time_placement: completed.time_placement,
               player: data.player,
               placement:
                 completed.placement === null ||
@@ -147,35 +150,28 @@ function onCompletedAchievement(
   );
 
   // update score
-  queryClient.setQueryData(
-    ["teams"],
-    (teams: (AchievementTeamType | AchievementTeamExtendedType)[]) => {
-      const newTeams = [];
+  queryClient.setQueryData(["teams"], (teamData: TeamDataType) => {
+    const newTeams = [];
 
-      for (const team of teams) {
-        if (!("players" in team)) {
-          newTeams.push(team);
-          continue;
-        }
-
-        let added = false;
-
-        for (const player of team.players) {
-          if (player.id === data.player.id) {
-            dispatchEventMsg({
-              type: "info",
-              msg: `+${data.score_gain}pts`,
-            });
-            newTeams.push({ ...team, points: data.score });
-            added = true;
-            break;
-          }
-        }
-
-        if (!added) newTeams.push(team);
+    for (const team of teamData.teams) {
+      if (!("players" in team)) {
+        newTeams.push(team);
+        continue;
       }
-    },
-  );
+
+      let added = false;
+
+      for (const player of team.players) {
+        if (player.id === data.player.id) {
+          newTeams.push({ ...team, points: data.score });
+          added = true;
+          break;
+        }
+      }
+
+      if (!added) newTeams.push(team);
+    }
+  });
 }
 
 function handleMessage(
