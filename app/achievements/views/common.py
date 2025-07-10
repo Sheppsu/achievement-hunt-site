@@ -151,6 +151,10 @@ def achievements(req, iteration):
     return success(result)
 
 
+def get_effective_team_count():
+    return AchievementCompletion.objects.select_related("player").values("player__team_id").distinct().count()
+
+
 @require_iteration
 def teams(req, iteration):
     all_teams = select_teams(iteration.id, many=True, sort=True)
@@ -168,7 +172,7 @@ def teams(req, iteration):
         )
 
         if my_team_item is None:
-            return success({"placement": 0, "teams": []})
+            return success({"placement": 0, "teams": [], "effective_team_count": get_effective_team_count()})
 
         my_team_i, my_team = my_team_item
 
@@ -185,10 +189,7 @@ def teams(req, iteration):
         {
             "placement": my_team_i + 1,
             "teams": serialized_teams,
-            "effective_team_count": AchievementCompletion.objects.select_related("player")
-            .values("player__team_id")
-            .distinct()
-            .count(),
+            "effective_team_count": get_effective_team_count(),
         }
     )
 
