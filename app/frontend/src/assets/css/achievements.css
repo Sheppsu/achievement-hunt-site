@@ -189,29 +189,84 @@ p {
 /* Progress container */
 
 .achievements-progress {
-  min-width: 380px;
   padding: 10px;
 
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
   gap: 20px;
 
   order: 1;
 
   border-radius: var(--border-rounding);
+  border: solid 2px var(--border-color);
 
   background-color: var(--background-color);
+  transition: border-color 0.3s;
+}
+
+.achievements-progress:hover {
+  border-color: var(--border-color-lit);
 }
 
 .achievements-progress__left-box {
-  flex-grow: 1;
-
   display: flex;
   flex-direction: column;
 
   border-radius: var(--border-rounding);
+}
 
-  background-color: var(--background-color);
+.achievements-progress__right-box {
+  flex-grow: 1;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.achievements-progress__pie {
+  width: 50px;
+  height: 50px;
+
+  border-radius: 50%;
+  border: solid white 2px;
+}
+
+@media (max-width: 900px) {
+  .achievements-progress__right-box {
+    height: 115px;
+    flex-direction: column;
+    justify-content: space-evenly;
+  }
+
+  .achievements-progress__pie {
+    width: 100px;
+    height: 100px;
+  }
+}
+
+@media(max-width: 500px) {
+  .achievements-progress {
+    flex-direction: column;
+  }
+
+  .achievements-progress__pie {
+    width: 200px;
+    height: 200px;
+  }
+}
+
+.achievements-progress__input-row {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
+.achievements-progress__button {
+}
+
+.dropdown.achievements-progress__dropdown {
+  width: 150px;
 }
 
 .achievements-progress-bar {

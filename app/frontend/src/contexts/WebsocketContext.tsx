@@ -113,7 +113,6 @@ type RefreshReturnType = {
 function onCompletedAchievement(
   data: RefreshReturnType,
   queryClient: QueryClient,
-  dispatchEventMsg: React.Dispatch<{ type: EventType; msg: string }>,
 ) {
   // add completions to achievements
   queryClient.setQueryData(
@@ -207,7 +206,7 @@ function handleMessage(
       dispatchEventMsg({ type: "info", msg: msg });
 
       if (achievements.length > 0) {
-        onCompletedAchievement(data, queryClient, dispatchEventMsg);
+        onCompletedAchievement(data, queryClient);
       }
 
       break;
@@ -239,7 +238,7 @@ function _sendSubmit(
     return;
   }
 
-  wsState.ws.send(JSON.stringify({ code: 1, mode: "any" }));
+  wsState.ws.send(JSON.stringify({ code: 1, mode: appState.submissionMode }));
 
   // disable submission for 5 seconds
   dispatchAppState({

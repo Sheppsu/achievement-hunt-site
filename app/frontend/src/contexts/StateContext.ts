@@ -52,6 +52,11 @@ interface HideMyAchievements extends BaseStateActionType {
   hideMyAchievements: boolean;
 }
 
+interface ChangeSubmissionMode extends BaseStateActionType {
+  id: 13;
+  mode: string;
+}
+
 type StateActionType =
   | ToggleSubmission
   | FilterType
@@ -60,7 +65,8 @@ type StateActionType =
   | AdjustAudioType
   | ActivateNavItem
   | SwitchNavItemSort
-  | HideMyAchievements;
+  | HideMyAchievements
+  | ChangeSubmissionMode;
 
 export function stateReducer(
   state: AppState,
@@ -131,6 +137,11 @@ export function stateReducer(
       return {
         ...state,
         showMyAchievements: action.hideMyAchievements,
+      };
+    case 13:
+      return {
+        ...state,
+        submissionMode: action.mode,
       };
   }
 }
