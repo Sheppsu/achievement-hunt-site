@@ -91,8 +91,9 @@ export default function AchievementCompletionPage() {
   const { data: teamData, isLoading: teamsLoading } = useGetTeams(showContent);
   const team =
     teamData === undefined ? null : getMyTeam(session.user?.id, teamData.teams);
+  const fetchAchievements = showContent && team !== null;
   const { data: achievements, isLoading: achievementsLoading } =
-    useGetAchievements(showContent && team !== null);
+    useGetAchievements(fetchAchievements);
 
   const state = useStateContext();
   const dispatchState = useDispatchStateContext();
@@ -120,7 +121,10 @@ export default function AchievementCompletionPage() {
     );
   }
 
-  if (achievements === undefined || teamData == undefined) {
+  if (
+    (fetchAchievements && achievements === undefined) ||
+    teamData == undefined
+  ) {
     return <TextPage text="Failed to load" />;
   }
 
