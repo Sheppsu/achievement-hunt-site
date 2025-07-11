@@ -4,6 +4,7 @@ import { AchievementPlayerType } from "api/types/AchievementPlayerType";
 import {
   AchievementTeamExtendedType,
   AchievementTeamType,
+  TeamDataType,
 } from "api/types/AchievementTeamType";
 import { AchievementExtendedType } from "api/types/AchievementType";
 import {
@@ -98,20 +99,20 @@ type WSAchievementType = {
   category: string;
   time: string;
   placement: AchievementCompletionPlacementType | null;
+  time_placement: number;
 };
 
 type RefreshReturnType = {
   achievements: WSAchievementType[];
   score: number;
   player: AchievementPlayerType;
-  last_score: string;
+  last_score?: string;
   score_gain: number;
 };
 
 function onCompletedAchievement(
   data: RefreshReturnType,
   queryClient: QueryClient,
-  dispatchEventMsg: React.Dispatch<{ type: EventType; msg: string }>,
 ) {
   // add completions to achievements
   queryClient.setQueryData(
@@ -128,6 +129,7 @@ function onCompletedAchievement(
             achievement.completion_count += 1;
             achievement.completions.push({
               time_completed: completed.time,
+              time_placement: completed.time_placement,
               player: data.player,
               placement:
                 completed.placement === null ||
@@ -147,41 +149,33 @@ function onCompletedAchievement(
   );
 
   // update score
-  queryClient.setQueryData(
-    ["teams"],
-    (teams: (AchievementTeamType | AchievementTeamExtendedType)[]) => {
-      const newTeams = [];
+  queryClient.setQueryData(["teams"], (teamData: TeamDataType) => {
+    const newTeams = [];
 
-      for (const team of teams) {
-        if (!("players" in team)) {
-          newTeams.push(team);
-          continue;
-        }
-
-        let added = false;
-
-        for (const player of team.players) {
-          if (player.id === data.player.id) {
-            dispatchEventMsg({
-              type: "info",
-              msg: `+${data.score_gain}pts`,
-            });
-            newTeams.push({ ...team, points: data.score });
-            added = true;
-            break;
-          }
-        }
-
-        if (!added) newTeams.push(team);
+    for (const team of teamData.teams) {
+      if (!("players" in team)) {
+        newTeams.push(team);
+        continue;
       }
-    },
-  );
+
+      let added = false;
+
+      for (const player of team.players) {
+        if (player.id === data.player.id) {
+          newTeams.push({ ...team, points: data.score });
+          added = true;
+          break;
+        }
+      }
+
+      if (!added) newTeams.push(team);
+    }
+  });
 }
 
 function handleMessage(
   evt: MessageEvent<string>,
   dispatchEventMsg: React.Dispatch<{ type: EventType; msg: string }>,
-  dispatchWsState: WebsocketStateDispatch,
   queryClient: QueryClient,
 ) {
   const data = JSON.parse(evt.data);
@@ -202,13 +196,17 @@ function handleMessage(
           : `You completed ${achievements.length} achievement(s)! ${achievements
               .map((achievement) => achievement.name)
               .join(", ")}.`;
-      msg +=
-        " Last score: " +
-        (data.last_score === null ? "no scores" : timeAgo(data.last_score));
+
+      if (data.last_score !== undefined) {
+        msg +=
+          " Last score: " +
+          (data.last_score === null ? "no scores" : timeAgo(data.last_score));
+      }
+
       dispatchEventMsg({ type: "info", msg: msg });
 
       if (achievements.length > 0) {
-        onCompletedAchievement(data, queryClient, dispatchEventMsg);
+        onCompletedAchievement(data, queryClient);
       }
 
       break;
@@ -240,7 +238,7 @@ function _sendSubmit(
     return;
   }
 
-  wsState.ws.send(JSON.stringify({ code: 1 }));
+  wsState.ws.send(JSON.stringify({ code: 1, mode: appState.submissionMode }));
 
   // disable submission for 5 seconds
   dispatchAppState({
@@ -252,7 +250,7 @@ function _sendSubmit(
       id: 3,
       enable: true,
     });
-  }, 5000);
+  }, 60000);
 }
 
 function _sendChatMessage(
@@ -267,12 +265,21 @@ function _sendChatMessage(
   wsState.ws.send(JSON.stringify({ code: 2, msg: msg }));
 }
 
-export const WebsocketContext = createContext<{
+function _resetConnection(state: WebsocketState) {
+  if (state !== null && state.ws !== null) {
+    state.ws.close();
+  }
+}
+
+export type WebsocketContextType = {
   wsState: WebsocketState | null;
   dispatchWsState: WebsocketStateDispatch;
   sendSubmit: () => void;
   sendChatMessage: (msg: string) => void;
-} | null>(null);
+  resetConnection: () => void;
+} | null;
+
+export const WebsocketContext = createContext<WebsocketContextType>(null);
 
 export function WebsocketContextProvider({
   children,
@@ -303,7 +310,7 @@ export function WebsocketContextProvider({
       dispatchWsState({ id: 2 });
     });
     ws.addEventListener("message", (evt) => {
-      handleMessage(evt, dispatchEventMsg, dispatchWsState, queryClient);
+      handleMessage(evt, dispatchEventMsg, queryClient);
     });
 
     dispatchWsState({
@@ -328,9 +335,23 @@ export function WebsocketContextProvider({
     _sendChatMessage(wsState, session, msg);
   };
 
+  const resetConnection = () => {
+    if (wsState === null) {
+      return;
+    }
+
+    _resetConnection(wsState);
+  };
+
   return (
     <WebsocketContext.Provider
-      value={{ wsState, dispatchWsState, sendSubmit, sendChatMessage }}
+      value={{
+        wsState,
+        dispatchWsState,
+        sendSubmit,
+        sendChatMessage,
+        resetConnection,
+      }}
     >
       {children}
     </WebsocketContext.Provider>

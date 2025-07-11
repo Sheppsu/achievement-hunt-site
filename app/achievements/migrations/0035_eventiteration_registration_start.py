@@ -14,11 +14,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="eventiteration",
             name="registration_start",
-            field=models.DateTimeField(
-                default=datetime.datetime(
-                    2025, 5, 1, 0, 0, tzinfo=datetime.timezone.utc
-                )
-            ),
+            field=models.DateTimeField(default=datetime.datetime(2025, 5, 1, 0, 0, tzinfo=datetime.timezone.utc)),
             preserve_default=False,
         ),
     ]

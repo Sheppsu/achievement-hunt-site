@@ -4,6 +4,7 @@ import { NotFoundError } from "../../errors/NotFoundError.ts";
 import Achievement from "components/staff/Achievement.tsx";
 
 import "assets/css/staff.css";
+import { Helmet } from "react-helmet";
 
 export default function AchievementPage() {
   const params = useParams();
@@ -30,10 +31,15 @@ export default function AchievementPage() {
   }
 
   return (
-    <div className="staff__page">
-      <div className="staff__achievement-container">
-        <Achievement achievement={achievement} />
+    <>
+      <Helmet>
+        <title>CTA - Staff Achievement</title>
+      </Helmet>
+      <div className="staff__page">
+        <div className="staff__achievement-container">
+          <Achievement achievement={achievement} />
+        </div>
       </div>
-    </div>
+    </>
   );
 }

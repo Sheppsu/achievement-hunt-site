@@ -15,9 +15,7 @@ class Migration(migrations.Migration):
             model_name="achievement",
             name="last_edited",
             field=models.DateTimeField(
-                default=datetime.datetime(
-                    2025, 3, 16, 18, 37, 23, 481910, tzinfo=datetime.timezone.utc
-                )
+                default=datetime.datetime(2025, 3, 16, 18, 37, 23, 481910, tzinfo=datetime.timezone.utc)
             ),
             preserve_default=False,
         ),

@@ -17,6 +17,7 @@ import classNames from "classnames";
 import { parseTags } from "util/helperFunctions.ts";
 import RenderedText from "components/common/RenderedText.tsx";
 import { PopupContext } from "contexts/PopupContext.ts";
+import { EventContext } from "contexts/EventContext.ts";
 
 function VoteContainer({ achievement }: { achievement: StaffAchievementType }) {
   const session = useContext(SessionContext);
@@ -53,9 +54,11 @@ type AchievementProps = {
 
 export default function Achievement(props: AchievementProps) {
   const achievement = props.achievement;
+  const achievementUrl = `https://${window.location.host}/staff/achievements/${achievement.id}`;
 
   const session = useContext(SessionContext);
   const popupCtx = useContext(PopupContext)!;
+  const dispatchEventMsg = useContext(EventContext);
 
   const [isCommenting, setIsCommenting] = useState(false);
   const [canSendComment, setCanSendComment] = useState(false);
@@ -70,6 +73,10 @@ export default function Achievement(props: AchievementProps) {
   const { data: batches, isLoading: batchesLoading } = useGetBatches(
     session.user!.is_admin,
   );
+
+  const canEdit =
+    achievement.creator !== null &&
+    (achievement.creator.id == session.user!.id || session.user!.is_admin);
 
   const onCommentStart = () => {
     setIsCommenting(true);
@@ -144,7 +151,6 @@ export default function Achievement(props: AchievementProps) {
   };
 
   const doMoveToBatch = (batchId: number) => {
-    console.log(batchId);
     moveAchievement.mutate(
       { batch_id: batchId },
       {
@@ -164,7 +170,7 @@ export default function Achievement(props: AchievementProps) {
       content = <h1>Failed to load</h1>;
     } else {
       content = (
-        <div className="staff-batches-listing">
+        <div className="staff-batch-move-container">
           {batches
             .sort(
               (a, b) => Date.parse(a.release_time) - Date.parse(b.release_time),
@@ -183,6 +189,11 @@ export default function Achievement(props: AchievementProps) {
       title: "Batches",
       content,
     });
+  };
+
+  const copyAchievementUrl = () => {
+    navigator.clipboard.writeText(achievementUrl);
+    dispatchEventMsg({ type: "info", msg: "Copied!" });
   };
 
   return (
@@ -241,9 +252,11 @@ export default function Achievement(props: AchievementProps) {
         achievement={achievement}
       />
       <div className="staff__achievement__comment-container">
-        {achievement.comments.map((comment, i) => (
-          <AchievementComment key={i} comment={comment} />
-        ))}
+        {achievement.comments
+          .sort((a, b) => Date.parse(a.posted_at) - Date.parse(b.posted_at))
+          .map((comment, i) => (
+            <AchievementComment key={i} comment={comment} />
+          ))}
         <TextArea
           className="staff__textarea"
           name="msg"
@@ -256,23 +269,12 @@ export default function Achievement(props: AchievementProps) {
         <div className="staff__achievement__comment-container__row">
           <Button
             children="Delete"
-            hidden={
-              achievement.creator === null ||
-              achievement.creator.id !== session.user!.id
-            }
+            hidden={!canEdit}
             unavailable={deleting}
             onClick={onDeleteAchievement}
             holdToUse={true}
           />
-          <Button
-            children="Edit"
-            hidden={
-              achievement.creator === null ||
-              achievement.creator.id !== session.user!.id ||
-              editing
-            }
-            onClick={onStartEdit}
-          />
+          <Button children="Edit" hidden={!canEdit} onClick={onStartEdit} />
           <Button
             children="Comment"
             onClick={onCommentStart}
@@ -289,15 +291,12 @@ export default function Achievement(props: AchievementProps) {
             onClick={onCommentCancel}
             hidden={!isCommenting || sendingComment}
           />
-          {session.user!.is_admin ? (
-            <Button
-              children="Move"
-              onClick={doMoveAchievement}
-              hidden={!session.user?.is_admin}
-            />
-          ) : (
-            ""
-          )}
+          <Button
+            children="Move"
+            onClick={doMoveAchievement}
+            hidden={!session.user?.is_admin}
+          />
+          <Button children="Copy URL" onClick={copyAchievementUrl} />
         </div>
       </div>
     </div>

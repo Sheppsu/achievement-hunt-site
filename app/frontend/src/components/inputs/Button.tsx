@@ -120,6 +120,7 @@ export default function Button(props: ButtonProps) {
         height: otherProps.height,
         position: "relative",
       }}
+      className={classNames({ hide: otherProps.hidden })}
     >
       <div
         className={classNames("button-circle", {

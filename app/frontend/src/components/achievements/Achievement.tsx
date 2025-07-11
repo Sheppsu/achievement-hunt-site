@@ -6,12 +6,7 @@ import AudioPlayer from "components/audio/AudioPlayer.tsx";
 import { AppState } from "types/AppStateType.ts";
 import { parseTags, toTitleCase } from "util/helperFunctions";
 import { useState } from "react";
-import Button from "components/inputs/Button.tsx";
-import {
-  IoIosArrowDown,
-  IoIosArrowDropdown,
-  IoIosArrowUp,
-} from "react-icons/io";
+import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 
 export default function Achievement({
   achievement,
@@ -47,8 +42,10 @@ export default function Achievement({
           <div className={infoCls}>
             <div className="achievement__container__info">
               <div style={{ display: "flex" }}>
-                <h1 style={{ flexGrow: "1" }}>{achievement.name}</h1>
-                <div style={{ flexBasis: "100px" }}></div>
+                <h1 style={{ flexGrow: "1", wordBreak: "break-word" }}>
+                  {achievement.name}
+                </h1>
+                <div style={{ flexBasis: "120px" }}></div>
               </div>
               <p className="achievement__points">
                 {points === null ? "" : `${points}pts`}

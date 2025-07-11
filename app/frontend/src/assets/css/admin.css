@@ -5,6 +5,8 @@
   flex-direction: column;
   align-items: center;
   gap: 10px;
+
+  overflow-y: auto;
 }
 
 .batch-input-row {
@@ -12,31 +14,6 @@
   flex-direction: row;
   align-items: center;
   gap: 10px;
-}
-
-.batch {
-  width: 100%;
-  height: 100%;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-
-.batch__title:hover {
-  cursor: pointer;
-}
-
-.batch__achievements {
-  width: calc(100% - 20px);
-  padding: 10px;
-
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-
-  background-color: var(--site-background-color);
 }
 
 .card--announcement__container {

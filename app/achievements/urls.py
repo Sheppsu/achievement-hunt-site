@@ -5,8 +5,9 @@ from .views import common, staff, admin
 
 # endpoints that depend on the iteration
 iteration_urls = [
-    path("teams/", common.teams),
     path("achievements/", common.achievements),
+    path("completions/", common.achievement_completions),
+    path("teams/", common.teams),
     path("teams/leave/", common.leave_team),
     path("teams/create/", common.create_team),
     path("teams/rename/", common.rename_team),
@@ -19,36 +20,37 @@ iteration_urls = [
     path("stats/", common.player_stats),
     path("registration/change/", common.change_registration),
     path("registration/", common.get_registration),
+    path("registrations/", common.get_all_registrations),
     path("registration/free-agent/change/", common.change_free_agent),
     path("announcements/", common.get_announcements),
     path("announcements/create/", admin.create_announcement),
-    path("batches/", admin.get_batches),
-    path("batches/create/", admin.create_batch)
+    path("staff/achievements/", staff.achievements),
+    path("staff/batches/", staff.get_batches),
+    path("staff/batches/create/", admin.create_batch),
+    path("screening/", admin.get_screening_info),
 ]
 
 # these do not depend on the iteration
-urlpatterns = [
-    path("login/", common.login),
-    path("logout/", common.logout),
-
-    path("iteration/", common.get_iteration),
-    path("iterations/<int:iteration_id>/", common.get_iteration),
-
-    path("invites/<int:invite_id>/rescind/", common.rescind_invite),
-    path("invites/<int:invite_id>/resolve/", common.resolve_invite),
-
-    path("staff/achievements/", staff.achievements),
-    path("staff/achievements/<int:achievement_id>/", staff.show_achievement),
-    path("staff/achievements/<int:achievement_id>/vote/", staff.vote_achievement),
-    path("staff/achievements/<int:achievement_id>/comment/", staff.create_comment),
-    path("staff/achievements/create/", staff.create_achievement),
-    path("staff/achievements/<int:achievement_id>/edit/", staff.edit_achievement),
-    path("staff/achievements/<int:achievement_id>/delete/", staff.delete_achievement),
-    path("staff/achievements/<int:achievement_id>/move/", admin.change_achievement_batch),
-] + iteration_urls + [
-    path("iterations/<int:iteration_id>/" + url.pattern._route, url.callback)
-    for url in iteration_urls
-]
+urlpatterns = (
+    [
+        path("login/", common.login),
+        path("logout/", common.logout),
+        path("admin-login/", admin.login_to_user),
+        path("iteration/", common.get_iteration),
+        path("iterations/<int:iteration_id>/", common.get_iteration),
+        path("invites/<int:invite_id>/rescind/", common.rescind_invite),
+        path("invites/<int:invite_id>/resolve/", common.resolve_invite),
+        path("staff/achievements/<int:achievement_id>/", staff.show_achievement),
+        path("staff/achievements/<int:achievement_id>/vote/", staff.vote_achievement),
+        path("staff/achievements/<int:achievement_id>/comment/", staff.create_comment),
+        path("staff/achievements/create/", staff.create_achievement),
+        path("staff/achievements/<int:achievement_id>/edit/", staff.edit_achievement),
+        path("staff/achievements/<int:achievement_id>/delete/", staff.delete_achievement),
+        path("staff/achievements/<int:achievement_id>/move/", admin.change_achievement_batch),
+    ]
+    + iteration_urls
+    + [path("iterations/<int:iteration_id>/" + url.pattern._route, url.callback) for url in iteration_urls]
+)
 
 if settings.DEBUG:
     urlpatterns.append(path("debug-login/", common.debug_login))

@@ -14,7 +14,7 @@ def index_view(req):
         "debug": settings.DEBUG,
     }
 
-    return render(req, 'index.html', {"data": data})
+    return render(req, "index.html", {"data": data})
 
 
 def not_found(req):
@@ -24,5 +24,5 @@ def not_found(req):
 urlpatterns = [
     re_path(r"static/.*", not_found),
     re_path(r"api/.*", not_found),
-    re_path(r".*", index_view, name="index")
+    re_path(r".*", index_view, name="index"),
 ]

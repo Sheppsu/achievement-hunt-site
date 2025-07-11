@@ -115,22 +115,36 @@ export function getMyCompletion(
   return null;
 }
 
+const c0 = -Math.atanh(0.7);
+const c1 = Math.atanh(0.97);
+
 export function calculateScore(
   teams: number,
   completions: number,
-  isCompleted: boolean,
+  timePlacement: number,
+  isSecret: boolean,
 ) {
   if (teams == 1) return 100;
-  if (isCompleted) completions -= 1;
-
-  const c0 = -Math.atanh(0.7);
-  const c1 = Math.atanh(0.97);
 
   const a = (x: number) => (1 - Math.tanh(x)) / 2;
   const b = (x: number) => (a((c1 - c0) * x + c0) - a(c1)) / (a(c0) - a(c1));
   const f = (x: number) => 10 + 90 * b(x / (teams - 1));
+  const p = (x: number) => Math.max(f(x - 1), f(teams - 1));
+  const s = (x: number) =>
+    (Math.cos((4 * Math.PI * (x - 1)) / (5 * teams)) + 1) / 2;
 
-  return Math.round(Math.max(f(completions), f(teams - 1)));
+  if (isSecret) {
+    return Math.max(Math.round(p(timePlacement) * s(completions)), 10);
+  }
+
+  return Math.round(p(completions));
+}
+
+export function parseMeaningfulTags(tagsString: string): boolean[] {
+  const tags = tagsString.toLowerCase().split(",");
+  const isCompetition = tags.includes("competition");
+  const isSecret = tags.includes("secret");
+  return [isCompetition, isSecret];
 }
 
 function* cleanTags(tags: string) {
@@ -187,4 +201,22 @@ export function parseMode(tags: string): string {
 
 export function randomChoice<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
+}
+
+export function sortedConcat<T>(
+  arr: T[],
+  item: T,
+  compFunc: (a: T, b: T) => number,
+): T[] {
+  for (const [i, existingItem] of arr.entries()) {
+    const comp = compFunc(existingItem, item);
+    if (comp === 0) return arr;
+
+    if (comp > 0) {
+      return arr.slice(0, i).concat([item], arr.slice(i));
+    }
+  }
+
+  arr.push(item);
+  return arr;
 }

@@ -14,13 +14,22 @@ import TextCard from "components/cards/TextCard.tsx";
 import RegistrationCard from "components/team/RegistrationCard.tsx";
 import AnnouncementsCard from "components/team/AnnouncementsCard.tsx";
 import { getMyTeam } from "util/helperFunctions.ts";
+import AllRegistrationsCard from "components/team/AllRegistrationsCard.tsx";
 
 export default function TeamPage() {
   const session = useContext(SessionContext);
   const { data: registration, isLoading: registrationLoading } =
     useGetRegistration(session.user !== null);
-  const { data: teamData, isLoading: teamsLoading } = useGetTeams();
-  const { data: iteration, isLoading: iterationLoading } = useGetIteration();
+  const { data: teamData, isLoading: teamsLoading } = useGetTeams(
+    session.user !== null,
+  );
+  const { data: iteration, isLoading: iterationLoading } = useGetIteration(
+    session.user !== null,
+  );
+
+  const isStaff =
+    session.user !== null &&
+    (session.user.is_admin || session.user.is_achievement_creator);
 
   // look for the current user's team
   let ownTeam: AchievementTeamExtendedType | null = null;
@@ -28,7 +37,7 @@ export default function TeamPage() {
     ownTeam = getMyTeam(session.user.id, teamData.teams);
 
   // show different layout of cards depending on current user state
-  const cardsColumns: React.ReactNode[][] = [[]];
+  const cardsColumns: React.ReactNode[][] = [[], []];
 
   if (session.user === null) {
     // not logged in
@@ -47,14 +56,29 @@ export default function TeamPage() {
     cardsColumns[0].push(
       <RegistrationCard iteration={iteration} registration={registration} />,
     );
-    if (registration !== null && Date.parse(iteration.start) > Date.now()) {
+    if (
+      registration !== null &&
+      !registration.is_screened &&
+      Date.parse(iteration.start) > Date.now()
+    ) {
       cardsColumns[0].push(<NoTeamCard registration={registration} />);
     }
   } else {
-    cardsColumns[0].push(<TeamCard team={ownTeam} />, <TeamChatCard />);
+    cardsColumns[0].push(
+      <TeamCard iteration={iteration} team={ownTeam} teamData={teamData} />,
+      <TeamChatCard />,
+    );
   }
 
-  cardsColumns.push([<AnnouncementsCard />]);
+  if (
+    session.user !== null &&
+    iteration !== undefined &&
+    Date.parse(iteration.registration_end) > Date.now()
+  ) {
+    cardsColumns[1].push(<AllRegistrationsCard />);
+  }
+
+  cardsColumns[1].push(<AnnouncementsCard />);
 
   if (teamData !== undefined && teamData.teams.length > 0) {
     cardsColumns[1].push(
@@ -65,7 +89,7 @@ export default function TeamPage() {
   // show teams listing for admins
   // or at the end of the event
   if (
-    ((session.user !== null && session.user.is_admin) ||
+    (isStaff ||
       (iteration !== undefined && Date.parse(iteration.end) <= Date.now())) &&
     teamData !== undefined
   ) {
@@ -79,7 +103,7 @@ export default function TeamPage() {
   return (
     <>
       <Helmet>
-        <title>CTA Teams</title>
+        <title>CTA - Dashboard</title>
       </Helmet>
       <div className="cards-container">
         {cardsColumns.map((cards, i) => (

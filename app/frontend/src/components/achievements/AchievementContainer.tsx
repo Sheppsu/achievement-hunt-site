@@ -3,7 +3,6 @@ import { AchievementTeamExtendedType } from "api/types/AchievementTeamType.ts";
 import { CompletedAchievementType } from "api/types/AchievementType";
 import "assets/css/achievements.css";
 import { SessionContext } from "contexts/SessionContext.ts";
-import { AnimationScope } from "motion/react";
 import { useContext } from "react";
 import { AppState } from "types/AppStateType.ts";
 import { getSortedAchievements } from "util/achievementSorting.ts";
@@ -11,6 +10,7 @@ import {
   calculateScore,
   getMyCompletion,
   getMyTeam,
+  parseMeaningfulTags,
 } from "util/helperFunctions.ts";
 import Achievement from "./Achievement";
 
@@ -21,34 +21,31 @@ function extendAchievementData(
 ) {
   for (const achievement of achievements) {
     const completion = getMyCompletion(achievement.completions, myTeam);
+    const [isCompetition, isSecret] = parseMeaningfulTags(achievement.tags);
 
     achievement.completed = completion !== null;
 
-    if (
-      achievement.tags.split(",").includes("competition") &&
-      completion === null
-    )
-      continue;
+    if (isCompetition && completion === null) continue;
 
-    achievement.points = calculateScore(
-      nTeams,
-      completion === null ||
-        completion.placement === undefined ||
-        completion.placement === null
-        ? achievement.completion_count
-        : completion.placement.place,
-      achievement.completed,
-    );
+    if (completion === null) {
+      achievement.points = calculateScore(
+        nTeams,
+        achievement.completion_count + 1,
+        achievement.completion_count + 1,
+        isSecret,
+      );
+    } else {
+      achievement.points = calculateScore(
+        nTeams,
+        achievement.completion_count,
+        completion.time_placement,
+        isSecret,
+      );
+    }
   }
 }
 
-export default function AchievementContainer({
-  state,
-  scope,
-}: {
-  state: AppState;
-  scope: AnimationScope;
-}) {
+export default function AchievementContainer({ state }: { state: AppState }) {
   const session = useContext(SessionContext);
   const { data: baseAchievements } = useGetAchievements();
   const { data: teamData } = useGetTeams();
@@ -66,7 +63,6 @@ export default function AchievementContainer({
 
   const teams = teamData.teams;
 
-  const nTeams = teams.filter((t) => t.points > 0).length;
   const achievements: CompletedAchievementType[] = baseAchievements.map(
     (a) => ({
       ...a,
@@ -77,7 +73,7 @@ export default function AchievementContainer({
 
   const myTeam = getMyTeam(session.user?.id ?? undefined, teams);
 
-  extendAchievementData(achievements, nTeams, myTeam);
+  extendAchievementData(achievements, teamData.effective_team_count, myTeam);
 
   const sortedAchievements = getSortedAchievements(
     achievements,
@@ -88,7 +84,7 @@ export default function AchievementContainer({
   );
 
   return (
-    <div ref={scope} className="achievements__container">
+    <div className="achievements__container">
       {Object.entries(sortedAchievements).map(([group, achievements]) => {
         return (
           <>

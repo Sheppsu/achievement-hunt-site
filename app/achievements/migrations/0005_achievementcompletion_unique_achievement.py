@@ -12,8 +12,6 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddConstraint(
             model_name="achievementcompletion",
-            constraint=models.UniqueConstraint(
-                fields=("player", "achievement"), name="unique_achievement"
-            ),
+            constraint=models.UniqueConstraint(fields=("player", "achievement"), name="unique_achievement"),
         ),
     ]

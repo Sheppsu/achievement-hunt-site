@@ -6,9 +6,8 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('achievements', '0022_chatmessage'),
-        ('achievements', '0025_registration_unique_registration'),
+        ("achievements", "0022_chatmessage"),
+        ("achievements", "0025_registration_unique_registration"),
     ]
 
-    operations = [
-    ]
+    operations = []

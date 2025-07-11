@@ -11,6 +11,7 @@ export function defaultState(): AppState {
       value: parseFloat(localStorage.getItem("volume") ?? "0.5"),
       isMuted: localStorage.getItem("isMuted") === "t",
     },
+    submissionMode: "any",
   };
 }
 
@@ -24,4 +25,5 @@ export type AppState = {
     value: number;
     isMuted: boolean;
   };
+  submissionMode: string;
 };

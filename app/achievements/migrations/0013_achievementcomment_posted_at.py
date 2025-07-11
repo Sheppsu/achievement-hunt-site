@@ -17,9 +17,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="achievementcomment",
             name="posted_at",
-            field=models.DateTimeField(
-                default=datetime.datetime(2025, 3, 15, 1, 49, 59, 555928)
-            ),
+            field=models.DateTimeField(default=datetime.datetime(2025, 3, 15, 1, 49, 59, 555928)),
             preserve_default=False,
         ),
     ]

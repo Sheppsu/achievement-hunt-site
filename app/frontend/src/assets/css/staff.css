@@ -1,7 +1,8 @@
 .staff__page {
-  width: 100%;
+  width: calc(100% - 20px);
   max-width: 1000px;
   margin: auto;
+  padding: 10px 0;
 
   display: flex;
   flex-direction: column;
@@ -86,6 +87,8 @@
 }
 
 .staff__achievement__name {
+  word-break: break-word;
+
   font-size: 30px;
   font-weight: 600;
 }
@@ -225,7 +228,7 @@
 }
 
 .staff__achievement__comment__user {
-  flex-basis: 180px;
+  flex-basis: 210px;
   flex-shrink: 0;
 
   display: flex;
@@ -275,10 +278,44 @@
   color: #d3d3d3;
 }
 
-.staff-batches-listing {
+.staff-batch-move-container {
   display: flex;
   flex-direction: row;
   gap: 5px;
   justify-content: center;
   flex-wrap: wrap;
+}
+
+.staff-batches-listing-container {
+  overflow-x: auto;
+}
+
+.staff-batches-listing {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.staff-batch {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.staff-batch__title:hover {
+  cursor: pointer;
+}
+
+.staff-batch__achievements {
+  width: calc(100% - 20px);
+  padding: 10px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+
+  background-color: var(--site-background-color);
 }

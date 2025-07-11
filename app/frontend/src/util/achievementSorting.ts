@@ -8,11 +8,12 @@ import {
   AnonymousAchievementCompletionType,
 } from "api/types/AchievementCompletionType.ts";
 import { AchievementTeamExtendedType } from "api/types/AchievementTeamType.ts";
-import { getMyCompletion } from "util/helperFunctions.ts";
+import { getMyCompletion, sortedConcat } from "util/helperFunctions.ts";
 import {
   NavItems,
   NavRowItems,
 } from "components/achievements/AchievementNavigationBar.tsx";
+import { AchievementBatchType } from "api/types/AchievementBatchType.ts";
 
 function intersects(a: string[], b: string[]): boolean {
   for (const item of b) {
@@ -24,7 +25,10 @@ function intersects(a: string[], b: string[]): boolean {
   return false;
 }
 
-function matchesSearch(achievement: AchievementType, searchFilter: string[]) {
+function matchesSearch(
+  achievement: AchievementType | StaffAchievementType,
+  searchFilter: string[],
+) {
   for (const word of searchFilter) {
     if (
       word != "" &&
@@ -35,7 +39,12 @@ function matchesSearch(achievement: AchievementType, searchFilter: string[]) {
           bm.info.artist.toLowerCase().includes(word) ||
           bm.info.title.toLowerCase().includes(word) ||
           bm.info.version.toLowerCase().includes(word),
-      ).length == 0
+      ).length == 0 &&
+      !(
+        "creator" in achievement &&
+        achievement.creator !== null &&
+        achievement.creator.username.toLowerCase().includes(word)
+      )
     )
       return false;
   }
@@ -64,6 +73,7 @@ function matchesMode(
 function getGrouping(
   sort: string,
   myTeam: AchievementTeamExtendedType | null,
+  achievements: AchievementType[],
 ): [
   string[],
   (
@@ -133,14 +143,27 @@ function getGrouping(
         (a: CompletedAchievementType, b: CompletedAchievementType) =>
           getTimestamp(a.completions) - getTimestamp(b.completions),
       ];
-    case "batch":
+    case "release": {
+      let batches: AchievementBatchType[] = [];
+      for (const achievement of achievements) {
+        if (batches.findIndex((b) => b.id == achievement.batch!.id) === -1)
+          batches = sortedConcat(
+            batches,
+            achievement.batch!,
+            (a, b) => Date.parse(b.release_time) - Date.parse(a.release_time),
+          );
+      }
+
+      const batchIds = batches.map((b) => b.id);
+
       return [
-        [1, 2, 3, 4, 5, 6, 7, 8].map((n) => `Batch ${n}`),
+        batchIds.map((_, i) => `Release ${batchIds.length - i}`),
         (a: CompletedAchievementType) =>
-          `Batch ${Math.ceil(Math.max(0, a.id - 30) / 10) + 1}`,
+          `Release ${batchIds.length - batchIds.indexOf(a.batch!.id)}`,
         (a: CompletedAchievementType, b: CompletedAchievementType) =>
           a.id - b.id,
       ];
+    }
     case "votes":
       return [
         ["*"],
@@ -178,11 +201,15 @@ export function getSortedAchievements<T extends AchievementType>(
 ): { [_k: string]: T[] } {
   const activeTags = filters.rows.tags.items
     .filter((item) => item.active)
-    .map((item) => item.label);
+    .map((item) => item.label.toLowerCase());
   const searchFilter = searchText.toLowerCase().split(" ");
   const sort = filters.rows.sort.items.filter((i) => i.active)[0].label;
 
-  const [groupSort, groupFunc, sortFunc] = getGrouping(sort, team);
+  const [groupSort, groupFunc, sortFunc] = getGrouping(
+    sort,
+    team,
+    achievements,
+  );
   const sortedAchievements: { [key: string]: T[] } = {};
 
   for (const achievement of achievements) {
@@ -192,7 +219,7 @@ export function getSortedAchievements<T extends AchievementType>(
 
     if (
       activeTags.length != 0 &&
-      !intersects(activeTags, achievement.tags.split(","))
+      !intersects(activeTags, achievement.tags.toLowerCase().split(","))
     )
       continue;
 

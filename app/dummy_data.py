@@ -18,12 +18,7 @@ client: osu.Client = settings.OSU_CLIENT
 
 def ensure_user(user: osu.UserCompact):
     User.objects.get_or_create(
-        id=user.id,
-        defaults={
-            "username": user.username,
-            "avatar": user.avatar_url,
-            "cover": user.cover.url
-        }
+        id=user.id, defaults={"username": user.username, "avatar": user.avatar_url, "cover": user.cover.url}
     )
 
 
@@ -38,11 +33,7 @@ for _ in range(10):
 
     for stats in itertools.batched(ret.ranking, 5):
         team, created = Team.objects.get_or_create(
-            name=f"Team {team_counter}",
-            defaults={
-                "points": random.randint(0, 9999),
-                "iteration": iteration
-            }
+            name=f"Team {team_counter}", defaults={"points": random.randint(0, 9999), "iteration": iteration}
         )
         team_counter += 1
 

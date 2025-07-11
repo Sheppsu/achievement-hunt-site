@@ -12,7 +12,6 @@ import {
   useDispatchStateContext,
   useStateContext,
 } from "contexts/StateContext.ts";
-import { AnimationScope, useAnimate } from "motion/react";
 import { useContext, useEffect, useState } from "react";
 import { Helmet } from "react-helmet";
 import { AppState } from "types/AppStateType.ts";
@@ -45,31 +44,23 @@ function HiddenAchievementCompletionPage({
   );
 }
 
-function LimitedAchievementCompletionPage({
-  state,
-  scope,
-}: {
-  state: AppState;
-  scope: AnimationScope;
-}) {
-  return <AchievementContainer scope={scope} state={state} />;
+function LimitedAchievementCompletionPage({ state }: { state: AppState }) {
+  return <AchievementContainer state={state} />;
 }
 
 function FullAchievementCompletionPage({
   team,
   state,
-  scope,
   iteration,
 }: {
   team: AchievementTeamExtendedType | null;
   state: AppState;
-  scope: AnimationScope;
   iteration: EventIterationType;
 }) {
   return (
     <>
       <AchievementProgress team={team} iteration={iteration} />
-      <AchievementContainer scope={scope} state={state} />
+      <AchievementContainer state={state} />
     </>
   );
 }
@@ -86,7 +77,6 @@ export default function AchievementCompletionPage() {
   const session = useContext(SessionContext);
 
   const [time, setTime] = useState<number>(Date.now());
-  const [scope, animate] = useAnimate();
 
   useEffect(() => {
     setInterval(() => setTime(Date.now()), 1000);
@@ -149,11 +139,11 @@ export default function AchievementCompletionPage() {
   return (
     <>
       <Helmet>
-        <title>CTA - Completions</title>
+        <title>CTA - Achievements</title>
       </Helmet>
 
       <div className="achievements-layout">
-        <div style={{ margin: "auto", textAlign: "center", marginTop: "20px" }}>
+        <div style={{ margin: "auto", textAlign: "center" }}>
           <h1 style={{ fontSize: "3em" }}>
             {time < iterationEnd
               ? `Ends in: ${getTimeStr(iterationEnd - time)}`
@@ -162,9 +152,8 @@ export default function AchievementCompletionPage() {
         </div>
 
         <AchievementNavigationBar
+          key="achievements"
           state={state}
-          animate={animate}
-          scope={scope}
           dispatchState={dispatchState}
           achievements={achievements}
           isStaff={false}
@@ -173,13 +162,12 @@ export default function AchievementCompletionPage() {
         <div className="achievements">
           {team !== null ? (
             <FullAchievementCompletionPage
-              scope={scope}
               state={state}
               team={team}
               iteration={iteration}
             />
           ) : (
-            <LimitedAchievementCompletionPage state={state} scope={scope} />
+            <LimitedAchievementCompletionPage state={state} />
           )}
         </div>
       </div>

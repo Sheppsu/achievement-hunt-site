@@ -11,7 +11,7 @@ __all__ = (
     "FlagType",
     "ValidationType",
     "ValidationResult",
-    "ValidationResultType"
+    "ValidationResultType",
 )
 
 
@@ -29,11 +29,11 @@ class ValidationResult:
     @classmethod
     def all_clear(cls):
         return cls(ValidationResultType.ALL_CLEAR)
-    
+
     @classmethod
     def clear(cls):
         return cls(ValidationResultType.CLEAR)
-    
+
     @classmethod
     def failed(cls, msg: str):
         return cls(ValidationResultType.FAILED, msg)
@@ -75,7 +75,7 @@ class OptionalType(ValidationType):
         if self.optional and data is None:
             return ValidationResult.all_clear()
         return ValidationResult.clear()
-    
+
 
 class OptionsType(OptionalType):
     __slots__ = ("options",)
@@ -91,8 +91,11 @@ class OptionsType(OptionalType):
         if self.options is None:
             return ValidationResult.clear()
 
-        return ValidationResult.clear() if data in self.options else \
-            ValidationResult.failed("Invalid option for {name}: '%s'" % data)
+        return (
+            ValidationResult.clear()
+            if data in self.options
+            else ValidationResult.failed("Invalid option for {name}: '%s'" % data)
+        )
 
 
 class StringType(OptionsType):
@@ -103,10 +106,10 @@ class StringType(OptionsType):
         min_length: int | None = None,
         max_length: int | None = None,
         options: Sequence | None = None,
-        optional: bool = False
+        optional: bool = False,
     ):
         super().__init__(options, optional)
-        
+
         self.min_length: int | None = min_length
         self.max_length: int | None = max_length
 
@@ -117,20 +120,17 @@ class StringType(OptionsType):
         if not isinstance(data, str):
             return ValidationResult.failed("{name} must be a string")
 
-        if (
-            (self.min_length is not None and len(data) < self.min_length) or
-            (self.max_length is not None and len(data) > self.max_length)
+        if (self.min_length is not None and len(data) < self.min_length) or (
+            self.max_length is not None and len(data) > self.max_length
         ):
             if self.max_length is None:
                 msg = "{name} must have a length of at least %d" % self.min_length
             elif self.min_length is None:
                 msg = "{name} must have a length of at most %d" % self.max_length
             else:
-                msg = "{name} must have a length between %d and %d" % (
-                    self.min_length, self.max_length
-                )
+                msg = "{name} must have a length between %d and %d" % (self.min_length, self.max_length)
             return ValidationResult.failed(msg)
-        
+
         return ValidationResult.clear()
 
 
@@ -152,7 +152,7 @@ class IntegerType(OptionalType):
             return ValidationResult.failed("{name} must be greater than %d" % self.min)
         if self.max is not None and data > self.max:
             return ValidationResult.failed("{name} must be less than %d" % self.max)
-        
+
         return ValidationResult.clear()
 
 
@@ -163,7 +163,7 @@ class BoolType(OptionalType):
 
         if not isinstance(data, bool):
             return ValidationResult.failed("{name} must be a boolean")
-        
+
         return ValidationResult.clear()
 
 
@@ -177,7 +177,7 @@ class ListType(OptionalType):
         max_len: int = 0,
         min_len: int = 0,
         unique: bool = False,
-        unique_check=None
+        unique_check=None,
     ):
         super().__init__(optional)
 
@@ -234,9 +234,12 @@ class DictionaryType(OptionalType):
 
             result = validator.validate(data[key])
             if result.is_failed:
-                return ValidationResult.failed(result.msg.format(name=key)) \
-                    if not isinstance(validator, DictionaryType) else result
-            
+                return (
+                    ValidationResult.failed(result.msg.format(name=key))
+                    if not isinstance(validator, DictionaryType)
+                    else result
+                )
+
         return ValidationResult.clear()
 
 

@@ -14,9 +14,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="achievement",
             name="created_at",
-            field=models.DateTimeField(
-                default=datetime.datetime(2025, 3, 16, 14, 34, 53, 726161)
-            ),
+            field=models.DateTimeField(default=datetime.datetime(2025, 3, 16, 14, 34, 53, 726161)),
             preserve_default=False,
         ),
     ]

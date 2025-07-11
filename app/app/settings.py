@@ -35,48 +35,48 @@ ALLOWED_HOSTS = ["*"] if DEBUG else ["cta.sheppsu.me"]
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'whitenoise.runserver_nostatic',
-    'django.contrib.staticfiles',
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "whitenoise.runserver_nostatic",
+    "django.contrib.staticfiles",
     "achievements",
-    "frontend"
+    "frontend",
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'middleware.ExceptionLoggingMiddleware',
-    'middleware.DatabaseDebugMiddleware'
+    "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "middleware.ExceptionLoggingMiddleware",
+    "middleware.DatabaseDebugMiddleware",
 ]
 
-ROOT_URLCONF = 'app.urls'
+ROOT_URLCONF = "app.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / "frontend" / "dist"],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [BASE_DIR / "frontend" / "dist"],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'app.wsgi.application'
+WSGI_APPLICATION = "app.wsgi.application"
 
 
 # Database
@@ -100,16 +100,10 @@ LOCAL_DB = {
     "PORT": os.getenv("LOCAL_PG_PORT"),
 }
 
-DATABASES = {
-    "default": LOCAL_DB if DEBUG and "--use-prod-db" not in sys.argv else PROD_DB
-}
+DATABASES = {"default": LOCAL_DB if DEBUG and "--use-prod-db" not in sys.argv else PROD_DB}
 
 
-STORAGES = {
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"
-    }
-}
+STORAGES = {"staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"}}
 
 
 # Password validation
@@ -117,16 +111,16 @@ STORAGES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
@@ -134,9 +128,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "UTC"
 
 USE_I18N = True
 
@@ -146,20 +140,16 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles' if not DEBUG else BASE_DIR / "frontend" / "dist"
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static")
-]
+STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles" if not DEBUG else BASE_DIR / "frontend" / "dist"
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 if not DEBUG:
-    STATICFILES_DIRS.append(
-        os.path.join(BASE_DIR, "frontend", "dist")
-    )
+    STATICFILES_DIRS.append(os.path.join(BASE_DIR, "frontend", "dist"))
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 AUTH_USER_MODEL = "achievements.User"
@@ -171,12 +161,7 @@ OSU_CLIENT_SECRET = os.getenv("OSU_CLIENT_SECRET")
 OSU_REDIRECT_URL = os.getenv("OSU_REDIRECT_URL")
 OSU_DEV_SERVER = bool(int(os.getenv("OSU_DEV_SERVER")))
 
-auth = AuthHandler(
-    OSU_CLIENT_ID,
-    OSU_CLIENT_SECRET,
-    OSU_REDIRECT_URL,
-    Scope.identify()
-)
+auth = AuthHandler(OSU_CLIENT_ID, OSU_CLIENT_SECRET, OSU_REDIRECT_URL, Scope.identify())
 if OSU_DEV_SERVER:
     auth.set_domain("dev.ppy.sh")
 OSU_LOGIN_URL = auth.get_auth_url()
@@ -190,3 +175,5 @@ ACHIEVEMENTS_WS_URI = os.getenv("ACHIEVEMENTS_WS_URI")
 WS_CONNECTION_VALIDATOR = os.getenv("WS_CONNECTION_VALIDATOR")
 
 DISCORD_LOGGER = DiscordLogger()
+
+COMM_PORT = int(os.getenv("COMM_PORT"))

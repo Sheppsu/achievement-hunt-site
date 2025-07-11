@@ -44,8 +44,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AddConstraint(
             model_name="teaminvite",
-            constraint=models.UniqueConstraint(
-                fields=("team", "user"), name="unique_team_invite"
-            ),
+            constraint=models.UniqueConstraint(fields=("team", "user"), name="unique_team_invite"),
         ),
     ]

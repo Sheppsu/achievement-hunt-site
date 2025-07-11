@@ -5,9 +5,7 @@ from django.conf import settings
 import logging
 
 
-__all__ = (
-    "DatabaseDebugMiddleware",
-)
+__all__ = ("DatabaseDebugMiddleware",)
 
 
 log = logging.getLogger(__name__)

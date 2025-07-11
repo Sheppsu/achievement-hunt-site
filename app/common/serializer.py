@@ -5,10 +5,7 @@ from datetime import datetime
 from typing import Callable, Any
 
 
-__all__ = (
-    "SerializableModel",
-    "SerializableField"
-)
+__all__ = ("SerializableModel", "SerializableField")
 
 
 class SerializableField:
@@ -19,7 +16,7 @@ class SerializableField:
         "serialize_filter",
         "post_serial_filter",
         "post_transform",
-        "is_passive"
+        "is_passive",
     )
 
     non_passive_attrs = (
@@ -57,10 +54,7 @@ class SerializableField:
                 super().__setattr__("is_passive", False)
 
     def _check_is_passive(self):
-        return all((
-            getattr(self, f) is None
-            for f in self.non_passive_attrs
-        ))
+        return all((getattr(self, f) is None for f in self.non_passive_attrs))
 
     def split(self):
         result = list(map(SerializableField, self.field.split(sep="__", maxsplit=1)))
@@ -75,7 +69,7 @@ class SerializableField:
             self.serialize_condition,
             self.serialize_filter,
             self.post_serial_filter,
-            self.post_transform
+            self.post_transform,
         )
 
     def __str__(self):
@@ -88,12 +82,12 @@ class SerializableField:
         return hash(self.field)
 
     def __eq__(self, other: "SerializableField"):
-        return self.field == other.field
+        return self.field == other.field and self.serial_key == other.serial_key
 
 
-def _separate_field_args(fields: list[str | SerializableField | None], only_include_last=False) -> tuple[
-    list[SerializableField], dict[SerializableField, list[SerializableField]]
-]:
+def _separate_field_args(
+    fields: list[str | SerializableField | None], only_include_last=False
+) -> tuple[list[SerializableField], dict[SerializableField, list[SerializableField]]]:
     # parse string representation of field reference
     # e.g. player__user__username -> {player: [user__username]}
     now = []
@@ -129,7 +123,7 @@ class SerializableModel(models.Model):
         self,
         fields: list[SerializableField],
         excludes: dict[SerializableField, list[SerializableField]],
-        includes: dict[SerializableField, list[SerializableField]]
+        includes: dict[SerializableField, list[SerializableField]],
     ) -> dict | None:
         field_transforms = getattr(self.Serialization, "TRANSFORM", {})
 
@@ -178,9 +172,7 @@ class SerializableModel(models.Model):
         return data
 
     def serialize(
-        self,
-        includes: list[str | SerializableField] | None = None,
-        excludes: list[str] | None = None
+        self, includes: list[str | SerializableField] | None = None, excludes: list[str] | None = None
     ) -> dict | None:
         if includes is None:
             includes = []

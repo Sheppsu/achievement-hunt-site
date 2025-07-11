@@ -115,6 +115,9 @@ hr {
 #page-content {
   width: 100%;
   min-height: calc(100vh - 142px);
+
+  /* For header */
+  padding-top: 82px;
 }
 
 /* Footer */
@@ -275,6 +278,10 @@ a.rendered-text:hover {
   overflow-y: auto;
 }
 
+.card.expand {
+  flex-grow: 1;
+}
+
 .card__title {
   padding-left: 18px;
   margin: 5px 0;
@@ -300,16 +307,32 @@ a.rendered-text:hover {
   }
 }
 
+.card__row {
+  padding: 10px 0;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.card__row.spaced {
+  justify-content: space-between;
+}
+
 /* header */
 
 .header {
   width: 100%;
   padding-top: 10px;
 
+  position: fixed;
+
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+
+  z-index: 10;
 }
 
 .header.mobile {

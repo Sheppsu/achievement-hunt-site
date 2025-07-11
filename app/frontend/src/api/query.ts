@@ -11,12 +11,17 @@ import {
 import { AchievementCommentType } from "api/types/AchievementCommentType.ts";
 import { UserType } from "api/types/UserType.ts";
 import { EventContext, EventType } from "contexts/EventContext";
-import { ChatMessage } from "contexts/WebsocketContext";
+import {
+  ChatMessage,
+  WebsocketContext,
+  WebsocketContextType,
+} from "contexts/WebsocketContext";
 import { UndefinedInitialDataOptions } from "node_modules/@tanstack/react-query/build/legacy";
 import { useContext } from "react";
 import {
   AchievementTeamExtendedType,
   AchievementTeamType,
+  TeamDataType,
 } from "./types/AchievementTeamType";
 import {
   AchievementExtendedType,
@@ -28,6 +33,8 @@ import { AnnouncementType } from "api/types/AnnouncementType.ts";
 import { AchievementBatchType } from "api/types/AchievementBatchType.ts";
 import { RegistrationType } from "api/types/RegistrationType.ts";
 import { TeamInviteType, UserInviteType } from "api/types/InviteType.ts";
+import { AllRegistrationsType } from "api/types/AllRegistrationsType.ts";
+import { AchievementCompletionExtendedType } from "api/types/AchievementCompletionType.ts";
 
 function getIterationParams() {
   const path = location.pathname;
@@ -125,10 +132,14 @@ export function useGetAchievements(
   });
 }
 
-type TeamDataType = {
-  placement: number;
-  teams: (AchievementTeamType | AchievementTeamExtendedType)[];
-};
+export function useGetCompletions(
+  enabled: boolean = true,
+): UseQueryResult<AchievementCompletionExtendedType[]> {
+  return useMakeQuery({
+    queryKey: [...getIterationParams(), "completions"],
+    enabled,
+  });
+}
 
 export function useGetTeams(
   enabled: boolean = true,
@@ -273,8 +284,11 @@ type TeamLeaveDataType = {
   user_id: number;
 };
 
-function onLeaveTeam(teamData: TeamDataType, leaveData: TeamLeaveDataType) {
-  console.log(teamData);
+function onLeaveTeam(
+  wsCtx: WebsocketContextType,
+  teamData: TeamDataType,
+  leaveData: TeamLeaveDataType,
+) {
   const newTeams = [];
 
   for (const team of teamData.teams) {
@@ -295,7 +309,7 @@ function onLeaveTeam(teamData: TeamDataType, leaveData: TeamLeaveDataType) {
     newTeams.push(team);
   }
 
-  console.log(newTeams);
+  wsCtx?.resetConnection();
 
   return { placement: teamData.placement, teams: newTeams };
 }
@@ -303,16 +317,16 @@ function onLeaveTeam(teamData: TeamDataType, leaveData: TeamLeaveDataType) {
 export function useLeaveTeam(): SpecificUseMutationResult<TeamLeaveDataType> {
   const iteration = getIterationParams();
   const queryClient = useContext(QueryClientContext);
+  const wsCtx = useContext(WebsocketContext);
 
   return useMakeMutation(
     {
       mutationKey: [...iteration, "teams", "leave"],
-      onSuccess: (leaveData: TeamLeaveDataType) => {
-        // remove players or team
-        queryClient?.setQueryData(
-          [...iteration, "teams"],
-          (teamData: TeamDataType) => onLeaveTeam(teamData, leaveData),
-        );
+      onSuccess: () => {
+        queryClient?.invalidateQueries({
+          queryKey: [...iteration, "teams"],
+          exact: true,
+        });
       },
     },
     {
@@ -324,6 +338,7 @@ export function useLeaveTeam(): SpecificUseMutationResult<TeamLeaveDataType> {
 export function useCreateTeam(): SpecificUseMutationResult<AchievementTeamExtendedType> {
   const iteration = getIterationParams();
   const queryClient = useContext(QueryClientContext);
+  const wsCtx = useContext(WebsocketContext);
 
   return useMakeMutation(
     {
@@ -331,7 +346,10 @@ export function useCreateTeam(): SpecificUseMutationResult<AchievementTeamExtend
       onSuccess: () => {
         queryClient?.invalidateQueries({
           queryKey: [...iteration, "teams"],
+          exact: true,
         });
+
+        wsCtx?.resetConnection();
       },
     },
     {
@@ -383,7 +401,6 @@ export function useSendTeamInvite(): SpecificUseMutationResult<TeamInviteType> {
 function onInviteDeleted(
   queryKey: string[],
   queryClient: QueryClient | undefined,
-  iteration: string[],
   inviteId: number,
 ) {
   queryClient?.setQueryData(queryKey, (invites: TeamInviteType[]) => {
@@ -412,7 +429,6 @@ export function useRescindTeamInvite(
         onInviteDeleted(
           [...iteration, "teams", "invites"],
           queryClient,
-          iteration,
           inviteId,
         ),
     },
@@ -427,14 +443,10 @@ export function useResolveInvite(
 ): SpecificUseMutationResult<AchievementTeamType | null> {
   const iteration = getIterationParams();
   const queryClient = useContext(QueryClientContext);
+  const wsCtx = useContext(WebsocketContext);
 
   function onInviteResolved(team: AchievementTeamType | null) {
-    onInviteDeleted(
-      [...iteration, "invites"],
-      queryClient,
-      iteration,
-      inviteId,
-    );
+    onInviteDeleted([...iteration, "invites"], queryClient, inviteId);
 
     if (team === null) {
       return;
@@ -442,7 +454,10 @@ export function useResolveInvite(
 
     queryClient?.invalidateQueries({
       queryKey: [...iteration, "teams"],
+      exact: true,
     });
+
+    wsCtx?.resetConnection();
   }
 
   return useMakeMutation(
@@ -456,12 +471,15 @@ export function useResolveInvite(
   );
 }
 
-export function useGetIteration(): UseQueryResult<EventIterationType> {
+export function useGetIteration(
+  enabled: boolean = true,
+): UseQueryResult<EventIterationType> {
   const iteration = getIterationParams();
 
   return useMakeQuery({
     queryKey: iteration.length === 0 ? ["iteration"] : iteration,
     refetchOnMount: false,
+    enabled,
   });
 }
 
@@ -473,6 +491,15 @@ export function useGetRegistration(
   return useMakeQuery({
     queryKey: [...iteration, "registration"],
     enabled,
+  });
+}
+
+export function useGetAllRegistrations(): UseQueryResult<AllRegistrationsType> {
+  const iteration = getIterationParams();
+
+  return useMakeQuery({
+    queryKey: [...iteration, "registrations"],
+    refetchOnMount: false,
   });
 }
 
@@ -598,7 +625,6 @@ function onCommented(
   queryClient?.setQueryData(
     ["staff", "achievements", "?batch=0"],
     (achievements: StaffAchievementType[] | undefined) => {
-      console.log(achievements);
       if (achievements === undefined) return;
 
       const newAchievements = [];
@@ -654,13 +680,12 @@ function onAchievementCreation(
   achievement: AchievementCreationReturn,
 ) {
   queryClient?.setQueryData(
-    ["staff", "achievements", "?batch=0"],
+    [...getIterationParams(), "staff", "achievements", "?batch=0"],
     (achievements: StaffAchievementType[] | undefined) =>
       achievements?.concat([
         {
           ...achievement,
           batch: null,
-          batch_id: null,
           comments: [],
           has_voted: false,
           vote_count: 0,
@@ -695,7 +720,12 @@ function onAchievementEdit(
   });
 
   queryClient?.setQueryData(
-    ["staff", "achievements", "?batch=0"],
+    [
+      ...getIterationParams(),
+      "staff",
+      "achievements",
+      editedAchievement.batch === null ? "?batch=0" : "?batch=1",
+    ],
     (achievements: StaffAchievementType[] | undefined) => {
       if (achievements === undefined) return;
 
@@ -749,6 +779,7 @@ function onAchievementDeleted(
 
   queryClient?.invalidateQueries({
     queryKey: ["staff", "achievements", achievementId.toString()],
+    exact: true,
   });
 }
 
@@ -797,8 +828,10 @@ export function useCreateAnnouncement(): SpecificUseMutationResult<AnnouncementT
       onSuccess: (announcement) => {
         queryClient?.setQueryData(
           [...iteration, "announcements"],
-          (announcements: AnnouncementType[]) =>
-            [announcement].concat(announcements),
+          (announcements: AnnouncementType[] | undefined) =>
+            announcements === undefined
+              ? [announcement]
+              : [announcement].concat(announcements),
         );
       },
     },
@@ -809,11 +842,12 @@ export function useCreateAnnouncement(): SpecificUseMutationResult<AnnouncementT
 }
 
 export function useGetBatches(
-  enabled: boolean = false,
+  enabled: boolean = true,
 ): UseQueryResult<AchievementBatchType[]> {
   return useMakeQuery({
-    queryKey: [...getIterationParams(), "batches"],
+    queryKey: [...getIterationParams(), "staff", "batches"],
     enabled,
+    refetchOnMount: false,
   });
 }
 
@@ -823,14 +857,14 @@ export function useCreateBatch(): SpecificUseMutationResult<AchievementBatchType
 
   function onBatchCreated(batch: AchievementBatchType) {
     queryClient?.setQueryData(
-      [...iteration, "batches"],
+      [...iteration, "staff", "batches"],
       (batches: AchievementBatchType[]) => batches.concat([batch]),
     );
   }
 
   return useMakeMutation(
     {
-      mutationKey: [...iteration, "batches", "create"],
+      mutationKey: [...iteration, "staff", "batches", "create"],
       onSuccess: onBatchCreated,
     },
     {
