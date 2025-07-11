@@ -88,27 +88,17 @@ export default function AchievementCompletionPage() {
     iteration !== undefined ? Date.parse(iteration.start) : null;
   const showContent = iterationStart !== null && iterationStart < time;
 
-  const {
-    data: achievements,
-    isLoading: achievementsLoading,
-    error: achievementsError,
-  } = useGetAchievements(showContent);
   const { data: teamData, isLoading: teamsLoading } = useGetTeams(showContent);
+  const team =
+    teamData === undefined ? null : getMyTeam(session.user?.id, teamData.teams);
+  const { data: achievements, isLoading: achievementsLoading } =
+    useGetAchievements(showContent && team !== null);
 
   const state = useStateContext();
   const dispatchState = useDispatchStateContext();
 
   if (iterationLoading || achievementsLoading || teamsLoading) {
     return <TextPage text="Loading..." />;
-  }
-
-  if (
-    achievementsError?.message === "must be on a team" ||
-    achievementsError?.message === "must be registered"
-  ) {
-    return (
-      <TextPage text="You must be registered & on a team to view achievements" />
-    );
   }
 
   if (iteration === undefined) {
@@ -124,11 +114,15 @@ export default function AchievementCompletionPage() {
     );
   }
 
+  if (team === null && Date.parse(iteration.end) > time) {
+    return (
+      <TextPage text="You must be playing to view the achievements while the event is ongoing." />
+    );
+  }
+
   if (achievements === undefined || teamData == undefined) {
     return <TextPage text="Failed to load" />;
   }
-
-  const team = getMyTeam(session.user?.id, teamData.teams);
 
   if (state.achievementsFilter === null) {
     dispatchState({ id: 5, achievementsFilter: getDefaultNav(achievements) });
