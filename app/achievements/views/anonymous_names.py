@@ -1,3 +1,6 @@
+import random
+
+
 adjectives = [
     "Wobbly",
     "Fluffy",
@@ -207,3 +210,7 @@ nouns = [
 def verify_name(name: str):
     parts = name.split()
     return len(parts) == 2 and parts[0] in adjectives and parts[1] in nouns
+
+
+def get_random_name():
+    return random.choice(adjectives) + " " + random.choice(nouns)

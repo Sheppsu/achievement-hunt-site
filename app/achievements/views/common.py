@@ -313,7 +313,7 @@ def transfer_admin(req, data, iteration):
 
 @require_http_methods(["PATCH"])
 @accepts_json_data(DictionaryType({"name": StringType(min_length=1, max_length=32)}))
-@require_iteration_before_start
+@require_iteration_before_end
 @require_user
 def rename_team(req, data, iteration):
     player = select_current_player(req.user.id, iteration.id)
