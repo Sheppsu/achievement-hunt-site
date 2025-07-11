@@ -1,5 +1,6 @@
 import { useGetAchievements, useGetIteration, useGetTeams } from "api/query";
 import { AchievementTeamExtendedType } from "api/types/AchievementTeamType";
+import { EventIterationType } from "api/types/EventIterationType.ts";
 import "assets/css/achievements.css";
 import AchievementContainer from "components/achievements/AchievementContainer";
 import AchievementNavigationBar, {
@@ -15,7 +16,6 @@ import { useContext, useEffect, useState } from "react";
 import { Helmet } from "react-helmet";
 import { AppState } from "types/AppStateType.ts";
 import { getMyTeam } from "util/helperFunctions";
-import { EventIterationType } from "api/types/EventIterationType.ts";
 
 function getTimeStr(delta: number) {
   const days = Math.floor((delta / (1000 * 60 * 60 * 24)) % 60);
@@ -88,9 +88,11 @@ export default function AchievementCompletionPage() {
     iteration !== undefined ? Date.parse(iteration.start) : null;
   const showContent = iterationStart !== null && iterationStart < time;
 
-  const { data: achievements, isLoading: achievementsLoading } =
-    useGetAchievements(showContent);
   const { data: teamData, isLoading: teamsLoading } = useGetTeams(showContent);
+  const team =
+    teamData === undefined ? null : getMyTeam(session.user?.id, teamData.teams);
+  const { data: achievements, isLoading: achievementsLoading } =
+    useGetAchievements(showContent && team !== null);
 
   const state = useStateContext();
   const dispatchState = useDispatchStateContext();
@@ -112,11 +114,15 @@ export default function AchievementCompletionPage() {
     );
   }
 
+  if (team === null && Date.parse(iteration.end) > time) {
+    return (
+      <TextPage text="You must be playing to view the achievements while the event is ongoing." />
+    );
+  }
+
   if (achievements === undefined || teamData == undefined) {
     return <TextPage text="Failed to load" />;
   }
-
-  const team = getMyTeam(session.user?.id, teamData.teams);
 
   if (state.achievementsFilter === null) {
     dispatchState({ id: 5, achievementsFilter: getDefaultNav(achievements) });
