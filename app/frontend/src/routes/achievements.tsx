@@ -128,7 +128,7 @@ export default function AchievementCompletionPage() {
     return <TextPage text="Failed to load" />;
   }
 
-  if (state.achievementsFilter === null) {
+  if (state.achievementsFilter === null && achievements !== undefined) {
     dispatchState({ id: 5, achievementsFilter: getDefaultNav(achievements) });
   }
 
