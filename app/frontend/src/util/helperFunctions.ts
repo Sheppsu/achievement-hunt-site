@@ -140,6 +140,13 @@ export function calculateScore(
   return Math.round(p(completions));
 }
 
+export function parseMeaningfulTags(tagsString: string): boolean[] {
+  const tags = tagsString.toLowerCase().split(",");
+  const isCompetition = tags.includes("competition");
+  const isSecret = tags.includes("secret");
+  return [isCompetition, isSecret];
+}
+
 function* cleanTags(tags: string) {
   for (let tag of tags.split(",")) {
     tag = tag.trim().toLowerCase();

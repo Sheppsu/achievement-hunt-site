@@ -15,3 +15,10 @@ export type AchievementCompletionPlacementType = {
   value: number;
   place: number;
 };
+
+export type AchievementCompletionExtendedType = {
+  achievement_name: string;
+  achievement_tags: string;
+  placement: AchievementCompletionPlacementType | null;
+  completions: number;
+} & AchievementCompletionType;

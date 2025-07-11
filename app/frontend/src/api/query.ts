@@ -34,6 +34,7 @@ import { AchievementBatchType } from "api/types/AchievementBatchType.ts";
 import { RegistrationType } from "api/types/RegistrationType.ts";
 import { TeamInviteType, UserInviteType } from "api/types/InviteType.ts";
 import { AllRegistrationsType } from "api/types/AllRegistrationsType.ts";
+import { AchievementCompletionExtendedType } from "api/types/AchievementCompletionType.ts";
 
 function getIterationParams() {
   const path = location.pathname;
@@ -127,6 +128,15 @@ export function useGetAchievements(
 ): UseQueryResult<AchievementExtendedType[]> {
   return useMakeQuery({
     queryKey: [...getIterationParams(), "achievements"],
+    enabled,
+  });
+}
+
+export function useGetCompletions(
+  enabled: boolean = true,
+): UseQueryResult<AchievementCompletionExtendedType[]> {
+  return useMakeQuery({
+    queryKey: [...getIterationParams(), "completions"],
     enabled,
   });
 }

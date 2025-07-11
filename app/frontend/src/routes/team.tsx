@@ -65,7 +65,7 @@ export default function TeamPage() {
     }
   } else {
     cardsColumns[0].push(
-      <TeamCard iteration={iteration} team={ownTeam} />,
+      <TeamCard iteration={iteration} team={ownTeam} teamData={teamData} />,
       <TeamChatCard />,
     );
   }

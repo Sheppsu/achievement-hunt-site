@@ -187,6 +187,25 @@
   gap: 5px;
 }
 
+/* Score */
+
+.card--teams__score-title-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.card--teams__container.score {
+  display: flex;
+  flex-direction: column;
+}
+
+.card--teams__score-container__row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
 /* Player */
 
 .card--teams__container.players {

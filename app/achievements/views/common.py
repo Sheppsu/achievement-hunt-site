@@ -151,6 +151,41 @@ def achievements(req, iteration):
     return success(result)
 
 
+@require_iteration
+@require_user
+def achievement_completions(req, iteration):
+    player = select_current_player(req.user.id, iteration.id)
+    if player is None:
+        return success([])
+
+    all_players = Player.objects.filter(team_id=player.team.id).all()
+    player_ids = [player.id for player in all_players]
+
+    completions = (
+        AchievementCompletion.objects.select_related("achievement", "placement")
+        .annotate(achievement_name=models.F("achievement__name"), achievement_tags=models.F("achievement__tags"))
+        .filter(player_id__in=player_ids)
+    )
+
+    achievement_ids = [completion.achievement_id for completion in completions]
+    completion_counts = {
+        ach.id: ach.completion_count
+        for ach in Achievement.objects.annotate(completion_count=models.Count("completions")).filter(
+            id__in=achievement_ids
+        )
+    }
+
+    for completion in completions:
+        completion.completions = completion_counts[completion.achievement_id]
+
+    return success(
+        [
+            completion.serialize(["placement", "achievement_name", "achievement_tags", "completions"])
+            for completion in completions
+        ]
+    )
+
+
 def get_effective_team_count():
     return AchievementCompletion.objects.select_related("player").values("player__team_id").distinct().count()
 

@@ -10,6 +10,7 @@ import {
   calculateScore,
   getMyCompletion,
   getMyTeam,
+  parseMeaningfulTags,
 } from "util/helperFunctions.ts";
 import Achievement from "./Achievement";
 
@@ -20,9 +21,7 @@ function extendAchievementData(
 ) {
   for (const achievement of achievements) {
     const completion = getMyCompletion(achievement.completions, myTeam);
-    const tags = achievement.tags.toLowerCase().split(",");
-    const isCompetition = tags.includes("competition");
-    const isSecret = tags.includes("secret");
+    const [isCompetition, isSecret] = parseMeaningfulTags(achievement.tags);
 
     achievement.completed = completion !== null;
 

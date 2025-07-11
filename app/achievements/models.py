@@ -184,7 +184,9 @@ class AchievementCompletionPlacement(SerializableModel):
 
     def serialize(self, *args, **kwargs):
         data = super().serialize(*args, **kwargs)
-        return {"value": data["value"] / (10**6) if data["is_float"] else data["value"], "place": data["place"]}
+        if data.pop("is_float"):
+            data["value"] /= (10**6)
+        return data
 
 
 class AchievementCompletion(SerializableModel):

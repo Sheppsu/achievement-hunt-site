@@ -1,5 +1,6 @@
 import {
   useChangeAcceptingFreeAgents,
+  useGetCompletions,
   useGetTeamInvites,
   useLeaveTeam,
   useRenameTeam,
@@ -9,7 +10,10 @@ import {
 } from "api/query.ts";
 import React, { FormEvent, useContext, useState } from "react";
 import { AchievementPlayerType } from "api/types/AchievementPlayerType.ts";
-import { AchievementTeamExtendedType } from "api/types/AchievementTeamType.ts";
+import {
+  AchievementTeamExtendedType,
+  TeamDataType,
+} from "api/types/AchievementTeamType.ts";
 import "assets/css/form.css";
 import "assets/css/team.css";
 import { SimplePromptPopup } from "components/popups/PopupContent.tsx";
@@ -20,15 +24,24 @@ import Player from "components/team/Player.tsx";
 import Button from "components/inputs/Button.tsx";
 import { TeamInviteType } from "api/types/InviteType.ts";
 import TextInput from "components/inputs/TextInput.tsx";
-import { IoIosCloseCircle, IoIosCloseCircleOutline } from "react-icons/io";
+import {
+  IoIosArrowDown,
+  IoIosArrowUp,
+  IoIosCloseCircle,
+  IoIosCloseCircleOutline,
+} from "react-icons/io";
 import { EventIterationType } from "api/types/EventIterationType.ts";
+import { calculateScore, parseMeaningfulTags } from "util/helperFunctions.ts";
+import classNames from "classnames";
 
 export default function TeamCard({
   team,
   iteration,
+  teamData,
 }: {
   team: AchievementTeamExtendedType;
   iteration: EventIterationType;
+  teamData: TeamDataType;
 }) {
   const session = useContext(SessionContext);
   const dispatchEventMsg = useContext(EventContext);
@@ -51,12 +64,15 @@ export default function TeamCard({
 
   const { data: invites, isLoading: invitesLoading } =
     useGetTeamInvites(showInvites);
+  const { data: completions, isLoading: completionsLoading } =
+    useGetCompletions(iterationStarted);
   const renameTeam = useRenameTeam();
   const leaveTeam = useLeaveTeam();
   const sendTeamInvite = useSendTeamInvite();
   const changeAcceptingFreeAgents = useChangeAcceptingFreeAgents();
 
   const [debounce, setDebounce] = useState(false);
+  const [showScoring, setShowScoring] = useState(false);
 
   const user = team.players.find(
     (player) => player.user.id === session.user?.id,
@@ -75,6 +91,48 @@ export default function TeamCard({
     invitesElement = invites.map((invite) => (
       <InviteItem key={invite.id} invite={invite} />
     ));
+  }
+
+  let extendedCompletions = null;
+  let score = null;
+  if (completions !== undefined) {
+    extendedCompletions = completions.map((c) => ({ ...c, score: 0 }));
+    score = 0;
+
+    for (const completion of extendedCompletions) {
+      const [isCompetition, isSecret] = parseMeaningfulTags(
+        completion.achievement_tags,
+      );
+      const nTeams = teamData.effective_team_count;
+
+      let scoreAdded;
+      if (isCompetition) {
+        scoreAdded = calculateScore(
+          nTeams,
+          completion.placement!.place,
+          0,
+          false,
+        );
+      } else if (isSecret) {
+        scoreAdded = calculateScore(
+          nTeams,
+          completion.completions,
+          completion.time_placement,
+          true,
+        );
+      } else {
+        scoreAdded = calculateScore(
+          nTeams,
+          completion.completions,
+          completion.time_placement,
+          false,
+        );
+      }
+
+      completion.score = scoreAdded;
+
+      score += scoreAdded;
+    }
   }
 
   const renameTeamPopup = () => {
@@ -217,7 +275,7 @@ export default function TeamCard({
     <div className="card scroll">
       <div className="card--teams__container your-team">
         <p className="card--teams__container__text center grow">
-          {team.name} | {team.anonymous_name} - {team.points}pts
+          {team.name} | {team.anonymous_name}
         </p>
       </div>
       <h1 className="card__title">Players</h1>
@@ -226,6 +284,35 @@ export default function TeamCard({
           <Player key={i} player={player} />
         ))}
       </div>
+      {score && (
+        <>
+          <div
+            className="card--teams__score-title-container clickable"
+            onClick={() => setShowScoring(!showScoring)}
+          >
+            <h1 className={classNames("card__title")}>
+              Real-time score: {score}
+            </h1>
+            {showScoring ? (
+              <IoIosArrowUp size={48} />
+            ) : (
+              <IoIosArrowDown size={48} />
+            )}
+          </div>
+          {showScoring && (
+            <div className={"card--teams__container score"}>
+              {extendedCompletions!
+                .sort((a, b) => b.score - a.score)
+                .map((completion) => (
+                  <div className="card--teams__score-container__row">
+                    <p>{completion.achievement_name}</p>
+                    <p>{completion.score}pts</p>
+                  </div>
+                ))}
+            </div>
+          )}
+        </>
+      )}
       <div className="card--teams__container buttons">
         <Button
           children="Leave team"

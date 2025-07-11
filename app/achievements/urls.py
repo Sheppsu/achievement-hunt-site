@@ -6,6 +6,7 @@ from .views import common, staff, admin
 # endpoints that depend on the iteration
 iteration_urls = [
     path("achievements/", common.achievements),
+    path("completions/", common.achievement_completions),
     path("teams/", common.teams),
     path("teams/leave/", common.leave_team),
     path("teams/create/", common.create_team),
