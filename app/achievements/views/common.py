@@ -187,8 +187,14 @@ def achievement_completions(req, iteration):
     )
 
 
-def get_effective_team_count():
-    return AchievementCompletion.objects.select_related("player").values("player__team_id").distinct().count()
+def get_effective_team_count(iteration_id):
+    return (
+        AchievementCompletion.objects.select_related("player", "achievement__batch")
+        .filter(achievement__batch__iteration_id=iteration_id)
+        .values("player__team_id")
+        .distinct()
+        .count()
+    )
 
 
 @require_iteration
@@ -208,7 +214,9 @@ def teams(req, iteration):
         )
 
         if my_team_item is None:
-            return success({"placement": 0, "teams": [], "effective_team_count": get_effective_team_count()})
+            return success(
+                {"placement": 0, "teams": [], "effective_team_count": get_effective_team_count(iteration.id)}
+            )
 
         my_team_i, my_team = my_team_item
 
@@ -225,7 +233,7 @@ def teams(req, iteration):
         {
             "placement": my_team_i + 1,
             "teams": serialized_teams,
-            "effective_team_count": get_effective_team_count(),
+            "effective_team_count": get_effective_team_count(iteration.id),
         }
     )
 
