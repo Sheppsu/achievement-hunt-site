@@ -46,7 +46,7 @@ class User(SerializableModel):
     is_authenticated = True
 
     id = models.PositiveBigIntegerField(unique=True, primary_key=True)
-    username = models.CharField(max_length=15)
+    username = models.CharField(max_length=32)
     avatar = models.CharField()
     cover = models.CharField()
 
@@ -185,7 +185,7 @@ class AchievementCompletionPlacement(SerializableModel):
     def serialize(self, *args, **kwargs):
         data = super().serialize(*args, **kwargs)
         if data.pop("is_float"):
-            data["value"] /= (10**6)
+            data["value"] /= 10**6
         return data
 
 
