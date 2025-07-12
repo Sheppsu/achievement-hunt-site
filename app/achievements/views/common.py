@@ -66,9 +66,10 @@ def achievements(req, iteration):
         if not req.user.is_authenticated:
             return error("not logged in", status=403)
 
-        registration = Registration.objects.filter(user=req.user, iteration=iteration).first()
-        if registration is None:
-            return error("must be registered", status=403)
+        if not req.user.is_staff:
+            registration = Registration.objects.filter(user=req.user, iteration=iteration).first()
+            if registration is None:
+                return error("must be registered", status=403)
 
     team = (
         Team.objects.prefetch_related("players").filter(players__user_id=req.user.id, iteration_id=iteration.id).first()
