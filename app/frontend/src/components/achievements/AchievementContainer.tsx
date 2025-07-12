@@ -35,12 +35,21 @@ function extendAchievementData(
         isSecret,
       );
     } else {
-      achievement.points = calculateScore(
-        nTeams,
-        achievement.completion_count,
-        completion.time_placement,
-        isSecret,
-      );
+      if (isCompetition) {
+        achievement.points = calculateScore(
+          nTeams,
+          completion.placement!.place,
+          0,
+          false,
+        );
+      } else {
+        achievement.points = calculateScore(
+          nTeams,
+          achievement.completion_count,
+          completion.time_placement,
+          isSecret,
+        );
+      }
     }
   }
 }
