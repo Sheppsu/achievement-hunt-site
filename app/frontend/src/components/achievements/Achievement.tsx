@@ -7,6 +7,7 @@ import { AppState } from "types/AppStateType.ts";
 import { parseTags, toTitleCase } from "util/helperFunctions";
 import { useState } from "react";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
+import RenderedText from "components/common/RenderedText.tsx";
 
 export default function Achievement({
   achievement,
@@ -50,7 +51,10 @@ export default function Achievement({
               <p className="achievement__points">
                 {points === null ? "" : `${points}pts`}
               </p>
-              <p className="achievement__container__info__description">{`${achievement.completion_count} completions | ${achievement.description}`}</p>
+              <p className="achievement__container__info__description">
+                {`${achievement.completion_count} completions | `}
+                <RenderedText text={achievement.description} />
+              </p>
               <div className="achievement__container__info__tags">
                 {tags.map((tag) => (
                   <div className="achievement-tag">{toTitleCase(tag)}</div>
