@@ -76,7 +76,7 @@ def achievements(req, iteration):
     )
 
     # shouldn't be possible, but let's check anyway
-    if not iteration_ended and team is None:
+    if not iteration_ended and team is None and not req.user.is_staff:
         return error("must be on a team", status=403)
 
     completion_prefetch = models.Prefetch(
@@ -91,7 +91,7 @@ def achievements(req, iteration):
         .filter(batch__iteration_id=iteration.id, batch__release_time__lte=datetime.now(tz=timezone.utc))
     )
 
-    if (req.user.is_authenticated and req.user.is_admin) or iteration_ended:
+    if (req.user.is_authenticated and req.user.is_staff) or iteration_ended:
         query = query.prefetch_related(completion_prefetch).annotate(completion_count=models.Count("completions"))
         return success(
             [

@@ -94,8 +94,8 @@ export default function AchievementCompletionPage() {
   const fetchAchievements =
     showContent &&
     (team !== null ||
-      session.user?.is_achievement_creator === true ||
-      session.user?.is_admin === true);
+      (session.user !== null &&
+        (session.user.is_admin || session.user.is_achievement_creator)));
   const { data: achievements, isLoading: achievementsLoading } =
     useGetAchievements(fetchAchievements);
 
@@ -119,7 +119,7 @@ export default function AchievementCompletionPage() {
     );
   }
 
-  if (team === null && Date.parse(iteration.end) > time) {
+  if (team === null && Date.parse(iteration.end) > time && !fetchAchievements) {
     return (
       <TextPage text="You must be playing to view the achievements while the event is ongoing." />
     );
