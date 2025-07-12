@@ -91,7 +91,11 @@ export default function AchievementCompletionPage() {
   const { data: teamData, isLoading: teamsLoading } = useGetTeams(showContent);
   const team =
     teamData === undefined ? null : getMyTeam(session.user?.id, teamData.teams);
-  const fetchAchievements = showContent && team !== null;
+  const fetchAchievements =
+    showContent &&
+    (team !== null ||
+      session.user?.is_achievement_creator === true ||
+      session.user?.is_admin === true);
   const { data: achievements, isLoading: achievementsLoading } =
     useGetAchievements(fetchAchievements);
 
