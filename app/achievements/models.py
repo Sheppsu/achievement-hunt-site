@@ -160,6 +160,7 @@ class Achievement(SerializableModel):
     created_at = models.DateTimeField()
     last_edited_at = models.DateTimeField()
     batch = models.ForeignKey(AchievementBatch, on_delete=models.SET_NULL, null=True, default=None)
+    is_desc = models.BooleanField(default=True)
 
     class Serialization:
         FIELDS = ["id", "name", "description", "audio", "tags", "release_time", "created_at", "last_edited_at"]

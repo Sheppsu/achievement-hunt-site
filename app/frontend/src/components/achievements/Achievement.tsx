@@ -121,7 +121,7 @@ export default function Achievement({
                       Date.parse(
                         (b as AchievementCompletionType).time_completed,
                       )
-                    : b.placement!.value - a.placement.value,
+                    : a.placement!.place - b.placement!.place,
                 )
                 .map((completion, i) => (
                   <AchievementCompletionEntry key={i} completion={completion} />
