@@ -185,7 +185,9 @@ export function parseTags(tags: string, includeMode: boolean = true): string[] {
     return filteredTags;
   }
 
-  return [`Mode: ${mode ?? "any"}`].concat(filteredTags);
+  return [`Mode: ${mode ?? "any"}`].concat(
+    filteredTags.sort((a, b) => a.localeCompare(b)),
+  );
 }
 
 export function parseMode(tags: string): string {
