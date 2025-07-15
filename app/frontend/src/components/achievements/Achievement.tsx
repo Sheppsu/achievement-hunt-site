@@ -5,9 +5,28 @@ import AchievementCompletionEntry from "components/achievements/AchievementCompl
 import AudioPlayer from "components/audio/AudioPlayer.tsx";
 import { AppState } from "types/AppStateType.ts";
 import { parseTags, toTitleCase } from "util/helperFunctions";
-import { useState } from "react";
+import { MouseEventHandler, useRef, useState } from "react";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import RenderedText from "components/common/RenderedText.tsx";
+
+const TAG_DESCRIPTIONS = {
+  secret: "The solution to this achievement is not explicitly stated.",
+  chat: "Completing this achievement involves sending an in-game DM to Sheppsu as part of the solution (messages checked by the server).",
+  competition:
+    "This achievement has a leaderboard and points are awarded based on your placement. Completions can be overruled with better ones by anyone on your team.",
+  expert: "This achievement cannot be completed with the use of NF.",
+  gimmick:
+    "Completing this achievement requires a gimmick skill or non-conventional way of playing.",
+  knowledge:
+    "Finding the solution requires some non-basic level of knowledge about osu, osu history, or related (or requires research).",
+  lazer: "This achievement must be completed on the lazer client.",
+  stable: "This achievement must be completed on the stable client.",
+  math: "Finding the solution involves decently heavy use of math.",
+  puzzle:
+    "The achievement involves some kind of puzzle (e.g. sudoku, logic puzzle).",
+  skill:
+    "Completing the achievement involves a decent level of skill (this tag is somewhat subjective).",
+};
 
 export default function Achievement({
   achievement,
@@ -21,6 +40,7 @@ export default function Achievement({
   state: AppState;
 }) {
   const [showCompletions, setShowCompletions] = useState(false);
+  const popupRef = useRef<null | HTMLDivElement>(null);
 
   const completions = achievement.completions;
   const tags = parseTags(achievement.tags);
@@ -34,8 +54,45 @@ export default function Achievement({
     className: "clickable",
   };
 
+  const onTagClicked: MouseEventHandler<HTMLDivElement> = (evt) => {
+    if (popupRef.current === null) return;
+
+    const popup = popupRef.current;
+
+    popup.innerText =
+      TAG_DESCRIPTIONS[evt.target.innerText.toLowerCase()] ??
+      "No description for this tag";
+    popup.style.display = "block";
+
+    const rect = evt.target.getBoundingClientRect();
+    const centerX = (rect.left + rect.right) / 2;
+    const centerY = (rect.top + rect.bottom) / 2;
+
+    const popupLeft = window.scrollX + centerX - 150;
+    const popupTop = window.scrollY + centerY - popup.offsetHeight - 40;
+
+    popup.style.left = `${popupLeft}px`;
+    popup.style.top = `${popupTop}px`;
+  };
+
+  document.addEventListener("click", (evt) => {
+    const popup = popupRef.current;
+    if (
+      popup === null ||
+      evt.target === null ||
+      (evt.target.classList !== undefined &&
+        evt.target.classList.contains("achievement-tag")) ||
+      evt.target == popup ||
+      popup.contains(evt.target)
+    )
+      return;
+
+    if (popup.style.display === "block") popup.style.display = "none";
+  });
+
   return (
     <>
+      <div className="achievement__tag-description" ref={popupRef}></div>
       {state.hideCompletedAchievements && completed ? (
         <></>
       ) : (
@@ -57,7 +114,12 @@ export default function Achievement({
               </p>
               <div className="achievement__container__info__tags">
                 {tags.map((tag) => (
-                  <div className="achievement-tag">{toTitleCase(tag)}</div>
+                  <div
+                    className="achievement-tag clickable"
+                    onClick={onTagClicked}
+                  >
+                    {toTitleCase(tag)}
+                  </div>
                 ))}
                 <div style={{ flexGrow: 1 }}></div>
                 {completions.length > 0 ? (

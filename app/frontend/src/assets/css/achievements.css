@@ -91,6 +91,7 @@ p {
   align-items: center;
   gap: 6px;
 
+  overflow-y: visible;
   overflow-x: scroll;
 }
 
@@ -114,6 +115,20 @@ p {
 
 .achievement-tag:hover {
   border-color: var(--border-color-lit);
+}
+
+.achievement__tag-description {
+  width: 300px;
+  padding: 5px;
+
+  position: absolute;
+
+  border: solid 2px var(--border-color);
+  background-color: var(--background-color);
+
+  display: none;
+  z-index: 5;
+  text-align: center;
 }
 
 .achievement-category {
