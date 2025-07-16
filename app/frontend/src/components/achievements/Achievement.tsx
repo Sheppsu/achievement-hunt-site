@@ -58,13 +58,15 @@ export default function Achievement({
     if (popupRef.current === null) return;
 
     const popup = popupRef.current;
+    const target = evt.target as HTMLDivElement;
 
     popup.innerText =
-      TAG_DESCRIPTIONS[evt.target.innerText.toLowerCase()] ??
+      // @ts-ignore
+      TAG_DESCRIPTIONS[target.innerText.toLowerCase()] ??
       "No description for this tag";
     popup.style.display = "block";
 
-    const rect = evt.target.getBoundingClientRect();
+    const rect = target.getBoundingClientRect();
     const centerX = (rect.left + rect.right) / 2;
     const centerY = (rect.top + rect.bottom) / 2;
 
@@ -77,18 +79,27 @@ export default function Achievement({
 
   document.addEventListener("click", (evt) => {
     const popup = popupRef.current;
+    const target = evt.target as Node | HTMLElement | null;
     if (
       popup === null ||
-      evt.target === null ||
-      (evt.target.classList !== undefined &&
-        evt.target.classList.contains("achievement-tag")) ||
-      evt.target == popup ||
-      popup.contains(evt.target)
+      target === null ||
+      ("classList" in target && target.classList.contains("achievement-tag")) ||
+      target == popup ||
+      popup.contains(target)
     )
       return;
 
     if (popup.style.display === "block") popup.style.display = "none";
   });
+
+  let dataAttributes = {};
+  if (achievement.id === 219) {
+    dataAttributes = {
+      "data-beatmap-id": 1138718,
+      "data-misses": 4,
+      "data-100s": 4,
+    };
+  }
 
   return (
     <>
@@ -100,7 +111,10 @@ export default function Achievement({
           <div className={infoCls}>
             <div className="achievement__container__info">
               <div style={{ display: "flex" }}>
-                <h1 style={{ flexGrow: "1", wordBreak: "break-word" }}>
+                <h1
+                  style={{ flexGrow: "1", wordBreak: "break-word" }}
+                  {...dataAttributes}
+                >
                   {achievement.name}
                 </h1>
                 <div style={{ flexBasis: "120px" }}></div>
