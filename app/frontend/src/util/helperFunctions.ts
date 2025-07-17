@@ -148,7 +148,10 @@ export function calculateScore(
 }
 
 export function parseMeaningfulTags(tagsString: string): boolean[] {
-  const tags = tagsString.toLowerCase().split(",");
+  const tags = tagsString
+    .toLowerCase()
+    .split(",")
+    .map((s) => s.trim());
   const isCompetition = tags.includes("competition");
   const isSecret = tags.includes("secret");
   return [isCompetition, isSecret];
