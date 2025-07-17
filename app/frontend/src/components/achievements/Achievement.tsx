@@ -200,7 +200,11 @@ export default function Achievement({
                     : a.placement!.place - b.placement!.place,
                 )
                 .map((completion, i) => (
-                  <AchievementCompletionEntry key={i} completion={completion} />
+                  <AchievementCompletionEntry
+                    key={i}
+                    completion={completion}
+                    releaseTime={achievement.batch!.release_time}
+                  />
                 ))}
             </div>
           )}

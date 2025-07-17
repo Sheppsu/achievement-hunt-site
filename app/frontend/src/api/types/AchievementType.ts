@@ -14,7 +14,6 @@ export type AchievementType = {
   audio: string;
   beatmaps: BeatmapConnectionType[];
   tags: string;
-  release_time: string | null;
   created_at: string;
   last_edited_at: string;
   batch: AchievementBatchType | null;

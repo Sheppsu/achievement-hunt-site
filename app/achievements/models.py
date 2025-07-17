@@ -163,7 +163,7 @@ class Achievement(SerializableModel):
     is_desc = models.BooleanField(default=True)
 
     class Serialization:
-        FIELDS = ["id", "name", "description", "audio", "tags", "release_time", "created_at", "last_edited_at"]
+        FIELDS = ["id", "name", "description", "audio", "tags", "created_at", "last_edited_at"]
 
 
 class BeatmapConnection(SerializableModel):

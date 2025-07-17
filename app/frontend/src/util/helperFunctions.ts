@@ -18,16 +18,23 @@ export function toTitleCase(str: string) {
   }
 }
 
-export function timeAgo(timestamp: string) {
+export function timeAgo(
+  timestamp: string | number,
+  upperBound: number | null = null,
+  suffix: string = "ago",
+) {
   const times: [number, string][] = [
     [60, "minute"],
     [60, "hour"],
     [24, "day"],
   ];
-  const now = Date.now();
-  const completion = Date.parse(timestamp);
+  if (upperBound === null) {
+    upperBound = Date.now();
+  }
+  const completion =
+    typeof timestamp === "string" ? Date.parse(timestamp) : timestamp;
 
-  let leftover1 = Math.round((now - completion) / 1000);
+  let leftover1 = Math.round((upperBound - completion) / 1000);
   let label1 = "second";
   let leftover2: number | null = null;
   let label2: string | null = null;
@@ -47,14 +54,14 @@ export function timeAgo(timestamp: string) {
   }
 
   if (leftover2 === null) {
-    return `${leftover1} ${label1} ago`;
+    return `${leftover1} ${label1} ${suffix}`;
   }
 
   if (leftover2 !== 1) {
     label2 += "s";
   }
 
-  return `${leftover1} ${label1} ${leftover2} ${label2} ago`;
+  return `${leftover1} ${label1} ${leftover2} ${label2} ${suffix}`;
 }
 
 export function dateToText(timestamp: string) {

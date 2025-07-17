@@ -6,10 +6,27 @@ import {
 
 function PlayerElement({
   completion,
+  releaseTime,
 }: {
   completion: AchievementCompletionType;
+  releaseTime: string;
 }) {
   const player = completion.player;
+
+  const release = Date.parse(releaseTime);
+  const completed = Date.parse(completion.time_completed);
+  let lowerBound;
+  let upperBound;
+  let suffix;
+  if (release < completed) {
+    lowerBound = release;
+    upperBound = completed;
+    suffix = "after release";
+  } else {
+    lowerBound = completed;
+    upperBound = release;
+    suffix = "before release";
+  }
 
   return (
     <>
@@ -22,7 +39,9 @@ function PlayerElement({
         <p>
           <b>{player.user.username}</b>
         </p>
-        <p style={{ fontSize: "14px" }}>{timeAgo(completion.time_completed)}</p>
+        <p style={{ fontSize: "14px" }}>
+          {timeAgo(lowerBound, upperBound, suffix)}
+        </p>
       </div>
     </>
   );
@@ -30,8 +49,10 @@ function PlayerElement({
 
 export default function AchievementCompletionEntry({
   completion,
+  releaseTime,
 }: {
   completion: AchievementCompletionType | AnonymousAchievementCompletionType;
+  releaseTime: string;
 }) {
   return (
     <div className="achievement__players__entry">
@@ -45,7 +66,11 @@ export default function AchievementCompletionEntry({
       ) : (
         ""
       )}
-      {"player" in completion ? <PlayerElement completion={completion} /> : ""}
+      {"player" in completion ? (
+        <PlayerElement releaseTime={releaseTime} completion={completion} />
+      ) : (
+        ""
+      )}
     </div>
   );
 }
