@@ -26,6 +26,8 @@ const TAG_DESCRIPTIONS = {
     "The achievement involves some kind of puzzle (e.g. sudoku, logic puzzle).",
   skill:
     "Completing the achievement involves a decent level of skill (this tag is somewhat subjective).",
+  trivia:
+    "This achievement incorporates some trivia-style general knowledge unrelated to osu!.",
 };
 
 export default function Achievement({
