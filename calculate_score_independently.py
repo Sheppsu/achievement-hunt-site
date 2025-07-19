@@ -6,10 +6,12 @@ import requests
 import math
 
 
-url = "http://127.0.0.1:8000"
+url = "https://cta.sheppsu.me/api"
 
-teams = requests.get(f"{url}/api/iterations/1/teams/").json()["data"]["teams"]
-achievements = requests.get(f"{url}/api/iterations/1/achievements/").json()["data"]
+team_data = requests.get(f"{url}/teams/").json()["data"]
+n_teams = team_data["effective_team_count"]
+teams = team_data["teams"]
+achievements = requests.get(f"{url}/achievements/").json()["data"]
 
 team_points = {
     team["id"]: {
@@ -30,7 +32,6 @@ for achievement in achievements:
 
 # remove teams with no completions
 team_points = dict((item for item in team_points.items() if item[1]["completions"] > 0))
-n_teams = len(team_points)
 
 
 def add_points(player_id, amount):
@@ -54,7 +55,7 @@ def calculate_f(x):
 
 
 def calculate_p(x):
-    return max(calculate_f(x - 1), calculate_f(n_teams - 1))
+    return round(max(calculate_f(x - 1), calculate_f(n_teams - 1)))
 
 
 def calculate_s(x):
