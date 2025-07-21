@@ -92,7 +92,7 @@ def achievements(req, iteration):
     )
 
     if (req.user.is_authenticated and req.user.is_staff) or iteration_ended:
-        query = query.prefetch_related(completion_prefetch).annotate(completion_count=models.Count("completions"))
+        query = query.prefetch_related(completion_prefetch)
         return success(
             [
                 achievement.serialize(
@@ -114,8 +114,6 @@ def achievements(req, iteration):
             ]
         )
 
-    completion_counts = Achievement.objects.annotate(completion_count=models.Count("completions")).all()
-
     def team_completion(c) -> bool:
         return any((player.id == c.player_id for player in team.players.all())) if team is not None else False
 
@@ -132,6 +130,7 @@ def achievements(req, iteration):
                 "completions__player__user",
                 "completions__placement",
                 "batch",
+                "completion_count",
             ],
             [
                 "completions__player__team_admin",
@@ -142,12 +141,6 @@ def achievements(req, iteration):
         )
         for achievement in query.prefetch_related(completion_prefetch).all()
     ]
-
-    for achievement in result:
-        for completion_count_achievement in completion_counts:
-            if completion_count_achievement.id == achievement["id"]:
-                achievement["completion_count"] = completion_count_achievement.completion_count
-                break
 
     return success(result)
 

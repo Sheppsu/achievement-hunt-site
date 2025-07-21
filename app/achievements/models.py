@@ -154,13 +154,12 @@ class Achievement(SerializableModel):
     solution = models.CharField(max_length=2048)
     audio = models.CharField(default="")
     tags = models.CharField(max_length=128)
-    beatmap = models.ForeignKey(BeatmapInfo, related_name="achievements", on_delete=models.PROTECT, null=True)
-    release_time = models.DateTimeField(null=True)
     creator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, default=None)
     created_at = models.DateTimeField()
     last_edited_at = models.DateTimeField()
     batch = models.ForeignKey(AchievementBatch, on_delete=models.SET_NULL, null=True, default=None)
     is_desc = models.BooleanField(default=True)
+    completion_count = models.PositiveSmallIntegerField(default=0)
 
     class Serialization:
         FIELDS = ["id", "name", "description", "audio", "tags", "created_at", "last_edited_at"]
