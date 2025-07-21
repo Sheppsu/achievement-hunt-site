@@ -162,12 +162,7 @@ def achievement_completions(req, iteration):
     )
 
     achievement_ids = [completion.achievement_id for completion in completions]
-    completion_counts = {
-        ach.id: ach.completion_count
-        for ach in Achievement.objects.annotate(completion_count=models.Count("completions")).filter(
-            id__in=achievement_ids
-        )
-    }
+    completion_counts = {ach.id: ach.completion_count for ach in Achievement.objects.filter(id__in=achievement_ids)}
 
     for completion in completions:
         completion.completions = completion_counts[completion.achievement_id]
