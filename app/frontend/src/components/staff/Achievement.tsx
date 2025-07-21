@@ -169,15 +169,18 @@ export default function Achievement(props: AchievementProps) {
     } else if (batches === undefined) {
       content = <h1>Failed to load</h1>;
     } else {
+      const unreleasedBatches = batches.filter(
+        (b) => Date.parse(b.release_time) > Date.now(),
+      );
       content = (
         <div className="staff-batch-move-container">
-          {batches
+          {unreleasedBatches
             .sort(
               (a, b) => Date.parse(a.release_time) - Date.parse(b.release_time),
             )
             .map((batch, i) => (
               <Button
-                children={`Batch ${i + 1}`}
+                children={`Batch ${i + 1 + batches.length - unreleasedBatches.length}`}
                 onClick={() => doMoveToBatch(batch.id)}
               />
             ))}
