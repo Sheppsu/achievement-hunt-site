@@ -19,8 +19,10 @@ const TAG_DESCRIPTIONS = {
     "Completing this achievement requires a gimmick skill or non-conventional way of playing.",
   knowledge:
     "Finding the solution requires some non-basic level of knowledge about osu, osu history, or related (or requires research).",
-  lazer: "This achievement must be completed on the lazer client.",
-  stable: "This achievement must be completed on the stable client.",
+  lazer:
+    "This achievement must be completed on the lazer client or does not work on stable for all applicable modes of the achievement.",
+  stable:
+    "This achievement must be completed on the stable client or does not work on lazer for all applicable modes of the achievement.",
   math: "Finding the solution involves decently heavy use of math.",
   puzzle:
     "The achievement involves some kind of puzzle (e.g. sudoku, logic puzzle).",
