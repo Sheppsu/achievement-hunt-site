@@ -5,6 +5,8 @@ import queue
 import logging
 from datetime import datetime, timezone
 
+from django.conf import settings
+
 
 __all__ = ("DiscordLogger",)
 
@@ -59,6 +61,9 @@ class DiscordLogger:
         self._running.clear()
 
     def submit_embeds(self, embeds, url, ping=None):
+        if settings.DEBUG:
+            return
+
         self._queue.put((embeds, url, ping))
 
         if not self._running.is_set():
