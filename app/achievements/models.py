@@ -160,9 +160,10 @@ class Achievement(SerializableModel):
     batch = models.ForeignKey(AchievementBatch, on_delete=models.SET_NULL, null=True, default=None)
     is_desc = models.BooleanField(default=True)
     completion_count = models.PositiveSmallIntegerField(default=0)
+    worth_points = models.BooleanField(default=True)
 
     class Serialization:
-        FIELDS = ["id", "name", "description", "audio", "tags", "created_at", "last_edited_at"]
+        FIELDS = ["id", "name", "description", "audio", "tags", "created_at", "last_edited_at", "worth_points"]
 
 
 class BeatmapConnection(SerializableModel):

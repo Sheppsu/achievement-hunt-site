@@ -21,9 +21,15 @@ function extendAchievementData(
 ) {
   for (const achievement of achievements) {
     const completion = getMyCompletion(achievement.completions, myTeam);
-    const [isCompetition, isSecret] = parseMeaningfulTags(achievement.tags);
 
     achievement.completed = completion !== null;
+
+    if (!achievement.worth_points) {
+      achievement.points = 0;
+      continue;
+    }
+
+    const [isCompetition, isSecret] = parseMeaningfulTags(achievement.tags);
 
     if (isCompetition && completion === null) continue;
 

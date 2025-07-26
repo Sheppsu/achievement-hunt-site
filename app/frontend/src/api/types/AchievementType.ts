@@ -17,6 +17,7 @@ export type AchievementType = {
   created_at: string;
   last_edited_at: string;
   batch: AchievementBatchType | null;
+  worth_points: boolean;
 };
 
 export type AchievementExtendedType = {
