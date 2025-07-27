@@ -43,7 +43,7 @@ function matchesSearch(
       !(
         "creator" in achievement &&
         achievement.creator !== null &&
-        achievement.creator.username.toLowerCase().includes(word)
+        achievement.creator!.username.toLowerCase().includes(word)
       )
     )
       return false;
