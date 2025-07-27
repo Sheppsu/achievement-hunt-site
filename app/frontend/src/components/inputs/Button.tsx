@@ -132,7 +132,7 @@ export default function Button(props: ButtonProps) {
       ></div>
       <button
         style={{
-          width: "100%",
+          width: otherProps.width === "auto" ? "auto" : "100%",
           height: "100%",
         }}
         onMouseDown={onMouseDown}

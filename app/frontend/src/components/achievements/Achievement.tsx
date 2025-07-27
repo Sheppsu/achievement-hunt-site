@@ -8,6 +8,7 @@ import { parseTags, toTitleCase } from "util/helperFunctions";
 import { MouseEventHandler, useRef, useState } from "react";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import RenderedText from "components/common/RenderedText.tsx";
+import Button from "components/inputs/Button.tsx";
 
 const TAG_DESCRIPTIONS = {
   secret: "The solution to this achievement is not explicitly stated.",
@@ -45,6 +46,8 @@ export default function Achievement({
 }) {
   const [showCompletions, setShowCompletions] = useState(false);
   const popupRef = useRef<null | HTMLDivElement>(null);
+
+  const [showSolution, setShowSolution] = useState(false);
 
   const completions = achievement.completions;
   const tags = parseTags(achievement.tags);
@@ -129,7 +132,36 @@ export default function Achievement({
               <p className="achievement__container__info__description">
                 {`${achievement.completion_count} completions | `}
                 <RenderedText text={achievement.description} />
+                {achievement.solution && (
+                  <>
+                    <Button
+                      children={
+                        showSolution ? "Hide solution" : "Show solution"
+                      }
+                      width="auto"
+                      className="achievement__show-solution-btn"
+                      onClick={() => setShowSolution(!showSolution)}
+                    />
+                    {showSolution && (
+                      <span style={{ color: "#ffc0c0" }}>
+                        <RenderedText text={achievement.solution} />
+                      </span>
+                    )}
+                  </>
+                )}
               </p>
+              {achievement.creator && (
+                <p className="achievement__creator">
+                  Creator:{" "}
+                  <a
+                    className="rendered-text"
+                    href={`https://osu.ppy.sh/u/${achievement.creator.id}`}
+                    target="_blank"
+                  >
+                    {achievement.creator.username}
+                  </a>
+                </p>
+              )}
               <div className="achievement__container__info__tags">
                 {tags.map((tag) => (
                   <div

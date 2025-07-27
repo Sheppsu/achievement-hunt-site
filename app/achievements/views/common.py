@@ -84,35 +84,38 @@ def achievements(req, iteration):
     )
 
     query = (
-        Achievement.objects.select_related("batch")
+        Achievement.objects.select_related("batch", "creator")
         .prefetch_related(
             models.Prefetch("beatmaps", queryset=BeatmapConnection.objects.select_related("info").filter(hide=False))
         )
         .filter(batch__iteration_id=iteration.id, batch__release_time__lte=datetime.now(tz=timezone.utc))
     )
 
-    if (req.user.is_authenticated and req.user.is_staff) or iteration_ended:
+    is_staff = req.user.is_authenticated and req.user.is_staff
+    if is_staff or iteration_ended:
         query = query.prefetch_related(completion_prefetch)
-        return success(
-            [
-                achievement.serialize(
-                    [
-                        "completions__player__user",
-                        "completions__placement",
-                        "beatmaps__info",
-                        "completion_count",
-                        "batch",
-                    ],
-                    [
-                        "completions__player__team_admin",
-                        "completions__player__user_id",
-                        "completions__player__user__is_admin",
-                        "completions__player__user__is_achievement_creator",
-                    ],
-                )
-                for achievement in query.all()
-            ]
-        )
+        includes = [
+            "completions__player__user",
+            "completions__placement",
+            "beatmaps__info",
+            "completion_count",
+            "batch",
+        ]
+        excludes = [
+            "completions__player__team_admin",
+            "completions__player__user_id",
+            "completions__player__user__is_admin",
+            "completions__player__user__is_achievement_creator",
+        ]
+
+        if iteration.solutions_released or is_staff:
+            includes.append("solution")
+            includes.append("creator")
+            excludes.append("creator__avatar")
+            excludes.append("creator__is_admin")
+            excludes.append("creator__is_achievement_creator")
+
+        return success([achievement.serialize(includes, excludes) for achievement in query.all()])
 
     def team_completion(c) -> bool:
         return any((player.id == c.player_id for player in team.players.all())) if team is not None else False

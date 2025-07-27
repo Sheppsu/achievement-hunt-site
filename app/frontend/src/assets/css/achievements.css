@@ -201,6 +201,19 @@ p {
   right: 0;
 }
 
+.button.achievement__show-solution-btn {
+  font-size: 16px;
+  background-color: #d15858;
+}
+
+.button.achievement__show-solution-btn:hover {
+  background-color: #ef7777;
+}
+
+.achievement__creator {
+  font-size: 16px;
+}
+
 /* Progress container */
 
 .achievements-progress {

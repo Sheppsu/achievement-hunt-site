@@ -79,6 +79,7 @@ class EventIteration(SerializableModel):
     description = models.JSONField(default=list)
     faq = models.JSONField(default=list)
     banner = models.CharField(max_length=32, null=True, default=None)
+    solutions_released = models.BooleanField(default=False)
 
     def has_registration_ended(self):
         return time.time() >= self.registration_end.timestamp()

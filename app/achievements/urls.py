@@ -36,6 +36,7 @@ urlpatterns = (
         path("login/", common.login),
         path("logout/", common.logout),
         path("admin-login/", admin.login_to_user),
+        path("admin/update-iteration-cache/", admin.update_iteration_cache),
         path("iteration/", common.get_iteration),
         path("iterations/<int:iteration_id>/", common.get_iteration),
         path("invites/<int:invite_id>/rescind/", common.rescind_invite),

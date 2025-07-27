@@ -95,3 +95,9 @@ def get_screening_info(req, iteration):
     response = HttpResponse(content.getvalue(), content_type="text/csv")
     response["Content-Disposition"] = 'attachment; filename="screening.csv"'
     return response
+
+
+@require_admin
+def update_iteration_cache(req):
+    update_current_iteration()
+    return HttpResponse("ok")

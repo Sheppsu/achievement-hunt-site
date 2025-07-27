@@ -17,6 +17,11 @@ def get_current_iteration() -> EventIteration:
     return current_iteration
 
 
+def update_current_iteration():
+    global current_iteration
+    current_iteration = EventIteration.objects.order_by("-id").first()
+
+
 def error(msg: str, status=400):
     return JsonResponse({"error": msg}, status=status, safe=False)
 
