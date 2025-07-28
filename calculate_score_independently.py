@@ -63,6 +63,9 @@ def calculate_s(x):
 
 
 for achievement in achievements:
+    if not achievement["worth_points"]:
+        continue
+
     tags = [tag.strip().lower() for tag in achievement["tags"].split(",")]
     is_secret = "secret" in tags
     is_competition = "competition" in tags
