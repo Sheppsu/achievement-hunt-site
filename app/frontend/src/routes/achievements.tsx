@@ -76,11 +76,12 @@ function TextPage({ text }: { text: string }) {
 export default function AchievementCompletionPage() {
   const session = useContext(SessionContext);
 
-  const [time, setTime] = useState<number>(Date.now());
+  // const [time, setTime] = useState<number>(Date.now());
+  const time = Date.now();
 
-  useEffect(() => {
-    setInterval(() => setTime(Date.now()), 1000);
-  }, []); // run once
+  // useEffect(() => {
+  //   setInterval(() => setTime(Date.now()), 1000);
+  // }, []); // run once
 
   const { data: iteration, isLoading: iterationLoading } = useGetIteration();
 
