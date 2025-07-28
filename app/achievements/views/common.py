@@ -82,18 +82,15 @@ def achievements(req, iteration):
     completion_prefetch = models.Prefetch(
         "completions", queryset=AchievementCompletion.objects.select_related("player__user", "placement")
     )
+    beatmaps_prefetch = models.Prefetch("beatmaps", queryset=BeatmapConnection.objects.select_related("info"))
 
-    query = (
-        Achievement.objects.select_related("batch", "creator")
-        .prefetch_related(
-            models.Prefetch("beatmaps", queryset=BeatmapConnection.objects.select_related("info").filter(hide=False))
-        )
-        .filter(batch__iteration_id=iteration.id, batch__release_time__lte=datetime.now(tz=timezone.utc))
+    query = Achievement.objects.select_related("batch", "creator").filter(
+        batch__iteration_id=iteration.id, batch__release_time__lte=datetime.now(tz=timezone.utc)
     )
 
     is_staff = req.user.is_authenticated and req.user.is_staff
     if is_staff or iteration_ended:
-        query = query.prefetch_related(completion_prefetch)
+        query = query.prefetch_related(completion_prefetch, beatmaps_prefetch)
         includes = [
             "completions__player__user",
             "completions__placement",
@@ -123,6 +120,7 @@ def achievements(req, iteration):
     completion_prefetch.queryset = completion_prefetch.queryset.filter(
         models.Q(player__team_id=team.id) | models.Q(placement__isnull=False)
     )
+    beatmaps_prefetch.queryset = beatmaps_prefetch.queryset.filter(hide=False)
 
     result = [
         achievement.serialize(
@@ -142,7 +140,7 @@ def achievements(req, iteration):
                 "completions__player__user__is_achievement_creator",
             ],
         )
-        for achievement in query.prefetch_related(completion_prefetch).all()
+        for achievement in query.prefetch_related(completion_prefetch, beatmaps_prefetch).all()
     ]
 
     return success(result)

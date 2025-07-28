@@ -108,6 +108,18 @@ export default function Achievement({
     };
   }
 
+  const hasHiddenBeatmap = () => {
+    for (const bm of achievement.beatmaps) {
+      if (bm.hide) return true;
+    }
+    return false;
+  };
+
+  const showSolutionBtn = achievement.solution || hasHiddenBeatmap();
+
+  let beatmapsToShow = achievement.beatmaps;
+  if (!showSolution) beatmapsToShow = beatmapsToShow.filter((b) => !b.hide);
+
   return (
     <>
       <div className="achievement__tag-description" ref={popupRef}></div>
@@ -132,7 +144,7 @@ export default function Achievement({
               <p className="achievement__container__info__description">
                 {`${achievement.completion_count} completions | `}
                 <RenderedText text={achievement.description} />
-                {achievement.solution && (
+                {showSolutionBtn && (
                   <>
                     <Button
                       children={
@@ -144,7 +156,7 @@ export default function Achievement({
                     />
                     {showSolution && (
                       <span style={{ color: "#ffc0c0" }}>
-                        <RenderedText text={achievement.solution} />
+                        <RenderedText text={achievement.solution!} />
                       </span>
                     )}
                   </>
@@ -191,21 +203,27 @@ export default function Achievement({
             <AudioPlayer currentSong={achievement.audio} />
           )}
 
-          {achievement.beatmaps.map((beatmap) => (
+          {beatmapsToShow.map((beatmap) => (
             <a href={`https://osu.ppy.sh/b/${beatmap.info.id}`} target="_blank">
-              <div className="achievement__beatmap">
+              <div
+                className={classNames("achievement__beatmap", {
+                  red: beatmap.hide,
+                })}
+              >
                 <img
                   className="achievement__beatmap__cover"
                   src={beatmap.info.cover}
                   alt=""
                 ></img>
                 <div className="achievement__beatmap__info">
-                  <p>
+                  <p className="achievement-beatmap-text">
                     {beatmap.info.artist} - {beatmap.info.title}
                   </p>
-                  <p>[{beatmap.info.version}]</p>
+                  <p className="achievement-beatmap-text">
+                    [{beatmap.info.version}]
+                  </p>
                 </div>
-                <h1 className="achievement__beatmap__star-rating">
+                <h1 className="achievement__beatmap__star-rating achievement-beatmap-text">
                   {beatmap.info.star_rating}*
                 </h1>
               </div>

@@ -148,6 +148,16 @@ p {
   display: flex;
   flex-direction: row;
   gap: 5px;
+
+  color: white;
+}
+
+.achievement__beatmap.red {
+  color: #ffc0c0;
+}
+
+h1.achievement-beatmap-text, p.achievement-beatmap-text {
+  color: inherit;
 }
 
 .achievement__beatmap__cover {
@@ -164,6 +174,8 @@ p {
 
   white-space: nowrap;
   overflow: hidden;
+
+  color: inherit;
 }
 
 .achievement__beatmap__star-rating {
