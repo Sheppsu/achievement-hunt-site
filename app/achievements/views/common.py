@@ -70,7 +70,7 @@ def logout(req):
     ],
 )
 def achievement(req, achievement):
-    if not achievement.batch.iteration.solutions_released:
+    if achievement.batch is None or not achievement.batch.iteration.solutions_released:
         return error("can't view this page yet", status=403)
 
     return success(
