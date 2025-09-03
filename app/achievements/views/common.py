@@ -60,6 +60,43 @@ def logout(req):
     return error("not logged in", status=403)
 
 
+@require_achievement(
+    ["batch__iteration", "creator"],
+    [
+        models.Prefetch(
+            "completions", queryset=AchievementCompletion.objects.select_related("player__user", "placement")
+        ),
+        models.Prefetch("beatmaps", queryset=BeatmapConnection.objects.select_related("info")),
+    ],
+)
+def achievement(req, achievement):
+    if not achievement.batch.iteration.solutions_released:
+        return error("can't view this page yet", status=403)
+
+    return success(
+        achievement.serialize(
+            [
+                "completions__player__user",
+                "completions__placement",
+                "beatmaps__info",
+                "completion_count",
+                "batch",
+                "solution",
+                "creator",
+            ],
+            [
+                "completions__player__team_admin",
+                "completions__player__user_id",
+                "completions__player__user__is_admin",
+                "completions__player__user__is_achievement_creator",
+                "creator__avatar",
+                "creator__is_admin",
+                "creator__is_achievement_creator",
+            ],
+        )
+    )
+
+
 @require_iteration_after_start
 def achievements(req, iteration):
     if not (iteration_ended := iteration.has_ended()):

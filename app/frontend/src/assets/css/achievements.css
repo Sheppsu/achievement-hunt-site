@@ -73,6 +73,11 @@ p {
   box-shadow: 0 0 5px 1px #fa4b4b;
 }
 
+.achievement__container.neutral {
+  border-color: #eeeeee;
+  box-shadow: 0 0 5px 1px #eeeeee;
+}
+
 .achievement__container__info {
   flex-grow: 1;
 

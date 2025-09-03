@@ -101,6 +101,11 @@ export default function AchievementContainer({ state }: { state: AppState }) {
   return (
     <div className="achievements__container">
       {Object.entries(sortedAchievements).map(([group, achievements]) => {
+        if (state.hideCompletedAchievements) {
+          achievements = achievements.filter(
+            (achievement) => !achievement.completed,
+          );
+        }
         return (
           <>
             <div className="achievement-category">{group}</div>
@@ -114,7 +119,6 @@ export default function AchievementContainer({ state }: { state: AppState }) {
                   achievement={achievement}
                   completed={achievement.completed}
                   points={achievement.points}
-                  state={state}
                 />
               ))
             )}

@@ -3,7 +3,6 @@ import { AchievementExtendedType } from "api/types/AchievementType";
 import classNames from "classnames";
 import AchievementCompletionEntry from "components/achievements/AchievementCompletionEntry.tsx";
 import AudioPlayer from "components/audio/AudioPlayer.tsx";
-import { AppState } from "types/AppStateType.ts";
 import { parseTags, toTitleCase } from "util/helperFunctions";
 import { MouseEventHandler, useRef, useState } from "react";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
@@ -37,12 +36,10 @@ export default function Achievement({
   achievement,
   completed,
   points,
-  state,
 }: {
   achievement: AchievementExtendedType;
-  completed: boolean;
+  completed: boolean | null;
   points: number | null;
-  state: AppState;
 }) {
   const [showCompletions, setShowCompletions] = useState(false);
   const popupRef = useRef<null | HTMLDivElement>(null);
@@ -52,8 +49,14 @@ export default function Achievement({
   const completions = achievement.completions;
   const tags = parseTags(achievement.tags);
 
-  const infoCls =
-    "achievement__container " + (completed ? "complete" : "incomplete");
+  let infoCls = "achievement__container ";
+  if (completed == null) {
+    infoCls += "neutral";
+  } else if (completed) {
+    infoCls += "complete";
+  } else {
+    infoCls += "incomplete";
+  }
 
   const dropdownArrowProps = {
     size: 36,
@@ -123,147 +126,139 @@ export default function Achievement({
   return (
     <>
       <div className="achievement__tag-description" ref={popupRef}></div>
-      {state.hideCompletedAchievements && completed ? (
-        <></>
-      ) : (
-        <div className="achievement">
-          <div className={infoCls}>
-            <div className="achievement__container__info">
-              <div style={{ display: "flex" }}>
-                <h1
-                  style={{ flexGrow: "1", wordBreak: "break-word" }}
-                  {...dataAttributes}
-                >
-                  {achievement.name}
-                </h1>
-                <div style={{ flexBasis: "120px" }}></div>
-              </div>
-              <p className="achievement__points">
-                {points === null ? "" : `${points}pts`}
-              </p>
-              <p className="achievement__container__info__description">
-                {`${achievement.completion_count} completions | `}
-                <RenderedText text={achievement.description} />
-                {showSolutionBtn && (
-                  <>
-                    <Button
-                      children={
-                        showSolution ? "Hide solution" : "Show solution"
-                      }
-                      width="auto"
-                      className="achievement__show-solution-btn"
-                      onClick={() => setShowSolution(!showSolution)}
-                    />
-                    {showSolution && (
-                      <span style={{ color: "#ffc0c0" }}>
-                        <RenderedText text={achievement.solution!} />
-                      </span>
-                    )}
-                  </>
-                )}
-              </p>
-              {achievement.creator && (
-                <p className="achievement__creator">
-                  Creator:{" "}
-                  <a
-                    className="rendered-text"
-                    href={`https://osu.ppy.sh/u/${achievement.creator.id}`}
-                    target="_blank"
-                  >
-                    {achievement.creator.username}
-                  </a>
-                </p>
+      <div className="achievement">
+        <div className={infoCls}>
+          <div className="achievement__container__info">
+            <div style={{ display: "flex" }}>
+              <h1
+                style={{ flexGrow: "1", wordBreak: "break-word" }}
+                {...dataAttributes}
+              >
+                {achievement.name}
+              </h1>
+              <div style={{ flexBasis: "120px" }}></div>
+            </div>
+            <p className="achievement__points">
+              {points === null ? "" : `${points}pts`}
+            </p>
+            <p className="achievement__container__info__description">
+              {`${achievement.completion_count} completions | `}
+              <RenderedText text={achievement.description} />
+              {showSolutionBtn && (
+                <>
+                  <Button
+                    children={showSolution ? "Hide solution" : "Show solution"}
+                    width="auto"
+                    className="achievement__show-solution-btn"
+                    onClick={() => setShowSolution(!showSolution)}
+                  />
+                  {showSolution && (
+                    <span style={{ color: "#ffc0c0" }}>
+                      <RenderedText text={achievement.solution!} />
+                    </span>
+                  )}
+                </>
               )}
-              <div className="achievement__container__info__tags">
-                {tags.map((tag) => (
-                  <div
-                    className="achievement-tag clickable"
-                    onClick={onTagClicked}
-                  >
-                    {toTitleCase(tag)}
-                  </div>
-                ))}
-                <div style={{ flexGrow: 1 }}></div>
-                {completions.length > 0 ? (
-                  showCompletions ? (
-                    <IoIosArrowUp {...dropdownArrowProps} />
-                  ) : (
-                    <IoIosArrowDown {...dropdownArrowProps} />
-                  )
+            </p>
+            {achievement.creator && (
+              <p className="achievement__creator">
+                Creator:{" "}
+                <a
+                  className="rendered-text"
+                  href={`https://osu.ppy.sh/u/${achievement.creator.id}`}
+                  target="_blank"
+                >
+                  {achievement.creator.username}
+                </a>
+              </p>
+            )}
+            <div className="achievement__container__info__tags">
+              {tags.map((tag) => (
+                <div
+                  className="achievement-tag clickable"
+                  onClick={onTagClicked}
+                >
+                  {toTitleCase(tag)}
+                </div>
+              ))}
+              <div style={{ flexGrow: 1 }}></div>
+              {completions.length > 0 ? (
+                showCompletions ? (
+                  <IoIosArrowUp {...dropdownArrowProps} />
                 ) : (
-                  ""
-                )}
-              </div>
+                  <IoIosArrowDown {...dropdownArrowProps} />
+                )
+              ) : (
+                ""
+              )}
             </div>
           </div>
-
-          {achievement.audio === null || achievement.audio === "" ? (
-            ""
-          ) : (
-            <AudioPlayer currentSong={achievement.audio} />
-          )}
-
-          {beatmapsToShow.map((beatmap) => (
-            <a href={`https://osu.ppy.sh/b/${beatmap.info.id}`} target="_blank">
-              <div
-                className={classNames("achievement__beatmap", {
-                  red: beatmap.hide,
-                })}
-              >
-                <img
-                  className="achievement__beatmap__cover"
-                  src={beatmap.info.cover}
-                  alt=""
-                ></img>
-                <div className="achievement__beatmap__info">
-                  <p className="achievement-beatmap-text">
-                    {beatmap.info.artist} - {beatmap.info.title}
-                  </p>
-                  <p className="achievement-beatmap-text">
-                    [{beatmap.info.version}]
-                  </p>
-                </div>
-                <h1 className="achievement__beatmap__star-rating achievement-beatmap-text">
-                  {beatmap.info.star_rating}*
-                </h1>
-              </div>
-            </a>
-          ))}
-          <hr
-            className={classNames({
-              hide:
-                achievement.beatmaps.length == 0 ||
-                completions.length === 0 ||
-                !showCompletions,
-            })}
-          />
-
-          {completions.length == 0 || !showCompletions ? (
-            ""
-          ) : (
-            <div className="achievement__players">
-              {completions
-                .sort((a, b) =>
-                  a.placement === undefined || a.placement === null
-                    ? Date.parse(
-                        (a as AchievementCompletionType).time_completed,
-                      ) -
-                      Date.parse(
-                        (b as AchievementCompletionType).time_completed,
-                      )
-                    : a.placement!.place - b.placement!.place,
-                )
-                .map((completion, i) => (
-                  <AchievementCompletionEntry
-                    key={i}
-                    completion={completion}
-                    releaseTime={achievement.batch!.release_time}
-                  />
-                ))}
-            </div>
-          )}
         </div>
-      )}
+
+        {achievement.audio === null || achievement.audio === "" ? (
+          ""
+        ) : (
+          <AudioPlayer currentSong={achievement.audio} />
+        )}
+
+        {beatmapsToShow.map((beatmap) => (
+          <a href={`https://osu.ppy.sh/b/${beatmap.info.id}`} target="_blank">
+            <div
+              className={classNames("achievement__beatmap", {
+                red: beatmap.hide,
+              })}
+            >
+              <img
+                className="achievement__beatmap__cover"
+                src={beatmap.info.cover}
+                alt=""
+              ></img>
+              <div className="achievement__beatmap__info">
+                <p className="achievement-beatmap-text">
+                  {beatmap.info.artist} - {beatmap.info.title}
+                </p>
+                <p className="achievement-beatmap-text">
+                  [{beatmap.info.version}]
+                </p>
+              </div>
+              <h1 className="achievement__beatmap__star-rating achievement-beatmap-text">
+                {beatmap.info.star_rating}*
+              </h1>
+            </div>
+          </a>
+        ))}
+        <hr
+          className={classNames({
+            hide:
+              achievement.beatmaps.length == 0 ||
+              completions.length === 0 ||
+              !showCompletions,
+          })}
+        />
+
+        {completions.length == 0 || !showCompletions ? (
+          ""
+        ) : (
+          <div className="achievement__players">
+            {completions
+              .sort((a, b) =>
+                a.placement === undefined || a.placement === null
+                  ? Date.parse(
+                      (a as AchievementCompletionType).time_completed,
+                    ) -
+                    Date.parse((b as AchievementCompletionType).time_completed)
+                  : a.placement!.place - b.placement!.place,
+              )
+              .map((completion, i) => (
+                <AchievementCompletionEntry
+                  key={i}
+                  completion={completion}
+                  releaseTime={achievement.batch!.release_time}
+                />
+              ))}
+          </div>
+        )}
+      </div>
     </>
   );
 }

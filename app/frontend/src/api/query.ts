@@ -132,6 +132,14 @@ export function useGetAchievements(
   });
 }
 
+export function useGetAchievement(
+  achievementId: number,
+): UseQueryResult<AchievementExtendedType> {
+  return useMakeQuery({
+    queryKey: ["achievements", achievementId.toString()],
+  });
+}
+
 export function useGetCompletions(
   enabled: boolean = true,
 ): UseQueryResult<AchievementCompletionExtendedType[]> {

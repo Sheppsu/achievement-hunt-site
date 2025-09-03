@@ -41,6 +41,7 @@ urlpatterns = (
         path("iterations/<int:iteration_id>/", common.get_iteration),
         path("invites/<int:invite_id>/rescind/", common.rescind_invite),
         path("invites/<int:invite_id>/resolve/", common.resolve_invite),
+        path("achievements/<int:achievement_id>/", common.achievement),
         path("staff/achievements/<int:achievement_id>/", staff.show_achievement),
         path("staff/achievements/<int:achievement_id>/vote/", staff.vote_achievement),
         path("staff/achievements/<int:achievement_id>/comment/", staff.create_comment),
