@@ -59,7 +59,7 @@ def calculate_p(x):
 
 
 def calculate_s(x):
-    return (math.cos((4 * math.pi * (x - 1)) / (5 * n_teams)) + 1) / 2
+    return (math.cos((4 * math.pi * x) / (5 * n_teams)) + 1) / 2
 
 
 for achievement in achievements:
