@@ -1,29 +1,21 @@
 import { splitProps } from "components/inputs/util.ts";
-import { HTMLInputAutoCompleteAttribute } from "react";
-import "assets/css/inputs/text-input.css";
 
-type TextInputProps = {
+type CheckboxPropsType = {
   className?: string;
-  placeholder?: string;
   hidden?: boolean;
-  type?: string;
-  onInput?: (e: React.FormEvent<HTMLInputElement>) => void;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  autoComplete?: HTMLInputAutoCompleteAttribute;
   [_k: string]: any;
 };
 
 const elementDefaults = {
   className: "",
-  autoComplete: "off",
-  type: "text",
 };
 
 const otherDefaults = {
   hidden: false,
 };
 
-export default function TextInput(props: TextInputProps) {
+export default function Checkbox(props: CheckboxPropsType) {
   const [elementProps, otherProps] = splitProps(
     props,
     elementDefaults,
@@ -34,7 +26,7 @@ export default function TextInput(props: TextInputProps) {
     elementProps.className += " hide";
   }
 
-  elementProps.className += " text-input";
+  elementProps.className += " checkbox-input";
 
-  return <input {...elementProps} />;
+  return <input type="checkbox" {...elementProps} />;
 }

@@ -12,6 +12,7 @@ __all__ = (
     "ValidationType",
     "ValidationResult",
     "ValidationResultType",
+    "AnyType",
 )
 
 
@@ -63,6 +64,11 @@ class ValidationResult:
 class ValidationType:
     def validate(self, data) -> ValidationResult:
         raise NotImplementedError()
+
+
+class AnyType(ValidationType):
+    def validate(self, data) -> ValidationResult:
+        return ValidationResult.clear()
 
 
 class OptionalType(ValidationType):

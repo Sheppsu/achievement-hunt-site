@@ -117,6 +117,7 @@ def vote_achievement(req, data, achievement):
                 unique=True,
                 unique_check=lambda a, b: a["id"] != b["id"],
             ),
+            "solution_algorithm": AnyType(),
         }
     )
 )
@@ -140,6 +141,7 @@ def create_achievement(req, data, achievement=None):
             creator=req.user,
             created_at=(date_now := datetime.now(tz=timezone.utc)),
             last_edited_at=date_now,
+            solution_algorithm=data["solution_algorithm"],
         )
         discord_logger.submit_achievement(req, achievement, "created")
     elif achievement.creator_id != req.user.id and not req.user.is_admin:
@@ -153,6 +155,7 @@ def create_achievement(req, data, achievement=None):
         achievement.solution = data["solution"]
         achievement.tags = data["tags"]
         achievement.last_edited_at = datetime.now(tz=timezone.utc)
+        achievement.solution_algorithm = data["solution_algorithm"]
         achievement.save()
 
         discord_logger.submit_achievement(req, achievement, "edited")

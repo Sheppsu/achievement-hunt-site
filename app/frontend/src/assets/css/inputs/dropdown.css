@@ -1,12 +1,12 @@
 .dropdown {
+  padding: 5px;
+
   font-size: 20px;
 
   border: 2px solid var(--border-color);
 
   background-color: var(--site-background-color);
   color: white;
-
-  padding: 5px;
 
   width: 100%;
 }
