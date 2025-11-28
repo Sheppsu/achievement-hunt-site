@@ -13,6 +13,7 @@ type ButtonProps = {
   height?: string;
   type?: "button" | "submit" | "reset";
   holdToUse?: boolean;
+  caution?: boolean;
 };
 
 const elementDefaults = {
@@ -28,6 +29,7 @@ const otherDefaults = {
   height: "auto",
   holdToUse: false,
   onClick: undefined,
+  caution: false,
 };
 
 // none | click | hold
@@ -48,9 +50,11 @@ export default function Button(props: ButtonProps) {
   if (otherProps.hidden) {
     elementProps.className += " hide";
   }
-
   if (otherProps.unavailable) {
     elementProps.className += " unavailable";
+  }
+  if (otherProps.caution) {
+    elementProps.className += " caution";
   }
 
   elementProps.className += " prevent-select button";
@@ -113,6 +117,9 @@ export default function Button(props: ButtonProps) {
     }
   };
 
+  const circleBgColor = otherProps.caution
+    ? "--caution-button-color"
+    : "--generic-button-color";
   return (
     <div
       style={{
@@ -125,9 +132,10 @@ export default function Button(props: ButtonProps) {
       <div
         className={classNames("button-circle", {
           hide: progress === null,
+          caution: otherProps.caution,
         })}
         style={{
-          backgroundImage: `conic-gradient(#fff ${progress}%, var(--generic-button-color) ${progress}%, var(--generic-button-color) 100%)`,
+          backgroundImage: `conic-gradient(#fff ${progress}%, var(${circleBgColor}) ${progress}%, var(${circleBgColor}) 100%)`,
         }}
       ></div>
       <button

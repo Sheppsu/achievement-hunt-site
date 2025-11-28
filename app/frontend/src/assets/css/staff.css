@@ -352,6 +352,17 @@
   gap: 5px;
 }
 
+.staff-creation__remove-holder {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+.staff-creation__remove-btn {
+  max-height: 40px;
+}
+
 .staff-creation__entry {
   display: flex;
   flex-direction: row;

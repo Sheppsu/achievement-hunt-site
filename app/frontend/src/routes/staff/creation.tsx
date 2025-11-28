@@ -20,6 +20,7 @@ import TextInput from "components/inputs/TextInput.tsx";
 import Dropdown from "components/inputs/Dropdown.tsx";
 import { IoIosAddCircle } from "react-icons/io";
 import Checkbox from "components/inputs/Checkbox.tsx";
+import Button from "components/inputs/Button.tsx";
 
 const EXPR_TYPES = [
   "func",
@@ -37,7 +38,23 @@ export default class CreationViewNew extends React.Component {
   constructor() {
     super({});
 
-    this.algorithm = makeBlankSolutionAlgorithm();
+    const storage = localStorage.getItem("savedCreationData");
+    const saveData = storage === null ? null : JSON.parse(storage);
+
+    this.algorithm =
+      saveData === null || saveData.algorithm === null
+        ? makeBlankSolutionAlgorithm()
+        : saveData.algorithm;
+  }
+
+  forceUpdate() {
+    localStorage.setItem(
+      "savedCreationData",
+      JSON.stringify({
+        algorithm: this.algorithm,
+      }),
+    );
+    super.forceUpdate();
   }
 
   private addVar() {
@@ -52,6 +69,74 @@ export default class CreationViewNew extends React.Component {
 
   private addVal() {
     this.algorithm.validation.push(makeBlankVal());
+    this.forceUpdate();
+  }
+
+  private removeVar(i: number) {
+    this.algorithm.vars = this.algorithm.vars
+      .slice(0, i)
+      .concat(this.algorithm.vars.slice(i + 1));
+
+    function fixExpr(expr: SolutionAlgorithmExpr) {
+      const exprType = getExprType(expr);
+      if (exprType === "variable") {
+        expr = expr as SolutionAlgorithmFuncExpr;
+        const refI = expr.args[0] as number | null;
+        if (refI === null) {
+          return;
+        }
+        if (refI === i) {
+          expr.args = [null];
+        } else if (refI > i) {
+          expr.args = [refI - 1];
+        }
+      } else if (exprType === "func") {
+        for (const arg of (expr as SolutionAlgorithmFuncExpr).args) {
+          fixExpr(arg);
+        }
+      }
+    }
+
+    for (const expr of this.algorithm.exprs) {
+      fixExpr(expr.value);
+    }
+    for (const val of this.algorithm.validation) {
+      fixExpr(val.assertion);
+      if (val.indexType === "variable" && val.index !== null) {
+        if (val.index === i) {
+          val.index = null;
+        } else if (val.index > i) {
+          val.index -= 1;
+        }
+      }
+    }
+
+    this.forceUpdate();
+  }
+
+  private removeExpr(i: number) {
+    this.algorithm.exprs = this.algorithm.exprs
+      .slice(0, i)
+      .concat(this.algorithm.exprs.slice(i + 1));
+
+    for (const val of this.algorithm.validation) {
+      if (val.indexType == "expr" && val.index !== null) {
+        if (val.index === i) {
+          val.index = null;
+        } else if (val.index > i) {
+          val.index -= 1;
+        }
+      }
+    }
+
+    this.forceUpdate();
+  }
+
+  private removeVal(i: number) {
+    this.algorithm.validation = this.algorithm.validation
+      .slice(0, 1)
+      .concat(this.algorithm.validation.slice(i + 1));
+
     this.forceUpdate();
   }
 
@@ -73,11 +158,19 @@ export default class CreationViewNew extends React.Component {
             </div>
             <div className="staff-creation__section-container">
               {this.algorithm.vars.map((v, i) => (
-                <VarEntry
-                  key={i}
-                  entry={v}
-                  forceUpdate={() => this.forceUpdate()}
-                />
+                <div className="staff-creation__remove-holder">
+                  <Button
+                    children="Remove"
+                    holdToUse={true}
+                    caution={true}
+                    onClick={() => this.removeVar(i)}
+                  />
+                  <VarEntry
+                    key={v.id}
+                    entry={v}
+                    forceUpdate={() => this.forceUpdate()}
+                  />
+                </div>
               ))}
             </div>
           </div>
@@ -94,12 +187,20 @@ export default class CreationViewNew extends React.Component {
             </div>
             <div className="staff-creation__section-container">
               {this.algorithm.exprs.map((e, i) => (
-                <NamedExprEntry
-                  key={i}
-                  entry={e}
-                  forceUpdate={() => this.forceUpdate()}
-                  variables={this.algorithm.vars}
-                />
+                <div className="staff-creation__remove-holder">
+                  <Button
+                    children="Remove"
+                    holdToUse={true}
+                    caution={true}
+                    onClick={() => this.removeExpr(i)}
+                  />
+                  <NamedExprEntry
+                    key={e.id}
+                    entry={e}
+                    forceUpdate={() => this.forceUpdate()}
+                    variables={this.algorithm.vars}
+                  />
+                </div>
               ))}
             </div>
           </div>
@@ -116,13 +217,21 @@ export default class CreationViewNew extends React.Component {
             </div>
             <div className="staff-creation__section-container">
               {this.algorithm.validation.map((v, i) => (
-                <ValidationEntry
-                  key={i}
-                  entry={v}
-                  forceUpdate={() => this.forceUpdate()}
-                  expressions={this.algorithm.exprs}
-                  variables={this.algorithm.vars}
-                />
+                <div className="staff-creation__remove-holder">
+                  <Button
+                    children="Remove"
+                    holdToUse={true}
+                    caution={true}
+                    onClick={() => this.removeVal(i)}
+                  />
+                  <ValidationEntry
+                    key={v.id}
+                    entry={v}
+                    forceUpdate={() => this.forceUpdate()}
+                    expressions={this.algorithm.exprs}
+                    variables={this.algorithm.vars}
+                  />
+                </div>
               ))}
             </div>
           </div>
@@ -188,12 +297,14 @@ function VarEntry({
           onChange={(evt) => editVar("type", evt)}
         />
         <TextInput
+          value={entry.name}
           placeholder="Name"
           className="staff-creation__input"
           onChange={(evt) => editVar("name", evt)}
         />
         {entry.type == "list" ? (
           <TextInput
+            value={entry.max_size}
             className="staff-creation__input"
             type="number"
             placeholder="Max Size"
@@ -230,7 +341,7 @@ function getDefaultValueForExprType(exprType: ExprType | "expr") {
     case "variable":
       return {
         func: "variable" as SolutionAlgorithmFuncType,
-        args: [0],
+        args: [null],
       };
     case "string":
       return "";
@@ -306,10 +417,12 @@ function createExprInput(
       const options = Object.fromEntries(
         variables.map((v, i) => [v.name, i.toString()]),
       );
+      const args = (expr as SolutionAlgorithmFuncExpr).args;
+      const value = args[0] === null ? undefined : args[0].toString();
       return [
         <Dropdown
           options={options}
-          value={(expr as SolutionAlgorithmFuncExpr).args[0]!.toString()}
+          value={value}
           className="staff-creation__dropdown"
           onChange={(evt) =>
             setValue({
@@ -424,6 +537,7 @@ function NamedExprEntry({
   return transformExprInputArray(
     [
       <TextInput
+        value={entry.name}
         placeholder="Name"
         className="staff-creation__input"
         onChange={(evt) => editName(evt.currentTarget.value)}
@@ -474,15 +588,23 @@ function ValidationEntry({
     [entry, forceUpdate],
   );
 
+  const value =
+    entry.index === null
+      ? undefined
+      : (entry.indexType === "variable" ? "v" : "e") + `-${entry.index}`;
   return transformExprInputArray(
     [
       <Dropdown
         options={options}
-        value={(entry.indexType === "variable" ? "v" : "e") + `-${entry.index}`}
+        value={value}
         className="staff-creation__dropdown"
         onChange={editVal}
       />,
-      <p className="staff-creation__entry-subtitle">=</p>,
+      <Dropdown
+        options={{ "=": "=" }}
+        value="="
+        className="staff-creation__dropdown"
+      />,
     ].concat(exprInputs),
   );
 }

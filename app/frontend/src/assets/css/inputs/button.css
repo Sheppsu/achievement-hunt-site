@@ -1,6 +1,8 @@
 :root {
   --generic-button-color: #003362;
   --generic-button-hover-color: #00417e;
+  --caution-button-color: #d15858;
+  --caution-button-hover-color: #ef7777;
 }
 
 .button {
@@ -17,10 +19,18 @@
   color: #ffffff;
 }
 
+.button.caution {
+  background-color: var(--caution-button-color);
+}
+
 .button:hover {
   cursor: pointer;
 
   background-color: var(--generic-button-hover-color);
+}
+
+.button.caution:hover {
+  background-color: var(--caution-button-hover-color);
 }
 
 .button.unavailable {
@@ -44,4 +54,8 @@
   border: solid white 1px;
 
   background-image: conic-gradient(#fff 50%, var(--generic-button-color) 50%, var(--generic-button-color) 100%);
+}
+
+.button-circle.caution {
+  background-image: conic-gradient(#fff 50%, var(--caution-button-color) 50%, var(--caution-button-color) 100%);
 }

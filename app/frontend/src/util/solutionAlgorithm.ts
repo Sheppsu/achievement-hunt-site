@@ -2,6 +2,7 @@
 export const VAR_TYPES = ["singular", "list"] as const;
 export type SolutionAlgorithmVarType = (typeof VAR_TYPES)[number];
 type SolutionAlgorithmVarBase = {
+  id: number;
   type: SolutionAlgorithmVarType;
   name: string;
 };
@@ -72,14 +73,16 @@ export type SolutionAlgorithmFuncExpr = {
   args: SolutionAlgorithmExpr[];
 };
 export type SolutionAlgorithmNamedExpr = {
+  id: number;
   name: string;
   value: SolutionAlgorithmExpr;
 };
 
 // validation typing
 export type SolutionAlgorithmValidation = {
+  id: number;
   assertion: SolutionAlgorithmExpr;
-  index: number;
+  index: number | null;
   indexType: "variable" | "expr";
 };
 
@@ -181,8 +184,15 @@ export function makeBlankSolutionAlgorithm(): SolutionAlgorithmData {
   };
 }
 
+var idCounter = 0;
+function getNewId() {
+  idCounter += 1;
+  return idCounter;
+}
+
 export function makeBlankVar(): SolutionAlgorithmVar {
   return {
+    id: getNewId(),
     type: "singular",
     name: "",
   };
@@ -190,6 +200,7 @@ export function makeBlankVar(): SolutionAlgorithmVar {
 
 export function makeBlankNamedExpr(): SolutionAlgorithmNamedExpr {
   return {
+    id: getNewId(),
     name: "",
     value: null,
   };
@@ -197,8 +208,9 @@ export function makeBlankNamedExpr(): SolutionAlgorithmNamedExpr {
 
 export function makeBlankVal(): SolutionAlgorithmValidation {
   return {
+    id: getNewId(),
     assertion: null,
-    index: 0,
+    index: null,
     indexType: "variable",
   };
 }
