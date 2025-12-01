@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 
 type TextAreaProps = {
   value: string;
-  setValue: React.Dispatch<React.SetStateAction<string>>;
+  setValue: (value: string) => void;
   className?: string;
   placeholder?: string;
   hidden?: boolean;

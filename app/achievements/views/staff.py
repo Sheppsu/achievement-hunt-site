@@ -22,6 +22,7 @@ def serialize_full_achievement(req, achievement: Achievement):
             "solution",
             "creator",
             "batch",
+            "solution_algorithm",
             SerializableField(
                 "votes",
                 serial_key="has_voted",

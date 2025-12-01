@@ -1,10 +1,11 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useGetStaffAchievement } from "api/query.ts";
 import { NotFoundError } from "../../errors/NotFoundError.ts";
 import Achievement from "components/staff/Achievement.tsx";
 
 import "assets/css/staff.css";
 import { Helmet } from "react-helmet";
+import { useCallback } from "react";
 
 export default function AchievementPage() {
   const params = useParams();
@@ -21,6 +22,15 @@ export default function AchievementPage() {
 
   const { isLoading, data: achievement } =
     useGetStaffAchievement(achievementId);
+  const navigate = useNavigate();
+  const setView = useCallback(
+    (value: any) => {
+      navigate("/staff", {
+        state: value,
+      });
+    },
+    [navigate],
+  );
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -37,7 +47,7 @@ export default function AchievementPage() {
       </Helmet>
       <div className="staff__page">
         <div className="staff__achievement-container">
-          <Achievement achievement={achievement} />
+          <Achievement achievement={achievement} setView={setView} />
         </div>
       </div>
     </>

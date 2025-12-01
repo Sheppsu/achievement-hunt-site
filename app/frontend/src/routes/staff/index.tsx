@@ -1,62 +1,72 @@
-import {
-  useCreateBatch,
-  useGetBatches,
-  useGetStaffAchievements,
-} from "api/query.ts";
+import { useGetStaffAchievements } from "api/query.ts";
 import Achievement from "components/staff/Achievement.tsx";
 import "assets/css/staff.css";
 import AchievementNavigationBar, {
   getDefaultNav,
 } from "components/achievements/AchievementNavigationBar.tsx";
-import Button from "components/inputs/Button.tsx";
-import AchievementCreation from "components/staff/AchievementCreation.tsx";
 import { SessionContext } from "contexts/SessionContext.ts";
 import {
   useDispatchStateContext,
   useStateContext,
 } from "contexts/StateContext.ts";
-import React, { useContext, useState } from "react";
+import React, { useCallback, useContext, useState } from "react";
 import { getSortedAchievements } from "util/achievementSorting.ts";
 import { useAuthEnsurer } from "util/auth.ts";
 import { Helmet } from "react-helmet";
 import ViewSwitcher from "components/common/ViewSwitcher.tsx";
 import ReleasesView from "routes/staff/releases.tsx";
 import CreationView from "routes/staff/creation.tsx";
+import { useLocation, useNavigate } from "react-router-dom";
 
-type ViewType = "achievements" | "releases" | "creation";
-const VIEWS: ViewType[] = ["achievements", "creation", "releases"];
+const VIEWS = ["achievements", "creation", "releases"] as const;
+type ViewName = (typeof VIEWS)[number];
+type ViewType = {
+  name: ViewName;
+  props: any;
+};
 
-function getView(view: ViewType) {
-  switch (view) {
+function getView(view: ViewType, setView: (value: ViewType) => void) {
+  switch (view.name) {
     case "achievements":
-      return <AchievementsView />;
+      return <AchievementsView setView={setView} {...view.props} />;
     case "releases":
-      return <ReleasesView />;
+      return <ReleasesView {...view.props} />;
     case "creation":
-      return <CreationView />;
+      return <CreationView {...view.props} />;
   }
 }
 
 export default function Index() {
   useAuthEnsurer().ensureStaff();
 
-  const [view, setView] = useState<ViewType>("creation");
+  const location = useLocation();
+  const [view, setView] = useState<ViewType>(
+    location.state ?? {
+      name: "achievements",
+      props: {},
+    },
+  );
+  const setViewName = useCallback((newName: ViewName) => {
+    setView((v) => ({ name: newName, props: {} }));
+  }, []);
 
   return (
     <div className="staff__page">
-      <ViewSwitcher views={VIEWS} currentView={view} setView={setView} />
-      {getView(view)}
+      <ViewSwitcher
+        views={VIEWS}
+        currentView={view.name}
+        setView={setViewName}
+      />
+      {getView(view, setView)}
     </div>
   );
 }
 
-function AchievementsView() {
+function AchievementsView({ setView }: { setView: (value: ViewType) => void }) {
   const { data: achievements, isLoading } = useGetStaffAchievements();
   const state = useStateContext();
   const dispatchState = useDispatchStateContext();
   const session = useContext(SessionContext);
-
-  const [creationOpen, setCreationOpen] = useState(false);
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -73,14 +83,6 @@ function AchievementsView() {
     });
     return <div>Loading...</div>;
   }
-
-  const onOpenCreation = () => {
-    setCreationOpen(true);
-  };
-
-  const onCancelCreation = () => {
-    setCreationOpen(false);
-  };
 
   let filteredAchievements = achievements;
   if (state.showMyAchievements) {
@@ -103,13 +105,8 @@ function AchievementsView() {
         <title>CTA - Staff Achievements</title>
       </Helmet>
       <h1>{achievements.length} Achievements</h1>
-      <div className="staff__interaction-bar">
-        <Button
-          children="Create achievement"
-          hidden={creationOpen}
-          onClick={onOpenCreation}
-        />
-      </div>
+      {/*<div className="staff__interaction-bar">*/}
+      {/*</div>*/}
       <AchievementNavigationBar
         key="staff"
         state={state}
@@ -117,15 +114,10 @@ function AchievementsView() {
         achievements={achievements}
         isStaff={true}
       />
-      <AchievementCreation
-        hidden={!creationOpen}
-        onCancelCreation={onCancelCreation}
-        submitText="Create"
-      />
       <div className="staff__achievement-container">
         {/* sorting for staff page puts everything under the 'values' category */}
         {(sortedAchievements["values"] ?? []).map((a) => (
-          <Achievement key={a.id} achievement={a} />
+          <Achievement key={a.id} achievement={a} setView={setView} />
         ))}
       </div>
     </>

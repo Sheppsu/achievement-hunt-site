@@ -66,11 +66,6 @@ class ValidationType:
         raise NotImplementedError()
 
 
-class AnyType(ValidationType):
-    def validate(self, data) -> ValidationResult:
-        return ValidationResult.clear()
-
-
 class OptionalType(ValidationType):
     __slots__ = ("optional",)
 
@@ -80,6 +75,14 @@ class OptionalType(ValidationType):
     def validate(self, data) -> ValidationResult:
         if self.optional and data is None:
             return ValidationResult.all_clear()
+        return ValidationResult.clear()
+
+
+class AnyType(OptionalType):
+    def __init__(self):
+        super().__init__(False)
+
+    def validate(self, data) -> ValidationResult:
         return ValidationResult.clear()
 
 

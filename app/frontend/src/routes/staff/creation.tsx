@@ -21,6 +21,10 @@ import Dropdown from "components/inputs/Dropdown.tsx";
 import { IoIosAddCircle } from "react-icons/io";
 import Checkbox from "components/inputs/Checkbox.tsx";
 import Button from "components/inputs/Button.tsx";
+import TextArea from "components/inputs/TextArea.tsx";
+import { useCreateAchievement, useEditAchievement } from "api/query.ts";
+import { useNavigate } from "react-router-dom";
+import { StaffAchievementType } from "api/types/AchievementType.ts";
 
 const EXPR_TYPES = [
   "func",
@@ -32,50 +36,109 @@ const EXPR_TYPES = [
 ] as const;
 type ExprType = (typeof EXPR_TYPES)[number];
 
-export default class CreationViewNew extends React.Component {
-  private algorithm: SolutionAlgorithmData;
+type AchievementPayloadType = {
+  id: number | null;
+  name: string;
+  description: string;
+  solution: string;
+  tags: string;
+  beatmaps: {
+    id: number;
+    hide: boolean;
+  }[];
+  solutionAlgorithm: SolutionAlgorithmData;
+};
 
-  constructor() {
-    super({});
+function makeDefaultPayload(): AchievementPayloadType {
+  return {
+    id: null,
+    name: "",
+    description: "",
+    solution: "",
+    tags: "",
+    beatmaps: [],
+    solutionAlgorithm: makeBlankSolutionAlgorithm(),
+  };
+}
 
-    const storage = localStorage.getItem("savedCreationData");
-    const saveData = storage === null ? null : JSON.parse(storage);
+function makeAchievementPayload(achievement: StaffAchievementType) {
+  return {
+    id: achievement.id,
+    name: achievement.name,
+    description: achievement.description,
+    solution: achievement.solution,
+    tags: achievement.tags,
+    beatmaps: achievement.beatmaps.map((item) => ({
+      id: item.info.id,
+      hide: item.hide,
+    })),
+    solutionAlgorithm: achievement.solution_algorithm,
+  };
+}
 
-    this.algorithm =
-      saveData === null || saveData.algorithm === null
-        ? makeBlankSolutionAlgorithm()
-        : saveData.algorithm;
+type ViewProps = {
+  createAchievement: ReturnType<typeof useCreateAchievement>;
+  editAchievement?: ReturnType<typeof useEditAchievement>;
+  navigate: ReturnType<typeof useNavigate>;
+  achievement?: StaffAchievementType;
+};
+
+class CreationViewComponent extends React.Component<ViewProps> {
+  private payload: AchievementPayloadType;
+  private timeoutId: number | null = null;
+  state = {
+    saving: false,
+  };
+
+  constructor(props: ViewProps) {
+    super(props);
+
+    if (this.props.achievement === undefined) {
+      let stored = localStorage.getItem("savedCreationData");
+      const saveData: AchievementPayloadType =
+        stored === null ? makeDefaultPayload() : JSON.parse(stored);
+      if (saveData.solutionAlgorithm === null) {
+        saveData.solutionAlgorithm = makeBlankSolutionAlgorithm();
+      }
+      this.payload = saveData;
+    } else {
+      this.payload = makeAchievementPayload(this.props.achievement);
+    }
   }
 
   forceUpdate() {
-    localStorage.setItem(
-      "savedCreationData",
-      JSON.stringify({
-        algorithm: this.algorithm,
-      }),
-    );
+    if (this.timeoutId !== null) {
+      clearTimeout(this.timeoutId);
+      this.timeoutId = null;
+    }
+    this.timeoutId = setTimeout(() => {
+      this.timeoutId = null;
+      localStorage.setItem("savedCreationData", JSON.stringify(this.payload));
+    }, 500);
+
     super.forceUpdate();
   }
 
   private addVar() {
-    this.algorithm.vars.push(makeBlankVar());
+    this.payload.solutionAlgorithm.vars.push(makeBlankVar());
     this.forceUpdate();
   }
 
   private addExpr() {
-    this.algorithm.exprs.push(makeBlankNamedExpr());
+    this.payload.solutionAlgorithm.exprs.push(makeBlankNamedExpr());
     this.forceUpdate();
   }
 
   private addVal() {
-    this.algorithm.validation.push(makeBlankVal());
+    this.payload.solutionAlgorithm.validation.push(makeBlankVal());
     this.forceUpdate();
   }
 
   private removeVar(i: number) {
-    this.algorithm.vars = this.algorithm.vars
+    const algorithm = this.payload.solutionAlgorithm;
+    algorithm.vars = algorithm.vars
       .slice(0, i)
-      .concat(this.algorithm.vars.slice(i + 1));
+      .concat(algorithm.vars.slice(i + 1));
 
     function fixExpr(expr: SolutionAlgorithmExpr) {
       const exprType = getExprType(expr);
@@ -97,10 +160,10 @@ export default class CreationViewNew extends React.Component {
       }
     }
 
-    for (const expr of this.algorithm.exprs) {
+    for (const expr of algorithm.exprs) {
       fixExpr(expr.value);
     }
-    for (const val of this.algorithm.validation) {
+    for (const val of algorithm.validation) {
       fixExpr(val.assertion);
       if (val.indexType === "variable" && val.index !== null) {
         if (val.index === i) {
@@ -115,11 +178,12 @@ export default class CreationViewNew extends React.Component {
   }
 
   private removeExpr(i: number) {
-    this.algorithm.exprs = this.algorithm.exprs
+    const algorithm = this.payload.solutionAlgorithm;
+    algorithm.exprs = algorithm.exprs
       .slice(0, i)
-      .concat(this.algorithm.exprs.slice(i + 1));
+      .concat(algorithm.exprs.slice(i + 1));
 
-    for (const val of this.algorithm.validation) {
+    for (const val of algorithm.validation) {
       if (val.indexType == "expr" && val.index !== null) {
         if (val.index === i) {
           val.index = null;
@@ -133,11 +197,82 @@ export default class CreationViewNew extends React.Component {
   }
 
   private removeVal(i: number) {
-    this.algorithm.validation = this.algorithm.validation
+    const algorithm = this.payload.solutionAlgorithm;
+    algorithm.validation = algorithm.validation
       .slice(0, 1)
-      .concat(this.algorithm.validation.slice(i + 1));
+      .concat(algorithm.validation.slice(i + 1));
 
     this.forceUpdate();
+  }
+
+  private editAchievement(attr: string, value: any) {
+    // @ts-ignore
+    this.payload[attr] = value;
+    this.forceUpdate();
+  }
+
+  private editBeatmapId(
+    beatmap: { id: number },
+    evt: React.ChangeEvent<HTMLInputElement>,
+  ) {
+    const newValue = evt.target.value;
+    const numValue = newValue.trim().length === 0 ? 0 : parseInt(newValue);
+    if (isNaN(numValue)) {
+      evt.preventDefault();
+      return;
+    }
+    beatmap.id = numValue;
+
+    this.forceUpdate();
+  }
+
+  private addBeatmap() {
+    this.payload.beatmaps.push({
+      id: 0,
+      hide: false,
+    });
+    this.forceUpdate();
+  }
+
+  private removeBeatmap(i: number) {
+    this.payload.beatmaps = this.payload.beatmaps
+      .slice(0, i)
+      .concat(this.payload.beatmaps.slice(i + 1));
+    this.forceUpdate();
+  }
+
+  private createPayload() {
+    return {
+      name: this.payload.name,
+      description: this.payload.description,
+      solution: this.payload.solution,
+      tags: this.payload.tags,
+      beatmaps: this.payload.beatmaps,
+      solution_algorithm: this.payload.solutionAlgorithm,
+    };
+  }
+
+  private saveAchievement() {
+    this.setState({
+      saving: true,
+    });
+
+    // editAchievement should be guaranteed defined when id is not null
+    const saveAchievement =
+      this.payload.id === null
+        ? this.props.createAchievement
+        : this.props.editAchievement;
+    saveAchievement!.mutate(this.createPayload(), {
+      onSuccess: (data) => {
+        localStorage.removeItem("savedCreationData");
+        this.props.navigate(`/staff/achievements/${data.id}`);
+      },
+      onSettled: () => {
+        this.setState({
+          saving: false,
+        });
+      },
+    });
   }
 
   render() {
@@ -147,6 +282,86 @@ export default class CreationViewNew extends React.Component {
           <title>CTA - Staff Creation</title>
         </Helmet>
         <div className="staff-creation__page">
+          {this.payload.id !== null ? (
+            <h2 className="staff-creation__section-header-text">
+              (Currently editing an achievement)
+            </h2>
+          ) : (
+            ""
+          )}
+          <h2 className="staff-creation__section-header-text">
+            Achievement Info
+          </h2>
+          <TextInput
+            placeholder="Title"
+            className="staff-creation__input extended"
+            value={this.payload.name}
+            onChange={(evt) =>
+              this.editAchievement("name", evt.currentTarget.value)
+            }
+          />
+          <TextArea
+            placeholder="Description"
+            className="staff-creation__input"
+            value={this.payload.description}
+            setValue={(value) => this.editAchievement("description", value)}
+          />
+          <TextArea
+            placeholder="Solution explanation"
+            className="staff-creation__input"
+            value={this.payload.solution}
+            setValue={(value) => this.editAchievement("solution", value)}
+          />
+          <TextInput
+            placeholder="Comma-separated tags"
+            className="staff-creation__input extended"
+            value={this.payload.tags}
+            onChange={(evt) =>
+              this.editAchievement("tags", evt.currentTarget.value)
+            }
+          />
+          <div className="staff-creation__section-section">
+            <div className="staff-creation__section-header">
+              <h2 className="staff-creation__section-header-text">
+                Attached Beatmaps
+              </h2>
+              <IoIosAddCircle
+                className="clickable"
+                size={32}
+                onClick={() => this.addBeatmap()}
+              />
+            </div>
+            <div className="staff-creation__section-container">
+              {this.payload.beatmaps.map((beatmap, i) => (
+                <div className="staff-creation__remove-holder">
+                  <Button
+                    children="Remove"
+                    holdToUse={true}
+                    caution={true}
+                    onClick={() => this.removeBeatmap(i)}
+                  />
+                  <div className="staff-creation__entry--col">
+                    <div className="staff-creation__entry">
+                      <TextInput
+                        placeholder="Beatmap id"
+                        className="staff-creation__input"
+                        value={beatmap.id}
+                        onChange={(evt) => this.editBeatmapId(beatmap, evt)}
+                      />
+                      <CustomCheckbox
+                        label="Secret"
+                        value={beatmap.hide}
+                        setValue={(value) => {
+                          beatmap.hide = value;
+                          this.forceUpdate();
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
           <div className="staff-creation__section">
             <div className="staff-creation__section-header">
               <h2 className="staff-creation__section-header-text">Variables</h2>
@@ -157,7 +372,7 @@ export default class CreationViewNew extends React.Component {
               />
             </div>
             <div className="staff-creation__section-container">
-              {this.algorithm.vars.map((v, i) => (
+              {this.payload.solutionAlgorithm.vars.map((v, i) => (
                 <div className="staff-creation__remove-holder">
                   <Button
                     children="Remove"
@@ -165,11 +380,7 @@ export default class CreationViewNew extends React.Component {
                     caution={true}
                     onClick={() => this.removeVar(i)}
                   />
-                  <VarEntry
-                    key={v.id}
-                    entry={v}
-                    forceUpdate={() => this.forceUpdate()}
-                  />
+                  <VarEntry entry={v} forceUpdate={() => this.forceUpdate()} />
                 </div>
               ))}
             </div>
@@ -186,7 +397,7 @@ export default class CreationViewNew extends React.Component {
               />
             </div>
             <div className="staff-creation__section-container">
-              {this.algorithm.exprs.map((e, i) => (
+              {this.payload.solutionAlgorithm.exprs.map((e, i) => (
                 <div className="staff-creation__remove-holder">
                   <Button
                     children="Remove"
@@ -195,10 +406,9 @@ export default class CreationViewNew extends React.Component {
                     onClick={() => this.removeExpr(i)}
                   />
                   <NamedExprEntry
-                    key={e.id}
                     entry={e}
                     forceUpdate={() => this.forceUpdate()}
-                    variables={this.algorithm.vars}
+                    variables={this.payload.solutionAlgorithm.vars}
                   />
                 </div>
               ))}
@@ -216,7 +426,7 @@ export default class CreationViewNew extends React.Component {
               />
             </div>
             <div className="staff-creation__section-container">
-              {this.algorithm.validation.map((v, i) => (
+              {this.payload.solutionAlgorithm.validation.map((v, i) => (
                 <div className="staff-creation__remove-holder">
                   <Button
                     children="Remove"
@@ -225,20 +435,62 @@ export default class CreationViewNew extends React.Component {
                     onClick={() => this.removeVal(i)}
                   />
                   <ValidationEntry
-                    key={v.id}
                     entry={v}
                     forceUpdate={() => this.forceUpdate()}
-                    expressions={this.algorithm.exprs}
-                    variables={this.algorithm.vars}
+                    expressions={this.payload.solutionAlgorithm.exprs}
+                    variables={this.payload.solutionAlgorithm.vars}
                   />
                 </div>
               ))}
             </div>
           </div>
+          <Button
+            holdToUse={true}
+            unavailable={this.state.saving}
+            children="Submit"
+            className="staff-creation__input"
+            onClick={() => this.saveAchievement()}
+          />
         </div>
       </>
     );
   }
+}
+
+function useEditCurrentAchievement(achievement?: StaffAchievementType) {
+  if (achievement !== undefined) {
+    return useEditAchievement(achievement.id);
+  } else {
+    const storage = localStorage.getItem("savedCreationData");
+    if (storage === null) {
+      return null;
+    }
+
+    const savedData = JSON.parse(storage);
+    if (savedData.id === null) {
+      return null;
+    }
+
+    return useEditAchievement(savedData.id);
+  }
+}
+
+export default function CreationView({
+  achievement,
+}: {
+  achievement?: StaffAchievementType;
+}) {
+  const createAchievement = useCreateAchievement();
+  const editAchievement = useEditCurrentAchievement(achievement);
+  const navigate = useNavigate();
+  return (
+    <CreationViewComponent
+      achievement={achievement}
+      createAchievement={createAchievement}
+      editAchievement={editAchievement}
+      navigate={navigate}
+    />
+  );
 }
 
 function CustomCheckbox({

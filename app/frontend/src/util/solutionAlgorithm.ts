@@ -2,7 +2,6 @@
 export const VAR_TYPES = ["singular", "list"] as const;
 export type SolutionAlgorithmVarType = (typeof VAR_TYPES)[number];
 type SolutionAlgorithmVarBase = {
-  id: number;
   type: SolutionAlgorithmVarType;
   name: string;
 };
@@ -24,6 +23,7 @@ export const EXPR_FUNCTIONS = [
   "assign",
   "length",
   "sum",
+  "ifelse",
 ] as const;
 export const EXPR_FUNCTION_ARGS = {
   variable: [
@@ -60,6 +60,20 @@ export const EXPR_FUNCTION_ARGS = {
       type: "expr",
     },
   ],
+  ifelse: [
+    {
+      descriptor: "Evaluated expression",
+      type: "expr",
+    },
+    {
+      descriptor: "If true",
+      type: "expr",
+    },
+    {
+      descriptor: "If false",
+      type: "expr",
+    },
+  ],
 } as const;
 export type SolutionAlgorithmFuncType = (typeof EXPR_FUNCTIONS)[number];
 export type SolutionAlgorithmExpr =
@@ -73,14 +87,12 @@ export type SolutionAlgorithmFuncExpr = {
   args: SolutionAlgorithmExpr[];
 };
 export type SolutionAlgorithmNamedExpr = {
-  id: number;
   name: string;
   value: SolutionAlgorithmExpr;
 };
 
 // validation typing
 export type SolutionAlgorithmValidation = {
-  id: number;
   assertion: SolutionAlgorithmExpr;
   index: number | null;
   indexType: "variable" | "expr";
@@ -92,90 +104,6 @@ export type SolutionAlgorithmData = {
   validation: SolutionAlgorithmValidation[];
 };
 
-// actions
-// export type SolutionAlgorithmActionAddVar = {
-//   type: "add-var";
-//   data: SolutionAlgorithmVar;
-// };
-// export type SolutionAlgorithmActionEditVar = {
-//   type: "edit-var";
-//   index: number;
-//   data: SolutionAlgorithmVar;
-// };
-// export type SolutionAlgorithmActionAddExpr = {
-//   type: "add-expr";
-//   data: SolutionAlgorithmExpr;
-// };
-// export type SolutionAlgorithmActionEditExpr = {
-//   type: "edit-expr";
-//   index: number;
-//   data: SolutionAlgorithmExpr;
-// };
-// export type SolutionAlgorithmActionAddValidation = {
-//   type: "add-validation";
-//   data: SolutionAlgorithmValidation;
-// };
-// export type SolutionAlgorithmActionEditValidation = {
-//   type: "edit-validation";
-//   index: number;
-//   data: SolutionAlgorithmValidation;
-// };
-//
-// export type SolutionAlgorithmAction =
-//   | SolutionAlgorithmActionAddVar
-//   | SolutionAlgorithmActionEditVar
-//   | SolutionAlgorithmActionAddExpr
-//   | SolutionAlgorithmActionEditExpr
-//   | SolutionAlgorithmActionAddValidation
-//   | SolutionAlgorithmActionEditValidation;
-//
-// export function solutionAlgorithmReducer(
-//   state: SolutionAlgorithmData,
-//   action: SolutionAlgorithmAction,
-// ) {
-//   switch (action.type) {
-//     case "add-var":
-//       return {
-//         ...state,
-//         vars: state.vars.concat([action.data]),
-//       };
-//     case "edit-var":
-//       return {
-//         ...state,
-//         vars: state.vars
-//           .slice(0, action.index)
-//           .concat([action.data])
-//           .concat(state.vars.slice(action.index + 1)),
-//       };
-//     case "add-expr":
-//       return {
-//         ...state,
-//         exprs: state.exprs.concat([action.data]),
-//       };
-//     case "edit-expr":
-//       return {
-//         ...state,
-//         exprs: state.exprs
-//           .slice(0, action.index)
-//           .concat([action.data])
-//           .concat(state.exprs.slice(action.index + 1)),
-//       };
-//     case "add-validation":
-//       return {
-//         ...state,
-//         validation: state.validation.concat([action.data]),
-//       };
-//     case "edit-validation":
-//       return {
-//         ...state,
-//         validation: state.validation
-//           .slice(0, action.index)
-//           .concat([action.data])
-//           .concat(state.validation.slice(action.index + 1)),
-//       };
-//   }
-// }
-
 export function makeBlankSolutionAlgorithm(): SolutionAlgorithmData {
   return {
     vars: [],
@@ -184,15 +112,8 @@ export function makeBlankSolutionAlgorithm(): SolutionAlgorithmData {
   };
 }
 
-var idCounter = 0;
-function getNewId() {
-  idCounter += 1;
-  return idCounter;
-}
-
 export function makeBlankVar(): SolutionAlgorithmVar {
   return {
-    id: getNewId(),
     type: "singular",
     name: "",
   };
@@ -200,7 +121,6 @@ export function makeBlankVar(): SolutionAlgorithmVar {
 
 export function makeBlankNamedExpr(): SolutionAlgorithmNamedExpr {
   return {
-    id: getNewId(),
     name: "",
     value: null,
   };
@@ -208,7 +128,6 @@ export function makeBlankNamedExpr(): SolutionAlgorithmNamedExpr {
 
 export function makeBlankVal(): SolutionAlgorithmValidation {
   return {
-    id: getNewId(),
     assertion: null,
     index: null,
     indexType: "variable",
