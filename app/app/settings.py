@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "achievements",
     "frontend",
+    "playtest",
+    "django_extensions",
 ]
 
 MIDDLEWARE = [
@@ -56,6 +58,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "middleware.ExceptionLoggingMiddleware",
     "middleware.DatabaseDebugMiddleware",
+    "middleware.DomainCheckingMiddleware",
 ]
 
 ROOT_URLCONF = "app.urls"
