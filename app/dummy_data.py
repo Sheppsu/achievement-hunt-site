@@ -7,13 +7,10 @@ os.environ["DJANGO_SETTINGS_MODULE"] = "app.settings"
 django.setup()
 
 from achievements.models import *
-from django.conf import settings
+from common.osu_api import get_client
 import osu
 import itertools
-import secrets
 import random
-
-client: osu.Client = settings.OSU_CLIENT
 
 
 def ensure_user(user: osu.UserCompact):
@@ -22,6 +19,7 @@ def ensure_user(user: osu.UserCompact):
     )
 
 
+client = get_client()
 iteration = EventIteration.objects.get()
 
 

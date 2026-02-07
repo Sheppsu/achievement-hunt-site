@@ -2,26 +2,21 @@ import time
 
 import requests
 
-from django.conf import settings
 from django.db import models
-from osu import Client
 
 from common.serializer import SerializableModel
-from common.util import create_auth_handler
 from common.comm import get_osu_user
-
-osu_client = settings.OSU_CLIENT
+from common.osu_api import get_user_client, get_client
 
 
 class UserManager(models.Manager):
     def create_user(self, code: str):
         try:
-            auth = create_auth_handler()
-            auth.get_auth_token(code)
-            client = Client(auth)
+            client = get_user_client(code)
             user = client.get_own_data()
             return self._create_user(user.id, user.username, user.avatar_url, user.cover.url)
-        except requests.HTTPError:
+        except requests.HTTPError as exc:
+            print(exc)
             return
 
     def create_user_from_id(self, user_id):
@@ -134,12 +129,12 @@ class BeatmapInfo(SerializableModel):
 
     @classmethod
     def get_or_create(cls, beatmap_id):
-        info = osu_client.get_beatmap(beatmap_id)
+        info = get_client().get_beatmap(beatmap_id)
         return cls._get_or_create(info)
 
     @classmethod
     def bulk_get_or_create(cls, beatmap_ids):
-        beatmaps = osu_client.get_beatmaps(beatmap_ids)
+        beatmaps = get_client().get_beatmaps(beatmap_ids)
         if len(beatmaps) != len(beatmap_ids):
             return
 

@@ -6,6 +6,7 @@ from django.views.decorators.http import require_POST, require_http_methods, req
 from django.contrib.auth import login as do_login
 from django.shortcuts import redirect
 from django.http.response import HttpResponse
+from django.conf import settings
 
 from common.validation import *
 from .util import *

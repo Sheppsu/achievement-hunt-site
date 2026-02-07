@@ -1,5 +1,5 @@
-from django.core.management.base import BaseCommand, CommandError
-from achievements.models import User, UserManager
+from django.core.management.base import BaseCommand
+from achievements.models import User
 
 
 class Command(BaseCommand):

@@ -15,9 +15,10 @@ django.setup()
 
 
 from achievements.models import *
-from django.conf import settings
+from common.osu_api import get_client
 
-client = settings.OSU_CLIENT
+
+client = get_client()
 
 
 dates = []

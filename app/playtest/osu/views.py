@@ -21,7 +21,6 @@ def decrypt_score_aes_data(
     osu_version: str,
 ) -> tuple[list[str], str]:
     """Decrypt the base64'ed score data."""
-    # TODO: perhaps this should return TypedDict?
 
     # attempt to decrypt score data
     aes = RijndaelCbc(
@@ -49,6 +48,7 @@ def handle_score_submission(req):
 
     score_data, client_hash_decoded = decrypt_score_aes_data(score_data.encode(), client_hash_b64, iv_b64, osu_version)
 
+    beatmap_hash = score_data[0]
     username = score_data[1]
     if username[-1] == " ":
         username = username[:-1]
@@ -56,5 +56,7 @@ def handle_score_submission(req):
     account = account_from_credentials(username, pw_md5)
     if account is None:
         return HttpResponse(b"")
+
+    score = {"accuracy": 100.0, "beatmap_id": 0}
 
     return HttpResponse(b"")

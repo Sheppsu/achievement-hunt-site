@@ -2,14 +2,14 @@ from django.urls import re_path
 from django.shortcuts import render, Http404
 from django.conf import settings
 
-from achievements.views.common import get_current_iteration
+from common.osu_api import OSU_AUTH_URL
 
 
 def index_view(req):
     data = {
         "isAuthenticated": req.user.is_authenticated,
         "user": req.user.serialize() if req.user.is_authenticated else None,
-        "authUrl": settings.OSU_LOGIN_URL,
+        "authUrl": OSU_AUTH_URL,
         "wsUri": settings.ACHIEVEMENTS_WS_URI,
         "debug": settings.DEBUG,
     }

@@ -194,9 +194,5 @@ class PlaytestAccount(models.Model):
         return ModeData()
 
 
-class Score(models.Model):
-    accuracy = models.FloatField()
-
-
 class Match:
     pass

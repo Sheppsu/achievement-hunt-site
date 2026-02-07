@@ -7,12 +7,12 @@ from django.db.models.deletion import RestrictedError
 from django.http import HttpResponseBadRequest
 from django.shortcuts import redirect
 from django.views.decorators.http import require_http_methods, require_POST, require_GET
+from django.conf import settings
 
 from .util import *
 from .anonymous_names import verify_name
 
 from datetime import datetime, timezone
-import itertools
 
 
 def serialize_team(team: Team):

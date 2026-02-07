@@ -1,4 +1,5 @@
 from django.views.decorators.http import require_POST, require_GET, require_http_methods
+from django.conf import settings
 
 from .util import *
 from common.serializer import SerializableField
