@@ -5,7 +5,6 @@ import requests
 from django.db import models
 
 from common.serializer import SerializableModel
-from common.comm import get_osu_user
 from common.osu_api import get_user_client, get_client
 
 
@@ -20,8 +19,8 @@ class UserManager(models.Manager):
             return
 
     def create_user_from_id(self, user_id):
-        user = get_osu_user(user_id)
-        return self._create_user(user["id"], user["username"], user["avatar"], user["cover"])
+        user = get_client().get_user(user_id)
+        return self._create_user(user.id, user.username, user.avatar_url, user.cover.url)
 
     def _create_user(self, user_id, username, avatar, cover):
         try:
@@ -158,6 +157,7 @@ class Achievement(SerializableModel):
     completion_count = models.PositiveSmallIntegerField(default=0)
     worth_points = models.BooleanField(default=True)
     solution_algorithm = models.JSONField(default=dict)
+    algorithm_enabled = models.BooleanField(default=False)
 
     class Serialization:
         FIELDS = ["id", "name", "description", "audio", "tags", "created_at", "last_edited_at", "worth_points"]

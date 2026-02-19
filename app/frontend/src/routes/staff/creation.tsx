@@ -47,6 +47,7 @@ type AchievementPayloadType = {
     hide: boolean;
   }[];
   solutionAlgorithm: SolutionAlgorithmData;
+  algorithmEnabled: boolean;
 };
 
 function makeDefaultPayload(): AchievementPayloadType {
@@ -58,6 +59,7 @@ function makeDefaultPayload(): AchievementPayloadType {
     tags: "",
     beatmaps: [],
     solutionAlgorithm: makeBlankSolutionAlgorithm(),
+    algorithmEnabled: false,
   };
 }
 
@@ -73,18 +75,19 @@ function makeAchievementPayload(achievement: StaffAchievementType) {
       hide: item.hide,
     })),
     solutionAlgorithm: achievement.solution_algorithm,
+    algorithmEnabled: achievement.algorithm_enabled,
   };
 }
 
 type ViewProps = {
   createAchievement: ReturnType<typeof useCreateAchievement>;
-  editAchievement?: ReturnType<typeof useEditAchievement>;
+  editAchievement: ReturnType<typeof useEditAchievement> | null;
   navigate: ReturnType<typeof useNavigate>;
   achievement?: StaffAchievementType;
 };
 
 class CreationViewComponent extends React.Component<ViewProps> {
-  private payload: AchievementPayloadType;
+  private readonly payload: AchievementPayloadType;
   private timeoutId: number | null = null;
   state = {
     saving: false,
@@ -249,6 +252,7 @@ class CreationViewComponent extends React.Component<ViewProps> {
       tags: this.payload.tags,
       beatmaps: this.payload.beatmaps,
       solution_algorithm: this.payload.solutionAlgorithm,
+      algorithm_enabled: this.payload.algorithmEnabled,
     };
   }
 
@@ -320,6 +324,15 @@ class CreationViewComponent extends React.Component<ViewProps> {
               this.editAchievement("tags", evt.currentTarget.value)
             }
           />
+          <div className="staff-creation__entry">
+            <CustomCheckbox
+              label="Enable solution algorithm"
+              value={this.payload.algorithmEnabled}
+              setValue={(value) =>
+                this.editAchievement("algorithmEnabled", value)
+              }
+            />
+          </div>
           <div className="staff-creation__section-section">
             <div className="staff-creation__section-header">
               <h2 className="staff-creation__section-header-text">
@@ -362,88 +375,99 @@ class CreationViewComponent extends React.Component<ViewProps> {
               ))}
             </div>
           </div>
-          <div className="staff-creation__section">
-            <div className="staff-creation__section-header">
-              <h2 className="staff-creation__section-header-text">Variables</h2>
-              <IoIosAddCircle
-                className="clickable"
-                size={32}
-                onClick={() => this.addVar()}
-              />
-            </div>
-            <div className="staff-creation__section-container">
-              {this.payload.solutionAlgorithm.vars.map((v, i) => (
-                <div className="staff-creation__remove-holder">
-                  <Button
-                    children="Remove"
-                    holdToUse={true}
-                    caution={true}
-                    onClick={() => this.removeVar(i)}
-                  />
-                  <VarEntry entry={v} forceUpdate={() => this.forceUpdate()} />
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="staff-creation__section">
-            <div className="staff-creation__section-header">
-              <h2 className="staff-creation__section-header-text">
-                Expressions
-              </h2>
-              <IoIosAddCircle
-                className="clickable"
-                size={32}
-                onClick={() => this.addExpr()}
-              />
-            </div>
-            <div className="staff-creation__section-container">
-              {this.payload.solutionAlgorithm.exprs.map((e, i) => (
-                <div className="staff-creation__remove-holder">
-                  <Button
-                    children="Remove"
-                    holdToUse={true}
-                    caution={true}
-                    onClick={() => this.removeExpr(i)}
-                  />
-                  <NamedExprEntry
-                    entry={e}
-                    forceUpdate={() => this.forceUpdate()}
-                    variables={this.payload.solutionAlgorithm.vars}
+          {this.payload.algorithmEnabled ? (
+            <>
+              <div className="staff-creation__section">
+                <div className="staff-creation__section-header">
+                  <h2 className="staff-creation__section-header-text">
+                    Variables
+                  </h2>
+                  <IoIosAddCircle
+                    className="clickable"
+                    size={32}
+                    onClick={() => this.addVar()}
                   />
                 </div>
-              ))}
-            </div>
-          </div>
-          <div className="staff-creation__section">
-            <div className="staff-creation__section-header">
-              <h2 className="staff-creation__section-header-text">
-                Validations
-              </h2>
-              <IoIosAddCircle
-                className="clickable"
-                size={32}
-                onClick={() => this.addVal()}
-              />
-            </div>
-            <div className="staff-creation__section-container">
-              {this.payload.solutionAlgorithm.validation.map((v, i) => (
-                <div className="staff-creation__remove-holder">
-                  <Button
-                    children="Remove"
-                    holdToUse={true}
-                    caution={true}
-                    onClick={() => this.removeVal(i)}
-                  />
-                  <ValidationEntry
-                    entry={v}
-                    forceUpdate={() => this.forceUpdate()}
-                    expressions={this.payload.solutionAlgorithm.exprs}
-                    variables={this.payload.solutionAlgorithm.vars}
+                <div className="staff-creation__section-container">
+                  {this.payload.solutionAlgorithm.vars.map((v, i) => (
+                    <div className="staff-creation__remove-holder">
+                      <Button
+                        children="Remove"
+                        holdToUse={true}
+                        caution={true}
+                        onClick={() => this.removeVar(i)}
+                      />
+                      <VarEntry
+                        entry={v}
+                        forceUpdate={() => this.forceUpdate()}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="staff-creation__section">
+                <div className="staff-creation__section-header">
+                  <h2 className="staff-creation__section-header-text">
+                    Expressions
+                  </h2>
+                  <IoIosAddCircle
+                    className="clickable"
+                    size={32}
+                    onClick={() => this.addExpr()}
                   />
                 </div>
-              ))}
-            </div>
-          </div>
+                <div className="staff-creation__section-container">
+                  {this.payload.solutionAlgorithm.exprs.map((e, i) => (
+                    <div className="staff-creation__remove-holder">
+                      <Button
+                        children="Remove"
+                        holdToUse={true}
+                        caution={true}
+                        onClick={() => this.removeExpr(i)}
+                      />
+                      <NamedExprEntry
+                        entry={e}
+                        forceUpdate={() => this.forceUpdate()}
+                        variables={this.payload.solutionAlgorithm.vars}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="staff-creation__section">
+                <div className="staff-creation__section-header">
+                  <h2 className="staff-creation__section-header-text">
+                    Validations
+                  </h2>
+                  <IoIosAddCircle
+                    className="clickable"
+                    size={32}
+                    onClick={() => this.addVal()}
+                  />
+                </div>
+                <div className="staff-creation__section-container">
+                  {this.payload.solutionAlgorithm.validation.map((v, i) => (
+                    <div className="staff-creation__remove-holder">
+                      <Button
+                        children="Remove"
+                        holdToUse={true}
+                        caution={true}
+                        onClick={() => this.removeVal(i)}
+                      />
+                      <ValidationEntry
+                        entry={v}
+                        forceUpdate={() => this.forceUpdate()}
+                        expressions={this.payload.solutionAlgorithm.exprs}
+                        variables={this.payload.solutionAlgorithm.vars}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
+          ) : (
+            ""
+          )}
           <Button
             holdToUse={true}
             unavailable={this.state.saving}

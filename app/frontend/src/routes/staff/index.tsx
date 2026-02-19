@@ -1,4 +1,4 @@
-import { useGetStaffAchievements } from "api/query.ts";
+import { useGetPlaytestPasskey, useGetStaffAchievements } from "api/query.ts";
 import Achievement from "components/staff/Achievement.tsx";
 import "assets/css/staff.css";
 import AchievementNavigationBar, {
@@ -17,6 +17,8 @@ import ViewSwitcher from "components/common/ViewSwitcher.tsx";
 import ReleasesView from "routes/staff/releases.tsx";
 import CreationView from "routes/staff/creation.tsx";
 import { useLocation, useNavigate } from "react-router-dom";
+import Button from "components/inputs/Button.tsx";
+import { EventContext } from "contexts/EventContext.ts";
 
 const VIEWS = ["achievements", "creation", "releases"] as const;
 type ViewName = (typeof VIEWS)[number];
@@ -64,9 +66,15 @@ export default function Index() {
 
 function AchievementsView({ setView }: { setView: (value: ViewType) => void }) {
   const { data: achievements, isLoading } = useGetStaffAchievements();
+  const {
+    data: playtestInfo,
+    refetch: fetchPasskey,
+    isLoading: fetchingPasskey,
+  } = useGetPlaytestPasskey();
   const state = useStateContext();
   const dispatchState = useDispatchStateContext();
   const session = useContext(SessionContext);
+  const dispatchEventMsg = useContext(EventContext);
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -99,14 +107,40 @@ function AchievementsView({ setView }: { setView: (value: ViewType) => void }) {
     null,
   );
 
+  const copyPasskey = () => {
+    // playtestInfo is defined if this func is called
+    navigator.clipboard.writeText(playtestInfo!.passkey).then(
+      () => dispatchEventMsg({ type: "info", msg: "Passkey copied!" }),
+      () =>
+        dispatchEventMsg({
+          type: "error",
+          msg: "Failed to copy to clipboard... in which case ping sheppsu to add a reveal passkey thingy",
+        }),
+    );
+  };
+
   return (
     <>
       <Helmet>
         <title>CTA - Staff Achievements</title>
       </Helmet>
       <h1>{achievements.length} Achievements</h1>
-      {/*<div className="staff__interaction-bar">*/}
-      {/*</div>*/}
+      <div className="staff__interaction-bar">
+        <Button
+          children="Generate Playtest Passkey"
+          onClick={() => fetchPasskey()}
+          unavailable={fetchingPasskey}
+        />
+        {playtestInfo === undefined ? (
+          ""
+        ) : (
+          <Button
+            children="Copy Passkey"
+            unavailable={fetchingPasskey}
+            onClick={copyPasskey}
+          />
+        )}
+      </div>
       <AchievementNavigationBar
         key="staff"
         state={state}

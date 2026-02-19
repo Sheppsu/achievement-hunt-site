@@ -65,7 +65,7 @@ def handle_osu_login(req):
     account.utc_offset = login_data["utc_offset"]
     account.save()
 
-    resp = (
+    account.add_packet(
         packets.protocol_version(19)
         + packets.login_reply(account.user_id)
         + packets.bancho_privileges(1)
@@ -75,7 +75,7 @@ def handle_osu_login(req):
         + packets.user_stats(account)
     )
 
-    return HttpResponse(resp, headers={"cho-token": osu_token})
+    return HttpResponse(account.get_response_data(), headers={"cho-token": osu_token})
 
 
 def index(req):
@@ -98,7 +98,9 @@ def index(req):
             for resp_packet in resp:
                 data += resp_packet
 
-    return HttpResponse(data)
+    account.add_packet(bytes(data))
+
+    return HttpResponse(account.get_response_data())
 
 
 PACKETS = {}

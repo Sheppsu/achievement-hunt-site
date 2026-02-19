@@ -439,14 +439,13 @@ def send_team_invite(req, data, iteration):
 
     user = User.objects.filter(id=data["user_id"]).first()
     if user is None:
-        user = get_osu_user(data["user_id"])
+        user = get_client().get_user(data["user_id"])
         if user is None:
             return error("invalid user id")
 
         user = User.objects.create(
-            id=user["id"], username=user["username"], avatar=user["avatar"], cover=user["cover"] or ""
+            id=user.id, username=user.username, avatar=user.avatar_url, cover=user.cover.url or ""
         )
-
     else:
         # ok so this is quite weird but
         # there's a slight possibility that someone uses the invite system

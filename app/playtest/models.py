@@ -170,10 +170,21 @@ class PlaytestAccount(models.Model):
     passkey = models.CharField(max_length=32)
     osu_token = models.CharField(max_length=256)
     utc_offset = models.SmallIntegerField(default=0)
+    recent_scores = models.JSONField(default=list)
+    response_data = models.BinaryField(default=b"")  # will be sent with next request from player
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._response_data = b""
+
+    @staticmethod
+    def generate_passkey():
+        return secrets.token_hex(16)
 
     @classmethod
     def from_user(cls, user: User):
-        passkey = secrets.token_hex(16)
+        passkey = cls.generate_passkey()
         osu_token = secrets.token_hex(32)
         return PlaytestAccount(user=user, passkey=passkey, osu_token=osu_token, utc_offset=0)
 
@@ -192,6 +203,21 @@ class PlaytestAccount(models.Model):
     @property
     def gm_stats(self):
         return ModeData()
+
+    def add_packet(self, data: bytes):
+        self._response_data += data
+
+    def save_packet(self, data: bytes):
+        self.response_data += data
+        self.save()
+
+    def get_response_data(self):
+        if len(self.response_data) > 0:
+            response_data = self.response_data + self._response_data
+            self.response_data = b""
+            self.save()
+            return response_data
+        return self._response_data
 
 
 class Match:

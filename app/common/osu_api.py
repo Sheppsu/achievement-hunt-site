@@ -30,11 +30,15 @@ class AuthData:
 
     @property
     def token(self):
-        return redis_client.get(self.KEY_TOKEN).decode("utf-8")
+        token = redis_client.get(self.KEY_TOKEN)
+        if token is not None:
+            return token.decode("utf-8")
 
     @property
     def refresh_token(self):
-        return redis_client.get(self.KEY_REFRESH_TOKEN).decode("utf-8")
+        token = redis_client.get(self.KEY_REFRESH_TOKEN)
+        if token is not None:
+            return token.decode("utf-8")
 
     @property
     def has_expired(self):
@@ -129,9 +133,11 @@ def get_client():
         osu_client = osu.Client.from_credentials(
             settings.OSU_CLIENT_ID, settings.OSU_CLIENT_SECRET, settings.OSU_REDIRECT_URL
         )
-        osu_client.auth._data = AuthData()
-        osu_client.auth._lock = redis_client.lock("AuthHandlerLock")
-        osu_client.auth.http.rate_limit = RateLimitHandler(1.0, 60)
+        # use redis
+        if not settings.DEBUG:
+            osu_client.auth._data = AuthData()
+            osu_client.auth._lock = redis_client.lock("AuthHandlerLock")
+            osu_client.auth.http.rate_limit = RateLimitHandler(1.0, 60)
         if settings.OSU_DEV_SERVER:
             osu_client.set_domain("dev.ppy.sh")
 

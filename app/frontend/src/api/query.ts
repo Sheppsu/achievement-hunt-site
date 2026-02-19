@@ -913,3 +913,11 @@ export function useMoveAchievement(
     },
   );
 }
+
+export function useGetPlaytestPasskey(): UseQueryResult<{ passkey: string }> {
+  return useMakeQuery({
+    queryKey: ["staff", "playtest", "passkey"],
+    enabled: false,
+    refetchOnMount: false,
+  });
+}
