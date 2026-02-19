@@ -16,7 +16,7 @@ import { Helmet } from "react-helmet";
 import ViewSwitcher from "components/common/ViewSwitcher.tsx";
 import ReleasesView from "routes/staff/releases.tsx";
 import CreationView from "routes/staff/creation.tsx";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import Button from "components/inputs/Button.tsx";
 import { EventContext } from "contexts/EventContext.ts";
 
@@ -32,7 +32,7 @@ function getView(view: ViewType, setView: (value: ViewType) => void) {
     case "achievements":
       return <AchievementsView setView={setView} {...view.props} />;
     case "releases":
-      return <ReleasesView {...view.props} />;
+      return <ReleasesView setView={setView} {...view.props} />;
     case "creation":
       return <CreationView {...view.props} />;
   }

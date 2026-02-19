@@ -13,7 +13,11 @@ import classNames from "classnames";
 import { IoIosAddCircle } from "react-icons/io";
 import AchievementsBatch from "components/staff/AchievementsBatch.tsx";
 
-export default function ReleasesView() {
+export default function ReleasesView({
+  setView,
+}: {
+  setView: (value: any) => void;
+}) {
   const session = useContext(SessionContext);
   const { data: achievements, isLoading: achievementsLoading } =
     useGetStaffAchievements(true);
@@ -111,6 +115,7 @@ export default function ReleasesView() {
               title={`Batch ${i + 1}`}
               batch={batch}
               achievements={achievements}
+              setView={setView}
             />
           ))}
         </div>

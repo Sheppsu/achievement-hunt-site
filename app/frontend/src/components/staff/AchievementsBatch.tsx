@@ -7,10 +7,12 @@ export default function AchievementsBatch({
   title,
   batch,
   achievements,
+  setView,
 }: {
   title: string;
   batch: AchievementBatchType;
   achievements: StaffAchievementType[];
+  setView: (value: any) => void;
 }) {
   const [showAchievement, setShowAchievements] = useState(false);
 
@@ -26,7 +28,7 @@ export default function AchievementsBatch({
       {showAchievement ? (
         <div className="staff-batch__achievements">
           {achievements.map((achievement) => (
-            <Achievement achievement={achievement} />
+            <Achievement achievement={achievement} setView={setView} />
           ))}
         </div>
       ) : (
