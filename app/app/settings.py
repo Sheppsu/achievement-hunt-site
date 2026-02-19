@@ -29,7 +29,7 @@ SECRET_KEY = os.getenv("DJANGO_SECRET")
 DEBUG = bool(int(os.getenv("DJANGO_DEBUG")))
 
 
-ALLOWED_HOSTS = ["*"] if DEBUG else ["cta.sheppsu.me"]
+ALLOWED_HOSTS = ["*"] if DEBUG else ["cta.sheppsu.me", "osu.sheppsu.me", "c.sheppsu.me", "c4.sheppsu.me"]
 
 
 # Application definition
