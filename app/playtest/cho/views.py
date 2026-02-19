@@ -50,7 +50,10 @@ def parse_osu_login_data(data: bytes):
 
 
 def handle_osu_login(req):
-    login_data = parse_osu_login_data(req.body)
+    try:
+        login_data = parse_osu_login_data(req.body)
+    except ValueError:
+        return HttpResponse(status=400)
 
     account = account_from_credentials(login_data["username"], login_data["password_md5"])
     if account is None:
