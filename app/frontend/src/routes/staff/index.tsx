@@ -1,64 +1,80 @@
-import {
-  useCreateBatch,
-  useGetBatches,
-  useGetStaffAchievements,
-} from "api/query.ts";
+import { useGetPlaytestPasskey, useGetStaffAchievements } from "api/query.ts";
 import Achievement from "components/staff/Achievement.tsx";
 import "assets/css/staff.css";
 import AchievementNavigationBar, {
   getDefaultNav,
 } from "components/achievements/AchievementNavigationBar.tsx";
-import Button from "components/inputs/Button.tsx";
-import AchievementCreation from "components/staff/AchievementCreation.tsx";
 import { SessionContext } from "contexts/SessionContext.ts";
 import {
   useDispatchStateContext,
   useStateContext,
 } from "contexts/StateContext.ts";
-import React, { useContext, useState } from "react";
+import React, { useCallback, useContext, useState } from "react";
 import { getSortedAchievements } from "util/achievementSorting.ts";
 import { useAuthEnsurer } from "util/auth.ts";
 import { Helmet } from "react-helmet";
 import ViewSwitcher from "components/common/ViewSwitcher.tsx";
+import ReleasesView from "routes/staff/releases.tsx";
+import CreationView from "routes/staff/creation.tsx";
+import { useLocation } from "react-router-dom";
+import Button from "components/inputs/Button.tsx";
 import { EventContext } from "contexts/EventContext.ts";
-import { AchievementBatchType } from "api/types/AchievementBatchType.ts";
-import { StaffAchievementType } from "api/types/AchievementType.ts";
-import { IoIosAddCircle } from "react-icons/io";
-import classNames from "classnames";
-import AchievementsBatch from "components/staff/AchievementsBatch.tsx";
 
-type ViewType = "achievements" | "releases";
-const VIEWS: ViewType[] = ["achievements", "releases"];
+const VIEWS = ["achievements", "creation", "releases"] as const;
+type ViewName = (typeof VIEWS)[number];
+type ViewType = {
+  name: ViewName;
+  props: any;
+};
 
-function getView(view: ViewType) {
-  switch (view) {
+function getView(view: ViewType, setView: (value: ViewType) => void) {
+  switch (view.name) {
     case "achievements":
-      return <AchievementsView />;
+      return <AchievementsView setView={setView} {...view.props} />;
     case "releases":
-      return <ReleasesView />;
+      return <ReleasesView setView={setView} {...view.props} />;
+    case "creation":
+      return <CreationView {...view.props} />;
   }
 }
 
 export default function Index() {
   useAuthEnsurer().ensureStaff();
 
-  const [view, setView] = useState<ViewType>("achievements");
+  const location = useLocation();
+  const [view, setView] = useState<ViewType>(
+    location.state ?? {
+      name: "achievements",
+      props: {},
+    },
+  );
+  const setViewName = useCallback((newName: ViewName) => {
+    setView((v) => ({ name: newName, props: {} }));
+  }, []);
 
   return (
     <div className="staff__page">
-      <ViewSwitcher views={VIEWS} currentView={view} setView={setView} />
-      {getView(view)}
+      <ViewSwitcher
+        views={VIEWS}
+        currentView={view.name}
+        setView={setViewName}
+      />
+      {getView(view, setView)}
     </div>
   );
 }
 
-function AchievementsView() {
+function AchievementsView({ setView }: { setView: (value: ViewType) => void }) {
   const { data: achievements, isLoading } = useGetStaffAchievements();
+  const {
+    data: playtestInfo,
+    refetch: fetchPasskey,
+    isLoading: fetchingPasskey,
+  } = useGetPlaytestPasskey();
   const state = useStateContext();
   const dispatchState = useDispatchStateContext();
   const session = useContext(SessionContext);
-
-  const [creationOpen, setCreationOpen] = useState(false);
+  const dispatchEventMsg = useContext(EventContext);
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -76,14 +92,6 @@ function AchievementsView() {
     return <div>Loading...</div>;
   }
 
-  const onOpenCreation = () => {
-    setCreationOpen(true);
-  };
-
-  const onCancelCreation = () => {
-    setCreationOpen(false);
-  };
-
   let filteredAchievements = achievements;
   if (state.showMyAchievements) {
     filteredAchievements = achievements.filter(
@@ -99,6 +107,18 @@ function AchievementsView() {
     null,
   );
 
+  const copyPasskey = () => {
+    // playtestInfo is defined if this func is called
+    navigator.clipboard.writeText(playtestInfo!.passkey).then(
+      () => dispatchEventMsg({ type: "info", msg: "Passkey copied!" }),
+      () =>
+        dispatchEventMsg({
+          type: "error",
+          msg: "Failed to copy to clipboard... in which case ping sheppsu to add a reveal passkey thingy",
+        }),
+    );
+  };
+
   return (
     <>
       <Helmet>
@@ -107,10 +127,19 @@ function AchievementsView() {
       <h1>{achievements.length} Achievements</h1>
       <div className="staff__interaction-bar">
         <Button
-          children="Create achievement"
-          hidden={creationOpen}
-          onClick={onOpenCreation}
+          children="Generate Playtest Passkey"
+          onClick={() => fetchPasskey()}
+          unavailable={fetchingPasskey}
         />
+        {playtestInfo === undefined ? (
+          ""
+        ) : (
+          <Button
+            children="Copy Passkey"
+            unavailable={fetchingPasskey}
+            onClick={copyPasskey}
+          />
+        )}
       </div>
       <AchievementNavigationBar
         key="staff"
@@ -119,122 +148,11 @@ function AchievementsView() {
         achievements={achievements}
         isStaff={true}
       />
-      <AchievementCreation
-        hidden={!creationOpen}
-        onCancelCreation={onCancelCreation}
-        submitText="Create"
-      />
       <div className="staff__achievement-container">
         {/* sorting for staff page puts everything under the 'values' category */}
         {(sortedAchievements["values"] ?? []).map((a) => (
-          <Achievement key={a.id} achievement={a} />
+          <Achievement key={a.id} achievement={a} setView={setView} />
         ))}
-      </div>
-    </>
-  );
-}
-
-function ReleasesView() {
-  const session = useContext(SessionContext);
-  const { data: achievements, isLoading: achievementsLoading } =
-    useGetStaffAchievements(true);
-  const { data: batches, isLoading: batchesLoading } = useGetBatches();
-  const createBatch = useCreateBatch();
-
-  const [batchDate, setBatchDate] = useState("");
-  const [debounce, setDebounce] = useState(false);
-
-  const dispatchEventMsg = useContext(EventContext);
-
-  if (achievementsLoading || batchesLoading) {
-    return <h1>Loading...</h1>;
-  }
-
-  if (achievements === undefined || batches == undefined) {
-    return <h1>Failed to load</h1>;
-  }
-
-  // batch sorting/grouping
-  let groupedBatches: [AchievementBatchType, StaffAchievementType[]][] =
-    batches.map((b) => [b, []]);
-
-  for (const achievement of achievements) {
-    for (const batch of groupedBatches) {
-      if (batch[0].id == achievement.batch!.id) {
-        batch[1].push(achievement);
-        break;
-      }
-    }
-  }
-
-  function doCreateBatch() {
-    if (debounce) {
-      return;
-    }
-
-    if (batchDate.length === 0) {
-      dispatchEventMsg({ type: "error", msg: "Invalid date" });
-      return;
-    }
-
-    setDebounce(true);
-
-    createBatch.mutate(
-      { release_time: Math.floor(Date.parse(batchDate) / 1000) },
-      {
-        onSuccess: () =>
-          dispatchEventMsg({
-            type: "info",
-            msg: "Successfully created new batch",
-          }),
-        onSettled: () => {
-          createBatch.reset();
-          setDebounce(false);
-          setBatchDate("");
-        },
-      },
-    );
-  }
-
-  function sortBatches(
-    a: [AchievementBatchType, StaffAchievementType[]],
-    b: [AchievementBatchType, StaffAchievementType[]],
-  ) {
-    return Date.parse(a[0].release_time) - Date.parse(b[0].release_time);
-  }
-
-  return (
-    <>
-      <Helmet>
-        <title>CTA - Staff Releases</title>
-      </Helmet>
-      <h1>{achievements.length} Achievements</h1>
-      <div
-        className={classNames("batch-input-row", {
-          hide: !session.user!.is_admin,
-        })}
-      >
-        <input
-          type="datetime-local"
-          value={batchDate}
-          onChange={(evt) => setBatchDate(evt.currentTarget.value)}
-        />
-        <IoIosAddCircle
-          size={48}
-          className={classNames({ clickable: !debounce })}
-          onClick={doCreateBatch}
-        />
-      </div>
-      <div className="staff-batches-listing-container">
-        <div className="staff-batches-listing">
-          {groupedBatches.sort(sortBatches).map(([batch, achievements], i) => (
-            <AchievementsBatch
-              title={`Batch ${i + 1}`}
-              batch={batch}
-              achievements={achievements}
-            />
-          ))}
-        </div>
       </div>
     </>
   );

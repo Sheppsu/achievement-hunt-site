@@ -9,7 +9,6 @@ import Staff from "routes/staff";
 import StaffAchievement from "routes/staff/achievement.tsx";
 import ErrorBoundary from "../errors/ErrorBoundary.tsx";
 import AdminPage from "routes/admin.tsx";
-import AchievementReleasesPage from "routes/staff/releases.tsx";
 import AchievementPage from "routes/achievement.tsx";
 
 const defaultRoutes: RouteObject[] = [
@@ -52,10 +51,6 @@ const defaultRoutes: RouteObject[] = [
       {
         path: "achievements/:achievementId",
         element: <StaffAchievement />,
-      },
-      {
-        path: "releases",
-        element: <AchievementReleasesPage />,
       },
     ],
   },

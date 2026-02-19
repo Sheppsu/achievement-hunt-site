@@ -6,9 +6,9 @@ export default function ViewSwitcher<T extends string>({
   currentView,
   setView,
 }: {
-  views: T[];
+  views: readonly T[];
   currentView: T;
-  setView: React.Dispatch<React.SetStateAction<T>>;
+  setView: (value: T) => void;
 }) {
   return (
     <div className="view-switcher">
@@ -30,7 +30,7 @@ function ViewItem<T extends string>({
 }: {
   label: T;
   active: boolean;
-  setView: React.Dispatch<React.SetStateAction<T>>;
+  setView: (value: T) => void;
 }) {
   const onClick = () => setView(label);
 

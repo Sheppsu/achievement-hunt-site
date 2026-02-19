@@ -6,6 +6,7 @@ import { AchievementCommentType } from "api/types/AchievementCommentType.ts";
 import { UserType } from "api/types/UserType.ts";
 import { BeatmapConnectionType } from "api/types/BeatmapConnectionType.ts";
 import { AchievementBatchType } from "api/types/AchievementBatchType.ts";
+import { SolutionAlgorithmData } from "util/solutionAlgorithm.ts";
 
 export type AchievementType = {
   id: number;
@@ -41,4 +42,6 @@ export type StaffAchievementType = {
   vote_count: number;
   has_voted: boolean;
   creator: UserType | null;
+  solution_algorithm: SolutionAlgorithmData;
+  algorithm_enabled: boolean;
 } & AchievementType;

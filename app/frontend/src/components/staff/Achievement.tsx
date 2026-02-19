@@ -12,7 +12,6 @@ import TextArea from "components/inputs/TextArea.tsx";
 import React, { useContext, useState } from "react";
 import AchievementComment from "components/staff/AchievementComment.tsx";
 import { SessionContext } from "contexts/SessionContext.ts";
-import AchievementCreation from "components/staff/AchievementCreation.tsx";
 import classNames from "classnames";
 import { parseTags } from "util/helperFunctions.ts";
 import RenderedText from "components/common/RenderedText.tsx";
@@ -50,6 +49,7 @@ function VoteContainer({ achievement }: { achievement: StaffAchievementType }) {
 
 type AchievementProps = {
   achievement: StaffAchievementType;
+  setView: (value: any) => void;
 };
 
 export default function Achievement(props: AchievementProps) {
@@ -64,7 +64,6 @@ export default function Achievement(props: AchievementProps) {
   const [canSendComment, setCanSendComment] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [sendingComment, setSendingComment] = useState(false);
-  const [editing, setEditing] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
   const sendComment = useSendComment(achievement.id);
@@ -84,14 +83,6 @@ export default function Achievement(props: AchievementProps) {
 
   const onCommentCancel = () => {
     setIsCommenting(false);
-  };
-
-  const onStartEdit = () => {
-    setEditing(true);
-  };
-
-  const onCancelEdit = () => {
-    setEditing(false);
   };
 
   const isCommentTextValid = (text: string) => {
@@ -201,7 +192,7 @@ export default function Achievement(props: AchievementProps) {
 
   return (
     <div>
-      <div className={classNames("staff__achievement", { hide: editing })}>
+      <div className="staff__achievement">
         <p className="staff__achievement__name">{achievement.name}</p>
         <p>
           <RenderedText text={achievement.description} />
@@ -230,7 +221,7 @@ export default function Achievement(props: AchievementProps) {
               </p>
             </div>
             <p className="staff__achievement__beatmap__star-rating">
-              {beatmap.info.star_rating}*
+              {Math.round(beatmap.info.star_rating * 100) / 100}*
             </p>
           </a>
         ))}
@@ -248,12 +239,6 @@ export default function Achievement(props: AchievementProps) {
           </p>
         )}
       </div>
-      <AchievementCreation
-        hidden={!editing}
-        onCancelCreation={onCancelEdit}
-        submitText="Save"
-        achievement={achievement}
-      />
       <div className="staff__achievement__comment-container">
         {achievement.comments
           .sort((a, b) => Date.parse(a.posted_at) - Date.parse(b.posted_at))
@@ -277,7 +262,16 @@ export default function Achievement(props: AchievementProps) {
             onClick={onDeleteAchievement}
             holdToUse={true}
           />
-          <Button children="Edit" hidden={!canEdit} onClick={onStartEdit} />
+          <Button
+            children="Edit"
+            hidden={!canEdit}
+            onClick={() =>
+              props.setView({
+                name: "creation",
+                props: { achievement: achievement },
+              })
+            }
+          />
           <Button
             children="Comment"
             onClick={onCommentStart}

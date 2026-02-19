@@ -1,9 +1,12 @@
 from django.views.decorators.http import require_POST, require_GET, require_http_methods
+from django.conf import settings
 
 from .util import *
 from common.serializer import SerializableField
 from common.validation import *
 from common.comm import refresh_achievements_on_server
+
+from playtest.models import PlaytestAccount
 
 from datetime import datetime, timezone
 
@@ -22,6 +25,8 @@ def serialize_full_achievement(req, achievement: Achievement):
             "solution",
             "creator",
             "batch",
+            "solution_algorithm",
+            "algorithm_enabled",
             SerializableField(
                 "votes",
                 serial_key="has_voted",
@@ -117,6 +122,7 @@ def vote_achievement(req, data, achievement):
                 unique=True,
                 unique_check=lambda a, b: a["id"] != b["id"],
             ),
+            "solution_algorithm": AnyType(),
         }
     )
 )
@@ -140,6 +146,8 @@ def create_achievement(req, data, achievement=None):
             creator=req.user,
             created_at=(date_now := datetime.now(tz=timezone.utc)),
             last_edited_at=date_now,
+            solution_algorithm=data["solution_algorithm"],
+            algorithm_enabled=data["algorithm_enabled"],
         )
         discord_logger.submit_achievement(req, achievement, "created")
     elif achievement.creator_id != req.user.id and not req.user.is_admin:
@@ -153,11 +161,13 @@ def create_achievement(req, data, achievement=None):
         achievement.solution = data["solution"]
         achievement.tags = data["tags"]
         achievement.last_edited_at = datetime.now(tz=timezone.utc)
+        achievement.solution_algorithm = data["solution_algorithm"]
+        achievement.algorithm_enabled = data["algorithm_enabled"]
         achievement.save()
 
         discord_logger.submit_achievement(req, achievement, "edited")
-        if achievement.batch_id is not None:
-            refresh_achievements_on_server()
+
+    refresh_achievements_on_server()
 
     resp_beatmaps = []
 
@@ -169,7 +179,9 @@ def create_achievement(req, data, achievement=None):
         obj, _ = BeatmapConnection.objects.update_or_create(achievement=achievement, info=info, defaults={"hide": hide})
         resp_beatmaps.append(obj.serialize(includes=["info"]))
 
-    resp_data = achievement.serialize(includes=["creator", "solution", "batch"])
+    resp_data = achievement.serialize(
+        includes=["creator", "solution", "batch", "solution_algorithm", "algorithm_enabled"]
+    )
     resp_data["beatmaps"] = resp_beatmaps
 
     return success(resp_data)
@@ -188,6 +200,7 @@ def delete_achievement(req, achievement):
         return error("cannot delete an achievement that's not yours")
 
     achievement.delete()
+    refresh_achievements_on_server()
     return success(None)
 
 
@@ -197,3 +210,17 @@ def delete_achievement(req, achievement):
 def get_batches(req, iteration):
     batches = AchievementBatch.objects.filter(iteration=iteration).all()
     return success([batch.serialize() for batch in batches])
+
+
+@require_GET
+@require_staff
+def get_playtest_passkey(req):
+    account = PlaytestAccount.objects.filter(user_id=req.user.id).first()
+    if account is None:
+        account = PlaytestAccount.from_user(req.user)
+        account.save()
+    else:
+        account.passkey = PlaytestAccount.generate_passkey()
+        account.save()
+
+    return success({"passkey": account.passkey})

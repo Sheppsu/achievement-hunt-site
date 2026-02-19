@@ -13,6 +13,7 @@ import {
   useContext,
   useEffect,
   useReducer,
+  useState,
 } from "react";
 import { AppState } from "types/AppStateType";
 import { Session } from "types/SessionType";
@@ -293,6 +294,7 @@ export function WebsocketContextProvider({
   const dispatchAppState = useDispatchStateContext();
 
   const [wsState, dispatchWsState] = useReducer(wsStateReducer, null);
+  const [lastConnect, setLastConnect] = useState<number | null>(null);
 
   const loggedIn = session.user !== null;
   const currentWs = wsState === null ? null : wsState.ws;
@@ -301,7 +303,13 @@ export function WebsocketContextProvider({
       return;
     }
 
+    if (lastConnect !== null && Date.now() - lastConnect <= 5000) {
+      setTimeout(() => setLastConnect(null), 5000 - (Date.now() - lastConnect));
+      return;
+    }
+
     const ws = new WebSocket(session.wsUri);
+    setLastConnect(Date.now());
 
     ws.addEventListener("open", () => {
       dispatchWsState({ id: 3, connected: true });
@@ -317,7 +325,7 @@ export function WebsocketContextProvider({
       id: 1,
       ws,
     });
-  }, [currentWs, loggedIn]);
+  }, [currentWs, loggedIn, lastConnect]);
 
   const sendSubmit = () => {
     if (wsState === null) {

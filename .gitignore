@@ -9,3 +9,4 @@ ahsite/
 .DS_Store
 .idea/
 stats/
+*.pem
