@@ -35,6 +35,7 @@ import { RegistrationType } from "api/types/RegistrationType.ts";
 import { TeamInviteType, UserInviteType } from "api/types/InviteType.ts";
 import { AllRegistrationsType } from "api/types/AllRegistrationsType.ts";
 import { AchievementCompletionExtendedType } from "api/types/AchievementCompletionType.ts";
+import { SolutionAlgorithmData } from "util/solutionAlgorithm.ts";
 
 function getIterationParams() {
   const path = location.pathname;
@@ -681,6 +682,8 @@ export function useSendComment(
 type AchievementCreationReturn = AchievementType & {
   solution: string;
   creator: UserType;
+  solution_algorithm: SolutionAlgorithmData;
+  algorithm_enabled: boolean;
 };
 
 function onAchievementCreation(

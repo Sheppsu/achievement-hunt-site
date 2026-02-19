@@ -179,7 +179,9 @@ def create_achievement(req, data, achievement=None):
         obj, _ = BeatmapConnection.objects.update_or_create(achievement=achievement, info=info, defaults={"hide": hide})
         resp_beatmaps.append(obj.serialize(includes=["info"]))
 
-    resp_data = achievement.serialize(includes=["creator", "solution", "batch"])
+    resp_data = achievement.serialize(
+        includes=["creator", "solution", "batch", "solution_algorithm", "algorithm_enabled"]
+    )
     resp_data["beatmaps"] = resp_beatmaps
 
     return success(resp_data)
