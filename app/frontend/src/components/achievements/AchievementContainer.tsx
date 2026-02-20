@@ -3,7 +3,7 @@ import { AchievementTeamExtendedType } from "api/types/AchievementTeamType.ts";
 import { CompletedAchievementType } from "api/types/AchievementType";
 import "assets/css/achievements.css";
 import { SessionContext } from "contexts/SessionContext.ts";
-import { useContext } from "react";
+import { useContext, useMemo } from "react";
 import { AppState } from "types/AppStateType.ts";
 import { getSortedAchievements } from "util/achievementSorting.ts";
 import {
@@ -65,9 +65,55 @@ export default function AchievementContainer({ state }: { state: AppState }) {
   const { data: baseAchievements } = useGetAchievements();
   const { data: teamData } = useGetTeams();
 
+  const teams = useMemo(
+    () => (teamData === undefined ? null : teamData.teams),
+    [teamData],
+  );
+  const myTeam = useMemo(
+    () =>
+      teams === null ? null : getMyTeam(session.user?.id ?? undefined, teams),
+    [teams, session.user],
+  );
+
+  const achievements = useMemo(() => {
+    if (
+      baseAchievements === undefined ||
+      teamData === undefined ||
+      myTeam === null
+    ) {
+      return null;
+    }
+    const ach = baseAchievements.map((a) => ({
+      ...a,
+      completed: false,
+      points: null,
+    }));
+    extendAchievementData(ach, teamData.effective_team_count, myTeam);
+    return ach;
+  }, [baseAchievements, teamData, myTeam]);
+
+  const sortedAchievements = useMemo(() => {
+    if (achievements === null || state.achievementsFilter === null) {
+      return null;
+    }
+    return getSortedAchievements(
+      achievements,
+      state.achievementsFilter,
+      state.achievementsSearchFilter,
+      state.hideCompletedAchievements,
+      myTeam,
+    );
+  }, [
+    achievements,
+    state.achievementsFilter,
+    state.achievementsSearchFilter,
+    state.hideCompletedAchievements,
+    myTeam,
+  ]);
+
   if (
     state.achievementsFilter === null ||
-    baseAchievements === undefined ||
+    sortedAchievements === null ||
     teamData === undefined
   )
     return (
@@ -75,28 +121,6 @@ export default function AchievementContainer({ state }: { state: AppState }) {
         <div>Loading achievements...</div>
       </div>
     );
-
-  const teams = teamData.teams;
-
-  const achievements: CompletedAchievementType[] = baseAchievements.map(
-    (a) => ({
-      ...a,
-      completed: false,
-      points: null,
-    }),
-  );
-
-  const myTeam = getMyTeam(session.user?.id ?? undefined, teams);
-
-  extendAchievementData(achievements, teamData.effective_team_count, myTeam);
-
-  const sortedAchievements = getSortedAchievements(
-    achievements,
-    state.achievementsFilter,
-    state.achievementsSearchFilter,
-    state.hideCompletedAchievements,
-    myTeam,
-  );
 
   return (
     <div className="achievements__container">
