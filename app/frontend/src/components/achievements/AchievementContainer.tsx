@@ -71,16 +71,14 @@ export default function AchievementContainer({ state }: { state: AppState }) {
   );
   const myTeam = useMemo(
     () =>
-      teams === null ? null : getMyTeam(session.user?.id ?? undefined, teams),
+      teams === null || session.user === null
+        ? null
+        : getMyTeam(session.user.id, teams),
     [teams, session.user],
   );
 
   const achievements = useMemo(() => {
-    if (
-      baseAchievements === undefined ||
-      teamData === undefined ||
-      myTeam === null
-    ) {
+    if (baseAchievements === undefined || teamData === undefined) {
       return null;
     }
     const ach = baseAchievements.map((a) => ({
