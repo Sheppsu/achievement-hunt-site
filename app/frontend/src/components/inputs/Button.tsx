@@ -14,6 +14,7 @@ type ButtonProps = {
   type?: "button" | "submit" | "reset";
   holdToUse?: boolean;
   caution?: boolean;
+  includeButtonCls?: boolean;
 };
 
 const elementDefaults = {
@@ -30,6 +31,7 @@ const otherDefaults = {
   holdToUse: false,
   onClick: undefined,
   caution: false,
+  includeButtonCls: true,
 };
 
 // none | click | hold
@@ -56,8 +58,11 @@ export default function Button(props: ButtonProps) {
   if (otherProps.caution) {
     elementProps.className += " caution";
   }
+  if (otherProps.includeButtonCls) {
+    elementProps.className += " button";
+  }
 
-  elementProps.className += " prevent-select button";
+  elementProps.className += " prevent-select";
 
   // for hold-to-use buttons
   const onMouseDown = (e: React.FormEvent<HTMLButtonElement>) => {

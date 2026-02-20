@@ -19,6 +19,8 @@ import CreationView from "routes/staff/creation.tsx";
 import { useLocation } from "react-router-dom";
 import Button from "components/inputs/Button.tsx";
 import { EventContext } from "contexts/EventContext.ts";
+import { FaEdit } from "react-icons/fa";
+import { IoIosCopy, IoIosRefresh } from "react-icons/io";
 
 const VIEWS = ["achievements", "creation", "releases"] as const;
 type ViewName = (typeof VIEWS)[number];
@@ -127,7 +129,12 @@ function AchievementsView({ setView }: { setView: (value: ViewType) => void }) {
       <h1>{achievements.length} Achievements</h1>
       <div className="staff__interaction-bar">
         <Button
-          children="Generate Playtest Passkey"
+          children={
+            <>
+              <IoIosRefresh />
+              &nbsp;Generate Playtest Passkey
+            </>
+          }
           onClick={() => fetchPasskey()}
           unavailable={fetchingPasskey}
         />
@@ -135,7 +142,12 @@ function AchievementsView({ setView }: { setView: (value: ViewType) => void }) {
           ""
         ) : (
           <Button
-            children="Copy Passkey"
+            children={
+              <>
+                <IoIosCopy />
+                &nbsp;Copy Passkey
+              </>
+            }
             unavailable={fetchingPasskey}
             onClick={copyPasskey}
           />
