@@ -9,7 +9,14 @@ import {
 } from "api/query.ts";
 import Button from "components/inputs/Button.tsx";
 import TextArea from "components/inputs/TextArea.tsx";
-import React, { useContext, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import AchievementComment from "components/staff/AchievementComment.tsx";
 import { SessionContext } from "contexts/SessionContext.ts";
 import classNames from "classnames";
@@ -17,6 +24,17 @@ import { parseTags } from "util/helperFunctions.ts";
 import RenderedText from "components/common/RenderedText.tsx";
 import { PopupContext } from "contexts/PopupContext.ts";
 import { EventContext } from "contexts/EventContext.ts";
+import {
+  IoIosArrowDropup,
+  IoIosCopy,
+  IoIosExit,
+  IoIosMore,
+  IoIosSend,
+} from "react-icons/io";
+import { FaEdit } from "react-icons/fa";
+import { FaComment } from "react-icons/fa6";
+import { MdDelete } from "react-icons/md";
+import ViewSwitcher from "components/common/ViewSwitcher.tsx";
 
 function VoteContainer({ achievement }: { achievement: StaffAchievementType }) {
   const session = useContext(SessionContext);
@@ -52,6 +70,9 @@ type AchievementProps = {
   setView: (value: any) => void;
 };
 
+const COMMENT_VIEWS = ["General", "Solving"] as const;
+type CommentView = (typeof COMMENT_VIEWS)[number];
+
 export default function Achievement(props: AchievementProps) {
   const achievement = props.achievement;
   const achievementUrl = `https://${window.location.host}/staff/achievements/${achievement.id}`;
@@ -65,6 +86,8 @@ export default function Achievement(props: AchievementProps) {
   const [commentText, setCommentText] = useState("");
   const [sendingComment, setSendingComment] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [actionMenuOpen, setActionMenuOpen] = useState(false);
+  const [commentView, setCommentView] = useState<CommentView>("General");
 
   const sendComment = useSendComment(achievement.id);
   const deleteAchievement = useDeleteAchievement(achievement.id);
@@ -77,19 +100,53 @@ export default function Achievement(props: AchievementProps) {
     achievement.creator !== null &&
     (achievement.creator.id == session.user!.id || session.user!.is_admin);
 
-  const onCommentStart = () => {
+  const commentChannel = COMMENT_VIEWS.indexOf(commentView);
+  const filteredComments = useMemo(
+    () =>
+      achievement.comments.filter(
+        (comment) => comment.channel == commentChannel,
+      ),
+    [achievement.comments, commentChannel],
+  );
+
+  const actionMenuBtnRef = useRef<HTMLDivElement | null>(null);
+  const actionMenuRef = useRef<HTMLDivElement | null>(null);
+
+  // close actions menu when clicking off it
+  useEffect(() => {
+    function onClick(evt: MouseEvent | TouchEvent) {
+      if (
+        actionMenuOpen &&
+        actionMenuRef.current &&
+        !actionMenuRef.current.contains(evt.target as Node) &&
+        actionMenuBtnRef.current &&
+        !actionMenuBtnRef.current.contains(evt.target as Node)
+      ) {
+        setActionMenuOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", onClick);
+    document.addEventListener("touchend", onClick);
+    return () => {
+      document.removeEventListener("mousedown", onClick);
+      document.removeEventListener("touchend", onClick);
+    };
+  }, [setActionMenuOpen, actionMenuOpen]);
+
+  const onCommentStart = useCallback(() => {
     setIsCommenting(true);
-  };
+  }, [setIsCommenting]);
 
-  const onCommentCancel = () => {
+  const onCommentCancel = useCallback(() => {
     setIsCommenting(false);
-  };
+  }, [setIsCommenting]);
 
-  const isCommentTextValid = (text: string) => {
+  const isCommentTextValid = useCallback((text: string) => {
     return text.trim().length !== 0;
-  };
+  }, []);
 
-  const onSendComment = () => {
+  const onSendComment = useCallback(() => {
     if (sendingComment) {
       return;
     }
@@ -100,8 +157,9 @@ export default function Achievement(props: AchievementProps) {
       return;
     }
 
+    const channel = COMMENT_VIEWS.indexOf(commentView);
     sendComment.mutate(
-      { msg: commentText },
+      { msg: commentText, channel },
       {
         onSuccess: () => {
           onCommentCancel();
@@ -112,19 +170,29 @@ export default function Achievement(props: AchievementProps) {
         },
       },
     );
-  };
+  }, [
+    sendingComment,
+    setSendingComment,
+    sendComment,
+    isCommentTextValid,
+    commentText,
+    setCommentText,
+    onCommentCancel,
+  ]);
 
-  const onCommentInput = (evt: React.ChangeEvent<HTMLTextAreaElement>) => {
-    console.log(evt.target.value);
-    const isValid = isCommentTextValid(evt.target.value);
-    if (isValid && !canSendComment) {
-      setCanSendComment(true);
-    } else if (!isValid && canSendComment) {
-      setCanSendComment(false);
-    }
-  };
+  const onCommentInput = useCallback(
+    (evt: React.ChangeEvent<HTMLTextAreaElement>) => {
+      const isValid = isCommentTextValid(evt.target.value);
+      if (isValid && !canSendComment) {
+        setCanSendComment(true);
+      } else if (!isValid && canSendComment) {
+        setCanSendComment(false);
+      }
+    },
+    [isCommentTextValid, canSendComment, setCanSendComment],
+  );
 
-  const onDeleteAchievement = () => {
+  const onDeleteAchievement = useCallback(() => {
     if (deleting) {
       return;
     }
@@ -139,21 +207,24 @@ export default function Achievement(props: AchievementProps) {
         },
       },
     );
-  };
+  }, [deleting, setDeleting, deleteAchievement]);
 
-  const doMoveToBatch = (batchId: number) => {
-    moveAchievement.mutate(
-      { batch_id: batchId },
-      {
-        onSettled: () => {
-          moveAchievement.reset();
-          popupCtx.setPopup(null);
+  const doMoveToBatch = useCallback(
+    (batchId: number) => {
+      moveAchievement.mutate(
+        { batch_id: batchId },
+        {
+          onSettled: () => {
+            moveAchievement.reset();
+            popupCtx.setPopup(null);
+          },
         },
-      },
-    );
-  };
+      );
+    },
+    [moveAchievement, popupCtx],
+  );
 
-  const doMoveAchievement = () => {
+  const doMoveAchievement = useCallback(() => {
     let content;
     if (batchesLoading) {
       content = <h1>Loading...</h1>;
@@ -183,48 +254,132 @@ export default function Achievement(props: AchievementProps) {
       title: "Batches",
       content,
     });
-  };
+  }, [batchesLoading, batches, doMoveToBatch, popupCtx]);
 
-  const copyAchievementUrl = () => {
-    navigator.clipboard.writeText(achievementUrl);
-    dispatchEventMsg({ type: "info", msg: "Copied!" });
-  };
+  const copyAchievementUrl = useCallback(() => {
+    navigator.clipboard.writeText(achievementUrl).then(
+      () => {
+        dispatchEventMsg({ type: "info", msg: "Copied!" });
+      },
+      () => {
+        dispatchEventMsg({
+          type: "error",
+          msg: "Failed to copy to clipboard...",
+        });
+      },
+    );
+  }, [achievementUrl]);
 
   return (
     <div>
       <div className="staff__achievement">
+        <div
+          className="staff__achievement__actions-button"
+          onClick={() => setActionMenuOpen((val) => !val)}
+          ref={actionMenuBtnRef}
+        >
+          <IoIosMore size={24} />
+        </div>
+        <div
+          className={classNames("staff__achievement__actions-menu", {
+            hidden: !actionMenuOpen,
+          })}
+          ref={actionMenuRef}
+        >
+          <Button
+            children={
+              <>
+                <IoIosCopy size={20} />
+                <p className="staff__actions-menu__label">Copy URL</p>
+              </>
+            }
+            className="staff__actions-menu__action"
+            width="100%"
+            onClick={copyAchievementUrl}
+            hidden={isCommenting}
+            includeButtonCls={false}
+          />
+          <Button
+            children={
+              <>
+                <FaEdit size={20} />
+                <p className="staff__actions-menu__label">Edit</p>
+              </>
+            }
+            className="staff__actions-menu__action"
+            width="100%"
+            hidden={!canEdit || isCommenting}
+            onClick={() =>
+              props.setView({
+                name: "creation",
+                props: { achievement: achievement },
+              })
+            }
+            includeButtonCls={false}
+          />
+          <Button
+            children={
+              <>
+                <IoIosArrowDropup size={20} />
+                <p className="staff__actions-menu__label">Move</p>
+              </>
+            }
+            className="staff__actions-menu__action"
+            width="100%"
+            onClick={doMoveAchievement}
+            hidden={!session.user?.is_admin || isCommenting}
+            includeButtonCls={false}
+          />
+          <hr className="staff__actions-menu__divider" />
+          <Button
+            children={
+              <>
+                <MdDelete size={20} />
+                <p className="staff__actions-menu__label">Delete</p>
+              </>
+            }
+            className="staff__actions-menu__action hazard"
+            width="100%"
+            hidden={!canEdit || isCommenting}
+            unavailable={deleting}
+            onClick={onDeleteAchievement}
+            holdToUse={true}
+            includeButtonCls={false}
+            caution={true}
+          />
+        </div>
         <p className="staff__achievement__name">{achievement.name}</p>
         <p>
           <RenderedText text={achievement.description} />
         </p>
-        <p className="staff__achievement__solution">
-          <RenderedText text={achievement.solution} />
-        </p>
-        {achievement.beatmaps.map((beatmap) => (
-          <a
-            className={classNames("staff__achievement__beatmap", {
-              red: beatmap.hide,
-            })}
-            href={`https://osu.ppy.sh/b/${beatmap.info.id}`}
-            target="_blank"
-          >
-            <div
-              className="staff__achievement__beatmap__cover"
-              style={{ backgroundImage: `url(${beatmap.info.cover})` }}
-            ></div>
-            <div className="staff__achievement__beatmap__info">
-              <p className="staff__achievement__beatmap__info__title">
-                {beatmap.info.artist} - {beatmap.info.title}
+        {/*<p className="staff__achievement__solution">*/}
+        {/*  <RenderedText text={achievement.solution} />*/}
+        {/*</p>*/}
+        {achievement.beatmaps
+          .filter((beatmap) => !beatmap.hide)
+          .map((beatmap) => (
+            <a
+              className={classNames("staff__achievement__beatmap")}
+              href={`https://osu.ppy.sh/b/${beatmap.info.id}`}
+              target="_blank"
+            >
+              <div
+                className="staff__achievement__beatmap__cover"
+                style={{ backgroundImage: `url(${beatmap.info.cover})` }}
+              ></div>
+              <div className="staff__achievement__beatmap__info">
+                <p className="staff__achievement__beatmap__info__title">
+                  {beatmap.info.artist} - {beatmap.info.title}
+                </p>
+                <p className="staff__achievement__beatmap__info__version">
+                  [{beatmap.info.version}]
+                </p>
+              </div>
+              <p className="staff__achievement__beatmap__star-rating">
+                {Math.round(beatmap.info.star_rating * 100) / 100}*
               </p>
-              <p className="staff__achievement__beatmap__info__version">
-                [{beatmap.info.version}]
-              </p>
-            </div>
-            <p className="staff__achievement__beatmap__star-rating">
-              {Math.round(beatmap.info.star_rating * 100) / 100}*
-            </p>
-          </a>
-        ))}
+            </a>
+          ))}
         <div className="staff__achievement__footer">
           <VoteContainer achievement={achievement} />
           {parseTags(achievement.tags).map((tag) => (
@@ -240,7 +395,12 @@ export default function Achievement(props: AchievementProps) {
         )}
       </div>
       <div className="staff__achievement__comment-container">
-        {achievement.comments
+        <ViewSwitcher
+          views={COMMENT_VIEWS}
+          currentView={commentView}
+          setView={setCommentView}
+        />
+        {filteredComments
           .sort((a, b) => Date.parse(a.posted_at) - Date.parse(b.posted_at))
           .map((comment, i) => (
             <AchievementComment key={i} comment={comment} />
@@ -256,44 +416,36 @@ export default function Achievement(props: AchievementProps) {
         />
         <div className="staff__achievement__comment-container__row">
           <Button
-            children="Delete"
-            hidden={!canEdit}
-            unavailable={deleting}
-            onClick={onDeleteAchievement}
-            holdToUse={true}
-          />
-          <Button
-            children="Edit"
-            hidden={!canEdit}
-            onClick={() =>
-              props.setView({
-                name: "creation",
-                props: { achievement: achievement },
-              })
+            children={
+              <>
+                <FaComment />
+                &nbsp;Comment
+              </>
             }
-          />
-          <Button
-            children="Comment"
             onClick={onCommentStart}
             hidden={isCommenting}
           />
           <Button
-            children="Send"
+            children={
+              <>
+                <IoIosSend />
+                &nbsp;Send
+              </>
+            }
             onClick={onSendComment}
             hidden={!isCommenting}
             unavailable={!canSendComment || sendingComment}
           />
           <Button
-            children="Cancel"
+            children={
+              <>
+                <IoIosExit />
+                &nbsp;Cancel
+              </>
+            }
             onClick={onCommentCancel}
             hidden={!isCommenting || sendingComment}
           />
-          <Button
-            children="Move"
-            onClick={doMoveAchievement}
-            hidden={!session.user?.is_admin}
-          />
-          <Button children="Copy URL" onClick={copyAchievementUrl} />
         </div>
       </div>
     </div>

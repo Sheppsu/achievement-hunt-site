@@ -5,4 +5,5 @@ export type AchievementCommentType = {
   msg: string;
   user: UserType;
   posted_at: string;
+  channel: number;
 };

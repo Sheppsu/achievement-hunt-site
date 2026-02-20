@@ -71,10 +71,14 @@ def show_achievement(req, achievement):
 @require_staff
 @require_POST
 @require_achievement()
-@accepts_json_data(DictionaryType({"msg": StringType(min_length=1, max_length=4096)}))
+@accepts_json_data(DictionaryType({"msg": StringType(min_length=1, max_length=4096), "channel": IntegerType(0, 1)}))
 def create_comment(req, data, achievement):
     comment = AchievementComment.objects.create(
-        achievement=achievement, user=req.user, msg=data["msg"], posted_at=datetime.now(tz=timezone.utc)
+        achievement=achievement,
+        user=req.user,
+        msg=data["msg"],
+        posted_at=datetime.now(tz=timezone.utc),
+        channel=data["channel"],
     )
 
     discord_logger.submit_comment(comment)
