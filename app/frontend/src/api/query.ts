@@ -568,6 +568,14 @@ export function useGetStaffAchievements(
     ],
     enabled,
     refetchInterval: 60000,
+    select: (data) => {
+      return data.map((ach) => ({
+        ...ach,
+        tags: ach.algorithm_enabled
+          ? ach.tags.concat("playtestable")
+          : ach.tags,
+      }));
+    },
   });
 }
 
