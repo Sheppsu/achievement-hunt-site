@@ -86,7 +86,7 @@ def create_comment(req, data, achievement):
         channel=data["channel"],
     )
 
-    discord_logger.submit_comment(comment)
+    discord_logger.submit_comment(comment, COMMENT_CHANNELS[comment.channel])
 
     return success(comment.serialize(includes=["user"]))
 
