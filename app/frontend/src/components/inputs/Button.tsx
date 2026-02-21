@@ -37,6 +37,9 @@ const otherDefaults = {
 // none | click | hold
 type DebounceType = 0 | 1 | 2;
 
+const HOLD_TIME = 2000;
+const UPDATE_INTERVAL = 50;
+
 export default function Button(props: ButtonProps) {
   const intervalId = useRef<null | number>(null);
   const holdOverId = useRef<null | number>(null);
@@ -82,7 +85,10 @@ export default function Button(props: ButtonProps) {
       setProgress((p) => {
         if (p === 100) return 100;
 
-        const newP = Math.min(100, (p ?? 0) + 5.0 / 3.0);
+        const newP = Math.min(
+          100,
+          (p ?? 0) + (100 * UPDATE_INTERVAL) / HOLD_TIME,
+        );
 
         // trigger button
         if (newP === 100 && otherProps.onClick) {
