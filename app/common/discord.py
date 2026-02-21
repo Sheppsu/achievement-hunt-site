@@ -27,6 +27,16 @@ def _create_error_embeds(req, exc):
     return embeds
 
 
+def _create_author_info(user):
+    return (
+        {
+            "name": user.username,
+            "icon_url": user.avatar,
+            "url": f"https://osu.ppy.sh/u/{user.id}",
+        },
+    )
+
+
 class DiscordLogger:
     ERROR_WEBHOOK_URL = os.getenv("ERROR_WEBHOOK_URL")
     STAFF_WEBHOOK_URL = os.getenv("STAFF_WEBHOOK_URL")
@@ -92,7 +102,7 @@ class DiscordLogger:
             "url": f"https://cta.sheppsu.me/staff/achievements/{achievement.id}",
             "description": achievement.name,
             "color": color,
-            "footer": {"text": req.user.username, "icon_url": req.user.avatar},
+            "author": _create_author_info(req.user),
             "timestamp": datetime.now(tz=timezone.utc).isoformat(),
         }
 
@@ -112,11 +122,7 @@ class DiscordLogger:
             "url": f"https://cta.sheppsu.me/staff/achievements/{comment.achievement_id}",
             "description": description,
             "color": 0x31A6CE,
-            "author": {
-                "name": comment.user.username,
-                "icon_url": comment.user.avatar,
-                "url": f"https://osu.ppy.sh/u/{comment.user.id}",
-            },
+            "author": _create_author_info(comment.user),
         }
 
         self.submit_embeds([embed], self.STAFF_WEBHOOK_URL)
