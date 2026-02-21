@@ -4,7 +4,7 @@ from django.conf import settings
 from .util import *
 from common.serializer import SerializableField
 from common.validation import *
-from common.comm import refresh_achievements_on_server
+from common import comm
 
 from playtest.models import PlaytestAccount
 
@@ -15,6 +15,7 @@ __all__ = ("achievements",)
 
 
 discord_logger = settings.DISCORD_LOGGER
+COMMENT_CHANNELS = ["General", "Solving"]
 
 
 def serialize_full_achievement(req, achievement: Achievement):
@@ -71,7 +72,11 @@ def show_achievement(req, achievement):
 @require_staff
 @require_POST
 @require_achievement()
-@accepts_json_data(DictionaryType({"msg": StringType(min_length=1, max_length=4096), "channel": IntegerType(0, 1)}))
+@accepts_json_data(
+    DictionaryType(
+        {"msg": StringType(min_length=1, max_length=4096), "channel": IntegerType(0, len(COMMENT_CHANNELS) - 1)}
+    )
+)
 def create_comment(req, data, achievement):
     comment = AchievementComment.objects.create(
         achievement=achievement,
@@ -171,7 +176,7 @@ def create_achievement(req, data, achievement=None):
 
         discord_logger.submit_achievement(req, achievement, "edited")
 
-    refresh_achievements_on_server()
+    comm.refresh_achievements_on_server()
 
     resp_beatmaps = []
 
@@ -204,7 +209,7 @@ def delete_achievement(req, achievement):
         return error("cannot delete an achievement that's not yours")
 
     achievement.delete()
-    refresh_achievements_on_server()
+    comm.refresh_achievements_on_server()
     return success(None)
 
 
@@ -228,3 +233,9 @@ def get_playtest_passkey(req):
         account.save()
 
     return success({"passkey": account.passkey})
+
+
+@require_GET
+@require_staff
+def request_algorithm_docs(req):
+    return success(comm.request_algorithm_docs())

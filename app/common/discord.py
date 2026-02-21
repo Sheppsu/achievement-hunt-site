@@ -98,17 +98,25 @@ class DiscordLogger:
 
         self.submit_embeds([embed], self.STAFF_WEBHOOK_URL)
 
-    def submit_comment(self, comment):
+    def submit_comment(self, comment, channel_name):
         if self.STAFF_WEBHOOK_URL is None:
             _log.warning("Unable to log new comment, STAFF_WEBHOOK_URL is None")
             return
 
+        if comment.channel == 1:
+            description = f"Reply to **{comment.achievement.name}**"
+        else:
+            description = f"Reply to **{comment.achievement.name}**:\n" + comment.msg
         embed = {
-            "title": "New comment",
+            "title": f"New comment in #{channel_name}",
             "url": f"https://cta.sheppsu.me/staff/achievements/{comment.achievement_id}",
-            "description": f"Reply to **{comment.achievement.name}**:\n" + comment.msg,
+            "description": description,
             "color": 0x31A6CE,
-            "footer": {"text": comment.user.username, "icon_url": comment.user.avatar},
+            "author": {
+                "name": comment.user.username,
+                "icon_url": comment.user.avatar,
+                "url": f"https://osu.ppy.sh/u/{comment.user.id}",
+            },
         }
 
         self.submit_embeds([embed], self.STAFF_WEBHOOK_URL)

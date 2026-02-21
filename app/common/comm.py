@@ -27,3 +27,7 @@ def refresh_achievements_on_server():
 
 def submit_playtest_scores(user, scores):
     return _send_and_recv({"evt": 1, "user": user, "scores": scores})
+
+
+def request_algorithm_docs():
+    return _send_and_recv({"evt": 3})
