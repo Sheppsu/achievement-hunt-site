@@ -269,7 +269,7 @@ class CreationViewComponent extends React.Component<ViewProps> {
     saveAchievement!.mutate(this.createPayload(), {
       onSuccess: (data) => {
         localStorage.removeItem("savedCreationData");
-        this.props.navigate(`/staff/achievements/${data.id}`);
+        this.props.navigate("/staff");
       },
       onSettled: () => {
         this.setState({
