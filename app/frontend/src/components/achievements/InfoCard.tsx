@@ -1,7 +1,8 @@
 import "assets/css/team.css";
 import { EventIterationType } from "api/types/EventIterationType.ts";
-import RenderedText from "components/common/RenderedText.tsx";
 import { dateToText } from "util/helperFunctions.ts";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export default function InfoCard({
   iteration,
@@ -20,7 +21,7 @@ export default function InfoCard({
           <>
             <p className="card--teams__subtitle">{section.heading}</p>
             <p className="info-text">
-              <RenderedText text={section.text}></RenderedText>
+              <Markdown remarkPlugins={[remarkGfm]}>{section.text}</Markdown>
             </p>
           </>
         ))}

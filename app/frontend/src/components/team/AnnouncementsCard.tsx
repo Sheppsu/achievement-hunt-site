@@ -1,14 +1,15 @@
 import { useGetAnnouncements } from "api/query.ts";
 import { AnnouncementType } from "api/types/AnnouncementType.ts";
-import RenderedText from "components/common/RenderedText.tsx";
 import { timeAgo } from "util/helperFunctions.ts";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 function Announcement({ announcement }: { announcement: AnnouncementType }) {
   return (
     <div className="announcement">
       <h1>{announcement.title}</h1>
       <p>
-        <RenderedText text={announcement.message} />
+        <Markdown remarkPlugins={[remarkGfm]}>{announcement.message}</Markdown>
       </p>
       <p className="announcement__time-ago">
         {timeAgo(announcement.created_at)}

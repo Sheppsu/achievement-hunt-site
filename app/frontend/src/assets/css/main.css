@@ -63,7 +63,11 @@ div {
 
 a {
   text-decoration: none;
-  color: inherit;
+  color: #b4c5ff;
+}
+
+a:hover {
+  color: #97a5d6;
 }
 
 h1 {
@@ -215,14 +219,6 @@ div.horizontal-divider {
   height: 2px;
   width: 100%;
   background-color: var(--border-color);
-}
-
-a.rendered-text {
-  color: #b4c5ff;
-}
-
-a.rendered-text:hover {
-  color: #97a5d6;
 }
 
 .clickable:hover {
@@ -401,6 +397,11 @@ a.rendered-text:hover {
   font-size: large;
 
   font-weight: 200;
+  color: white;
+}
+
+.header__container__left-box__links__link:hover {
+  color: white;
 }
 
 .header__container__left-box__links__link.active {

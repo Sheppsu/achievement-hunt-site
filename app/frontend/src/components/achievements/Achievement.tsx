@@ -6,8 +6,9 @@ import AudioPlayer from "components/audio/AudioPlayer.tsx";
 import { parseTags, toTitleCase } from "util/helperFunctions";
 import { MouseEventHandler, useRef, useState } from "react";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
-import RenderedText from "components/common/RenderedText.tsx";
 import Button from "components/inputs/Button.tsx";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 const TAG_DESCRIPTIONS = {
   secret: "The solution to this achievement is not explicitly stated.",
@@ -142,8 +143,10 @@ export default function Achievement({
               {points === null ? "" : `${points}pts`}
             </p>
             <p className="achievement__container__info__description">
-              {`${achievement.completion_count} completions | `}
-              <RenderedText text={achievement.description} />
+              <Markdown remarkPlugins={[remarkGfm]}>
+                {`${achievement.completion_count} completions | ` +
+                  achievement.description}
+              </Markdown>
               {showSolutionBtn && (
                 <>
                   <Button
@@ -154,7 +157,9 @@ export default function Achievement({
                   />
                   {showSolution && (
                     <span style={{ color: "#ffc0c0" }}>
-                      <RenderedText text={achievement.solution!} />
+                      <Markdown remarkPlugins={[remarkGfm]}>
+                        {achievement.solution!}
+                      </Markdown>
                     </span>
                   )}
                 </>

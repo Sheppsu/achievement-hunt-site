@@ -1,8 +1,9 @@
 import "assets/css/team.css";
 import { EventIterationType } from "api/types/EventIterationType.ts";
-import RenderedText from "components/common/RenderedText.tsx";
-import { useState } from "react";
+import React, { useState } from "react";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export default function FAQCard({
   iteration,
@@ -36,7 +37,7 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
       </div>
       {showAnswer && (
         <p className="info-text">
-          <RenderedText text={answer}></RenderedText>
+          <Markdown remarkPlugins={[remarkGfm]}>{answer}</Markdown>
         </p>
       )}
     </div>

@@ -358,11 +358,12 @@
   border: 1px solid var(--border-color);
 
   background-color: var(--site-background-color);
+  text-align: left;
 }
 
 .announcement__time-ago {
   font-size: 1em;
-  text-align: left;
+  text-align: right;
 }
 
 hr.announcement-divider {

@@ -21,7 +21,6 @@ import AchievementComment from "components/staff/AchievementComment.tsx";
 import { SessionContext } from "contexts/SessionContext.ts";
 import classNames from "classnames";
 import { parseTags } from "util/helperFunctions.ts";
-import RenderedText from "components/common/RenderedText.tsx";
 import { PopupContext } from "contexts/PopupContext.ts";
 import { EventContext } from "contexts/EventContext.ts";
 import {
@@ -35,6 +34,8 @@ import { FaEdit } from "react-icons/fa";
 import { FaComment } from "react-icons/fa6";
 import { MdDelete } from "react-icons/md";
 import ViewSwitcher from "components/common/ViewSwitcher.tsx";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 function VoteContainer({ achievement }: { achievement: StaffAchievementType }) {
   const session = useContext(SessionContext);
@@ -350,7 +351,9 @@ export default function Achievement(props: AchievementProps) {
         </div>
         <p className="staff__achievement__name">{achievement.name}</p>
         <p>
-          <RenderedText text={achievement.description} />
+          <Markdown remarkPlugins={[remarkGfm]}>
+            {achievement.description}
+          </Markdown>
         </p>
         {/*<p className="staff__achievement__solution">*/}
         {/*  <RenderedText text={achievement.solution} />*/}
