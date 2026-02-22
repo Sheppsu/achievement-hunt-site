@@ -28,13 +28,11 @@ def _create_error_embeds(req, exc):
 
 
 def _create_author_info(user):
-    return (
-        {
-            "name": user.username,
-            "icon_url": user.avatar,
-            "url": f"https://osu.ppy.sh/u/{user.id}",
-        },
-    )
+    return {
+        "name": user.username,
+        "icon_url": user.avatar,
+        "url": f"https://osu.ppy.sh/u/{user.id}",
+    }
 
 
 class DiscordLogger:
