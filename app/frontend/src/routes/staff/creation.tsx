@@ -23,8 +23,8 @@ import Checkbox from "components/inputs/Checkbox.tsx";
 import Button from "components/inputs/Button.tsx";
 import TextArea from "components/inputs/TextArea.tsx";
 import { useCreateAchievement, useEditAchievement } from "api/query.ts";
-import { useNavigate } from "react-router-dom";
 import { StaffAchievementType } from "api/types/AchievementType.ts";
+import { cleanTags } from "util/helperFunctions.ts";
 
 const EXPR_TYPES = [
   "func",
@@ -36,7 +36,7 @@ const EXPR_TYPES = [
 ] as const;
 type ExprType = (typeof EXPR_TYPES)[number];
 
-type AchievementPayloadType = {
+type CompactAchievementPayloadType = {
   id: number | null;
   name: string;
   description: string;
@@ -50,6 +50,10 @@ type AchievementPayloadType = {
   algorithmEnabled: boolean;
 };
 
+type AchievementPayloadType = CompactAchievementPayloadType & {
+  mode: string;
+};
+
 function makeDefaultPayload(): AchievementPayloadType {
   return {
     id: null,
@@ -60,30 +64,71 @@ function makeDefaultPayload(): AchievementPayloadType {
     beatmaps: [],
     solutionAlgorithm: makeBlankSolutionAlgorithm(),
     algorithmEnabled: false,
+    mode: "any",
   };
 }
 
+function parseModeAndTags(tags: string): [string, string] {
+  const parsedTags = [];
+  let mode = "any";
+  for (const tag of cleanTags(tags)) {
+    if (tag.startsWith("mode-")) {
+      mode = tag;
+    } else {
+      parsedTags.push(tag);
+    }
+  }
+
+  return [parsedTags.join(", "), mode];
+}
+
 function makeAchievementPayload(achievement: StaffAchievementType) {
+  const [tags, mode] = parseModeAndTags(achievement.tags);
   return {
     id: achievement.id,
     name: achievement.name,
     description: achievement.description,
     solution: achievement.solution,
-    tags: achievement.tags,
+    tags,
     beatmaps: achievement.beatmaps.map((item) => ({
       id: item.info.id,
       hide: item.hide,
     })),
     solutionAlgorithm: achievement.solution_algorithm,
     algorithmEnabled: achievement.algorithm_enabled,
+    mode,
+  };
+}
+
+function parseCompactAchievementPayload(
+  payload: CompactAchievementPayloadType,
+): AchievementPayloadType {
+  const [tags, mode] = parseModeAndTags(payload.tags);
+  return {
+    ...payload,
+    tags,
+    mode,
+  };
+}
+
+function convertToCompactPayload(
+  payload: AchievementPayloadType,
+): CompactAchievementPayloadType {
+  let [cleanTags, _] = parseModeAndTags(payload.tags);
+  if (payload.mode !== "any") {
+    cleanTags = cleanTags + "," + payload.mode;
+  }
+  return {
+    ...payload,
+    tags: cleanTags,
   };
 }
 
 type ViewProps = {
   createAchievement: ReturnType<typeof useCreateAchievement>;
   editAchievement: ReturnType<typeof useEditAchievement> | null;
-  navigate: ReturnType<typeof useNavigate>;
   achievement?: StaffAchievementType;
+  setView: (value: any) => void;
 };
 
 class CreationViewComponent extends React.Component<ViewProps> {
@@ -99,7 +144,9 @@ class CreationViewComponent extends React.Component<ViewProps> {
     if (this.props.achievement === undefined) {
       let stored = localStorage.getItem("savedCreationData");
       const saveData: AchievementPayloadType =
-        stored === null ? makeDefaultPayload() : JSON.parse(stored);
+        stored === null
+          ? makeDefaultPayload()
+          : parseCompactAchievementPayload(JSON.parse(stored));
       if (saveData.solutionAlgorithm === null) {
         saveData.solutionAlgorithm = makeBlankSolutionAlgorithm();
       }
@@ -116,7 +163,10 @@ class CreationViewComponent extends React.Component<ViewProps> {
     }
     this.timeoutId = setTimeout(() => {
       this.timeoutId = null;
-      localStorage.setItem("savedCreationData", JSON.stringify(this.payload));
+      localStorage.setItem(
+        "savedCreationData",
+        JSON.stringify(convertToCompactPayload(this.payload)),
+      );
     }, 500);
 
     super.forceUpdate();
@@ -244,15 +294,17 @@ class CreationViewComponent extends React.Component<ViewProps> {
     this.forceUpdate();
   }
 
-  private createPayload() {
+  // payload sent to the server
+  private createFinalPayload() {
+    const payload = convertToCompactPayload(this.payload);
     return {
-      name: this.payload.name,
-      description: this.payload.description,
-      solution: this.payload.solution,
-      tags: this.payload.tags,
-      beatmaps: this.payload.beatmaps,
-      solution_algorithm: this.payload.solutionAlgorithm,
-      algorithm_enabled: this.payload.algorithmEnabled,
+      name: payload.name,
+      description: payload.description,
+      solution: payload.solution,
+      tags: payload.tags,
+      beatmaps: payload.beatmaps,
+      solution_algorithm: payload.solutionAlgorithm,
+      algorithm_enabled: payload.algorithmEnabled,
     };
   }
 
@@ -266,10 +318,10 @@ class CreationViewComponent extends React.Component<ViewProps> {
       this.payload.id === null
         ? this.props.createAchievement
         : this.props.editAchievement;
-    saveAchievement!.mutate(this.createPayload(), {
-      onSuccess: (data) => {
+    saveAchievement!.mutate(this.createFinalPayload(), {
+      onSuccess: (_data) => {
         localStorage.removeItem("savedCreationData");
-        this.props.navigate("/staff");
+        this.props.setView({ name: "achievements", props: {} });
       },
       onSettled: () => {
         this.setState({
@@ -324,6 +376,24 @@ class CreationViewComponent extends React.Component<ViewProps> {
               this.editAchievement("tags", evt.currentTarget.value)
             }
           />
+          <div className="staff-creation__entry">
+            <p>Mode:</p>
+            <Dropdown
+              className="staff-creation__input"
+              options={{
+                Any: "any",
+                Standard: "mode-o",
+                Taiko: "mode-t",
+                Mania: "mode-m",
+                Catch: "mode-f",
+              }}
+              onChange={(e: React.FormEvent<HTMLSelectElement>) => {
+                this.editAchievement("mode", e.currentTarget.value);
+              }}
+              value={this.payload.mode}
+            />
+          </div>
+
           <div className="staff-creation__entry">
             <CustomCheckbox
               label="Enable solution algorithm"
@@ -490,7 +560,7 @@ function useEditCurrentAchievement(achievement?: StaffAchievementType) {
       return null;
     }
 
-    const savedData = JSON.parse(storage);
+    const savedData = parseCompactAchievementPayload(JSON.parse(storage));
     if (savedData.id === null) {
       return null;
     }
@@ -500,19 +570,20 @@ function useEditCurrentAchievement(achievement?: StaffAchievementType) {
 }
 
 export default function CreationView({
+  setView,
   achievement,
 }: {
+  setView: (value: any) => void;
   achievement?: StaffAchievementType;
 }) {
   const createAchievement = useCreateAchievement();
   const editAchievement = useEditCurrentAchievement(achievement);
-  const navigate = useNavigate();
   return (
     <CreationViewComponent
       achievement={achievement}
       createAchievement={createAchievement}
       editAchievement={editAchievement}
-      navigate={navigate}
+      setView={setView}
     />
   );
 }

@@ -157,7 +157,7 @@ export function parseMeaningfulTags(tagsString: string): boolean[] {
   return [isCompetition, isSecret];
 }
 
-function* cleanTags(tags: string) {
+export function* cleanTags(tags: string) {
   for (let tag of tags.split(",")) {
     tag = tag.trim().toLowerCase();
     if (tag === "") {

@@ -19,7 +19,6 @@ import CreationView from "routes/staff/creation.tsx";
 import { useLocation } from "react-router-dom";
 import Button from "components/inputs/Button.tsx";
 import { EventContext } from "contexts/EventContext.ts";
-import { FaEdit } from "react-icons/fa";
 import { IoIosCopy, IoIosRefresh } from "react-icons/io";
 
 const VIEWS = ["achievements", "creation", "releases"] as const;
@@ -29,14 +28,14 @@ type ViewType = {
   props: any;
 };
 
-function getView(view: ViewType, setView: (value: ViewType) => void) {
+function getViewComponent(view: ViewType, setView: (value: ViewType) => void) {
   switch (view.name) {
     case "achievements":
       return <AchievementsView setView={setView} {...view.props} />;
     case "releases":
       return <ReleasesView setView={setView} {...view.props} />;
     case "creation":
-      return <CreationView {...view.props} />;
+      return <CreationView setView={setView} {...view.props} />;
   }
 }
 
@@ -51,7 +50,7 @@ export default function Index() {
     },
   );
   const setViewName = useCallback((newName: ViewName) => {
-    setView((v) => ({ name: newName, props: {} }));
+    setView((_v) => ({ name: newName, props: {} }));
   }, []);
 
   return (
@@ -61,7 +60,7 @@ export default function Index() {
         currentView={view.name}
         setView={setViewName}
       />
-      {getView(view, setView)}
+      {getViewComponent(view, setView)}
     </div>
   );
 }
