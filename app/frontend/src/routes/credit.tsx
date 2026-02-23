@@ -33,7 +33,7 @@ export default function Credit() {
                 Kheops
               </a>
             </div>
-            <h1 className="staff-header">Website developers</h1>
+            <h1 className="staff-header">Website/backend developers</h1>
             <div className="staff-container">
               <a
                 href="https://sheppsu.me"
@@ -209,7 +209,7 @@ export default function Credit() {
                 Kheops
               </a>
             </div>
-            <h1 className="staff-header">Website developers</h1>
+            <h1 className="staff-header">Website/backend developers</h1>
             <div className="staff-container">
               <a
                 href="https://sheppsu.me"
