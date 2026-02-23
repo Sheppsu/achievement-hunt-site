@@ -9,7 +9,7 @@ import {
   useDispatchStateContext,
   useStateContext,
 } from "contexts/StateContext.ts";
-import React, { useCallback, useContext, useState } from "react";
+import React, { useCallback, useContext, useMemo, useState } from "react";
 import { getSortedAchievements } from "util/achievementSorting.ts";
 import { useAuthEnsurer } from "util/auth.ts";
 import { Helmet } from "react-helmet";
@@ -77,6 +77,58 @@ function AchievementsView({ setView }: { setView: (value: ViewType) => void }) {
   const session = useContext(SessionContext);
   const dispatchEventMsg = useContext(EventContext);
 
+  const filteredAchievements = useMemo(() => {
+    if (isLoading || achievements === undefined) {
+      return null;
+    }
+    if (state.showMyAchievements) {
+      return achievements.filter(
+        (a) => a.creator !== null && a.creator.id === session.user!.id,
+      );
+    }
+    return achievements;
+  }, [achievements, session.user, state.showMyAchievements, isLoading]);
+
+  // don't want to refresh everytime achievements change (it's a bit disorienting)
+  // so fixed sorting is fixed based on the achievements when sort was set
+  const fixedSorting: [string, number[]][] | null = useMemo(() => {
+    if (filteredAchievements === null || state.achievementsFilter === null) {
+      return null;
+    }
+    const sortedAchievements = getSortedAchievements(
+      filteredAchievements,
+      state.achievementsFilter,
+      state.achievementsSearchFilter,
+      false,
+      null,
+    );
+    return Object.entries(sortedAchievements).map(([key, values]) => [
+      key,
+      values.map((a) => a.id),
+    ]);
+  }, [
+    state.achievementsFilter,
+    state.achievementsSearchFilter,
+    state.showMyAchievements,
+    isLoading,
+  ]);
+
+  // this is based on latest achievement data but uses fixed sorting
+  const sortedAchievements = useMemo(() => {
+    if (fixedSorting === null) {
+      return null;
+    }
+
+    return Object.fromEntries(
+      fixedSorting.map(([label, ids]) => [
+        label,
+        ids.map((id) =>
+          filteredAchievements!.filter((ach) => ach.id === id).pop(),
+        ),
+      ]),
+    );
+  }, [fixedSorting, filteredAchievements]);
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -85,28 +137,13 @@ function AchievementsView({ setView }: { setView: (value: ViewType) => void }) {
     return <div>Failed to load achievements</div>;
   }
 
-  if (state.achievementsFilter === null) {
+  if (sortedAchievements === null) {
     dispatchState({
       id: 5,
       achievementsFilter: getDefaultNav(achievements, true),
     });
     return <div>Loading...</div>;
   }
-
-  let filteredAchievements = achievements;
-  if (state.showMyAchievements) {
-    filteredAchievements = achievements.filter(
-      (a) => a.creator !== null && a.creator.id === session.user!.id,
-    );
-  }
-
-  const sortedAchievements = getSortedAchievements(
-    filteredAchievements,
-    state.achievementsFilter,
-    state.achievementsSearchFilter,
-    false,
-    null,
-  );
 
   const copyPasskey = () => {
     // playtestInfo is defined if this func is called
