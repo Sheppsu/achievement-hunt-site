@@ -122,9 +122,11 @@ function AchievementsView({ setView }: { setView: (value: ViewType) => void }) {
     return Object.fromEntries(
       fixedSorting.map(([label, ids]) => [
         label,
-        ids.map((id) =>
-          filteredAchievements!.filter((ach) => ach.id === id).pop(),
-        ),
+        ids
+          .map((id) =>
+            filteredAchievements!.filter((ach) => ach.id === id).pop(),
+          )
+          .filter((ach) => ach !== undefined),
       ]),
     );
   }, [fixedSorting, filteredAchievements]);
