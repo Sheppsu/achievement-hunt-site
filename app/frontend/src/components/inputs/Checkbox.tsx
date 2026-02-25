@@ -1,4 +1,4 @@
-import { splitProps } from "components/inputs/util.ts";
+import { splitProps } from "util/helperFunctions.ts";
 
 type CheckboxPropsType = {
   className?: string;

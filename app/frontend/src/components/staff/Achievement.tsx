@@ -36,6 +36,7 @@ import { MdDelete } from "react-icons/md";
 import ViewSwitcher from "components/common/ViewSwitcher.tsx";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import ActionMenu, { ActionInfo } from "components/common/ActionMenu.tsx";
 
 function VoteContainer({ achievement }: { achievement: StaffAchievementType }) {
   const session = useContext(SessionContext);
@@ -109,31 +110,6 @@ export default function Achievement(props: AchievementProps) {
       ),
     [achievement.comments, commentChannel],
   );
-
-  const actionMenuBtnRef = useRef<HTMLDivElement | null>(null);
-  const actionMenuRef = useRef<HTMLDivElement | null>(null);
-
-  // close actions menu when clicking off it
-  useEffect(() => {
-    function onClick(evt: MouseEvent | TouchEvent) {
-      if (
-        actionMenuOpen &&
-        actionMenuRef.current &&
-        !actionMenuRef.current.contains(evt.target as Node) &&
-        actionMenuBtnRef.current &&
-        !actionMenuBtnRef.current.contains(evt.target as Node)
-      ) {
-        setActionMenuOpen(false);
-      }
-    }
-
-    document.addEventListener("mousedown", onClick);
-    document.addEventListener("touchend", onClick);
-    return () => {
-      document.removeEventListener("mousedown", onClick);
-      document.removeEventListener("touchend", onClick);
-    };
-  }, [setActionMenuOpen, actionMenuOpen]);
 
   const onCommentStart = useCallback(() => {
     setIsCommenting(true);
@@ -271,84 +247,47 @@ export default function Achievement(props: AchievementProps) {
     );
   }, [achievementUrl]);
 
+  const actionMenuInfo: ActionInfo[] = [
+    {
+      type: "button",
+      label: "Copy URL",
+      icon: IoIosCopy,
+      onClick: copyAchievementUrl,
+    },
+    {
+      type: "button",
+      label: "Edit",
+      icon: FaEdit,
+      onClick: () =>
+        props.setView({
+          name: "creation",
+          props: { achievement: achievement },
+        }),
+      hidden: !canEdit,
+    },
+    {
+      type: "button",
+      label: "Move",
+      icon: IoIosArrowDropup,
+      onClick: doMoveAchievement,
+      hidden: !session.user?.is_admin,
+    },
+    { type: "divider" },
+    {
+      type: "button",
+      label: "Delete",
+      icon: MdDelete,
+      onClick: onDeleteAchievement,
+      holdToUse: true,
+      caution: true,
+      hidden: !canEdit,
+    },
+  ];
+
   return (
     <div>
       <div className="staff__achievement">
-        <div
-          className="staff__achievement__actions-button"
-          onClick={() => setActionMenuOpen((val) => !val)}
-          ref={actionMenuBtnRef}
-        >
-          <IoIosMore size={24} />
-        </div>
-        <div
-          className={classNames("staff__achievement__actions-menu", {
-            hidden: !actionMenuOpen,
-          })}
-          ref={actionMenuRef}
-        >
-          <Button
-            children={
-              <>
-                <IoIosCopy size={20} />
-                <p className="staff__actions-menu__label">Copy URL</p>
-              </>
-            }
-            className="staff__actions-menu__action"
-            width="100%"
-            onClick={copyAchievementUrl}
-            hidden={isCommenting}
-            includeButtonCls={false}
-          />
-          <Button
-            children={
-              <>
-                <FaEdit size={20} />
-                <p className="staff__actions-menu__label">Edit</p>
-              </>
-            }
-            className="staff__actions-menu__action"
-            width="100%"
-            hidden={!canEdit || isCommenting}
-            onClick={() =>
-              props.setView({
-                name: "creation",
-                props: { achievement: achievement },
-              })
-            }
-            includeButtonCls={false}
-          />
-          <Button
-            children={
-              <>
-                <IoIosArrowDropup size={20} />
-                <p className="staff__actions-menu__label">Move</p>
-              </>
-            }
-            className="staff__actions-menu__action"
-            width="100%"
-            onClick={doMoveAchievement}
-            hidden={!session.user?.is_admin || isCommenting}
-            includeButtonCls={false}
-          />
-          <hr className="staff__actions-menu__divider" />
-          <Button
-            children={
-              <>
-                <MdDelete size={20} />
-                <p className="staff__actions-menu__label">Delete</p>
-              </>
-            }
-            className="staff__actions-menu__action hazard"
-            width="100%"
-            hidden={!canEdit || isCommenting}
-            unavailable={deleting}
-            onClick={onDeleteAchievement}
-            holdToUse={true}
-            includeButtonCls={false}
-            caution={true}
-          />
-        </div>
+        <ActionMenu info={actionMenuInfo} />
         <p className="staff__achievement__name">{achievement.name}</p>
         <p>
           <Markdown remarkPlugins={[remarkGfm]}>

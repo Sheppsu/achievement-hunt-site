@@ -208,10 +208,12 @@ class AchievementComment(SerializableModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
     msg = models.CharField(max_length=4096)
     posted_at = models.DateTimeField()
+    edited_at = models.DateTimeField(null=True, default=None)
+    deleted_at = models.DateTimeField(null=True, default=None)
     channel = models.SmallIntegerField(default=0)
 
     class Serialization:
-        FIELDS = ["id", "msg", "posted_at", "channel"]
+        FIELDS = ["id", "msg", "posted_at", "edited_at", "channel"]
 
 
 class AchievementVote(SerializableModel):

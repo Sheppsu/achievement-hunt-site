@@ -687,6 +687,112 @@ export function useSendComment(
   );
 }
 
+function onCommentEdited(
+  queryClient: QueryClient | undefined,
+  achievementId: number,
+  comment: AchievementCommentType,
+) {
+  function updateComment(achievements: StaffAchievementType[]) {
+    const newAchievements = [];
+    for (const ach of achievements) {
+      if (ach.id === achievementId) {
+        newAchievements.push({
+          ...ach,
+          comments: ach.comments.map((c) =>
+            c.id === comment.id ? comment : c,
+          ),
+        });
+      } else {
+        newAchievements.push(ach);
+      }
+    }
+
+    return newAchievements;
+  }
+
+  queryClient?.setQueryData(
+    ["staff", "achievements", "?batch=0"],
+    (achievements: StaffAchievementType[] | undefined) =>
+      achievements === undefined ? undefined : updateComment(achievements),
+  );
+
+  queryClient?.setQueryData(
+    ["staff", "achievements", achievementId.toString()],
+    (achievement: StaffAchievementType | undefined) =>
+      achievement === undefined ? undefined : updateComment([achievement]),
+  );
+}
+
+export function useEditComment(
+  commentId: number,
+): SpecificUseMutationResult<
+  AchievementCommentType & { achievement_id: number }
+> {
+  const queryClient = useContext(QueryClientContext);
+  return useMakeMutation(
+    {
+      mutationKey: ["staff", "comments", commentId.toString(), "edit"],
+      onSuccess: (result) =>
+        onCommentEdited(queryClient, result.achievement_id, result),
+    },
+    {
+      method: "POST",
+    },
+  );
+}
+
+function onCommentDeleted(
+  queryClient: QueryClient | undefined,
+  achievementId: number,
+  comment: AchievementCommentType,
+) {
+  function removeComment(achievements: StaffAchievementType[]) {
+    const newAchievements = [];
+    for (const ach of achievements) {
+      if (ach.id === achievementId) {
+        newAchievements.push({
+          ...ach,
+          comments: ach.comments.filter((c) => c.id !== comment.id),
+        });
+      } else {
+        newAchievements.push(ach);
+      }
+    }
+
+    return newAchievements;
+  }
+
+  queryClient?.setQueryData(
+    ["staff", "achievements", "?batch=0"],
+    (achievements: StaffAchievementType[] | undefined) =>
+      achievements === undefined ? undefined : removeComment(achievements),
+  );
+
+  queryClient?.setQueryData(
+    ["staff", "achievements", achievementId.toString()],
+    (achievement: StaffAchievementType | undefined) =>
+      achievement === undefined ? undefined : removeComment([achievement]),
+  );
+}
+
+export function useDeleteComment(
+  commentId: number,
+): SpecificUseMutationResult<
+  AchievementCommentType & { achievement_id: number }
+> {
+  const queryClient = useContext(QueryClientContext);
+  return useMakeMutation(
+    {
+      mutationKey: ["staff", "comments", commentId.toString(), "delete"],
+      onSuccess: (result) =>
+        onCommentDeleted(queryClient, result.achievement_id, result),
+    },
+    {
+      method: "DELETE",
+    },
+  );
+}
+
 type AchievementCreationReturn = AchievementType & {
   solution: string;
   creator: UserType;

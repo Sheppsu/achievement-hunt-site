@@ -49,7 +49,7 @@ def achievements(req, iteration):
     batch = int(batch) == 1
 
     query = Achievement.objects.prefetch_related(
-        models.Prefetch("comments", AchievementComment.objects.select_related("user")),
+        models.Prefetch("comments", AchievementComment.objects.select_related("user").filter(deleted_at=None)),
         models.Prefetch("beatmaps", BeatmapConnection.objects.select_related("info")),
         "votes",
     ).select_related("creator", "batch")
@@ -89,6 +89,42 @@ def create_comment(req, data, achievement):
     discord_logger.submit_comment(comment, COMMENT_CHANNELS[comment.channel])
 
     return success(comment.serialize(includes=["user"]))
+
+
+@require_staff
+@require_POST
+@accepts_json_data(
+    DictionaryType(
+        {"msg": StringType(min_length=1, max_length=4096)},
+    )
+)
+def edit_comment(req, data, comment_id):
+    comment = AchievementComment.objects.select_related("user").filter(id=comment_id).first()
+    if comment is None:
+        return error("Comment not found", status=404)
+    if comment.user_id != req.user.id:
+        return error("You can't edit this comment", status=403)
+
+    comment.edited_at = datetime.now(tz=timezone.utc)
+    comment.msg = data["msg"]
+    comment.save()
+
+    return success(comment.serialize(includes=["achievement_id", "user"]))
+
+
+@require_staff
+@require_http_methods(["DELETE"])
+def delete_comment(req, comment_id):
+    comment = AchievementComment.objects.select_related("user").filter(id=comment_id).first()
+    if comment is None:
+        return error("Comment not found", status=404)
+    if comment.user_id != req.user.id and not req.user.is_admin:
+        return error("You can't delete this comment", status=403)
+
+    comment.deleted_at = datetime.now(tz=timezone.utc)
+    comment.save()
+
+    return success(comment.serialize(includes=["achievement_id", "user"]))
 
 
 @require_staff

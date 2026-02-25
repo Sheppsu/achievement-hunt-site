@@ -1,4 +1,4 @@
-import { splitProps } from "components/inputs/util.ts";
+import { splitProps } from "util/helperFunctions.ts";
 import { HTMLInputAutoCompleteAttribute } from "react";
 import "assets/css/inputs/text-input.css";
 

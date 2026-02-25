@@ -1,6 +1,6 @@
 import "assets/css/inputs/button.css";
 import React, { useRef, useState } from "react";
-import { splitProps } from "components/inputs/util.ts";
+import { splitProps } from "util/helperFunctions.ts";
 import classNames from "classnames";
 
 type ButtonProps = {
@@ -8,7 +8,9 @@ type ButtonProps = {
   className?: string;
   hidden?: boolean;
   unavailable?: boolean;
-  onClick?: (e: React.FormEvent<HTMLButtonElement>) => void;
+  onClick?:
+    | ((e: React.FormEvent<HTMLButtonElement>) => void)
+    | ((e: React.FormEvent<HTMLButtonElement>) => void)[];
   width?: string;
   height?: string;
   type?: "button" | "submit" | "reset";
@@ -67,6 +69,19 @@ export default function Button(props: ButtonProps) {
 
   elementProps.className += " prevent-select";
 
+  const onClick =
+    otherProps.onClick === undefined
+      ? undefined
+      : (e: React.FormEvent<HTMLButtonElement>) => {
+          if (Array.isArray(otherProps.onClick)) {
+            for (const func of otherProps.onClick) {
+              func(e);
+            }
+          } else {
+            otherProps.onClick(e);
+          }
+        };
+
   // for hold-to-use buttons
   const onMouseDown = (e: React.FormEvent<HTMLButtonElement>) => {
     if (debounce !== 0) return;
@@ -91,8 +106,8 @@ export default function Button(props: ButtonProps) {
         );
 
         // trigger button
-        if (newP === 100 && otherProps.onClick) {
-          otherProps.onClick(e);
+        if (newP === 100 && onClick) {
+          onClick(e);
           if (intervalId.current !== null) clearInterval(intervalId.current);
           return null;
         }
@@ -107,8 +122,7 @@ export default function Button(props: ButtonProps) {
     setDebounce(0);
 
     if (debounce === 1) {
-      if (e.type == "mouseup" && otherProps.onClick && !otherProps.unavailable)
-        otherProps.onClick(e);
+      if (e.type == "mouseup" && onClick && !otherProps.unavailable) onClick(e);
       return;
     }
 
