@@ -3,8 +3,8 @@
   "scripts": {
     "check": "tsc --skipLibCheck",
     "build": "vite build",
-    "build-debug": "vite build -m debug",
-    "watch": "vite build --watch -m debug",
+    "build-debug": "SET NODE_ENV=development && vite build --mode development",
+    "watch": "SET NODE_ENV=development && vite build --watch --mode development",
     "format": "prettier .",
     "format:write": "prettier . --write"
   },

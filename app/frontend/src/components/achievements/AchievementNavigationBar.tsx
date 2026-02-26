@@ -12,6 +12,10 @@ export type NavItem = {
   active: boolean;
 };
 
+export type BoolNavItem = {
+  value: boolean;
+} & NavItem;
+
 export type NavRowItems = {
   items: NavItem[];
 };
@@ -20,11 +24,16 @@ export type SortedNavRowItems = {
   sort: "desc" | "asc";
 } & NavRowItems;
 
+export type BoolNavRowItems = {
+  items: BoolNavItem[];
+};
+
 export type NavItems = {
   rows: {
     mode: NavRowItems;
     tags: NavRowItems;
     sort: SortedNavRowItems;
+    filters: BoolNavRowItems;
   };
   isStaff: boolean;
 };
@@ -40,7 +49,7 @@ export function getDefaultNav(
     }
   }
 
-  const sortItems = isStaff
+  const sortItems: NavItem[] = isStaff
     ? [
         { label: "last active", active: true },
         { label: "creation time", active: false },
@@ -53,13 +62,20 @@ export function getDefaultNav(
         { label: "release", active: false },
       ];
 
-  let modes = [
+  const modes: NavItem[] = [
     { label: "any", active: false },
     { label: "standard", active: false },
     { label: "taiko", active: false },
     { label: "mania", active: false },
     { label: "catch", active: false },
   ];
+
+  const filters: BoolNavItem[] = isStaff
+    ? [
+        { label: "my achievements", active: false, value: false },
+        { label: "solved", active: false, value: false },
+      ]
+    : [{ label: "completed", active: false, value: false }];
 
   return {
     rows: {
@@ -71,6 +87,7 @@ export function getDefaultNav(
         items: sortItems,
         sort: "desc",
       },
+      filters: { items: filters },
     },
     isStaff,
   };
@@ -85,8 +102,11 @@ function AchievementNavigationBarRow({
 }: {
   label: string;
   sort: string | undefined;
-  children: NavItem[];
-  onItemClick: (label: keyof NavItems["rows"], itemLabel: string) => void;
+  children: (NavItem | BoolNavItem)[];
+  onItemClick: (
+    label: keyof NavItems["rows"],
+    item: NavItem | BoolNavItem,
+  ) => void;
   onLabelClick: (label: keyof NavItems["rows"]) => void;
 }) {
   const isSorted = sort !== undefined;
@@ -94,8 +114,21 @@ function AchievementNavigationBarRow({
   let labelText = toTitleCase(label);
   if (isSorted) labelText += sort === "desc" ? " ↓" : " ↑";
 
+  const getItemCls = (item: NavItem | BoolNavItem) => {
+    if ("value" in item) {
+      return classNames("achievement-nav-bar__row__options__item", {
+        active: item.active,
+        on: item.value,
+        off: !item.value,
+      });
+    }
+    return classNames("achievement-nav-bar__row__options__item", {
+      active: item.active,
+    });
+  };
+
   return (
-    <div className="achievement-nav-bar__row prevent-select" key={label}>
+    <div className="achievement-nav-bar__row prevent-select">
       <p
         className={classNames("achievement-nav-bar__row__label", {
           "sort-type": isSorted,
@@ -112,13 +145,8 @@ function AchievementNavigationBarRow({
         {children.map((item) => (
           <p
             key={item.label}
-            className={
-              "achievement-nav-bar__row__options__item" +
-              (item.active ? " active" : "")
-            }
-            onClick={() =>
-              onItemClick(label as keyof NavItems["rows"], item.label)
-            }
+            className={getItemCls(item)}
+            onClick={() => onItemClick(label as keyof NavItems["rows"], item)}
           >
             {toTitleCase(item.label)}
           </p>
@@ -140,8 +168,9 @@ export default function AchievementNavigationBar({
   isStaff: boolean;
 }) {
   const [searchField, setSearchField] = useState<string>("");
+  const [resetting, setResetting] = useState<boolean>(false);
 
-  function onReset() {
+  function refreshState() {
     if (!achievements) return;
 
     dispatchState({
@@ -152,14 +181,19 @@ export default function AchievementNavigationBar({
     setSearchField("");
   }
 
-  function onItemClick(label: keyof NavItems["rows"], itemLabel: string) {
+  function onItemClick(
+    label: keyof NavItems["rows"],
+    item: NavItem | BoolNavItem,
+  ) {
     if (state === null || state.achievementsFilter === null) return;
 
     dispatchState({
       id: 10,
       label: label,
-      item: itemLabel,
+      item: item.label,
       multiSelect: label !== "sort",
+      active: item.active,
+      value: "value" in item ? item.value : undefined,
     });
   }
 
@@ -175,32 +209,21 @@ export default function AchievementNavigationBar({
     });
   }
 
-  function onHideCompletedChange(e: React.ChangeEvent<HTMLInputElement>) {
-    dispatchState({
-      id: 7,
-      hideCompletedAchievements: e.target.checked,
-    });
-  }
-
-  function onShowMyAchievements(e: React.ChangeEvent<HTMLInputElement>) {
-    dispatchState({
-      id: 12,
-      hideMyAchievements: e.target.checked,
-    });
-  }
-
   // reset navigator when switching pages (staff vs achievements)
-  if (
+  const isReady =
     state !== null &&
     state.achievementsFilter !== null &&
-    state.achievementsFilter.isStaff !== isStaff
-  ) {
-    onReset();
+    state.achievementsFilter.isStaff === isStaff;
+  if (!resetting && !isReady) {
+    refreshState();
+    setResetting(true);
+  } else if (resetting && isReady) {
+    setResetting(false);
   }
 
   return (
     <div className="achievement-nav-bar">
-      {state === null ? (
+      {!isReady || resetting ? (
         <div>Loading...</div>
       ) : (
         <>
@@ -210,39 +233,12 @@ export default function AchievementNavigationBar({
               value={searchField}
               onChange={onSearchChange}
             />
-            <div
-              className={classNames("achievement-nav-bar__row--input__group", {
-                hide: isStaff,
-              })}
-            >
-              <input
-                id="hide-completed"
-                type="checkbox"
-                style={{ width: 18 }}
-                onChange={onHideCompletedChange}
-                checked={state.hideCompletedAchievements}
-              />
-              <p>Hide completed achievements</p>
-            </div>
-            <div
-              className={classNames("achievement-nav-bar__row--input__group", {
-                hide: !isStaff,
-              })}
-            >
-              <input
-                id="hide-my-achievements"
-                type="checkbox"
-                style={{ width: 18 }}
-                onChange={onShowMyAchievements}
-                checked={state.showMyAchievements}
-              />
-              <p>Show my achievements</p>
-            </div>
           </div>
           {Object.entries(
-            (state.achievementsFilter?.rows ?? {}) as NavItems["rows"],
+            (state.achievementsFilter!.rows ?? {}) as NavItems["rows"],
           ).map(([label, children]) => (
             <AchievementNavigationBarRow
+              key={label}
               label={label}
               sort={"sort" in children ? children.sort : undefined}
               children={children.items}
@@ -250,7 +246,7 @@ export default function AchievementNavigationBar({
               onLabelClick={onLabelClick}
             />
           ))}
-          <Button onClick={() => onReset()}>Reset to Default</Button>
+          <Button onClick={refreshState}>Reset to Default</Button>
         </>
       )}
     </div>

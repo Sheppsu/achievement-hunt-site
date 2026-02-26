@@ -101,9 +101,9 @@ export default function AchievementComment(props: AchievementCommentProps) {
       </div>
       <div className="staff__achievement__comment__divider"></div>
       <div className="staff__achievement__comment__content">
-        <p className={isEditing ? "hide" : ""}>
+        <span className={isEditing ? "hide" : ""}>
           <Markdown remarkPlugins={[remarkGfm]}>{comment.msg}</Markdown>
-        </p>
+        </span>
         <TextArea
           className="staff__textarea"
           value={editedMsg}

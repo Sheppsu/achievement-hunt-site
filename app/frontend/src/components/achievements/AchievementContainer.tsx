@@ -100,6 +100,7 @@ export default function AchievementContainer({ state }: { state: AppState }) {
       state.achievementsSearchFilter,
       state.hideCompletedAchievements,
       myTeam,
+      session.user,
     );
   }, [
     achievements,
@@ -130,7 +131,9 @@ export default function AchievementContainer({ state }: { state: AppState }) {
         }
         return (
           <>
-            <div className="achievement-category">{group}</div>
+            <div key={`group-${group}`} className="achievement-category">
+              {group}
+            </div>
             {group.toLowerCase().includes("search") &&
             achievements.length === 0 ? (
               <p>No achievements found!</p>

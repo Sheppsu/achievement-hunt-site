@@ -14,6 +14,7 @@ export default function ViewSwitcher<T extends string>({
     <div className="view-switcher">
       {views.map((label) => (
         <ViewItem
+          key={label}
           label={label}
           active={currentView === label}
           setView={setView}

@@ -158,6 +158,7 @@ class Achievement(SerializableModel):
     worth_points = models.BooleanField(default=True)
     solution_algorithm = models.JSONField(default=dict)
     algorithm_enabled = models.BooleanField(default=False)
+    staff_solved = models.BooleanField(default=False)
 
     class Serialization:
         FIELDS = ["id", "name", "description", "audio", "tags", "created_at", "last_edited_at", "worth_points"]

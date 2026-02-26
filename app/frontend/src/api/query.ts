@@ -814,6 +814,7 @@ function onAchievementCreation(
           comments: [],
           has_voted: false,
           vote_count: 0,
+          staff_solved: false,
         },
       ]),
   );
@@ -922,6 +923,67 @@ export function useDeleteAchievement(achievementId: number) {
     },
     {
       method: "DELETE",
+    },
+  );
+}
+
+type MarkedSolvedReturnType = {
+  achievement_id: number;
+  solved: boolean;
+};
+
+function onAchievementMarkedSolved(
+  queryClient: QueryClient | undefined,
+  data: MarkedSolvedReturnType,
+) {
+  queryClient?.setQueryData(
+    ["staff", "achievements", "?batch=0"],
+    (achievements: StaffAchievementType[] | undefined) => {
+      if (achievements === undefined) {
+        return;
+      }
+
+      const newAchievements = [];
+      for (const achievement of achievements) {
+        if (achievement.id === data.achievement_id) {
+          newAchievements.push({
+            ...achievement,
+            staff_solved: data.solved,
+          });
+          continue;
+        }
+
+        newAchievements.push(achievement);
+      }
+      return newAchievements;
+    },
+  );
+
+  queryClient?.setQueryData(
+    ["staff", "achievements", data.achievement_id.toString()],
+    (achievement: StaffAchievementType | undefined) =>
+      achievement === undefined
+        ? undefined
+        : { ...achievement, staff_solved: data.solved },
+  );
+}
+
+export function useMarkAchievementSolved(
+  achievementId: number,
+): SpecificUseMutationResult<MarkedSolvedReturnType> {
+  const queryClient = useContext(QueryClientContext);
+  return useMakeMutation(
+    {
+      mutationKey: [
+        "staff",
+        "achievements",
+        achievementId.toString(),
+        "mark-solved",
+      ],
+      onSuccess: (data) => onAchievementMarkedSolved(queryClient, data),
+    },
+    {
+      method: "POST",
     },
   );
 }

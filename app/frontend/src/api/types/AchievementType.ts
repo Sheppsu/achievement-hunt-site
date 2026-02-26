@@ -44,4 +44,5 @@ export type StaffAchievementType = {
   creator: UserType | null;
   solution_algorithm: SolutionAlgorithmData;
   algorithm_enabled: boolean;
+  staff_solved: boolean;
 } & AchievementType;

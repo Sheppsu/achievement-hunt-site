@@ -3,20 +3,14 @@ import { BiSolidUpArrow, BiUpArrow } from "react-icons/bi";
 import {
   useDeleteAchievement,
   useGetBatches,
+  useMarkAchievementSolved,
   useMoveAchievement,
   useSendComment,
   useVoteAchievement,
 } from "api/query.ts";
 import Button from "components/inputs/Button.tsx";
 import TextArea from "components/inputs/TextArea.tsx";
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useContext, useMemo, useState } from "react";
 import AchievementComment from "components/staff/AchievementComment.tsx";
 import { SessionContext } from "contexts/SessionContext.ts";
 import classNames from "classnames";
@@ -27,11 +21,9 @@ import {
   IoIosArrowDropup,
   IoIosCopy,
   IoIosExit,
-  IoIosMore,
   IoIosSend,
 } from "react-icons/io";
-import { FaEdit } from "react-icons/fa";
-import { FaComment } from "react-icons/fa6";
+import { FaEdit, FaComment, FaCheck } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
 import ViewSwitcher from "components/common/ViewSwitcher.tsx";
 import Markdown from "react-markdown";
@@ -88,7 +80,6 @@ export default function Achievement(props: AchievementProps) {
   const [commentText, setCommentText] = useState("");
   const [sendingComment, setSendingComment] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [actionMenuOpen, setActionMenuOpen] = useState(false);
   const [commentView, setCommentView] = useState<CommentView>("General");
 
   const sendComment = useSendComment(achievement.id);
@@ -97,6 +88,7 @@ export default function Achievement(props: AchievementProps) {
   const { data: batches, isLoading: batchesLoading } = useGetBatches(
     session.user!.is_admin,
   );
+  const markSolved = useMarkAchievementSolved(achievement.id);
 
   const canEdit =
     achievement.creator !== null &&
@@ -247,6 +239,16 @@ export default function Achievement(props: AchievementProps) {
     );
   }, [achievementUrl]);
 
+  const changeSolvedStatus = useCallback(() => {
+    if (markSolved.isPending) {
+      return;
+    }
+
+    markSolved.mutate({
+      solved: !achievement.staff_solved,
+    });
+  }, [markSolved.isPending, achievement.staff_solved]);
+
   const actionMenuInfo: ActionInfo[] = [
     {
       type: "button",
@@ -270,7 +272,15 @@ export default function Achievement(props: AchievementProps) {
       label: "Move",
       icon: IoIosArrowDropup,
       onClick: doMoveAchievement,
-      hidden: !session.user?.is_admin,
+      hidden: !session.user!.is_admin,
+    },
+    {
+      type: "button",
+      label: achievement.staff_solved ? "Mark unsolved" : "Mark solved",
+      icon: FaCheck,
+      onClick: changeSolvedStatus,
+      hidden:
+        session.user!.id !== achievement.creator?.id && !session.user!.is_admin,
     },
     { type: "divider" },
     {
@@ -286,14 +296,18 @@ export default function Achievement(props: AchievementProps) {
 
   return (
     <div>
-      <div className="staff__achievement">
+      <div
+        className={classNames("staff__achievement", {
+          solved: achievement.staff_solved,
+        })}
+      >
         <ActionMenu info={actionMenuInfo} />
         <p className="staff__achievement__name">{achievement.name}</p>
-        <p>
+        <span>
           <Markdown remarkPlugins={[remarkGfm]}>
             {achievement.description}
           </Markdown>
-        </p>
+        </span>
         {/*<p className="staff__achievement__solution">*/}
         {/*  <RenderedText text={achievement.solution} />*/}
         {/*</p>*/}
@@ -301,6 +315,7 @@ export default function Achievement(props: AchievementProps) {
           .filter((beatmap) => !beatmap.hide)
           .map((beatmap) => (
             <a
+              key={beatmap.info.id}
               className={classNames("staff__achievement__beatmap")}
               href={`https://osu.ppy.sh/b/${beatmap.info.id}`}
               target="_blank"

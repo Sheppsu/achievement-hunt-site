@@ -88,6 +88,10 @@
   position: relative;
 }
 
+.staff__achievement.solved {
+  border-color: #2a5e3f;
+}
+
 .staff__achievement__name {
   /* leave space for actions button */
   padding-right: 40px;

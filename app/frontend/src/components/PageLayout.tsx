@@ -15,7 +15,7 @@ import { PopupContext, PopupState } from "contexts/PopupContext";
 import {
   StateContext,
   StateDispatchContext,
-  stateReducer,
+  useStateReducer,
 } from "contexts/StateContext.ts";
 import { WebsocketContextProvider } from "contexts/WebsocketContext.tsx";
 import { AnimatePresence } from "motion/react";
@@ -25,7 +25,6 @@ import {
   IoIosArrowDropup,
   IoIosNotifications,
 } from "react-icons/io";
-import { defaultState } from "types/AppStateType.ts";
 
 import PopupContainer from "./popups/PopupContainer.tsx";
 import classNames from "classnames";
@@ -195,11 +194,7 @@ export default function PageLayout({
     events: [],
     pastEvents: [],
   });
-  const [appState, dispatchAppState] = useReducer(
-    stateReducer,
-    null,
-    defaultState,
-  );
+  const [appState, dispatchAppState] = useStateReducer();
   const [popup, setPopup] = useState<PopupState>(null);
   const [showNotifications, setShowNotifications] = useState(false);
 

@@ -37,10 +37,11 @@ const otherDefaults = {
 function createActionElement(
   info: ActionInfo,
   setActionMenuOpen: (v: boolean) => void,
+  i: number,
 ) {
   switch (info.type) {
     case "divider":
-      return <hr className="actions-menu__divider" />;
+      return <hr key={`hr-${i}`} className="actions-menu__divider" />;
     case "button":
       const icon = info.icon({ size: 20 });
       const children = (
@@ -51,6 +52,7 @@ function createActionElement(
       );
       return (
         <Button
+          key={info.label}
           children={children}
           className={classNames("actions-menu__action", {
             hazard: info.caution,
@@ -112,7 +114,9 @@ export default function ActionMenu(props: ActionMenuProps) {
         })}
         ref={actionMenuRef}
       >
-        {props.info.map((info) => createActionElement(info, setActionMenuOpen))}
+        {props.info.map((info, i) =>
+          createActionElement(info, setActionMenuOpen, i),
+        )}
       </div>
     </>
   );

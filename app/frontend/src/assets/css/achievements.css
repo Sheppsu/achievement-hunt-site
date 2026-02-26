@@ -546,4 +546,18 @@ h1.achievement-beatmap-text, p.achievement-beatmap-text {
   color: #ffffff;
 }
 
+.achievement-nav-bar__row__options__item.active.on {
+  color: #abffb5;
+}
 
+.achievement-nav-bar__row__options__item.active.on:hover {
+  color: #c3ffca;
+}
+
+.achievement-nav-bar__row__options__item.active.off {
+  color: #ffaeab;
+}
+
+.achievement-nav-bar__row__options__item.active.off:hover {
+  color: #ffc0be;
+}

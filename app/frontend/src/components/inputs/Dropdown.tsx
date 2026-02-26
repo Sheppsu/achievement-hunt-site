@@ -29,7 +29,8 @@ export default function Dropdown(props: DropdownProps) {
     <select {...elementProps}>
       {Object.entries(otherProps.options).map(([k, v]) => (
         <option
-          value={v as string}
+          key={v}
+          value={v}
           selected={otherProps.value !== null && otherProps.value === v}
         >
           {k}

@@ -142,7 +142,7 @@ export default function Achievement({
             <p className="achievement__points">
               {points === null ? "" : `${points}pts`}
             </p>
-            <p className="achievement__container__info__description">
+            <div className="achievement__container__info__description">
               <Markdown remarkPlugins={[remarkGfm]}>
                 {`${achievement.completion_count} completions | ` +
                   achievement.description}
@@ -164,7 +164,7 @@ export default function Achievement({
                   )}
                 </>
               )}
-            </p>
+            </div>
             {achievement.creator && (
               <p className="achievement__creator">
                 Creator:{" "}
@@ -180,6 +180,7 @@ export default function Achievement({
             <div className="achievement__container__info__tags">
               {tags.map((tag) => (
                 <div
+                  key={tag}
                   className="achievement-tag clickable"
                   onClick={onTagClicked}
                 >
@@ -207,7 +208,11 @@ export default function Achievement({
         )}
 
         {beatmapsToShow.map((beatmap) => (
-          <a href={`https://osu.ppy.sh/b/${beatmap.info.id}`} target="_blank">
+          <a
+            key={beatmap.info.id}
+            href={`https://osu.ppy.sh/b/${beatmap.info.id}`}
+            target="_blank"
+          >
             <div
               className={classNames("achievement__beatmap", {
                 red: beatmap.hide,

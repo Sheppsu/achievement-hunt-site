@@ -2,8 +2,8 @@ import {
   NavItems,
   SortedNavRowItems,
 } from "components/achievements/AchievementNavigationBar.tsx";
-import { createContext, useContext } from "react";
-import { AppState } from "types/AppStateType.ts";
+import { createContext, useContext, useReducer } from "react";
+import { AppState, defaultState } from "types/AppStateType.ts";
 
 interface BaseStateActionType {
   id: number;
@@ -24,11 +24,6 @@ interface SearchFilterType extends BaseStateActionType {
   achievementsSearchFilter: string;
 }
 
-interface CheckboxType extends BaseStateActionType {
-  id: 7;
-  hideCompletedAchievements: boolean;
-}
-
 interface AdjustAudioType extends BaseStateActionType {
   id: 9;
   value: number;
@@ -40,16 +35,13 @@ interface ActivateNavItem extends BaseStateActionType {
   label: keyof NavItems["rows"];
   item: string;
   multiSelect: boolean;
+  active: boolean;
+  value?: boolean;
 }
 
 interface SwitchNavItemSort extends BaseStateActionType {
   id: 11;
   label: keyof NavItems["rows"];
-}
-
-interface HideMyAchievements extends BaseStateActionType {
-  id: 12;
-  hideMyAchievements: boolean;
 }
 
 interface ChangeSubmissionMode extends BaseStateActionType {
@@ -61,17 +53,12 @@ type StateActionType =
   | ToggleSubmission
   | FilterType
   | SearchFilterType
-  | CheckboxType
   | AdjustAudioType
   | ActivateNavItem
   | SwitchNavItemSort
-  | HideMyAchievements
   | ChangeSubmissionMode;
 
-export function stateReducer(
-  state: AppState,
-  action: StateActionType,
-): AppState {
+function stateReducer(state: AppState, action: StateActionType): AppState {
   switch (action.id) {
     case 3:
       return {
@@ -87,11 +74,6 @@ export function stateReducer(
       return {
         ...state,
         achievementsSearchFilter: action.achievementsSearchFilter,
-      };
-    case 7: // hide achievements
-      return {
-        ...state,
-        hideCompletedAchievements: action.hideCompletedAchievements,
       };
     case 9: {
       // audio adjustment
@@ -110,7 +92,23 @@ export function stateReducer(
 
       if (action.multiSelect) {
         for (const item of newFilter.rows[action.label].items) {
-          if (item.label === action.item) item.active = !item.active;
+          if (item.label === action.item) {
+            if ("value" in item) {
+              // if bool row item
+              if (!action.active) {
+                item.value = true;
+                item.active = true;
+              } else if (action.value) {
+                item.value = false;
+              } else {
+                item.active = false;
+              }
+            } else {
+              item.active = !action.active;
+            }
+
+            break;
+          }
         }
       } else {
         for (const item of newFilter.rows[action.label].items)
@@ -133,11 +131,6 @@ export function stateReducer(
         achievementsFilter: newFilter,
       };
     }
-    case 12:
-      return {
-        ...state,
-        showMyAchievements: action.hideMyAchievements,
-      };
     case 13:
       return {
         ...state,
@@ -150,6 +143,10 @@ export type StateDispatch = React.Dispatch<StateActionType>;
 
 export const StateContext = createContext<AppState | null>(null);
 export const StateDispatchContext = createContext<StateDispatch | null>(null);
+
+export function useStateReducer() {
+  return useReducer(stateReducer, defaultState());
+}
 
 export function useStateContext(): AppState {
   return useContext(StateContext)!;

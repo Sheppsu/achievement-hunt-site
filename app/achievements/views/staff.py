@@ -28,6 +28,7 @@ def serialize_full_achievement(req, achievement: Achievement):
             "batch",
             "solution_algorithm",
             "algorithm_enabled",
+            "staff_solved",
             SerializableField(
                 "votes",
                 serial_key="has_voted",
@@ -168,6 +169,7 @@ def vote_achievement(req, data, achievement):
                 unique_check=lambda a, b: a["id"] != b["id"],
             ),
             "solution_algorithm": AnyType(),
+            "algorithm_enabled": BoolType(),
         }
     )
 )
@@ -247,6 +249,19 @@ def delete_achievement(req, achievement):
     achievement.delete()
     comm.refresh_achievements_on_server()
     return success(None)
+
+
+@require_POST
+@require_achievement()
+@accepts_json_data(DictionaryType({"solved": BoolType()}))
+def mark_as_solved(req, achievement, data):
+    if achievement.creator_id != req.user.id and not req.user.is_admin:
+        return error("cannot mark this achievement solved", status=403)
+
+    achievement.staff_solved = data["solved"]
+    achievement.save()
+
+    return success({"achievement_id": achievement.id, "solved": achievement.staff_solved})
 
 
 @require_GET

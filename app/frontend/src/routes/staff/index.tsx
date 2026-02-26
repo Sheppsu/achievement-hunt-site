@@ -101,6 +101,7 @@ function AchievementsView({ setView }: { setView: (value: ViewType) => void }) {
       state.achievementsSearchFilter,
       false,
       null,
+      session.user,
     );
     return Object.entries(sortedAchievements).map(([key, values]) => [
       key,

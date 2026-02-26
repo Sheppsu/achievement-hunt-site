@@ -1,4 +1,5 @@
 import {
+  AchievementExtendedType,
   AchievementType,
   CompletedAchievementType,
   StaffAchievementType,
@@ -10,10 +11,12 @@ import {
 import { AchievementTeamExtendedType } from "api/types/AchievementTeamType.ts";
 import { getMyCompletion, sortedConcat } from "util/helperFunctions.ts";
 import {
+  BoolNavItem,
   NavItems,
   NavRowItems,
 } from "components/achievements/AchievementNavigationBar.tsx";
 import { AchievementBatchType } from "api/types/AchievementBatchType.ts";
+import { UserType } from "api/types/UserType.ts";
 
 function intersects(a: string[], b: string[]): boolean {
   for (const item of b) {
@@ -68,6 +71,39 @@ function matchesMode(
 
   // any mode tag is active
   return modes.items[0].active;
+}
+
+function checkFilterCondition(
+  achievement: AchievementType,
+  user: UserType | null,
+  boolName: string,
+): boolean {
+  switch (boolName) {
+    case "my achievements": // staff page
+      return user!.id === achievement.creator?.id;
+    case "solved": // staff page
+      return (achievement as StaffAchievementType).staff_solved;
+    case "completed": // achievements page
+      return "completed" in achievement
+        ? (achievement as CompletedAchievementType).completed
+        : false;
+    default:
+      throw new Error(`Invalid achievement filter: ${boolName}`);
+  }
+}
+
+function matchFilters(
+  achievement: AchievementType,
+  user: UserType | null,
+  bools: BoolNavItem[],
+): boolean {
+  for (const bool of bools) {
+    if (!(checkFilterCondition(achievement, user, bool.label) === bool.value)) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 function getGrouping(
@@ -198,12 +234,14 @@ export function getSortedAchievements<T extends AchievementType>(
   searchText: string,
   hideCompletedAchievements: boolean = false,
   team: AchievementTeamExtendedType | null = null,
+  user: UserType | null,
 ): { [_k: string]: T[] } {
   const activeTags = filters.rows.tags.items
     .filter((item) => item.active)
     .map((item) => item.label.toLowerCase());
   const searchFilter = searchText.toLowerCase().split(" ");
   const sort = filters.rows.sort.items.filter((i) => i.active)[0].label;
+  const activeFilters = filters.rows.filters.items.filter((b) => b.active);
 
   const [groupSort, groupFunc, sortFunc] = getGrouping(
     sort,
@@ -213,8 +251,8 @@ export function getSortedAchievements<T extends AchievementType>(
   const sortedAchievements: { [key: string]: T[] } = {};
 
   for (const achievement of achievements) {
+    if (!matchFilters(achievement, user, activeFilters)) continue;
     if (!matchesMode(achievement, filters.rows.mode)) continue;
-
     if (!matchesSearch(achievement, searchFilter)) continue;
 
     if (
