@@ -8,6 +8,7 @@ import { IconType } from "react-icons";
 
 export type ActionInfoDivider = {
   type: "divider";
+  hidden?: boolean;
 };
 
 export type ActionInfoButton = {
@@ -41,7 +42,12 @@ function createActionElement(
 ) {
   switch (info.type) {
     case "divider":
-      return <hr key={`hr-${i}`} className="actions-menu__divider" />;
+      return (
+        <hr
+          key={`hr-${i}`}
+          className={classNames("actions-menu__divider", { hide: info.hidden })}
+        />
+      );
     case "button":
       const icon = info.icon({ size: 20 });
       const children = (
@@ -114,9 +120,22 @@ export default function ActionMenu(props: ActionMenuProps) {
         })}
         ref={actionMenuRef}
       >
-        {props.info.map((info, i) =>
-          createActionElement(info, setActionMenuOpen, i),
-        )}
+        {props.info.map((info, i) => {
+          // hide divider if nothing after it
+          if (info.type === "divider") {
+            const nextItems = props.info
+              .slice(i + 1)
+              .filter((item) => "hidden" in item && !item.hidden);
+            if (nextItems.length === 0) {
+              return createActionElement(
+                { ...info, hidden: true },
+                setActionMenuOpen,
+                i,
+              );
+            }
+          }
+          return createActionElement(info, setActionMenuOpen, i);
+        })}
       </div>
     </>
   );

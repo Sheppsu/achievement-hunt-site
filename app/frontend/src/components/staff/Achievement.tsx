@@ -279,8 +279,7 @@ export default function Achievement(props: AchievementProps) {
       label: achievement.staff_solved ? "Mark unsolved" : "Mark solved",
       icon: FaCheck,
       onClick: changeSolvedStatus,
-      hidden:
-        session.user!.id !== achievement.creator?.id && !session.user!.is_admin,
+      hidden: !canEdit,
     },
     { type: "divider" },
     {
