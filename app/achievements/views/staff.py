@@ -261,6 +261,8 @@ def mark_as_solved(req, achievement, data):
     achievement.staff_solved = data["solved"]
     achievement.save()
 
+    discord_logger.submit_achievement(req, achievement, "solved" if achievement.staff_solved else "unsolved")
+
     return success({"achievement_id": achievement.id, "solved": achievement.staff_solved})
 
 
