@@ -139,7 +139,7 @@ type ViewProps = {
 };
 
 class CreationViewComponent extends React.Component<ViewProps> {
-  private readonly payload: AchievementPayloadType;
+  private payload: AchievementPayloadType;
   private timeoutId: number | null = null;
   state = {
     saving: false,
@@ -302,6 +302,11 @@ class CreationViewComponent extends React.Component<ViewProps> {
         });
       },
     });
+  }
+
+  private resetToDefault() {
+    this.payload = makeDefaultPayload();
+    this.forceUpdate();
   }
 
   render() {
@@ -490,7 +495,7 @@ class CreationViewComponent extends React.Component<ViewProps> {
                 </div>
                 <div className="staff-creation__section-container">
                   {this.payload.solutionAlgorithm.validation.map((v, i) => (
-                    <div className="staff-creation__remove-holder">
+                    <div className="staff-creation__remove-holder" key={i}>
                       <Button
                         children="Remove"
                         holdToUse={true}
@@ -511,13 +516,22 @@ class CreationViewComponent extends React.Component<ViewProps> {
           ) : (
             ""
           )}
-          <Button
-            holdToUse={true}
-            unavailable={this.state.saving}
-            children="Submit"
-            className="staff-creation__input"
-            onClick={() => this.saveAchievement()}
-          />
+          <div className="staff-creation__entry">
+            <Button
+              holdToUse={true}
+              unavailable={this.state.saving}
+              children="Submit"
+              className="staff-creation__input"
+              onClick={() => this.saveAchievement()}
+            />
+            <Button
+              holdToUse={true}
+              caution={true}
+              children="Reset to default"
+              className="staff-creation__input"
+              onClick={() => this.resetToDefault()}
+            />
+          </div>
         </div>
       </>
     );
