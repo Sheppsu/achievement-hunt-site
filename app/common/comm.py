@@ -9,7 +9,7 @@ def _send(data, close=True):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.connect(("localhost", settings.COMM_PORT))
     payload = json.dumps(data).encode("utf-8")
-    sock.send(struct.pack(">I", len(payload)) + payload)
+    sock.sendall(struct.pack(">I", len(payload)) + payload)
     if close:
         sock.close()
     return sock
