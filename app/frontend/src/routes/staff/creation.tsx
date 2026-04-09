@@ -798,7 +798,7 @@ function NamedExprEntry({
   forceUpdate: () => void;
   variables: SolutionAlgorithmVar[];
 }) {
-  const [code, setCode] = useState(entry.code);
+  const [code, setCode] = useState(entry.code ?? "");
   const updateCode = useCallback(
     (value: string) => {
       setCode(value);
