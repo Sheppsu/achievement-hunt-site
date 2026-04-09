@@ -108,7 +108,10 @@ def handle_score_submission(req):
         return HttpResponse(b"error: not logged in", status=403)
 
     osu_client = get_client()
-    beatmap = osu_client.http.make_request(osu.Path.beatmap_lookup(), checksum=beatmap_hash)
+    try:
+        beatmap = osu_client.http.make_request(osu.Path.beatmap_lookup(), checksum=beatmap_hash)
+    except:
+        return HttpResponse(b"error: unsubmitted map or something", status=400)
 
     client_checksum = score_data[2]
 
