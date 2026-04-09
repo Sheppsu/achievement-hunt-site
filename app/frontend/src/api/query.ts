@@ -36,6 +36,7 @@ import { TeamInviteType, UserInviteType } from "api/types/InviteType.ts";
 import { AllRegistrationsType } from "api/types/AllRegistrationsType.ts";
 import { AchievementCompletionExtendedType } from "api/types/AchievementCompletionType.ts";
 import { SolutionAlgorithmData } from "util/solutionAlgorithm.ts";
+import { AlgorithmDocsType } from "api/types/AlgorithmDocsType.ts";
 
 function getIterationParams() {
   const path = location.pathname;
@@ -798,6 +799,7 @@ type AchievementCreationReturn = AchievementType & {
   creator: UserType;
   solution_algorithm: SolutionAlgorithmData;
   algorithm_enabled: boolean;
+  algorithm_code: string;
 };
 
 function onAchievementCreation(
@@ -1097,6 +1099,13 @@ export function useGetPlaytestPasskey(): UseQueryResult<{ passkey: string }> {
   return useMakeQuery({
     queryKey: ["staff", "playtest", "passkey"],
     enabled: false,
+    refetchOnMount: false,
+  });
+}
+
+export function useGetAlgorithmDocs(): UseQueryResult<AlgorithmDocsType> {
+  return useMakeQuery({
+    queryKey: ["staff", "algorithm-docs"],
     refetchOnMount: false,
   });
 }

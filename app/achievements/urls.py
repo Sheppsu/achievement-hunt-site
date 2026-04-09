@@ -53,7 +53,7 @@ urlpatterns = (
         path("staff/comments/<int:comment_id>/delete/", staff.delete_comment),
         path("staff/achievements/create/", staff.create_achievement),
         path("staff/playtest/passkey/", staff.get_playtest_passkey),
-        path("staff/algorithm-docs", staff.request_algorithm_docs),
+        path("staff/algorithm-docs/", staff.request_algorithm_docs),
     ]
     + iteration_urls
     + [path("iterations/<int:iteration_id>/" + url.pattern._route, url.callback) for url in iteration_urls]

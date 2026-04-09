@@ -22,6 +22,7 @@ import { EventContext } from "contexts/EventContext.ts";
 import { IoIosCopy, IoIosRefresh } from "react-icons/io";
 
 const VIEWS = ["achievements", "creation", "releases"] as const;
+const DEFAULT_VIEW = "achievements";
 type ViewName = (typeof VIEWS)[number];
 type ViewType = {
   name: ViewName;
@@ -45,7 +46,7 @@ export default function Index() {
   const location = useLocation();
   const [view, setView] = useState<ViewType>(
     location.state ?? {
-      name: "achievements",
+      name: DEFAULT_VIEW,
       props: {},
     },
   );

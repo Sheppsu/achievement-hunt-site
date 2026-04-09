@@ -1,19 +1,23 @@
 import { Helmet } from "react-helmet";
-import React, { ReactNode, useCallback } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
-  EXPR_FUNCTION_ARGS,
-  EXPR_FUNCTIONS,
-  makeBlankNamedExpr,
   makeBlankSolutionAlgorithm,
-  makeBlankVal,
-  makeBlankVar,
   SolutionAlgorithmData,
-  SolutionAlgorithmExpr,
+  compileCode,
+  HIGHLIGHT_COLORS,
+  makeBlankVar,
+  makeBlankVal,
+  makeBlankNamedExpr,
   SolutionAlgorithmNamedExpr,
-  SolutionAlgorithmFuncExpr,
-  SolutionAlgorithmFuncType,
-  SolutionAlgorithmValidation,
   SolutionAlgorithmVar,
+  SolutionAlgorithmExpr,
+  SolutionAlgorithmValidation,
   VAR_TYPES,
 } from "util/solutionAlgorithm.ts";
 import TextInput from "components/inputs/TextInput.tsx";
@@ -22,19 +26,16 @@ import { IoIosAddCircle } from "react-icons/io";
 import Checkbox from "components/inputs/Checkbox.tsx";
 import Button from "components/inputs/Button.tsx";
 import TextArea from "components/inputs/TextArea.tsx";
-import { useCreateAchievement, useEditAchievement } from "api/query.ts";
+import {
+  useCreateAchievement,
+  useEditAchievement,
+  useGetAlgorithmDocs,
+} from "api/query.ts";
 import { StaffAchievementType } from "api/types/AchievementType.ts";
 import { cleanTags } from "util/helperFunctions.ts";
-
-const EXPR_TYPES = [
-  "func",
-  "string",
-  "number",
-  "boolean",
-  "variable",
-  "null",
-] as const;
-type ExprType = (typeof EXPR_TYPES)[number];
+import classNames from "classnames";
+// @ts-ignore
+import getCaretCoordinates from "textarea-caret";
 
 type CompactAchievementPayloadType = {
   id: number | null;
@@ -68,10 +69,16 @@ function makeDefaultPayload(): AchievementPayloadType {
   };
 }
 
+// return mode and actual tags
 function parseModeAndTags(tags: string): [string, string] {
   const parsedTags = [];
   let mode = "any";
   for (const tag of cleanTags(tags)) {
+    // this is only a client-side tag
+    if (tag === "playtestable") {
+      continue;
+    }
+
     if (tag.startsWith("mode-")) {
       mode = tag;
     } else {
@@ -192,40 +199,6 @@ class CreationViewComponent extends React.Component<ViewProps> {
     algorithm.vars = algorithm.vars
       .slice(0, i)
       .concat(algorithm.vars.slice(i + 1));
-
-    function fixExpr(expr: SolutionAlgorithmExpr) {
-      const exprType = getExprType(expr);
-      if (exprType === "variable") {
-        expr = expr as SolutionAlgorithmFuncExpr;
-        const refI = expr.args[0] as number | null;
-        if (refI === null) {
-          return;
-        }
-        if (refI === i) {
-          expr.args = [null];
-        } else if (refI > i) {
-          expr.args = [refI - 1];
-        }
-      } else if (exprType === "func") {
-        for (const arg of (expr as SolutionAlgorithmFuncExpr).args) {
-          fixExpr(arg);
-        }
-      }
-    }
-
-    for (const expr of algorithm.exprs) {
-      fixExpr(expr.value);
-    }
-    for (const val of algorithm.validation) {
-      fixExpr(val.assertion);
-      if (val.indexType === "variable" && val.index !== null) {
-        if (val.index === i) {
-          val.index = null;
-        } else if (val.index > i) {
-          val.index -= 1;
-        }
-      }
-    }
 
     this.forceUpdate();
   }
@@ -613,6 +586,157 @@ function CustomCheckbox({
   );
 }
 
+function isValidFuncChar(char: string) {
+  const code = char.charCodeAt(0);
+  return (
+    (code > 47 && code < 58) || // numeric (0-9)
+    (code > 64 && code < 91) || // upper alpha (A-Z)
+    (code > 96 && code < 123) || // lower alpha (a-z)
+    char === "_"
+  );
+}
+
+function CodeEditor({
+  value,
+  setValue,
+  onCompile,
+}: {
+  value: string;
+  setValue: (value: string) => void;
+  onCompile: (compilation: SolutionAlgorithmExpr) => void;
+}) {
+  const { data: docs, isLoading } = useGetAlgorithmDocs();
+  const [autofillPos, setAutofillPos] = useState<null | [number, number]>(null);
+  const [autofillValues, setAutofillValues] = useState<string[]>([]);
+
+  const taRef = useRef<HTMLTextAreaElement | null>(null);
+
+  const adjustHeight = useCallback(() => {
+    if (taRef.current !== null) {
+      taRef.current.style.height = "auto";
+      taRef.current.style.height =
+        Math.min(Math.max(40, taRef.current.scrollHeight), 600) + "px";
+    }
+  }, [taRef.current]);
+
+  const onChange = useCallback(
+    (evt: React.ChangeEvent<HTMLTextAreaElement>) => {
+      // set contents of autofill container
+      let phrase = null;
+      for (let i = evt.target.selectionEnd - 1; i > 0; i--) {
+        const c = evt.target.value[i];
+        if (!isValidFuncChar(c)) {
+          phrase = evt.target.value
+            .substring(i, evt.target.selectionEnd)
+            .toLowerCase();
+          break;
+        }
+      }
+      if (phrase === null) {
+        phrase = evt.target.value
+          .substring(0, evt.target.selectionEnd)
+          .toLowerCase();
+      }
+      let matches: string[] = [];
+      if (phrase.length > 0) {
+        matches = docs!.score
+          .filter((func) => func.name.toLowerCase().startsWith(phrase))
+          .map((func) => func.name);
+      }
+      setAutofillValues(matches);
+
+      // set position of autofill container (if we have any matches)
+      if (matches.length > 0) {
+        const caret = getCaretCoordinates(evt.target, evt.target.selectionEnd);
+        setAutofillPos([Math.max(0, caret.left - 16), caret.top + 20]);
+      } else {
+        setAutofillPos(null);
+      }
+
+      // adjust height of code container
+      setValue(evt.target.value);
+      adjustHeight();
+    },
+    [setValue, docs],
+  );
+
+  const validFuncs = useMemo(() => {
+    if (docs === undefined) {
+      return [];
+    }
+
+    return docs.score.map((func) => func.name);
+  }, [docs]);
+
+  const highlightedCode = useMemo(() => {
+    const [compilation, highlights, success] = compileCode(
+      value,
+      false,
+      validFuncs,
+    );
+    if (success) {
+      onCompile(compilation);
+    }
+    const elements = [];
+
+    let lastI = 0;
+    for (const highlight of highlights) {
+      elements.push(value.substring(lastI, highlight.rng[0]));
+      const color = HIGHLIGHT_COLORS[highlight.type];
+      elements.push(
+        <span className="staff-creation__input coding" style={{ color }}>
+          {value.substring(highlight.rng[0], highlight.rng[1])}
+        </span>,
+      );
+      lastI = highlight.rng[1];
+    }
+    elements.push(value.substring(lastI));
+
+    return elements;
+  }, [value]);
+
+  useEffect(() => {
+    adjustHeight();
+  }, [taRef.current]);
+
+  if (isLoading) {
+    return <h1>Loading editor...</h1>;
+  }
+
+  // positioning for autofill container
+  const autofillStyling =
+    autofillPos === null
+      ? undefined
+      : { left: autofillPos[0] + "px", top: autofillPos[1] + "px" };
+
+  return (
+    <div className="staff-creation__input coding">
+      <div className="staff-creation__input coding-display">
+        {...highlightedCode}
+      </div>
+      <textarea
+        ref={taRef}
+        spellCheck={false}
+        className="staff-creation__input coding"
+        onChange={onChange}
+        value={value}
+      />
+      <div
+        className={classNames("staff-creation__input coding-autofill", {
+          show: autofillStyling !== undefined,
+        })}
+        style={autofillStyling}
+      >
+        {autofillValues.map((name) => (
+          <div className="staff-creation__autofill-item" key={name}>
+            {name}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function VarEntry({
   entry,
   forceUpdate,
@@ -665,193 +789,6 @@ function VarEntry({
   );
 }
 
-function getExprType(expr: SolutionAlgorithmExpr): ExprType {
-  if (typeof expr === "object") {
-    if (expr === null) {
-      return "null";
-    } else if (expr.func === "variable") {
-      return "variable";
-    }
-    return "func";
-  } else {
-    return typeof expr as ExprType;
-  }
-}
-
-function getDefaultValueForExprType(exprType: ExprType | "expr") {
-  switch (exprType) {
-    case "func":
-      return {
-        func: "attribute" as SolutionAlgorithmFuncType,
-        args: [""],
-      };
-    case "variable":
-      return {
-        func: "variable" as SolutionAlgorithmFuncType,
-        args: [null],
-      };
-    case "string":
-      return "";
-    case "boolean":
-      return false;
-    case "number":
-      return 0;
-    default:
-      return null;
-  }
-}
-
-function transformExprInputArray(inputs: (ReactNode | ReactNode[])[]) {
-  const result = [];
-  let lowerI = 0;
-  for (const [i, input] of inputs.entries()) {
-    if (Array.isArray(input)) {
-      if (lowerI !== i) {
-        result.push(
-          <div className="staff-creation__entry">
-            {inputs.slice(lowerI, i)}
-          </div>,
-        );
-      }
-      result.push(transformExprInputArray(input as ReactNode[]));
-      lowerI = i + 1;
-    }
-  }
-  result.push(
-    <div className="staff-creation__entry">{inputs.slice(lowerI)}</div>,
-  );
-  return <div className="staff-creation__entry--col">{result}</div>;
-}
-
-function createExprInput(
-  expr: SolutionAlgorithmExpr,
-  exprType: ExprType,
-  variables: SolutionAlgorithmVar[],
-  setValue: (expr: SolutionAlgorithmExpr) => void,
-  forceUpdate: () => void,
-) {
-  function setFuncValue(evt: React.FormEvent<HTMLSelectElement>) {
-    const func = evt.currentTarget.value as SolutionAlgorithmFuncType;
-    setValue({
-      func,
-      args: EXPR_FUNCTION_ARGS[func].map((info) =>
-        getDefaultValueForExprType(info.type),
-      ),
-    });
-  }
-
-  switch (exprType) {
-    case "func": {
-      // slice to remove variable option (used internally to reference variables)
-      const options = Object.fromEntries(
-        EXPR_FUNCTIONS.slice(1).map((v) => [v, v]),
-      );
-      return [
-        <Dropdown
-          options={options}
-          value={(expr as SolutionAlgorithmFuncExpr).func}
-          className="staff-creation__dropdown"
-          onChange={setFuncValue}
-        />,
-        createArgsEntry(
-          expr as SolutionAlgorithmFuncExpr,
-          forceUpdate,
-          variables,
-        ),
-      ];
-    }
-    case "variable": {
-      const options = Object.fromEntries(
-        variables.map((v, i) => [v.name, i.toString()]),
-      );
-      const args = (expr as SolutionAlgorithmFuncExpr).args;
-      const value = args[0] === null ? undefined : args[0].toString();
-      return [
-        <Dropdown
-          options={options}
-          value={value}
-          className="staff-creation__dropdown"
-          onChange={(evt) =>
-            setValue({
-              ...(expr as SolutionAlgorithmFuncExpr),
-              args: [parseInt(evt.currentTarget.value)],
-            })
-          }
-        />,
-        "",
-      ];
-    }
-    case "string": {
-      return [
-        <TextInput
-          placeholder="Value"
-          className="staff-creation__input"
-          value={expr}
-          onChange={(evt) => setValue(evt.currentTarget.value)}
-        />,
-      ];
-    }
-    case "number": {
-      return [
-        <TextInput
-          placeholder="Value"
-          type="number"
-          className="staff-creation__input"
-          value={expr}
-          onChange={(evt) => setValue(parseInt(evt.currentTarget.value))}
-        />,
-      ];
-    }
-    case "boolean": {
-      return [
-        <CustomCheckbox
-          value={expr as boolean}
-          setValue={(value) => setValue(value)}
-        />,
-      ];
-    }
-    case "null": {
-      return [""];
-    }
-  }
-}
-
-function createFreeExprInput(
-  expr: SolutionAlgorithmExpr,
-  variables: SolutionAlgorithmVar[],
-  setValue: (expr: SolutionAlgorithmExpr) => void,
-  forceUpdate: () => void,
-) {
-  const exprType = getExprType(expr);
-  const editExprType = (newType: ExprType) => {
-    setValue(getDefaultValueForExprType(newType));
-  };
-
-  const exprInput = createExprInput(
-    expr,
-    exprType,
-    variables,
-    setValue,
-    forceUpdate,
-  );
-  return [
-    <Dropdown
-      options={{
-        Function: "func",
-        String: "string",
-        Number: "number",
-        Boolean: "boolean",
-        Variable: "variable",
-        Null: "null",
-      }}
-      value={exprType}
-      className="staff-creation__dropdown"
-      onChange={(evt) => editExprType(evt.currentTarget.value as ExprType)}
-    />,
-    // @ts-ignore
-  ].concat(exprInput);
-}
-
 function NamedExprEntry({
   entry,
   forceUpdate,
@@ -861,17 +798,20 @@ function NamedExprEntry({
   forceUpdate: () => void;
   variables: SolutionAlgorithmVar[];
 }) {
-  const setExprValue = useCallback((value: SolutionAlgorithmExpr) => {
-    entry.value = value;
-    forceUpdate();
-  }, []);
-  const exprInputs = createFreeExprInput(
-    entry.value,
-    variables,
-    setExprValue,
-    forceUpdate,
+  const [code, setCode] = useState(entry.code);
+  const updateCode = useCallback(
+    (value: string) => {
+      setCode(value);
+      entry.code = value;
+    },
+    [setCode, entry],
   );
-
+  const onCompile = useCallback(
+    (compilation: SolutionAlgorithmExpr) => {
+      entry.value = compilation;
+    },
+    [entry],
+  );
   const editName = useCallback(
     (value: any) => {
       // @ts-ignore
@@ -881,15 +821,16 @@ function NamedExprEntry({
     [entry, forceUpdate],
   );
 
-  return transformExprInputArray(
-    [
+  return (
+    <div className="staff-creation__entry--col">
       <TextInput
         value={entry.name}
         placeholder="Name"
         className="staff-creation__input"
         onChange={(evt) => editName(evt.currentTarget.value)}
-      />,
-    ].concat(exprInputs),
+      />
+      <CodeEditor value={code} setValue={updateCode} onCompile={onCompile} />
+    </div>
   );
 }
 
@@ -904,30 +845,22 @@ function ValidationEntry({
   expressions: SolutionAlgorithmNamedExpr[];
   variables: SolutionAlgorithmVar[];
 }) {
-  const namedExpressions = expressions.map((expr, idx) => [
-    expr.name,
-    `e-${idx}`,
-  ]);
-  const vars = variables.map((v, idx) => [v.name, `v-${idx}`]);
-  const options = Object.fromEntries(vars.concat(namedExpressions));
-
-  const setAssertion = useCallback(
-    (expr: SolutionAlgorithmExpr) => {
-      entry.assertion = expr;
-      forceUpdate();
-    },
-    [entry],
+  const namedExpressions = useMemo(
+    () => expressions.map((expr, idx) => [expr.name, `e-${idx}`]),
+    [expressions],
   );
-  const exprInputs = createFreeExprInput(
-    entry.assertion,
-    variables,
-    setAssertion,
-    forceUpdate,
+  const vars = useMemo(
+    () => variables.map((v, idx) => [v.name, `v-${idx}`]),
+    [variables],
+  );
+  const options = useMemo(
+    () => Object.fromEntries(vars.concat(namedExpressions)),
+    [namedExpressions, vars],
   );
 
   const editVal = useCallback(
-    (evt: React.FormEvent<HTMLSelectElement>) => {
-      const [indexType, index] = evt.currentTarget.value.split("-");
+    (val: string) => {
+      const [indexType, index] = val.split("-");
       entry.index = parseInt(index);
       entry.indexType = indexType === "v" ? "variable" : "expr";
       forceUpdate();
@@ -935,69 +868,25 @@ function ValidationEntry({
     [entry, forceUpdate],
   );
 
-  const value =
+  useEffect(() => {
+    const optionVals = Object.values<string>(options);
+    if (entry.index === null && optionVals.length > 0) {
+      editVal(optionVals[0]);
+    }
+  }, [entry.index, options]);
+
+  let value =
     entry.index === null
       ? undefined
       : (entry.indexType === "variable" ? "v" : "e") + `-${entry.index}`;
-  return transformExprInputArray(
-    [
+  return (
+    <div className="staff-creation__entry--col">
       <Dropdown
         options={options}
         value={value}
         className="staff-creation__dropdown"
-        onChange={editVal}
-      />,
-      <Dropdown
-        options={{ "=": "=" }}
-        value="="
-        className="staff-creation__dropdown"
-      />,
-    ].concat(exprInputs),
+        onChange={(evt) => editVal(evt.currentTarget.value)}
+      />
+    </div>
   );
-}
-
-function createArgsEntry(
-  expr: SolutionAlgorithmFuncExpr,
-  forceUpdate: () => void,
-  variables: SolutionAlgorithmVar[],
-): ReactNode[] {
-  const argInfo = EXPR_FUNCTION_ARGS[expr.func];
-
-  const setArgValue = (index: number, value: SolutionAlgorithmExpr) => {
-    expr.args = expr.args
-      .slice(0, index)
-      .concat([value])
-      .concat(expr.args.slice(index + 1));
-    forceUpdate();
-  };
-
-  const result = [];
-  for (const [i, info] of argInfo.entries()) {
-    const subtitle = (
-      <p className="staff-creation__entry-subtitle">{info.descriptor}</p>
-    );
-    if (info.type === "expr") {
-      result.push(
-        subtitle,
-        createFreeExprInput(
-          expr.args[i],
-          variables,
-          (value) => setArgValue(i, value),
-          forceUpdate,
-        ),
-      );
-    } else {
-      result.push(
-        subtitle,
-        createExprInput(
-          expr.args[i],
-          info.type as ExprType,
-          variables,
-          (value) => setArgValue(i, value),
-          forceUpdate,
-        ),
-      );
-    }
-  }
-  return result;
 }
