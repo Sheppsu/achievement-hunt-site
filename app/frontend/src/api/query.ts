@@ -720,7 +720,7 @@ function onCommentEdited(
   queryClient?.setQueryData(
     ["staff", "achievements", achievementId.toString()],
     (achievement: StaffAchievementType | undefined) =>
-      achievement === undefined ? undefined : updateComment([achievement]),
+      achievement === undefined ? undefined : updateComment([achievement])[0],
   );
 }
 
