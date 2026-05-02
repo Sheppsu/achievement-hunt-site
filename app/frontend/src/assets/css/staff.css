@@ -358,8 +358,63 @@
 
 .staff-creation__page {
   display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
+.staff-creation__page-col {
+  display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+.staff-creation__page-col.docs {
+  max-width: 300px;
+
+  padding: 10px;
+  border: solid white 1px;
+}
+
+.staff-creation__func-doc {
+  display: flex;
+  flex-direction: column;
+}
+
+.staff-creation__func-doc-name {
+  margin: 0;
+  font-size: 20px;
+
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.staff-creation__func-doc-name:hover {
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.staff-creation__func-doc-details {
+  display: flex;
+  flex-direction: row;
+}
+
+.staff-creation__func-doc-details-indent {
+  width: 2px;
+  margin: 0 5px;
+
+  background-color: white;
+}
+
+.staff-creation__func-doc-content {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.staff-creation__func-doc-description {
+  font-size: 16px;
 }
 
 .staff-creation__section {
@@ -469,6 +524,50 @@ select.staff-creation__input {
   margin: 0;
 }
 
+.staff-creation__multi-select {
+  background-color: black;
+  color: white;
+  border: solid 2px var(--border-color);
+  border-radius: 0;
+}
+
+.staff-creation__multi-select__control {
+  padding: 5px;
+  gap: 10px;
+  background-color: black;
+  color: inherit;
+}
+
+.staff-creation__multi-select__menu {
+  background-color: black;
+  border: solid 2px var(--border-color);
+  border-radius: 0;
+}
+
+.staff-creation__multi-select__value-container {
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.staff-creation__multi-select__option {
+  padding: 5px;
+}
+
+.staff-creation__multi-select__option:hover {
+  background-color: #222;
+}
+
+.staff-creation__multi-select__multi-value {
+  padding: 5px;
+
+  background-color: #222;
+  border-radius: 2px;
+}
+
+.staff-creation__multi-select__value-container {
+  padding-left: 5px;
+}
+
 /* algorithm coding styling */
 
 .staff-creation__input.coding {
@@ -485,7 +584,7 @@ select.staff-creation__input {
 textarea.staff-creation__input.coding {
   width: 100%;
 
-  resize: none;
+  /*resize: none;*/
 
   color: transparent;
   background: transparent;
@@ -493,7 +592,7 @@ textarea.staff-creation__input.coding {
 }
 
 div.staff-creation__input.coding-display {
-  width: 100%;
+  width: calc(100% - 20px);
   height: 100%;
   position: absolute;
   top: 6px;
@@ -501,6 +600,7 @@ div.staff-creation__input.coding-display {
 
   font-family: inherit;
   white-space: pre-wrap;
+  word-break: break-all;
 }
 
 span.staff-creation__input.coding {

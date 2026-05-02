@@ -137,6 +137,11 @@ export function compileCode(
     // expression object that we're inside
     const parentExpr = stack[stack.length - 1];
 
+    // invalid code
+    if (parentExpr === undefined) {
+      return [null, highlighting, false];
+    }
+
     // function call
     if (text[i] == "(") {
       const funcName = text.substring(lowerI, i);

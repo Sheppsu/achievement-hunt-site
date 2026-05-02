@@ -22,7 +22,7 @@ import {
 } from "util/solutionAlgorithm.ts";
 import TextInput from "components/inputs/TextInput.tsx";
 import Dropdown from "components/inputs/Dropdown.tsx";
-import { IoIosAddCircle } from "react-icons/io";
+import { IoIosAddCircle, IoIosArrowDropdown } from "react-icons/io";
 import Checkbox from "components/inputs/Checkbox.tsx";
 import Button from "components/inputs/Button.tsx";
 import TextArea from "components/inputs/TextArea.tsx";
@@ -31,11 +31,19 @@ import {
   useEditAchievement,
   useGetAlgorithmDocs,
 } from "api/query.ts";
-import { StaffAchievementType } from "api/types/AchievementType.ts";
+import {
+  StaffAchievementType,
+  TAG_DESCRIPTIONS,
+} from "api/types/AchievementType.ts";
 import { cleanTags } from "util/helperFunctions.ts";
 import classNames from "classnames";
 // @ts-ignore
 import getCaretCoordinates from "textarea-caret";
+import {
+  AlgorithmDocsType,
+  AlgorithmFuncDocType,
+} from "api/types/AlgorithmDocsType.ts";
+import Select from "react-select";
 
 type CompactAchievementPayloadType = {
   id: number | null;
@@ -51,8 +59,9 @@ type CompactAchievementPayloadType = {
   algorithmEnabled: boolean;
 };
 
-type AchievementPayloadType = CompactAchievementPayloadType & {
+type AchievementPayloadType = Omit<CompactAchievementPayloadType, "tags"> & {
   mode: string;
+  tags: string[];
 };
 
 function makeDefaultPayload(): AchievementPayloadType {
@@ -61,7 +70,7 @@ function makeDefaultPayload(): AchievementPayloadType {
     name: "",
     description: "",
     solution: "",
-    tags: "",
+    tags: [],
     beatmaps: [],
     solutionAlgorithm: makeBlankSolutionAlgorithm(),
     algorithmEnabled: false,
@@ -89,14 +98,23 @@ function parseModeAndTags(tags: string): [string, string] {
   return [parsedTags.join(", "), mode];
 }
 
-function makeAchievementPayload(achievement: StaffAchievementType) {
+function parseTagsString(tags: string): string[] {
+  return tags
+    .split(",")
+    .map((tag) => tag.trim().toLowerCase())
+    .filter((tag) => tag.length > 0);
+}
+
+function makeAchievementPayload(
+  achievement: StaffAchievementType,
+): AchievementPayloadType {
   const [tags, mode] = parseModeAndTags(achievement.tags);
   return {
     id: achievement.id,
     name: achievement.name,
     description: achievement.description,
     solution: achievement.solution,
-    tags,
+    tags: parseTagsString(tags),
     beatmaps: achievement.beatmaps.map((item) => ({
       id: item.info.id,
       hide: item.hide,
@@ -113,7 +131,7 @@ function parseCompactAchievementPayload(
   const [tags, mode] = parseModeAndTags(payload.tags);
   return {
     ...payload,
-    tags,
+    tags: parseTagsString(tags),
     mode,
   };
 }
@@ -121,7 +139,7 @@ function parseCompactAchievementPayload(
 function convertToCompactPayload(
   payload: AchievementPayloadType,
 ): CompactAchievementPayloadType {
-  let [cleanTags, _] = parseModeAndTags(payload.tags);
+  let [cleanTags, _] = parseModeAndTags(payload.tags.join(","));
   if (payload.mode !== "any") {
     cleanTags = cleanTags + "," + payload.mode;
   }
@@ -136,6 +154,7 @@ type ViewProps = {
   editAchievement: ReturnType<typeof useEditAchievement> | null;
   achievement?: StaffAchievementType;
   setView: (value: any) => void;
+  algorithmReq: ReturnType<typeof useGetAlgorithmDocs>;
 };
 
 class CreationViewComponent extends React.Component<ViewProps> {
@@ -231,8 +250,10 @@ class CreationViewComponent extends React.Component<ViewProps> {
     this.forceUpdate();
   }
 
-  private editAchievement(attr: string, value: any) {
-    // @ts-ignore
+  private editAchievement<K extends keyof AchievementPayloadType>(
+    attr: K,
+    value: AchievementPayloadType[K],
+  ) {
     this.payload[attr] = value;
     this.forceUpdate();
   }
@@ -310,227 +331,267 @@ class CreationViewComponent extends React.Component<ViewProps> {
   }
 
   render() {
+    let docsElm;
+    if (this.props.algorithmReq.isLoading) {
+      docsElm = <h2>Loading...</h2>;
+    } else if (this.props.algorithmReq.data === undefined) {
+      docsElm = <h2>Failed to load</h2>;
+    } else {
+      // variable func is an "internal" func
+      docsElm = this.props.algorithmReq.data.score
+        .filter((func) => func.name !== "variable")
+        .map((func) => <FunctionDoc key={func.name} doc={func} />);
+    }
+
     return (
       <>
         <Helmet>
           <title>CTA - Staff Creation</title>
         </Helmet>
         <div className="staff-creation__page">
-          {this.payload.id !== null ? (
-            <h2 className="staff-creation__section-header-text">
-              (Currently editing an achievement)
-            </h2>
+          {this.payload.algorithmEnabled ? (
+            <div className="staff-creation__page-col docs">
+              <h2 className="staff-creation__section-header-text">
+                Function Docs
+              </h2>
+              {docsElm}
+            </div>
           ) : (
             ""
           )}
-          <h2 className="staff-creation__section-header-text">
-            Achievement Info
-          </h2>
-          <TextInput
-            placeholder="Title"
-            className="staff-creation__input extended"
-            value={this.payload.name}
-            onChange={(evt) =>
-              this.editAchievement("name", evt.currentTarget.value)
-            }
-          />
-          <TextArea
-            placeholder="Description"
-            className="staff-creation__input"
-            value={this.payload.description}
-            setValue={(value) => this.editAchievement("description", value)}
-          />
-          <TextArea
-            placeholder="Solution explanation"
-            className="staff-creation__input"
-            value={this.payload.solution}
-            setValue={(value) => this.editAchievement("solution", value)}
-          />
-          <TextInput
-            placeholder="Comma-separated tags"
-            className="staff-creation__input extended"
-            value={this.payload.tags}
-            onChange={(evt) =>
-              this.editAchievement("tags", evt.currentTarget.value)
-            }
-          />
-          <div className="staff-creation__entry">
-            <p>Mode:</p>
-            <Dropdown
-              className="staff-creation__input"
-              options={{
-                Any: "any",
-                Standard: "mode-o",
-                Taiko: "mode-t",
-                Mania: "mode-m",
-                Catch: "mode-f",
-              }}
-              onChange={(e: React.FormEvent<HTMLSelectElement>) => {
-                this.editAchievement("mode", e.currentTarget.value);
-              }}
-              value={this.payload.mode}
-            />
-          </div>
-
-          <div className="staff-creation__entry">
-            <CustomCheckbox
-              label="Enable solution algorithm"
-              value={this.payload.algorithmEnabled}
-              setValue={(value) =>
-                this.editAchievement("algorithmEnabled", value)
+          <div className="staff-creation__page-col">
+            {this.payload.id !== null ? (
+              <h2 className="staff-creation__section-header-text">
+                (Currently editing an achievement)
+              </h2>
+            ) : (
+              ""
+            )}
+            <h2 className="staff-creation__section-header-text">
+              Achievement Info
+            </h2>
+            <TextInput
+              placeholder="Title"
+              className="staff-creation__input extended"
+              value={this.payload.name}
+              onChange={(evt) =>
+                this.editAchievement("name", evt.currentTarget.value)
               }
             />
-          </div>
-          <div className="staff-creation__section-section">
-            <div className="staff-creation__section-header">
-              <h2 className="staff-creation__section-header-text">
-                Attached Beatmaps
-              </h2>
-              <IoIosAddCircle
-                className="clickable"
-                size={32}
-                onClick={() => this.addBeatmap()}
+            <TextArea
+              placeholder="Description"
+              className="staff-creation__input"
+              value={this.payload.description}
+              setValue={(value) => this.editAchievement("description", value)}
+            />
+            <TextArea
+              placeholder="Solution explanation"
+              className="staff-creation__input"
+              value={this.payload.solution}
+              setValue={(value) => this.editAchievement("solution", value)}
+            />
+            <Select
+              isMulti
+              name="tags"
+              options={Object.keys(TAG_DESCRIPTIONS).map((tag) => ({
+                label: tag,
+                value: tag,
+              }))}
+              unstyled
+              className="staff-creation__multi-select"
+              classNamePrefix="staff-creation__multi-select"
+              onChange={(
+                value, // todo: should save as a list
+              ) =>
+                this.editAchievement(
+                  "tags",
+                  value.map((item) => item.value),
+                )
+              }
+              defaultValue={this.payload.tags.map((tag) => ({
+                label: tag,
+                value: tag,
+              }))}
+            />
+            <div className="staff-creation__entry">
+              <p>Mode:</p>
+              <Dropdown
+                className="staff-creation__input"
+                options={{
+                  Any: "any",
+                  Standard: "mode-o",
+                  Taiko: "mode-t",
+                  Mania: "mode-m",
+                  Catch: "mode-f",
+                }}
+                onChange={(e: React.FormEvent<HTMLSelectElement>) => {
+                  this.editAchievement("mode", e.currentTarget.value);
+                }}
+                value={this.payload.mode}
               />
             </div>
-            <div className="staff-creation__section-container">
-              {this.payload.beatmaps.map((beatmap, i) => (
-                <div className="staff-creation__remove-holder">
-                  <Button
-                    children="Remove"
-                    holdToUse={true}
-                    caution={true}
-                    onClick={() => this.removeBeatmap(i)}
-                  />
-                  <div className="staff-creation__entry--col">
-                    <div className="staff-creation__entry">
-                      <TextInput
-                        placeholder="Beatmap id"
-                        className="staff-creation__input"
-                        value={beatmap.id}
-                        onChange={(evt) => this.editBeatmapId(beatmap, evt)}
-                      />
-                      <CustomCheckbox
-                        label="Secret"
-                        value={beatmap.hide}
-                        setValue={(value) => {
-                          beatmap.hide = value;
-                          this.forceUpdate();
-                        }}
-                      />
+
+            <div className="staff-creation__entry">
+              <CustomCheckbox
+                label="Enable solution algorithm"
+                value={this.payload.algorithmEnabled}
+                setValue={(value) =>
+                  this.editAchievement("algorithmEnabled", value)
+                }
+              />
+            </div>
+            <div className="staff-creation__section-section">
+              <div className="staff-creation__section-header">
+                <h2 className="staff-creation__section-header-text">
+                  Attached Beatmaps
+                </h2>
+                <IoIosAddCircle
+                  className="clickable"
+                  size={32}
+                  onClick={() => this.addBeatmap()}
+                />
+              </div>
+              <div className="staff-creation__section-container">
+                {this.payload.beatmaps.map((beatmap, i) => (
+                  <div className="staff-creation__remove-holder">
+                    <Button
+                      children="Remove"
+                      holdToUse={true}
+                      caution={true}
+                      onClick={() => this.removeBeatmap(i)}
+                    />
+                    <div className="staff-creation__entry--col">
+                      <div className="staff-creation__entry">
+                        <TextInput
+                          placeholder="Beatmap id"
+                          className="staff-creation__input"
+                          value={beatmap.id}
+                          onChange={(evt) => this.editBeatmapId(beatmap, evt)}
+                        />
+                        <CustomCheckbox
+                          label="Secret"
+                          value={beatmap.hide}
+                          setValue={(value) => {
+                            beatmap.hide = value;
+                            this.forceUpdate();
+                          }}
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-          {this.payload.algorithmEnabled ? (
-            <>
-              <div className="staff-creation__section">
-                <div className="staff-creation__section-header">
-                  <h2 className="staff-creation__section-header-text">
-                    Variables
-                  </h2>
-                  <IoIosAddCircle
-                    className="clickable"
-                    size={32}
-                    onClick={() => this.addVar()}
-                  />
+            {this.payload.algorithmEnabled ? (
+              <>
+                <div className="staff-creation__section">
+                  <div className="staff-creation__section-header">
+                    <h2 className="staff-creation__section-header-text">
+                      Variables
+                    </h2>
+                    <IoIosAddCircle
+                      className="clickable"
+                      size={32}
+                      onClick={() => this.addVar()}
+                    />
+                  </div>
+                  <div className="staff-creation__section-container">
+                    {this.payload.solutionAlgorithm.vars.map((v, i) => (
+                      <div className="staff-creation__remove-holder">
+                        <Button
+                          children="Remove"
+                          holdToUse={true}
+                          caution={true}
+                          onClick={() => this.removeVar(i)}
+                        />
+                        <VarEntry
+                          entry={v}
+                          forceUpdate={() => this.forceUpdate()}
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="staff-creation__section-container">
-                  {this.payload.solutionAlgorithm.vars.map((v, i) => (
-                    <div className="staff-creation__remove-holder">
-                      <Button
-                        children="Remove"
-                        holdToUse={true}
-                        caution={true}
-                        onClick={() => this.removeVar(i)}
-                      />
-                      <VarEntry
-                        entry={v}
-                        forceUpdate={() => this.forceUpdate()}
-                      />
-                    </div>
-                  ))}
+                <div className="staff-creation__section">
+                  <div className="staff-creation__section-header">
+                    <h2 className="staff-creation__section-header-text">
+                      Expressions
+                    </h2>
+                    <IoIosAddCircle
+                      className="clickable"
+                      size={32}
+                      onClick={() => this.addExpr()}
+                    />
+                  </div>
+                  <div className="staff-creation__section-container">
+                    {this.payload.solutionAlgorithm.exprs.map((e, i) => (
+                      <div className="staff-creation__remove-holder">
+                        <Button
+                          children="Remove"
+                          holdToUse={true}
+                          caution={true}
+                          onClick={() => this.removeExpr(i)}
+                        />
+                        <NamedExprEntry
+                          entry={e}
+                          forceUpdate={() => this.forceUpdate()}
+                          variables={this.payload.solutionAlgorithm.vars}
+                          docs={this.props.algorithmReq.data}
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-              <div className="staff-creation__section">
-                <div className="staff-creation__section-header">
-                  <h2 className="staff-creation__section-header-text">
-                    Expressions
-                  </h2>
-                  <IoIosAddCircle
-                    className="clickable"
-                    size={32}
-                    onClick={() => this.addExpr()}
-                  />
+                <div className="staff-creation__section">
+                  <div className="staff-creation__section-header">
+                    <h2 className="staff-creation__section-header-text">
+                      Validations
+                    </h2>
+                    <IoIosAddCircle
+                      className="clickable"
+                      size={32}
+                      onClick={() => this.addVal()}
+                    />
+                  </div>
+                  <div className="staff-creation__section-container">
+                    {this.payload.solutionAlgorithm.validation.map((v, i) => (
+                      <div className="staff-creation__remove-holder" key={i}>
+                        <Button
+                          children="Remove"
+                          holdToUse={true}
+                          caution={true}
+                          onClick={() => this.removeVal(i)}
+                        />
+                        <ValidationEntry
+                          entry={v}
+                          forceUpdate={() => this.forceUpdate()}
+                          expressions={this.payload.solutionAlgorithm.exprs}
+                          variables={this.payload.solutionAlgorithm.vars}
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="staff-creation__section-container">
-                  {this.payload.solutionAlgorithm.exprs.map((e, i) => (
-                    <div className="staff-creation__remove-holder">
-                      <Button
-                        children="Remove"
-                        holdToUse={true}
-                        caution={true}
-                        onClick={() => this.removeExpr(i)}
-                      />
-                      <NamedExprEntry
-                        entry={e}
-                        forceUpdate={() => this.forceUpdate()}
-                        variables={this.payload.solutionAlgorithm.vars}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="staff-creation__section">
-                <div className="staff-creation__section-header">
-                  <h2 className="staff-creation__section-header-text">
-                    Validations
-                  </h2>
-                  <IoIosAddCircle
-                    className="clickable"
-                    size={32}
-                    onClick={() => this.addVal()}
-                  />
-                </div>
-                <div className="staff-creation__section-container">
-                  {this.payload.solutionAlgorithm.validation.map((v, i) => (
-                    <div className="staff-creation__remove-holder" key={i}>
-                      <Button
-                        children="Remove"
-                        holdToUse={true}
-                        caution={true}
-                        onClick={() => this.removeVal(i)}
-                      />
-                      <ValidationEntry
-                        entry={v}
-                        forceUpdate={() => this.forceUpdate()}
-                        expressions={this.payload.solutionAlgorithm.exprs}
-                        variables={this.payload.solutionAlgorithm.vars}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </>
-          ) : (
-            ""
-          )}
-          <div className="staff-creation__entry">
-            <Button
-              holdToUse={true}
-              unavailable={this.state.saving}
-              children="Submit"
-              className="staff-creation__input"
-              onClick={() => this.saveAchievement()}
-            />
-            <Button
-              holdToUse={true}
-              caution={true}
-              children="Reset to default"
-              className="staff-creation__input"
-              onClick={() => this.resetToDefault()}
-            />
+              </>
+            ) : (
+              ""
+            )}
+            <div className="staff-creation__entry">
+              <Button
+                holdToUse={true}
+                unavailable={this.state.saving}
+                children="Submit"
+                className="staff-creation__input"
+                onClick={() => this.saveAchievement()}
+              />
+              <Button
+                holdToUse={true}
+                caution={true}
+                children="Reset to default"
+                className="staff-creation__input"
+                onClick={() => this.resetToDefault()}
+              />
+            </div>
           </div>
         </div>
       </>
@@ -565,12 +626,14 @@ export default function CreationView({
 }) {
   const createAchievement = useCreateAchievement();
   const editAchievement = useEditCurrentAchievement(achievement);
+  const algorithmReq = useGetAlgorithmDocs();
   return (
     <CreationViewComponent
       achievement={achievement}
       createAchievement={createAchievement}
       editAchievement={editAchievement}
       setView={setView}
+      algorithmReq={algorithmReq}
     />
   );
 }
@@ -614,12 +677,13 @@ function CodeEditor({
   value,
   setValue,
   onCompile,
+  docs,
 }: {
   value: string;
   setValue: (value: string) => void;
   onCompile: (compilation: SolutionAlgorithmExpr) => void;
+  docs: AlgorithmDocsType | undefined;
 }) {
-  const { data: docs, isLoading } = useGetAlgorithmDocs();
   const [autofillPos, setAutofillPos] = useState<null | [number, number]>(null);
   const [autofillValues, setAutofillValues] = useState<string[]>([]);
 
@@ -713,7 +777,7 @@ function CodeEditor({
     adjustHeight();
   }, [taRef.current]);
 
-  if (isLoading) {
+  if (docs === undefined) {
     return <h1>Loading editor...</h1>;
   }
 
@@ -807,10 +871,12 @@ function NamedExprEntry({
   entry,
   forceUpdate,
   variables,
+  docs,
 }: {
   entry: SolutionAlgorithmNamedExpr;
   forceUpdate: () => void;
   variables: SolutionAlgorithmVar[];
+  docs: AlgorithmDocsType | undefined;
 }) {
   const [code, setCode] = useState(entry.code ?? "");
   const updateCode = useCallback(
@@ -843,7 +909,12 @@ function NamedExprEntry({
         className="staff-creation__input"
         onChange={(evt) => editName(evt.currentTarget.value)}
       />
-      <CodeEditor value={code} setValue={updateCode} onCompile={onCompile} />
+      <CodeEditor
+        value={code}
+        setValue={updateCode}
+        onCompile={onCompile}
+        docs={docs}
+      />
     </div>
   );
 }
@@ -901,6 +972,44 @@ function ValidationEntry({
         className="staff-creation__dropdown"
         onChange={(evt) => editVal(evt.currentTarget.value)}
       />
+    </div>
+  );
+}
+
+function FunctionDoc({ doc }: { doc: AlgorithmFuncDocType }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="staff-creation__func-doc">
+      <p
+        className="staff-creation__func-doc-name"
+        onClick={() => setOpen((v) => !v)}
+      >
+        {doc.name}({doc.args.map((arg) => arg.name).join(", ")})
+      </p>
+      {open ? (
+        <div className="staff-creation__func-doc-details">
+          <div className="staff-creation__func-doc-details-indent"></div>
+          <div className="staff-creation__func-doc-content">
+            <p className="staff-creation__func-doc-description">
+              {doc.description}
+            </p>
+            {doc.args.map((arg) => (
+              <p
+                key={arg.name}
+                className="staff-creation__func-doc-description"
+              >
+                <b>{arg.name}</b> ({arg.type.join(" | ")}): {arg.description}
+              </p>
+            ))}
+            <p className="staff-creation__func-doc-description">
+              <b>Returns:</b> {doc.returns.join(" | ")}
+            </p>
+          </div>
+        </div>
+      ) : (
+        ""
+      )}
     </div>
   );
 }

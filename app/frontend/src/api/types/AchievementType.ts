@@ -46,3 +46,30 @@ export type StaffAchievementType = {
   algorithm_enabled: boolean;
   staff_solved: boolean;
 } & AchievementType;
+
+export const TAG_DESCRIPTIONS = {
+  secret: "The solution to this achievement is not explicitly stated.",
+  chat: "Completing this achievement involves sending an in-game DM to Sheppsu as part of the solution (messages checked by the server).",
+  competition:
+    "This achievement has a leaderboard and points are awarded based on your placement. Completions can be overruled with better ones by anyone on your team.",
+  expert: "This achievement cannot be completed with the use of NF.",
+  gimmick:
+    "Completing this achievement requires a gimmick skill or non-conventional way of playing.",
+  knowledge:
+    "Finding the solution requires some non-basic level of knowledge about osu, osu history, or related (or requires research).",
+  lazer:
+    "This achievement must be completed on the lazer client or does not work on stable for all applicable modes of the achievement.",
+  stable:
+    "This achievement must be completed on the stable client or does not work on lazer for all applicable modes of the achievement.",
+  math: "Finding the solution involves at least somewhat heavy use of math.",
+  puzzle:
+    "The achievement involves some kind of puzzle (e.g. sudoku, logic puzzle).",
+  skill:
+    "Completing the achievement involves a decent level of skill (this tag is somewhat subjective).",
+  trivia:
+    "This achievement incorporates some trivia-style general knowledge unrelated to osu!.",
+  password:
+    "Completing this achievement requires inputting the correct password. Find the input box on the achievement.",
+  score:
+    "Completing this achievement requires submitting at least one scores (may include failed scores).",
+};

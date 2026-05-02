@@ -1,5 +1,8 @@
 import { AchievementCompletionType } from "api/types/AchievementCompletionType.ts";
-import { AchievementExtendedType } from "api/types/AchievementType";
+import {
+  AchievementExtendedType,
+  TAG_DESCRIPTIONS,
+} from "api/types/AchievementType";
 import classNames from "classnames";
 import AchievementCompletionEntry from "components/achievements/AchievementCompletionEntry.tsx";
 import AudioPlayer from "components/audio/AudioPlayer.tsx";
@@ -9,29 +12,6 @@ import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import Button from "components/inputs/Button.tsx";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-
-const TAG_DESCRIPTIONS = {
-  secret: "The solution to this achievement is not explicitly stated.",
-  chat: "Completing this achievement involves sending an in-game DM to Sheppsu as part of the solution (messages checked by the server).",
-  competition:
-    "This achievement has a leaderboard and points are awarded based on your placement. Completions can be overruled with better ones by anyone on your team.",
-  expert: "This achievement cannot be completed with the use of NF.",
-  gimmick:
-    "Completing this achievement requires a gimmick skill or non-conventional way of playing.",
-  knowledge:
-    "Finding the solution requires some non-basic level of knowledge about osu, osu history, or related (or requires research).",
-  lazer:
-    "This achievement must be completed on the lazer client or does not work on stable for all applicable modes of the achievement.",
-  stable:
-    "This achievement must be completed on the stable client or does not work on lazer for all applicable modes of the achievement.",
-  math: "Finding the solution involves decently heavy use of math.",
-  puzzle:
-    "The achievement involves some kind of puzzle (e.g. sudoku, logic puzzle).",
-  skill:
-    "Completing the achievement involves a decent level of skill (this tag is somewhat subjective).",
-  trivia:
-    "This achievement incorporates some trivia-style general knowledge unrelated to osu!.",
-};
 
 export default function Achievement({
   achievement,

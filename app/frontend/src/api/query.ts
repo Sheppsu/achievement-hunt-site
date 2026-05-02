@@ -573,7 +573,7 @@ export function useGetStaffAchievements(
       return data.map((ach) => ({
         ...ach,
         tags: ach.algorithm_enabled
-          ? ach.tags.concat("playtestable")
+          ? ach.tags.concat(",playtestable")
           : ach.tags,
       }));
     },
