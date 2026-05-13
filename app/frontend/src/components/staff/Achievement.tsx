@@ -366,7 +366,11 @@ export default function Achievement(props: AchievementProps) {
             onSubmit={(e) => submitPwGuess(e)}
             className="staff__achievement__input-row"
           >
-            <TextInput name="guess" placeholder="Guess password" />
+            <TextInput
+              name="guess"
+              placeholder="Guess password"
+              autocomplete="off"
+            />
             <Button
               children="Submit"
               type="submit"
