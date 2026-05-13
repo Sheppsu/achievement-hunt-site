@@ -1,5 +1,6 @@
 import { Helmet } from "react-helmet";
 import React, {
+  JSX,
   useCallback,
   useEffect,
   useMemo,
@@ -22,7 +23,7 @@ import {
 } from "util/solutionAlgorithm.ts";
 import TextInput from "components/inputs/TextInput.tsx";
 import Dropdown from "components/inputs/Dropdown.tsx";
-import { IoIosAddCircle, IoIosArrowDropdown } from "react-icons/io";
+import { IoIosAddCircle } from "react-icons/io";
 import Checkbox from "components/inputs/Checkbox.tsx";
 import Button from "components/inputs/Button.tsx";
 import TextArea from "components/inputs/TextArea.tsx";
@@ -35,7 +36,7 @@ import {
   StaffAchievementType,
   TAG_DESCRIPTIONS,
 } from "api/types/AchievementType.ts";
-import { cleanTags } from "util/helperFunctions.ts";
+import { cleanTags, interweavingPush } from "util/helperFunctions.ts";
 import classNames from "classnames";
 // @ts-ignore
 import getCaretCoordinates from "textarea-caret";
@@ -783,25 +784,34 @@ function CodeEditor({
     if (success) {
       onCompile(compilation);
     }
-    const elements = [];
+    const elements: (string | JSX.Element)[] = [];
 
     let lastI = 0;
     for (const highlight of highlights) {
-      elements.push(value.substring(lastI, highlight.rng[0]));
+      interweavingPush(
+        elements,
+        value.substring(lastI, highlight.rng[0]).split("\n"),
+        <br />,
+      );
       const color = HIGHLIGHT_COLORS[highlight.type];
       // this is kinda goofy but if there are multiple characters inside
       // a single span, then the text in the textarea and div wrap differently.
       // I couldn't find any css settings that fixed it, so this is my solution
       for (let i = highlight.rng[0]; i < highlight.rng[1]; i++) {
-        elements.push(
-          <span className="staff-creation__input coding" style={{ color }}>
-            {value[i]}
-          </span>,
-        );
+        if (value[i] == "\n") {
+          elements.push(<br />);
+        } else {
+          elements.push(
+            <span className="staff-creation__input coding" style={{ color }}>
+              {value[i]}
+            </span>,
+          );
+        }
       }
       lastI = highlight.rng[1];
     }
-    elements.push(value.substring(lastI));
+
+    interweavingPush(elements, value.substring(lastI).split("\n"), <br />);
 
     return elements;
   }, [value, validFuncs]);

@@ -278,3 +278,12 @@ export function splitProps<
     otherProps as Required<{ [K in keyof T3]: Exclude<T1[K], undefined> }>,
   ];
 }
+
+export function interweavingPush<T>(arr: T[], newItems: T[], join: T) {
+  for (let i = 0; i < newItems.length; i++) {
+    arr.push(newItems[i]);
+    if (i !== newItems.length - 1) {
+      arr.push(join);
+    }
+  }
+}

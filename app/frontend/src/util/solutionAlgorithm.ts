@@ -135,6 +135,9 @@ export function compileCode(
   // if current index is inside a string
   let inString = false;
   for (let i = 0; i < text.length; i++) {
+    // these characters are just decorative
+    if ([" ", "\t", "\n"].includes(text[i])) continue;
+
     // expression object that we're inside
     const parentExpr = stack[stack.length - 1];
 
@@ -145,7 +148,7 @@ export function compileCode(
 
     // function call
     if (text[i] == "(") {
-      const funcName = text.substring(lowerI, i);
+      const funcName = text.substring(lowerI, i).trim();
       const expr: SolutionAlgorithmFuncExpr = {
         func: funcName,
         args: [],

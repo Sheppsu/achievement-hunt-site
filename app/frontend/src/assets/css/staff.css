@@ -623,10 +623,11 @@ textarea.staff-creation__input.coding {
 
 div.staff-creation__input.coding-display {
   width: calc(100% - 20px);
-  height: 100%;
+  height: calc(100% - 20px);
   position: absolute;
   top: 6px;
   left: 10px;
+  overflow: hidden;
 }
 
 span.staff-creation__input.coding {
