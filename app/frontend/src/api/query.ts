@@ -1109,3 +1109,21 @@ export function useGetAlgorithmDocs(): UseQueryResult<AlgorithmDocsType> {
     refetchOnMount: false,
   });
 }
+
+export function useSubmitPasswordGuess(
+  achievementId: number,
+): SpecificUseMutationResult<{ correct: boolean }> {
+  return useMakeMutation(
+    {
+      mutationKey: [
+        "staff",
+        "achievements",
+        achievementId.toString(),
+        "pw-guess",
+      ],
+    },
+    {
+      method: "POST",
+    },
+  );
+}

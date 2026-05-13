@@ -1,5 +1,5 @@
 import "assets/css/inputs/button.css";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { splitProps } from "util/helperFunctions.ts";
 import classNames from "classnames";
 
@@ -45,6 +45,7 @@ const UPDATE_INTERVAL = 50;
 export default function Button(props: ButtonProps) {
   const intervalId = useRef<null | number>(null);
   const holdOverId = useRef<null | number>(null);
+  const mouseDownE = useRef<null | React.FormEvent<HTMLButtonElement>>(null);
   const [progress, setProgress] = useState<null | number>(null);
   const [debounce, setDebounce] = useState<DebounceType>(0);
 
@@ -90,6 +91,7 @@ export default function Button(props: ButtonProps) {
 
     if (!otherProps.holdToUse) return;
 
+    mouseDownE.current = e;
     setProgress(0);
 
     if (holdOverId.current !== null) {
@@ -99,20 +101,7 @@ export default function Button(props: ButtonProps) {
     intervalId.current = setInterval(() => {
       setProgress((p) => {
         if (p === 100) return 100;
-
-        const newP = Math.min(
-          100,
-          (p ?? 0) + (100 * UPDATE_INTERVAL) / HOLD_TIME,
-        );
-
-        // trigger button
-        if (newP === 100 && onClick) {
-          onClick(e);
-          if (intervalId.current !== null) clearInterval(intervalId.current);
-          return null;
-        }
-
-        return newP;
+        return Math.min(100, (p ?? 0) + (100 * UPDATE_INTERVAL) / HOLD_TIME);
       });
     }, 50);
   };
@@ -141,6 +130,18 @@ export default function Button(props: ButtonProps) {
       }
     }
   };
+
+  // trigger button
+  useEffect(() => {
+    if (progress === 100 && onClick) {
+      onClick(mouseDownE.current!);
+      if (intervalId.current !== null) {
+        clearInterval(intervalId.current);
+        intervalId.current = null;
+      }
+      setProgress(null);
+    }
+  }, [progress, onClick]);
 
   const circleBgColor = otherProps.caution
     ? "--caution-button-color"

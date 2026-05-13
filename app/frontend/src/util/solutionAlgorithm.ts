@@ -32,7 +32,8 @@ export type SolutionAlgorithmFuncExpr = {
 export type SolutionAlgorithmNamedExpr = {
   name: string;
   value: SolutionAlgorithmExpr;
-  code: string;
+  // possibly not present on older achievements
+  code?: string;
 };
 
 // validation typing

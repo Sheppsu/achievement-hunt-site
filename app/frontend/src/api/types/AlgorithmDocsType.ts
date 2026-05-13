@@ -20,4 +20,5 @@ export type AlgorithmFuncDocType = {
 };
 export type AlgorithmDocsType = {
   score: AlgorithmFuncDocType[];
+  password: AlgorithmFuncDocType[];
 };

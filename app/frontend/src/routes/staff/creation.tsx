@@ -182,7 +182,7 @@ class CreationViewComponent extends React.Component<ViewProps> {
     }
   }
 
-  forceUpdate() {
+  save() {
     if (this.timeoutId !== null) {
       clearTimeout(this.timeoutId);
       this.timeoutId = null;
@@ -194,7 +194,10 @@ class CreationViewComponent extends React.Component<ViewProps> {
         JSON.stringify(convertToCompactPayload(this.payload)),
       );
     }, 500);
+  }
 
+  forceUpdate() {
+    this.save();
     super.forceUpdate();
   }
 
@@ -241,10 +244,19 @@ class CreationViewComponent extends React.Component<ViewProps> {
     this.forceUpdate();
   }
 
+  private updateExpr(i: number, newData: Partial<SolutionAlgorithmNamedExpr>) {
+    const algorithm = this.payload.solutionAlgorithm;
+    algorithm.exprs = algorithm.exprs
+      .slice(0, i)
+      .concat([{ ...algorithm.exprs[i], ...newData }])
+      .concat(algorithm.exprs.slice(i + 1));
+    this.save();
+  }
+
   private removeVal(i: number) {
     const algorithm = this.payload.solutionAlgorithm;
     algorithm.validation = algorithm.validation
-      .slice(0, 1)
+      .slice(0, i)
       .concat(algorithm.validation.slice(i + 1));
 
     this.forceUpdate();
@@ -303,6 +315,9 @@ class CreationViewComponent extends React.Component<ViewProps> {
   }
 
   private saveAchievement() {
+    if (this.state.saving) {
+      return;
+    }
     this.setState({
       saving: true,
     });
@@ -325,9 +340,15 @@ class CreationViewComponent extends React.Component<ViewProps> {
     });
   }
 
-  private resetToDefault() {
+  private resetToDefault(keepId: boolean) {
+    const achievementId = keepId ? this.payload.id : null;
     this.payload = makeDefaultPayload();
+    this.payload.id = achievementId;
     this.forceUpdate();
+  }
+
+  private getAlgorithmType() {
+    return this.payload.tags.includes("password") ? "password" : "score";
   }
 
   render() {
@@ -338,7 +359,7 @@ class CreationViewComponent extends React.Component<ViewProps> {
       docsElm = <h2>Failed to load</h2>;
     } else {
       // variable func is an "internal" func
-      docsElm = this.props.algorithmReq.data.score
+      docsElm = this.props.algorithmReq.data[this.getAlgorithmType()]
         .filter((func) => func.name !== "variable")
         .map((func) => <FunctionDoc key={func.name} doc={func} />);
     }
@@ -361,9 +382,15 @@ class CreationViewComponent extends React.Component<ViewProps> {
           )}
           <div className="staff-creation__page-col">
             {this.payload.id !== null ? (
-              <h2 className="staff-creation__section-header-text">
-                (Currently editing an achievement)
-              </h2>
+              <>
+                <h2 className="staff-creation__section-header-text">
+                  (Currently editing an achievement)
+                </h2>
+                <Button
+                  children="Stop editing"
+                  onClick={() => this.resetToDefault(false)}
+                />
+              </>
             ) : (
               ""
             )}
@@ -400,15 +427,13 @@ class CreationViewComponent extends React.Component<ViewProps> {
               unstyled
               className="staff-creation__multi-select"
               classNamePrefix="staff-creation__multi-select"
-              onChange={(
-                value, // todo: should save as a list
-              ) =>
+              onChange={(value) =>
                 this.editAchievement(
                   "tags",
                   value.map((item) => item.value),
                 )
               }
-              defaultValue={this.payload.tags.map((tag) => ({
+              value={this.payload.tags.map((tag) => ({
                 label: tag,
                 value: tag,
               }))}
@@ -535,6 +560,9 @@ class CreationViewComponent extends React.Component<ViewProps> {
                         <NamedExprEntry
                           entry={e}
                           forceUpdate={() => this.forceUpdate()}
+                          updateExpr={(
+                            newData: Partial<SolutionAlgorithmNamedExpr>,
+                          ) => this.updateExpr(i, newData)}
                           variables={this.payload.solutionAlgorithm.vars}
                           docs={this.props.algorithmReq.data}
                         />
@@ -589,7 +617,7 @@ class CreationViewComponent extends React.Component<ViewProps> {
                 caution={true}
                 children="Reset to default"
                 className="staff-creation__input"
-                onClick={() => this.resetToDefault()}
+                onClick={() => this.resetToDefault(true)}
               />
             </div>
           </div>
@@ -705,7 +733,7 @@ function CodeEditor({
         const c = evt.target.value[i];
         if (!isValidFuncChar(c)) {
           phrase = evt.target.value
-            .substring(i, evt.target.selectionEnd)
+            .substring(i + 1, evt.target.selectionEnd)
             .toLowerCase();
           break;
         }
@@ -761,17 +789,22 @@ function CodeEditor({
     for (const highlight of highlights) {
       elements.push(value.substring(lastI, highlight.rng[0]));
       const color = HIGHLIGHT_COLORS[highlight.type];
-      elements.push(
-        <span className="staff-creation__input coding" style={{ color }}>
-          {value.substring(highlight.rng[0], highlight.rng[1])}
-        </span>,
-      );
+      // this is kinda goofy but if there are multiple characters inside
+      // a single span, then the text in the textarea and div wrap differently.
+      // I couldn't find any css settings that fixed it, so this is my solution
+      for (let i = highlight.rng[0]; i < highlight.rng[1]; i++) {
+        elements.push(
+          <span className="staff-creation__input coding" style={{ color }}>
+            {value[i]}
+          </span>,
+        );
+      }
       lastI = highlight.rng[1];
     }
     elements.push(value.substring(lastI));
 
     return elements;
-  }, [value]);
+  }, [value, validFuncs]);
 
   useEffect(() => {
     adjustHeight();
@@ -872,30 +905,32 @@ function NamedExprEntry({
   forceUpdate,
   variables,
   docs,
+  updateExpr,
 }: {
   entry: SolutionAlgorithmNamedExpr;
   forceUpdate: () => void;
   variables: SolutionAlgorithmVar[];
   docs: AlgorithmDocsType | undefined;
+  updateExpr: (newData: Partial<SolutionAlgorithmNamedExpr>) => void;
 }) {
   const [code, setCode] = useState(entry.code ?? "");
   const updateCode = useCallback(
     (value: string) => {
       setCode(value);
-      entry.code = value;
+      updateExpr({ code: value });
     },
     [setCode, entry],
   );
   const onCompile = useCallback(
     (compilation: SolutionAlgorithmExpr) => {
-      entry.value = compilation;
+      updateExpr({ value: compilation });
     },
     [entry],
   );
   const editName = useCallback(
     (value: any) => {
       // @ts-ignore
-      entry.name = value;
+      updateExpr({ name: value });
       forceUpdate();
     },
     [entry, forceUpdate],
@@ -905,7 +940,7 @@ function NamedExprEntry({
     <div className="staff-creation__entry--col">
       <TextInput
         value={entry.name}
-        placeholder="Name"
+        placeholder="Label"
         className="staff-creation__input"
         onChange={(evt) => editName(evt.currentTarget.value)}
       />

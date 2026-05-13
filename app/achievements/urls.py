@@ -49,6 +49,7 @@ urlpatterns = (
         path("staff/achievements/<int:achievement_id>/delete/", staff.delete_achievement),
         path("staff/achievements/<int:achievement_id>/move/", admin.change_achievement_batch),
         path("staff/achievements/<int:achievement_id>/mark-solved/", staff.mark_as_solved),
+        path("staff/achievements/<int:achievement_id>/pw-guess/", staff.submit_password_guess),
         path("staff/comments/<int:comment_id>/edit/", staff.edit_comment),
         path("staff/comments/<int:comment_id>/delete/", staff.delete_comment),
         path("staff/achievements/create/", staff.create_achievement),

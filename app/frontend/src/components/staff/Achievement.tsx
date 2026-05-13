@@ -6,6 +6,7 @@ import {
   useMarkAchievementSolved,
   useMoveAchievement,
   useSendComment,
+  useSubmitPasswordGuess,
   useVoteAchievement,
 } from "api/query.ts";
 import Button from "components/inputs/Button.tsx";
@@ -29,6 +30,7 @@ import ViewSwitcher from "components/common/ViewSwitcher.tsx";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import ActionMenu, { ActionInfo } from "components/common/ActionMenu.tsx";
+import TextInput from "components/inputs/TextInput.tsx";
 
 function VoteContainer({ achievement }: { achievement: StaffAchievementType }) {
   const session = useContext(SessionContext);
@@ -81,6 +83,7 @@ export default function Achievement(props: AchievementProps) {
   const [sendingComment, setSendingComment] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [commentView, setCommentView] = useState<CommentView>("General");
+  const [verifyingPwGuess, setVerifyingPwGuess] = useState(false);
 
   const sendComment = useSendComment(achievement.id);
   const deleteAchievement = useDeleteAchievement(achievement.id);
@@ -89,10 +92,20 @@ export default function Achievement(props: AchievementProps) {
     session.user!.is_admin,
   );
   const markSolved = useMarkAchievementSolved(achievement.id);
+  const submitPwGuessMut = useSubmitPasswordGuess(achievement.id);
 
-  const canEdit =
-    achievement.creator !== null &&
-    (achievement.creator.id == session.user!.id || session.user!.is_admin);
+  const canEdit = useMemo(
+    () =>
+      achievement.creator !== null &&
+      (achievement.creator.id == session.user!.id || session.user!.is_admin),
+    [achievement.creator, session.user],
+  );
+  const canGuessPassword = useMemo(() => {
+    const cleanTags = achievement.tags
+      .split(",")
+      .map((tag) => tag.trim().toLowerCase());
+    return cleanTags.includes("password") && cleanTags.includes("playtestable");
+  }, [achievement.tags]);
 
   const commentChannel = COMMENT_VIEWS.indexOf(commentView);
   const filteredComments = useMemo(
@@ -249,49 +262,90 @@ export default function Achievement(props: AchievementProps) {
     });
   }, [markSolved.isPending, achievement.staff_solved]);
 
-  const actionMenuInfo: ActionInfo[] = [
-    {
-      type: "button",
-      label: "Copy URL",
-      icon: IoIosCopy,
-      onClick: copyAchievementUrl,
+  const submitPwGuess = useCallback(
+    (e: React.SubmitEvent) => {
+      e.preventDefault();
+
+      if (verifyingPwGuess) {
+        return;
+      }
+
+      setVerifyingPwGuess(true);
+
+      const data = new FormData(e.target);
+      submitPwGuessMut.mutate(
+        { guess: data.get("guess") },
+        {
+          onSettled: () => setVerifyingPwGuess(false),
+          onSuccess: (result) =>
+            dispatchEventMsg({
+              type: "info",
+              msg: result.correct
+                ? "Your guess was correct!"
+                : "Your guess was wrong",
+            }),
+        },
+      );
     },
-    {
-      type: "button",
-      label: "Edit",
-      icon: FaEdit,
-      onClick: () =>
-        props.setView({
-          name: "creation",
-          props: { achievement: achievement },
-        }),
-      hidden: !canEdit,
-    },
-    {
-      type: "button",
-      label: "Move",
-      icon: IoIosArrowDropup,
-      onClick: doMoveAchievement,
-      hidden: !session.user!.is_admin,
-    },
-    {
-      type: "button",
-      label: achievement.staff_solved ? "Mark unsolved" : "Mark solved",
-      icon: FaCheck,
-      onClick: changeSolvedStatus,
-      hidden: !canEdit,
-    },
-    { type: "divider" },
-    {
-      type: "button",
-      label: "Delete",
-      icon: MdDelete,
-      onClick: onDeleteAchievement,
-      holdToUse: true,
-      caution: true,
-      hidden: !canEdit,
-    },
-  ];
+    [verifyingPwGuess, setVerifyingPwGuess, submitPwGuessMut, dispatchEventMsg],
+  );
+
+  const actionMenuInfo: ActionInfo[] = useMemo(
+    () => [
+      {
+        type: "button",
+        label: "Copy URL",
+        icon: IoIosCopy,
+        onClick: copyAchievementUrl,
+      },
+      {
+        type: "button",
+        label: "Edit",
+        icon: FaEdit,
+        onClick: () =>
+          props.setView({
+            name: "creation",
+            props: { achievement: achievement },
+          }),
+        hidden: !canEdit,
+      },
+      {
+        type: "button",
+        label: "Move",
+        icon: IoIosArrowDropup,
+        onClick: doMoveAchievement,
+        hidden: !session.user!.is_admin,
+      },
+      {
+        type: "button",
+        label: achievement.staff_solved ? "Mark unsolved" : "Mark solved",
+        icon: FaCheck,
+        onClick: changeSolvedStatus,
+        hidden: !canEdit,
+      },
+      { type: "divider" },
+      {
+        type: "button",
+        label: "Delete",
+        icon: MdDelete,
+        onClick: onDeleteAchievement,
+        holdToUse: true,
+        caution: true,
+        hidden: !canEdit,
+      },
+    ],
+    [
+      achievement,
+      achievement.staff_solved,
+      session.user,
+      canEdit,
+      onDeleteAchievement,
+      changeSolvedStatus,
+      doMoveAchievement,
+      props.setView,
+      copyAchievementUrl,
+    ],
+  );
 
   return (
     <div>
@@ -302,14 +356,26 @@ export default function Achievement(props: AchievementProps) {
       >
         <ActionMenu info={actionMenuInfo} />
         <p className="staff__achievement__name">{achievement.name}</p>
-        <span>
+        <span className="staff__achievement__description-container">
           <Markdown remarkPlugins={[remarkGfm]}>
             {achievement.description}
           </Markdown>
         </span>
-        {/*<p className="staff__achievement__solution">*/}
-        {/*  <RenderedText text={achievement.solution} />*/}
-        {/*</p>*/}
+        {canGuessPassword ? (
+          <form
+            onSubmit={(e) => submitPwGuess(e)}
+            className="staff__achievement__input-row"
+          >
+            <TextInput name="guess" placeholder="Guess password" />
+            <Button
+              children="Submit"
+              type="submit"
+              unavailable={verifyingPwGuess}
+            />
+          </form>
+        ) : (
+          ""
+        )}
         {achievement.beatmaps
           .filter((beatmap) => !beatmap.hide)
           .map((beatmap) => (

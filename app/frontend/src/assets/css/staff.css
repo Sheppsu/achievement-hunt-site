@@ -104,6 +104,16 @@
   font-weight: 600;
 }
 
+.staff__achievement__description-container {
+  word-break: break-all;
+}
+
+.staff__achievement__input-row {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
 .staff__achievement__solution {
   color: #ffc0c0;
 }
@@ -577,18 +587,38 @@ select.staff-creation__input {
     Consolas,
     "Courier New",
     monospace;
+  font-size: 16px;
 
   position: relative;
+  display: inline-block;
+}
+
+textarea.staff-creation__input.coding,
+div.staff-creation__input.coding-display,
+span.staff-creation__input.coding {
+  font-family: inherit;
+
+  white-space: pre-wrap;
+  word-break: break-all;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+
+  letter-spacing: normal;
+  word-spacing: normal;
+  line-height: normal;
+  column-count: initial;
+  text-rendering: auto;
 }
 
 textarea.staff-creation__input.coding {
-  width: 100%;
-
-  /*resize: none;*/
+  width: 400px;
+  height: 50px;
+  min-width: 200px;
 
   color: transparent;
   background: transparent;
   caret-color: white;
+  overflow-y: hidden;
 }
 
 div.staff-creation__input.coding-display {
@@ -597,14 +627,18 @@ div.staff-creation__input.coding-display {
   position: absolute;
   top: 6px;
   left: 10px;
-
-  font-family: inherit;
-  white-space: pre-wrap;
-  word-break: break-all;
 }
 
 span.staff-creation__input.coding {
-  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  font-style: inherit;
+  letter-spacing: inherit;
+  word-spacing: inherit;
+  padding: 0;
+  margin: 0;
+  border: none;
+  line-height: inherit;
 }
 
 .staff-creation__input.coding-autofill {

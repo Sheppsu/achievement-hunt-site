@@ -292,3 +292,12 @@ def get_playtest_passkey(req):
 @require_staff
 def request_algorithm_docs(req):
     return success(comm.request_algorithm_docs())
+
+
+@require_POST
+@require_staff
+@require_achievement()
+@accepts_json_data(DictionaryType({"guess": StringType()}))
+def submit_password_guess(req, achievement, data):
+    completions = comm.submit_pw_guess(req.user.id, achievement.id, data["guess"])
+    return success({"correct": len(completions) > 0})

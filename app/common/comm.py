@@ -29,5 +29,9 @@ def submit_playtest_scores(user, scores):
     return _send_and_recv({"evt": 1, "user": user, "scores": scores})
 
 
+def submit_pw_guess(user_id: int, achievement_id: int, guess: str):
+    return _send_and_recv({"evt": 4, "user_id": user_id, "achievement_id": achievement_id, "guess": guess})
+
+
 def request_algorithm_docs():
     return _send_and_recv({"evt": 3})
