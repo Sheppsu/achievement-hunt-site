@@ -95,8 +95,6 @@ p {
 }
 
 .achievement__container__info__tags {
-  height: 40px;
-
   padding-top: 6px;
 
   display: flex;
@@ -113,7 +111,7 @@ p {
 }
 
 .achievement-tag {
-  height: 80%;
+  height: 32px;
   padding: 0 10px 0 10px;
 
   border-radius: 100px;
