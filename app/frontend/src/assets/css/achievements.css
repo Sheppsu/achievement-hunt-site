@@ -87,12 +87,20 @@ p {
   position: relative;
 }
 
+.achievement__info-row {
+  margin-top: 5px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
 .achievement__container__info__tags {
   height: 40px;
 
   padding-top: 6px;
 
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 6px;
 
@@ -143,7 +151,7 @@ p {
 }
 
 .achievement__container__info__description {
-  word-break: break-word;
+  word-break: break-all;
 }
 
 .achievement__beatmap {

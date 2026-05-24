@@ -7,11 +7,20 @@ import classNames from "classnames";
 import AchievementCompletionEntry from "components/achievements/AchievementCompletionEntry.tsx";
 import AudioPlayer from "components/audio/AudioPlayer.tsx";
 import { parseTags, toTitleCase } from "util/helperFunctions";
-import { MouseEventHandler, useRef, useState } from "react";
+import React, {
+  MouseEventHandler,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import Button from "components/inputs/Button.tsx";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import TextInput from "components/inputs/TextInput.tsx";
+import { WebsocketContext } from "contexts/WebsocketContext.tsx";
 
 export default function Achievement({
   achievement,
@@ -22,13 +31,15 @@ export default function Achievement({
   completed: boolean | null;
   points: number | null;
 }) {
+  const wsCtx = useContext(WebsocketContext);
+
   const [showCompletions, setShowCompletions] = useState(false);
+  const [showSolution, setShowSolution] = useState(false);
   const popupRef = useRef<null | HTMLDivElement>(null);
 
-  const [showSolution, setShowSolution] = useState(false);
-
   const completions = achievement.completions;
-  const tags = parseTags(achievement.tags);
+  const tags = useMemo(() => parseTags(achievement.tags), [achievement.tags]);
+  const hasPasswordTag = useMemo(() => tags.includes("password"), [tags]);
 
   let infoCls = "achievement__container ";
   if (completed == null) {
@@ -68,6 +79,12 @@ export default function Achievement({
     popup.style.top = `${popupTop}px`;
   };
 
+  const onPasswordSubmitted = useCallback((e: React.SubmitEvent) => {
+    e.preventDefault();
+
+    // TODO
+  }, []);
+
   document.addEventListener("click", (evt) => {
     const popup = popupRef.current;
     const target = evt.target as Node | HTMLElement | null;
@@ -83,6 +100,7 @@ export default function Achievement({
     if (popup.style.display === "block") popup.style.display = "none";
   });
 
+  // for CTA2 achievement
   let dataAttributes = {};
   if (achievement.id === 219) {
     dataAttributes = {
@@ -145,6 +163,23 @@ export default function Achievement({
                 </>
               )}
             </div>
+            {hasPasswordTag && !showSolutionBtn && (
+              <form
+                className="achievement__info-row"
+                onSubmit={(e) => onPasswordSubmitted(e)}
+              >
+                <TextInput
+                  name="guess"
+                  placeholder="Guess password"
+                  autocomplete="off"
+                />
+                <Button
+                  children="Submit"
+                  type="submit"
+                  unavailable={completed ?? false}
+                />
+              </form>
+            )}
             {achievement.creator && (
               <p className="achievement__creator">
                 Creator:{" "}
@@ -212,7 +247,7 @@ export default function Achievement({
                 </p>
               </div>
               <h1 className="achievement__beatmap__star-rating achievement-beatmap-text">
-                {beatmap.info.star_rating}*
+                {Math.round(beatmap.info.star_rating * 100) / 100}*
               </h1>
             </div>
           </a>
