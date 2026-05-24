@@ -54,7 +54,7 @@ function Header({
         >
           <div className="header__container__left-box">
             <Link to="/">
-              <h1 className="header__container__left-box__title">CTA2</h1>
+              <h1 className="header__container__left-box__title">CTA3</h1>
             </Link>
           </div>
           <div className="header__container__right-box">
