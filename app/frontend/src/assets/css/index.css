@@ -16,6 +16,11 @@
 
 .info-text {
   margin: 5px 0;
+  text-align: left;
+}
+
+.info-text.centered {
+  text-align: center;
 }
 
 .info-date {

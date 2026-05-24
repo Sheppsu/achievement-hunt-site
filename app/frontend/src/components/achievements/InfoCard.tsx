@@ -9,17 +9,20 @@ export default function InfoCard({
 }: {
   iteration: EventIterationType;
 }) {
+  const year = new Date(iteration.start).getFullYear();
   return (
     <div className="card no-scroll">
-      <h1 className="card__title">{iteration.name}</h1>
-      <p className="info-text">
+      <h1 className="card__title">
+        {iteration.name} ({year})
+      </h1>
+      <p className="info-text centered">
         Starts {dateToText(iteration.start)} - Ends {dateToText(iteration.end)}
       </p>
       {iteration.description
         .sort((a, b) => a.order - b.order)
         .map((section) => (
           <>
-            <p className="card--teams__subtitle">{section.heading}</p>
+            <p className="card__subtitle">{section.heading}</p>
             <p className="info-text">
               <Markdown remarkPlugins={[remarkGfm]}>{section.text}</Markdown>
             </p>
