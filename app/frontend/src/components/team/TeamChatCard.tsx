@@ -4,7 +4,7 @@ import { FormEvent, useContext, useEffect, useRef, useState } from "react";
 
 export default function TeamChatCard() {
   const [value, setValue] = useState<string>("");
-  const { wsState, sendChatMessage } = useContext(WebsocketContext)!;
+  const { state: wsState, sendChatMessage } = useContext(WebsocketContext)!;
   const { data: messages } = useGetTeamMessages();
   const msgsEndRef = useRef<HTMLDivElement>(null);
 
@@ -24,7 +24,7 @@ export default function TeamChatCard() {
     }
   }, [messages]);
 
-  const connected = wsState?.connected;
+  const connected = wsState.connected;
 
   return (
     <div className="card">

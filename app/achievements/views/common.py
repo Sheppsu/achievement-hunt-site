@@ -249,7 +249,7 @@ def teams(req, iteration):
         # localized leaderboard
         # (teams above and below you)
         serialized_teams = [serialize_team(my_team)]
-        excludes = ["name", "icon", "accepts_free_agents"]
+        excludes = ["name", "accepts_free_agents", "free_agent_type"]
         if my_team_i > 0:
             serialized_teams.insert(0, all_teams[my_team_i - 1].serialize(excludes=excludes))
         if my_team_i < len(all_teams) - 1:
@@ -307,7 +307,7 @@ def create_team(req, data, iteration, registration):
         return error("invalid anonymous name")
 
     try:
-        team = Team(name=data["name"], anonymous_name=data["anonymous_name"], icon="", iteration=iteration)
+        team = Team(name=data["name"], anonymous_name=data["anonymous_name"], iteration=iteration)
         team.save()
     except Exception as e:
         if "unique_iteration_team_name" in str(e):
@@ -370,19 +370,18 @@ def rename_team(req, data, iteration):
 @require_http_methods(["PATCH"])
 @require_iteration_before_start
 @require_user
-@accepts_json_data(DictionaryType({"enable": BoolType()}))
+@accepts_json_data(DictionaryType({"enable": BoolType(), "type": IntegerType(1, 2)}))
 def change_accepting_free_agents(req, data, iteration):
     player = select_current_player(req.user.id, iteration.id)
     if player is None or not player.team_admin:
         return error("not on a team or not admin")
 
-    enable = data["enable"]
-
     team = player.team
-    team.accepts_free_agents = enable
+    team.accepts_free_agents = data["enable"]
+    team.free_agent_type = data["type"]
     team.save()
 
-    return success({"id": team.id, "enabled": enable})
+    return success({"id": team.id, "enabled": data["enable"], "type": data["type"]})
 
 
 @require_GET
@@ -595,10 +594,11 @@ def change_registration(req, data, iteration):
 
 @require_http_methods(["PATCH"])
 @require_iteration_before_start
-@accepts_json_data(DictionaryType({"free_agent": BoolType()}))
+@accepts_json_data(DictionaryType({"free_agent": BoolType(), "type": IntegerType(1, 2)}))
 @require_registered
 def change_free_agent(req, data, iteration, registration):
     registration.is_free_agent = data["free_agent"]
+    registration.free_agent_type = data["type"]
     registration.save()
     return success(registration.serialize())
 

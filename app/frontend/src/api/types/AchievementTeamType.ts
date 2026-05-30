@@ -12,6 +12,7 @@ export type AchievementTeamExtendedType = {
   icon: string | null;
   players: AchievementPlayerType[];
   accepts_free_agents: boolean;
+  free_agent_type: number;
 } & AchievementTeamType;
 
 export type TeamDataType = {

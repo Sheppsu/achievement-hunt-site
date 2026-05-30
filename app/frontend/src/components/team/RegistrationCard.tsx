@@ -69,6 +69,7 @@ function RegisterButton({ registered }: { registered: boolean }) {
       onClick={doRegistration}
       holdToUse={registered}
       unavailable={debounce}
+      width="100%"
     />
   );
 }

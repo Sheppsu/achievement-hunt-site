@@ -10,7 +10,6 @@ import { parseTags, toTitleCase } from "util/helperFunctions";
 import React, {
   MouseEventHandler,
   useCallback,
-  useContext,
   useMemo,
   useRef,
   useState,
@@ -20,7 +19,6 @@ import Button from "components/inputs/Button.tsx";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import TextInput from "components/inputs/TextInput.tsx";
-import { WebsocketContext } from "contexts/WebsocketContext.tsx";
 
 export default function Achievement({
   achievement,
@@ -31,8 +29,6 @@ export default function Achievement({
   completed: boolean | null;
   points: number | null;
 }) {
-  const wsCtx = useContext(WebsocketContext);
-
   const [showCompletions, setShowCompletions] = useState(false);
   const [showSolution, setShowSolution] = useState(false);
   const popupRef = useRef<null | HTMLDivElement>(null);

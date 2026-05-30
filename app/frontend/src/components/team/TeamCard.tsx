@@ -33,6 +33,7 @@ import {
 import { EventIterationType } from "api/types/EventIterationType.ts";
 import { calculateScore, parseMeaningfulTags } from "util/helperFunctions.ts";
 import classNames from "classnames";
+import Dropdown from "components/inputs/Dropdown.tsx";
 
 export default function TeamCard({
   team,
@@ -73,6 +74,7 @@ export default function TeamCard({
 
   const [debounce, setDebounce] = useState(false);
   const [showScoring, setShowScoring] = useState(false);
+  const [faType, setFaType] = useState(team.free_agent_type);
 
   const user = team.players.find(
     (player) => player.user.id === session.user?.id,
@@ -253,15 +255,21 @@ export default function TeamCard({
     );
   };
 
-  const doChangeAcceptingFreeAgent = () => {
+  const doChangeAcceptingFreeAgent = (val: null | number) => {
     if (debounce) {
       return;
     }
 
     setDebounce(true);
 
+    let freeAgents = !team.accepts_free_agents;
+    if (val !== null) {
+      setFaType(val);
+      freeAgents = team.accepts_free_agents;
+    }
+
     changeAcceptingFreeAgents.mutate(
-      { enable: !team.accepts_free_agents },
+      { enable: freeAgents, type: val ?? faType },
       {
         onSettled: () => {
           changeAcceptingFreeAgents.reset();
@@ -365,16 +373,30 @@ export default function TeamCard({
               <div className="card--teams__row">
                 <p className="card--teams__description">
                   You may opt into accepting free agents (players without a
-                  team). When the event starts, free agents will be
-                  automatically assigned to teams.
+                  team). If opted in, they will be added to your team when
+                  screening returns. Additionally, you may specify a preference
+                  for casual or competitive free agents.
                 </p>
-                <Button
-                  className="team-rigid-btn"
-                  children={team.accepts_free_agents ? "Opt out" : "Opt in"}
-                  unavailable={debounce}
-                  onClick={doChangeAcceptingFreeAgent}
-                  holdToUse={team.accepts_free_agents}
-                />
+                <div className="card--teams__form__item__col">
+                  <Button
+                    className="team-rigid-btn"
+                    children={team.accepts_free_agents ? "Opt out" : "Opt in"}
+                    unavailable={debounce}
+                    onClick={() => doChangeAcceptingFreeAgent(null)}
+                  />
+                  {team.accepts_free_agents && (
+                    <Dropdown
+                      options={{ Casual: "1", Competitive: "2" }}
+                      value={faType.toString()}
+                      onChange={(e) =>
+                        doChangeAcceptingFreeAgent(
+                          parseInt(e.currentTarget.value),
+                        )
+                      }
+                      disabled={debounce}
+                    />
+                  )}
+                </div>
               </div>
             </>
           )}

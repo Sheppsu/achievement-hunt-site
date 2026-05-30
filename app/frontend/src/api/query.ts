@@ -11,11 +11,7 @@ import {
 import { AchievementCommentType } from "api/types/AchievementCommentType.ts";
 import { UserType } from "api/types/UserType.ts";
 import { EventContext, EventType } from "contexts/EventContext";
-import {
-  ChatMessage,
-  WebsocketContext,
-  WebsocketContextType,
-} from "contexts/WebsocketContext";
+import { ChatMessage, WebsocketContext } from "contexts/WebsocketContext";
 import { UndefinedInitialDataOptions } from "node_modules/@tanstack/react-query/build/legacy";
 import { useContext } from "react";
 import {
@@ -294,40 +290,9 @@ type TeamLeaveDataType = {
   user_id: number;
 };
 
-function onLeaveTeam(
-  wsCtx: WebsocketContextType,
-  teamData: TeamDataType,
-  leaveData: TeamLeaveDataType,
-) {
-  const newTeams = [];
-
-  for (const team of teamData.teams) {
-    if (team.id === leaveData.team_id) {
-      if ((team as AchievementTeamExtendedType).players.length === 1) {
-        continue;
-      }
-
-      newTeams.push({
-        ...team,
-        players: (team as AchievementTeamExtendedType).players.filter(
-          (player) => player.user.id !== leaveData.user_id,
-        ),
-      });
-      continue;
-    }
-
-    newTeams.push(team);
-  }
-
-  wsCtx?.resetConnection();
-
-  return { placement: teamData.placement, teams: newTeams };
-}
-
 export function useLeaveTeam(): SpecificUseMutationResult<TeamLeaveDataType> {
   const iteration = getIterationParams();
   const queryClient = useContext(QueryClientContext);
-  const wsCtx = useContext(WebsocketContext);
 
   return useMakeMutation(
     {

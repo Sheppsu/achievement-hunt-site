@@ -228,10 +228,10 @@ class AchievementVote(SerializableModel):
 class Team(SerializableModel):
     name = models.CharField(max_length=32)
     anonymous_name = models.CharField(max_length=32)
-    icon = models.CharField(max_length=64, null=True)
     points = models.PositiveIntegerField(default=0)
     iteration = models.ForeignKey(EventIteration, on_delete=models.CASCADE)
     accepts_free_agents = models.BooleanField(default=False)
+    free_agent_type = models.SmallIntegerField(default=1)
 
     class Meta:
         constraints = [
@@ -240,7 +240,7 @@ class Team(SerializableModel):
         ]
 
     class Serialization:
-        FIELDS = ["id", "name", "anonymous_name", "icon", "points", "accepts_free_agents"]
+        FIELDS = ["id", "name", "anonymous_name", "points", "accepts_free_agents", "free_agent_type"]
 
 
 class Player(SerializableModel):
@@ -269,13 +269,14 @@ class Registration(SerializableModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     iteration = models.ForeignKey(EventIteration, on_delete=models.CASCADE)
     is_screened = models.BooleanField(default=False)
-    is_free_agent = models.BooleanField(default=True)
+    is_free_agent = models.BooleanField(default=False)
+    free_agent_type = models.SmallIntegerField(default=1)  # 1 = casual, 2 = competitive
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=["user", "iteration"], name="unique_registration")]
 
     class Serialization:
-        FIELDS = ["is_screened", "is_free_agent"]
+        FIELDS = ["is_screened", "is_free_agent", "free_agent_type"]
 
 
 class Announcement(SerializableModel):

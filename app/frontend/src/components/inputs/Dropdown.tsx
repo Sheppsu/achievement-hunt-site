@@ -6,6 +6,7 @@ type DropdownProps = {
   options: { [_k: string]: string };
   onChange?: (e: React.FormEvent<HTMLSelectElement>) => void;
   value?: string;
+  disabled?: boolean;
 };
 
 const elementDefaults = {

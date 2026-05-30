@@ -26,7 +26,7 @@ export default function AchievementProgress({
   team: AchievementTeamExtendedType | null;
   iteration: EventIterationType;
 }) {
-  const { wsState, sendSubmit } = useContext(WebsocketContext)!;
+  const { state: wsState, sendSubmit } = useContext(WebsocketContext)!;
   const appState = useContext(StateContext);
   const dispatchAppState = useDispatchStateContext();
 
@@ -52,7 +52,7 @@ export default function AchievementProgress({
   }
 
   const submitDisabled =
-    !wsState?.connected || eventEnded || !appState?.submitEnabled;
+    !wsState.connected || eventEnded || !appState?.submitEnabled;
   const submitCls = "submit-button" + (submitDisabled ? " disabled" : "");
 
   function doSubmit() {

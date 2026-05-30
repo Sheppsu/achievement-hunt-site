@@ -85,7 +85,7 @@ export default function Button(props: ButtonProps) {
 
   // for hold-to-use buttons
   const onMouseDown = (e: React.FormEvent<HTMLButtonElement>) => {
-    if (debounce !== 0) return;
+    if (debounce !== 0 || otherProps.unavailable) return;
 
     setDebounce(otherProps.holdToUse ? 2 : 1);
 

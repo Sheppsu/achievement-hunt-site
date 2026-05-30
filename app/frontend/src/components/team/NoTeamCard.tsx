@@ -23,17 +23,25 @@ export default function NoTeamCard({
 }) {
   const [currentTab, setCurrentTab] = useState<"create" | "default">("default");
   const [debounce, setDebounce] = useState(false);
+  const [faType, setFaType] = useState(registration.free_agent_type);
 
   const changeFreeAgent = useChangeFreeAgent();
 
-  function doChangeFreeAgent() {
+  function doChangeFreeAgent(val: null | number) {
     if (debounce) {
       return;
     }
 
+    let freeAgent = !registration.is_free_agent;
+    // if val not null, only change free agent type
+    if (val !== null) {
+      setFaType(val);
+      freeAgent = registration.is_free_agent;
+    }
+
     setDebounce(true);
     changeFreeAgent.mutate(
-      { free_agent: !registration.is_free_agent },
+      { free_agent: freeAgent, type: val ?? faType },
       {
         onSettled: () => {
           setDebounce(false);
@@ -62,18 +70,28 @@ export default function NoTeamCard({
           <div className="horizontal-divider" />
           <div className="card--teams__row">
             <p className="card--teams__description">
-              If you are not on a team when the event starts, you will be
-              automatically placed on a team. You have the option to opt out of
-              this, but will not be able to participate unless you find a team
-              before then.
+              Opt into/out of being a free agent. If you opt in, you may specify
+              whether you intend to play casually or competitively, which will
+              help match you to a team.
             </p>
-            <Button
-              className="team-rigid-btn"
-              children={registration.is_free_agent ? "Opt out" : "Opt in"}
-              unavailable={debounce}
-              onClick={doChangeFreeAgent}
-              holdToUse={registration.is_free_agent}
-            />
+            <div className="card--teams__form__item__col">
+              <Button
+                className="team-rigid-btn"
+                children={registration.is_free_agent ? "Opt out" : "Opt in"}
+                unavailable={debounce}
+                onClick={() => doChangeFreeAgent(null)}
+              />
+              {registration.is_free_agent && (
+                <Dropdown
+                  options={{ Casual: "1", Competitive: "2" }}
+                  value={faType.toString()}
+                  onChange={(e) =>
+                    doChangeFreeAgent(parseInt(e.currentTarget.value))
+                  }
+                  disabled={debounce}
+                />
+              )}
+            </div>
           </div>
         </>
       ) : (
