@@ -12,34 +12,20 @@ import {
   useDispatchStateContext,
   useStateContext,
 } from "contexts/StateContext.ts";
-import { useContext } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet";
 import { AppState } from "types/AppStateType.ts";
 import { getMyTeam } from "util/helperFunctions";
-
-function getTimeStr(delta: number) {
-  const days = Math.floor((delta / (1000 * 60 * 60 * 24)) % 60);
-  const hours = Math.floor((delta / (1000 * 60 * 60)) % 24);
-  const minutes = Math.floor((delta / (1000 * 60)) % 60);
-  const seconds = Math.floor((delta / 1000) % 60);
-  return [days, hours, minutes, seconds]
-    .map((n) => (n < 10 ? "0" + n : "" + n))
-    .join(":");
-}
+import { Timer } from "components/common/Timer.tsx";
 
 function HiddenAchievementCompletionPage({
-  time,
   eventStart,
 }: {
-  time: number;
   eventStart: number;
 }) {
-  const delta = eventStart - time;
-  const timeString = getTimeStr(delta);
-
   return (
     <div style={{ margin: "auto", textAlign: "center", marginTop: "20px" }}>
-      <h1 style={{ fontSize: "3em" }}>Starts in {timeString}</h1>
+      <Timer endsAt={eventStart} preText="Starting in" finishedText="Begin!" />
     </div>
   );
 }
@@ -76,27 +62,83 @@ function TextPage({ text }: { text: string }) {
 export default function AchievementCompletionPage() {
   const session = useContext(SessionContext);
 
-  // const [time, setTime] = useState<number>(Date.now());
-  const time = Date.now();
-
-  // useEffect(() => {
-  //   setInterval(() => setTime(Date.now()), 1000);
-  // }, []); // run once
-
   const { data: iteration, isLoading: iterationLoading } = useGetIteration();
 
-  const iterationStart =
-    iteration !== undefined ? Date.parse(iteration.start) : null;
-  const showContent = iterationStart !== null && iterationStart < time;
+  const iterationStart = useMemo(
+    () => (iteration !== undefined ? Date.parse(iteration.start) : null),
+    [iteration, iteration?.start],
+  );
+  const iterationEnd = useMemo(
+    () => (iteration !== undefined ? Date.parse(iteration.end) : null),
+    [iteration, iteration?.end],
+  );
+  const [showContent, setShowContent] = useState(false);
+
+  useEffect(() => {
+    if (iterationStart === null) {
+      return;
+    }
+
+    if (Date.now() >= iterationStart) {
+      console.log("ok");
+      setShowContent(true);
+      return;
+    }
+
+    console.log(iterationStart - Date.now());
+    const timeoutId = setTimeout(
+      () => {
+        console.log("aaa");
+        setShowContent(true);
+      },
+      Math.min(iterationStart - Date.now(), 2147483647),
+    );
+    return () => clearTimeout(timeoutId);
+  }, [iterationStart]);
+
+  const [iterationEnded, setIterationEnded] = useState(false);
+
+  useEffect(() => {
+    if (iteration === undefined) {
+      return;
+    }
+
+    const iterationEnd = Date.parse(iteration.end);
+
+    if (Date.now() >= iterationEnd) {
+      setIterationEnded(true);
+      return;
+    }
+
+    const timeoutId = setTimeout(
+      () => setIterationEnded(true),
+      Math.min(iterationEnd - Date.now(), 2147483647),
+    );
+    return () => clearTimeout(timeoutId);
+  }, [iterationEnd]);
 
   const { data: teamData, isLoading: teamsLoading } = useGetTeams(showContent);
-  const team =
-    teamData === undefined ? null : getMyTeam(session.user?.id, teamData.teams);
-  const fetchAchievements =
-    showContent &&
-    (team !== null ||
-      (session.user !== null &&
-        (session.user.is_admin || session.user.is_achievement_creator)));
+  const team = useMemo(
+    () =>
+      teamData === undefined
+        ? null
+        : getMyTeam(session.user?.id, teamData.teams),
+    [teamData, teamData?.teams, session.user],
+  );
+  const fetchAchievements = useMemo(
+    () =>
+      showContent &&
+      (team !== null ||
+        (session.user !== null &&
+          (session.user.is_admin || session.user.is_achievement_creator))),
+    [
+      showContent,
+      team,
+      session.user,
+      session.user?.is_admin,
+      session.user?.is_achievement_creator,
+    ],
+  );
   const { data: achievements, isLoading: achievementsLoading } =
     useGetAchievements(fetchAchievements);
 
@@ -112,15 +154,10 @@ export default function AchievementCompletionPage() {
   }
 
   if (!showContent) {
-    return (
-      <HiddenAchievementCompletionPage
-        time={time}
-        eventStart={iterationStart!}
-      />
-    );
+    return <HiddenAchievementCompletionPage eventStart={iterationStart!} />;
   }
 
-  if (team === null && Date.parse(iteration.end) > time && !fetchAchievements) {
+  if (team === null && !iterationEnded && !fetchAchievements) {
     return (
       <TextPage text="You must be playing to view the achievements while the event is ongoing." />
     );
@@ -137,8 +174,6 @@ export default function AchievementCompletionPage() {
     dispatchState({ id: 5, achievementsFilter: getDefaultNav(achievements) });
   }
 
-  const iterationEnd = Date.parse(iteration.end);
-
   return (
     <>
       <Helmet>
@@ -147,11 +182,11 @@ export default function AchievementCompletionPage() {
 
       <div className="achievements-layout">
         <div style={{ margin: "auto", textAlign: "center" }}>
-          <h1 style={{ fontSize: "3em" }}>
-            {time < iterationEnd
-              ? `Ends in: ${getTimeStr(iterationEnd - time)}`
-              : "Event ended"}
-          </h1>
+          <Timer
+            endsAt={iterationEnd!}
+            preText="Ends in"
+            finishedText="Event ended"
+          />
         </div>
 
         <AchievementNavigationBar
