@@ -4,6 +4,7 @@ Implemented as specified in this desmos https://www.desmos.com/calculator/d4a6d8
 
 import requests
 import math
+from datetime import datetime
 
 
 url = "https://cta.sheppsu.me/api"
@@ -28,7 +29,20 @@ for team in teams:
 
 for achievement in achievements:
     for completion in achievement["completions"]:
+        completion["time_completed"] = datetime.fromisoformat(completion["time_completed"])
         team_points[player_teams[completion["player"]["id"]]]["completions"] += 1
+    
+    last_time = None
+    last_placement = 1
+    for i, completion in enumerate(sorted(achievement["completions"], key=lambda c: c["time_completed"])):
+        if last_time is None:
+            completion["time_placement"] = 1
+        elif (completion["time_completed"] - last_time).total_seconds() <= 5 * 60:
+            completion["time_placement"] = last_placement
+        else:
+            completion["time_placement"] = i + 1
+            last_placement = i + 1
+        last_time = completion["time_completed"]
 
 # remove teams with no completions
 team_points = dict((item for item in team_points.items() if item[1]["completions"] > 0))
@@ -51,15 +65,27 @@ def calculate_b(x):
 
 
 def calculate_f(x):
-    return 10 + 90 * calculate_b(x / (n_teams - 1))
+    return 10 + 90 * (calculate_b((x - 1) / (n_teams - 1)) ** 2)
+    
+    
+def calculate_g(x, y):
+    return 10 + 20 * (calculate_b((x - 1) / (n_teams - 1)) ** 2) + 70 * (calculate_b((y - 1) / (n_teams - 1)) ** 2)
+
+
+def calculate_h(x):
+    return 10 + 90 * (calculate_b((x - 1) / (n_teams - 1)) ** 3)
 
 
 def calculate_p(x):
-    return round(max(calculate_f(x - 1), calculate_f(n_teams - 1)))
+    return round(max(calculate_f(x), 10))
+    
 
+def calculate_ps(x, y):
+    return round(max(calculate_g(x, y), 10))
+    
 
-def calculate_s(x):
-    return (math.cos((4 * math.pi * x) / (5 * n_teams)) + 1) / 2
+def calculate_pc(x):
+    return round(max(calculate_h(x), 10))
 
 
 for achievement in achievements:
@@ -73,14 +99,12 @@ for achievement in achievements:
 
     if is_competition:
         for completion in achievement["completions"]:
-            add_points(completion["player"]["id"], round(calculate_p(completion["placement"]["place"])))
+            add_points(completion["player"]["id"], round(calculate_pc(completion["placement"]["place"])))
     elif is_secret:
-        scalar = calculate_s(total_completions)
         for completion in achievement["completions"]:
-            points = max(round(calculate_p(completion["time_placement"]) * scalar), 10)
-            add_points(completion["player"]["id"], points)
+            add_points(completion["player"]["id"], calculate_ps(completion["time_placement"], total_completions))
     else:
-        amount = round(calculate_p(total_completions))
+        amount = calculate_p(total_completions)
         for completion in achievement["completions"]:
             add_points(completion["player"]["id"], amount)
 
