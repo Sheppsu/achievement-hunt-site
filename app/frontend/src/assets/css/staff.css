@@ -299,6 +299,10 @@
   word-break: break-word;
 }
 
+.staff__achievement__comment__content__text {
+  padding-right: 35px;
+}
+
 .staff__achievement__comment__content__footer {
   color: #d3d3d3;
 
@@ -320,6 +324,24 @@
 .staff__achievement__comment__footer-text.action:hover {
   cursor: pointer;
   color: #eaeaea;
+}
+
+@media(max-width: 700px) {
+  .staff__achievement__comment {
+    flex-direction: column;
+  }
+
+  .staff__achievement__comment__divider {
+    display: none;
+  }
+
+  .staff__achievement__comment__user {
+    flex-basis: auto;
+  }
+
+  .actions-button.comment-action {
+    top: -60px;
+  }
 }
 
 .staff-batch-move-container {

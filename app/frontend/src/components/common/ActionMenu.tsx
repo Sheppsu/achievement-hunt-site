@@ -27,6 +27,7 @@ export type ActionInfo = ActionInfoDivider | ActionInfoButton;
 type ActionMenuProps = {
   info: ActionInfo[];
   iconSize?: number;
+  className?: string;
 };
 
 const elementDefaults = {};
@@ -108,7 +109,7 @@ export default function ActionMenu(props: ActionMenuProps) {
   return (
     <>
       <div
-        className="actions-button"
+        className={classNames("actions-button", props.className)}
         onClick={() => setActionMenuOpen((val) => !val)}
         ref={actionMenuBtnRef}
       >

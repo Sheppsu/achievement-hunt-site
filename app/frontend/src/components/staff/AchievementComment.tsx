@@ -101,7 +101,12 @@ export default function AchievementComment(props: AchievementCommentProps) {
       </div>
       <div className="staff__achievement__comment__divider"></div>
       <div className="staff__achievement__comment__content">
-        <span className={isEditing ? "hide" : ""}>
+        <span
+          className={classNames(
+            { hide: isEditing },
+            "staff__achievement__comment__content__text",
+          )}
+        >
           <Markdown remarkPlugins={[remarkGfm]}>{comment.msg}</Markdown>
         </span>
         <TextArea
@@ -123,7 +128,12 @@ export default function AchievementComment(props: AchievementCommentProps) {
           </p>
         </div>
         {session.user!.id === comment.user.id ? (
-          <ActionMenu key={comment.id} iconSize={18} info={actionMenuInfo} />
+          <ActionMenu
+            className="comment-action"
+            key={comment.id}
+            iconSize={18}
+            info={actionMenuInfo}
+          />
         ) : (
           ""
         )}
