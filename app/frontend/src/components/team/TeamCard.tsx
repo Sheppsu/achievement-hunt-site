@@ -292,7 +292,9 @@ export default function TeamCard({
           <Player key={i} player={player} />
         ))}
       </div>
-      {score && (
+      {score == 0 ? (
+        ""
+      ) : (
         <>
           <div
             className="card--teams__score-title-container clickable"
