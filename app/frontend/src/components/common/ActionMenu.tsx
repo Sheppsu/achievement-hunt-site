@@ -116,9 +116,13 @@ export default function ActionMenu(props: ActionMenuProps) {
         <IoIosMore size={otherProps.iconSize} />
       </div>
       <div
-        className={classNames("actions-menu", {
-          hidden: !actionMenuOpen,
-        })}
+        className={classNames(
+          "actions-menu",
+          {
+            hidden: !actionMenuOpen,
+          },
+          props.className,
+        )}
         ref={actionMenuRef}
       >
         {props.info.map((info, i) => {

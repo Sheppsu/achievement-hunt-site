@@ -340,7 +340,11 @@
   }
 
   .actions-button.comment-action {
-    top: -60px;
+    top: -55px;
+  }
+
+  .actions-menu.comment-action {
+    top: -25px;
   }
 }
 
