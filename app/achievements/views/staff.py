@@ -248,6 +248,7 @@ def delete_achievement(req, achievement):
 
     achievement.delete()
     comm.refresh_achievements_on_server()
+    discord_logger.submit_achievement(req, achievement, "deleted")
     return success(None)
 
 

@@ -95,6 +95,7 @@ class DiscordLogger:
             "moved": ("Achievement moved for release", 0x744DFF),
             "solved": ("Achievement marked as solved", 0xAAFFE4),
             "unsolved": ("Achievement unmarked as solved", 0xFFAAC2),
+            "deleted": ("Achievement deleted", 0xFF6060),
         }[action]
 
         embed = {
