@@ -96,7 +96,7 @@ function parseModeAndTags(tags: string): [string, string] {
     }
   }
 
-  return [parsedTags.join(", "), mode];
+  return [parsedTags.join(","), mode];
 }
 
 function parseTagsString(tags: string): string[] {

@@ -257,7 +257,13 @@ export function getSortedAchievements<T extends AchievementType>(
 
     if (
       activeTags.length != 0 &&
-      !intersects(activeTags, achievement.tags.toLowerCase().split(","))
+      !intersects(
+        activeTags,
+        achievement.tags
+          .toLowerCase()
+          .split(",")
+          .map((t) => t.trim()),
+      )
     )
       continue;
 
