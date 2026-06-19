@@ -159,6 +159,8 @@ class Achievement(SerializableModel):
     solution_algorithm = models.JSONField(default=dict)
     algorithm_enabled = models.BooleanField(default=False)
     staff_solved = models.BooleanField(default=False)
+    avg_quality_rating = models.FloatField(default=None, null=True)
+    avg_difficulty_rating = models.FloatField(default=None, null=True)
 
     class Serialization:
         FIELDS = ["id", "name", "description", "audio", "tags", "created_at", "last_edited_at", "worth_points"]
@@ -223,6 +225,17 @@ class AchievementVote(SerializableModel):
 
     class Serialization:
         FIELDS = ["id", "user_id"]
+
+
+class AchievementRating(SerializableModel):
+    achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE, related_name="ratings")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="ratings")
+    upvoted = models.BooleanField(default=False)
+    quality = models.PositiveSmallIntegerField(default=None, null=True)
+    difficulty = models.PositiveSmallIntegerField(default=None, null=True)
+
+    class Serialization:
+        FIELDS = ["id", "upvoted", "quality", "difficulty"]
 
 
 class Team(SerializableModel):
