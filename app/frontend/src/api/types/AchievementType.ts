@@ -41,8 +41,8 @@ export type StaffAchievementType = {
   solution: string;
   comments: AchievementCommentType[];
   upvotes: number;
-  avg_difficulty_rating: number;
-  avg_quality_rating: number;
+  avg_difficulty_rating: number | null;
+  avg_quality_rating: number | null;
   user_rating: AchievementRatingType | null;
   creator: UserType | null;
   solution_algorithm: SolutionAlgorithmData;

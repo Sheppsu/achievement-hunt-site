@@ -786,6 +786,8 @@ function onAchievementCreation(
           comments: [],
           user_rating: null,
           upvotes: 0,
+          avg_difficulty_rating: null,
+          avg_quality_rating: null,
           staff_solved: false,
         },
       ]),

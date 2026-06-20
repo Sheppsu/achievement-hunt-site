@@ -205,7 +205,7 @@ function getGrouping(
         ["*"],
         () => "values",
         (a: StaffAchievementType, b: StaffAchievementType) =>
-          a.vote_count - b.vote_count,
+          a.upvotes - b.upvotes,
       ];
     case "creation time":
       return [
