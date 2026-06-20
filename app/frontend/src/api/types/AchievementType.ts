@@ -7,6 +7,7 @@ import { UserType } from "api/types/UserType.ts";
 import { BeatmapConnectionType } from "api/types/BeatmapConnectionType.ts";
 import { AchievementBatchType } from "api/types/AchievementBatchType.ts";
 import { SolutionAlgorithmData } from "util/solutionAlgorithm.ts";
+import { AchievementRatingType } from "api/types/AchievementRatingType.ts";
 
 export type AchievementType = {
   id: number;
@@ -39,8 +40,10 @@ export type CompletedAchievementType = AchievementExtendedType & {
 export type StaffAchievementType = {
   solution: string;
   comments: AchievementCommentType[];
-  vote_count: number;
-  has_voted: boolean;
+  upvotes: number;
+  avg_difficulty_rating: number;
+  avg_quality_rating: number;
+  user_rating: AchievementRatingType | null;
   creator: UserType | null;
   solution_algorithm: SolutionAlgorithmData;
   algorithm_enabled: boolean;

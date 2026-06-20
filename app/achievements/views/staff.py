@@ -30,12 +30,15 @@ def serialize_full_achievement(req, achievement: Achievement):
             "algorithm_enabled",
             "staff_solved",
             SerializableField(
-                "votes",
-                serial_key="has_voted",
-                post_transform=lambda votes: any((v["user_id"] == req.user.id for v in votes)),
+                "user_rating", post_transform=lambda ratings: None if len(ratings) == 0 else ratings[0].serialize()
             ),
-            SerializableField("votes", serial_key="vote_count", post_transform=lambda votes: len(votes)),
         ]
+    )
+
+
+def with_user_rating(user_id, query):
+    return query.prefetch_related(
+        models.Prefetch("ratings", queryset=AchievementRating.objects.filter(user_id=user_id), to_attr="user_rating")
     )
 
 
@@ -52,7 +55,6 @@ def achievements(req, iteration):
     query = Achievement.objects.prefetch_related(
         models.Prefetch("comments", AchievementComment.objects.select_related("user").filter(deleted_at=None)),
         models.Prefetch("beatmaps", BeatmapConnection.objects.select_related("info")),
-        "votes",
     ).select_related("creator", "batch")
 
     if batch:
@@ -60,12 +62,18 @@ def achievements(req, iteration):
     else:
         query = query.filter(batch_id__isnull=True)
 
+    query = with_user_rating(req.user.id, query)
+
     return success([serialize_full_achievement(req, achievement) for achievement in query.all()])
 
 
 @require_staff
 @require_GET
-@require_achievement(select=["creator"], prefetch=["comments__user", "votes", "beatmaps__info"])
+@require_achievement(
+    select=["creator"],
+    prefetch=["comments__user", "beatmaps__info"],
+    query_func=lambda req, query: with_user_rating(req.user.id, query),
+)
 def show_achievement(req, achievement):
     return success(serialize_full_achievement(req, achievement))
 
@@ -131,27 +139,48 @@ def delete_comment(req, comment_id):
 @require_staff
 @require_POST
 @require_achievement()
-@accepts_json_data(DictionaryType({"add": BoolType()}))
-def vote_achievement(req, data, achievement):
-    add_vote = data["add"]
-
+@accepts_json_data(
+    DictionaryType(
+        {
+            "upvoted": BoolType(),
+            "quality": IntegerType(0, 10, True),
+            "difficulty": IntegerType(0, 10, True),
+        }
+    )
+)
+def set_achievement_rating(req, data, achievement):
     if req.user.id == achievement.creator_id:
-        return error("Can't vote for your own achievement!")
+        return error("Can't rate your own achievement!")
 
-    existing_vote = AchievementVote.objects.filter(achievement_id=achievement.id, user_id=req.user).first()
-
-    if add_vote and existing_vote is not None:
-        return error("Already voted this achievement")
-
-    if not add_vote and existing_vote is None:
-        return error("No vote to remove")
-
-    if add_vote:
-        AchievementVote.objects.create(achievement=achievement, user=req.user)
+    rating = AchievementRating.objects.filter(achievement_id=achievement.id, user_id=req.user.id).first()
+    if rating is None:
+        rating = AchievementRating.objects.create(
+            achievement_id=achievement.id,
+            user_id=req.user.id,
+            upvoted=data["upvoted"],
+            quality=data["quality"],
+            difficulty=data["difficulty"],
+        )
     else:
-        existing_vote.delete()
+        rating.upvoted = data["upvoted"]
+        rating.quality = data["quality"]
+        rating.difficulty = data["difficulty"]
+        rating.save()
 
-    return success({"added": add_vote})
+    result = AchievementRating.objects.aggregate(
+        avg=models.Avg("quality", filter=models.Q(achievement_id=achievement.id))
+    )
+    if result is not None:
+        achievement.avg_quality_rating = result["avg"]
+    result = AchievementRating.objects.aggregate(
+        avg=models.Avg("difficulty", filter=models.Q(achievement_id=achievement.id))
+    )
+    if result is not None:
+        achievement.avg_difficulty_rating = result["avg"]
+    achievement.upvotes = AchievementRating.objects.filter(achievement_id=achievement.id, upvoted=True).count()
+    achievement.save()
+
+    return success(rating.serialize())
 
 
 @require_staff

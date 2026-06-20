@@ -161,9 +161,22 @@ class Achievement(SerializableModel):
     staff_solved = models.BooleanField(default=False)
     avg_quality_rating = models.FloatField(default=None, null=True)
     avg_difficulty_rating = models.FloatField(default=None, null=True)
+    upvotes = models.PositiveSmallIntegerField(default=0)
 
     class Serialization:
-        FIELDS = ["id", "name", "description", "audio", "tags", "created_at", "last_edited_at", "worth_points"]
+        FIELDS = [
+            "id",
+            "name",
+            "description",
+            "audio",
+            "tags",
+            "created_at",
+            "last_edited_at",
+            "worth_points",
+            "upvotes",
+            "avg_difficulty_rating",
+            "avg_quality_rating",
+        ]
 
 
 class BeatmapConnection(SerializableModel):
@@ -219,14 +232,6 @@ class AchievementComment(SerializableModel):
         FIELDS = ["id", "msg", "posted_at", "edited_at", "channel"]
 
 
-class AchievementVote(SerializableModel):
-    achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE, related_name="votes")
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="votes")
-
-    class Serialization:
-        FIELDS = ["id", "user_id"]
-
-
 class AchievementRating(SerializableModel):
     achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE, related_name="ratings")
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="ratings")
@@ -235,7 +240,7 @@ class AchievementRating(SerializableModel):
     difficulty = models.PositiveSmallIntegerField(default=None, null=True)
 
     class Serialization:
-        FIELDS = ["id", "upvoted", "quality", "difficulty"]
+        FIELDS = ["upvoted", "quality", "difficulty"]
 
 
 class Team(SerializableModel):

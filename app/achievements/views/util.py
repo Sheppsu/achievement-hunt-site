@@ -180,22 +180,25 @@ def require_staff(func):
     return wrapper
 
 
-def require_achievement(select: list | None = None, prefetch: list | None = None):
+def require_achievement(select: list | None = None, prefetch: list | None = None, query_func=None):
     def decorator(func):
         def wrapper(req, *args, **kwargs):
             achievement_id = kwargs.pop("achievement_id", None)
             if achievement_id is None:
                 return error("Invalid achievement id")
 
-            achievement = Achievement.objects.filter(id=achievement_id)
+            query = Achievement.objects.filter(id=achievement_id)
 
             if select is not None:
-                achievement.select_related(*select)
+                query = query.select_related(*select)
 
             if prefetch is not None:
-                achievement.prefetch_related(*prefetch)
+                query = query.prefetch_related(*prefetch)
 
-            achievement = achievement.first()
+            if query_func is not None:
+                query = query_func(req, query)
+
+            achievement = query.first()
 
             if achievement is None:
                 return error("Invalid achievement id")

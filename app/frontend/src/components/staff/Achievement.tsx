@@ -7,7 +7,7 @@ import {
   useMoveAchievement,
   useSendComment,
   useSubmitPasswordGuess,
-  useVoteAchievement,
+  useRateAchievement,
 } from "api/query.ts";
 import Button from "components/inputs/Button.tsx";
 import TextArea from "components/inputs/TextArea.tsx";
@@ -35,15 +35,25 @@ import TextInput from "components/inputs/TextInput.tsx";
 function VoteContainer({ achievement }: { achievement: StaffAchievementType }) {
   const session = useContext(SessionContext);
 
-  const vote = useVoteAchievement(achievement.id);
+  const rate = useRateAchievement(achievement.id);
   const isCreator =
     achievement.creator !== null && achievement.creator.id === session.user!.id;
 
   const onClick = () => {
-    vote.mutate(
-      { add: !achievement.has_voted },
+    rate.mutate(
+      achievement.user_rating === null
+        ? {
+            upvoted: true,
+            quality: null,
+            difficulty: null,
+          }
+        : {
+            upvoted: !achievement.user_rating.upvoted,
+            quality: achievement.user_rating.quality,
+            difficulty: achievement.user_rating.difficulty,
+          },
       {
-        onSettled: () => vote.reset(),
+        onSettled: () => rate.reset(),
       },
     );
   };
@@ -55,8 +65,13 @@ function VoteContainer({ achievement }: { achievement: StaffAchievementType }) {
       })}
       onClick={isCreator ? undefined : onClick}
     >
-      {achievement.vote_count}
-      {achievement.has_voted || isCreator ? <BiSolidUpArrow /> : <BiUpArrow />}
+      {achievement.upvotes}
+      {(achievement.user_rating !== null && achievement.user_rating.upvoted) ||
+      isCreator ? (
+        <BiSolidUpArrow />
+      ) : (
+        <BiUpArrow />
+      )}
     </div>
   );
 }

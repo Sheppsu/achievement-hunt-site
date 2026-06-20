@@ -43,7 +43,7 @@ urlpatterns = (
         path("invites/<int:invite_id>/resolve/", common.resolve_invite),
         path("achievements/<int:achievement_id>/", common.achievement),
         path("staff/achievements/<int:achievement_id>/", staff.show_achievement),
-        path("staff/achievements/<int:achievement_id>/vote/", staff.vote_achievement),
+        path("staff/achievements/<int:achievement_id>/rate/", staff.set_achievement_rating),
         path("staff/achievements/<int:achievement_id>/comment/", staff.create_comment),
         path("staff/achievements/<int:achievement_id>/edit/", staff.edit_achievement),
         path("staff/achievements/<int:achievement_id>/delete/", staff.delete_achievement),

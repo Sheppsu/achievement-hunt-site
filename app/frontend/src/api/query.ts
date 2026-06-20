@@ -33,6 +33,7 @@ import { AllRegistrationsType } from "api/types/AllRegistrationsType.ts";
 import { AchievementCompletionExtendedType } from "api/types/AchievementCompletionType.ts";
 import { SolutionAlgorithmData } from "util/solutionAlgorithm.ts";
 import { AlgorithmDocsType } from "api/types/AlgorithmDocsType.ts";
+import { AchievementRatingType } from "api/types/AchievementRatingType.ts";
 
 function getIterationParams() {
   const path = location.pathname;
@@ -545,16 +546,20 @@ export function useGetStaffAchievements(
   });
 }
 
-export function useVoteAchievement(
+export function useRateAchievement(
   achievementId: number,
-): SpecificUseMutationResult<{ added: boolean }> {
+): SpecificUseMutationResult<AchievementRatingType> {
   const queryClient = useContext(QueryClientContext);
 
-  function onVoted(added: boolean) {
-    const concatVote = (achievement: StaffAchievementType) => ({
+  function onRated(rating: AchievementRatingType) {
+    const concatRating = (achievement: StaffAchievementType) => ({
       ...achievement,
-      has_voted: added,
-      vote_count: achievement.vote_count + (added ? 1 : -1),
+      user_rating: rating,
+      upvotes:
+        (achievement.user_rating ?? { upvoted: false }).upvoted !=
+        rating.upvoted
+          ? achievement.upvotes + (rating.upvoted ? 1 : -1)
+          : achievement.upvotes,
     });
 
     queryClient?.setQueryData(
@@ -566,7 +571,7 @@ export function useVoteAchievement(
 
         for (const achievement of achievements) {
           if (achievement.id === achievementId) {
-            newAchievements.push(concatVote(achievement));
+            newAchievements.push(concatRating(achievement));
             continue;
           }
 
@@ -580,14 +585,14 @@ export function useVoteAchievement(
     queryClient?.setQueryData(
       ["staff", "achievements", achievementId.toString()],
       (achievement: StaffAchievementType | undefined) =>
-        achievement === undefined ? undefined : concatVote(achievement),
+        achievement === undefined ? undefined : concatRating(achievement),
     );
   }
 
   return useMakeMutation(
     {
-      mutationKey: ["staff", "achievements", achievementId.toString(), "vote"],
-      onSuccess: (result: { added: boolean }) => onVoted(result.added),
+      mutationKey: ["staff", "achievements", achievementId.toString(), "rate"],
+      onSuccess: onRated,
     },
     {
       method: "POST",
@@ -779,8 +784,8 @@ function onAchievementCreation(
           ...achievement,
           batch: null,
           comments: [],
-          has_voted: false,
-          vote_count: 0,
+          user_rating: null,
+          upvotes: 0,
           staff_solved: false,
         },
       ]),
@@ -808,8 +813,8 @@ function onAchievementEdit(
   const combineAchievements = (achievement: StaffAchievementType) => ({
     ...editedAchievement,
     comments: achievement.comments,
-    vote_count: achievement.vote_count,
-    has_voted: achievement.has_voted,
+    upvotes: achievement.upvotes,
+    user_rating: achievement.user_rating,
   });
 
   queryClient?.setQueryData(

@@ -1,9 +1,10 @@
-from typing import Union, Sequence
+from typing import Callable, Sequence, Type, Any
 from enum import IntEnum, IntFlag
 
 
 __all__ = (
     "StringType",
+    "NumberType",
     "IntegerType",
     "BoolType",
     "ListType",
@@ -143,7 +144,7 @@ class StringType(OptionsType):
         return ValidationResult.clear()
 
 
-class IntegerType(OptionalType):
+class NumberType(OptionalType):
     __slots__ = ("min", "max")
 
     def __init__(self, minimum: int | None = None, maximum: int | None = None, optional: bool = False):
@@ -155,12 +156,26 @@ class IntegerType(OptionalType):
         if (result := super().validate(data)).is_final:
             return result
 
-        if not isinstance(data, int):
+        if not (isinstance(data, int) or isinstance(data, float)):
             return ValidationResult.failed("{name} must be an int")
         if self.min is not None and data < self.min:
             return ValidationResult.failed("{name} must be greater than %d" % self.min)
         if self.max is not None and data > self.max:
             return ValidationResult.failed("{name} must be less than %d" % self.max)
+
+        return ValidationResult.clear()
+
+
+class IntegerType(NumberType):
+    def __init__(self, minimum: int | None = None, maximum: int | None = None, optional: bool = False):
+        super().__init__(minimum, maximum, optional)
+
+    def validate(self, data) -> ValidationResult:
+        if (result := super().validate(data)).is_final:
+            return result
+
+        if not isinstance(data, int):
+            return ValidationResult.failed("{name} must be an int")
 
         return ValidationResult.clear()
 
