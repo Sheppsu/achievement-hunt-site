@@ -158,29 +158,35 @@ def set_achievement_rating(req, data, achievement):
             achievement_id=achievement.id,
             user_id=req.user.id,
             upvoted=data["upvoted"],
-            quality=data["quality"],
-            difficulty=data["difficulty"],
+            quality=data.get("quality"),
+            difficulty=data.get("difficulty"),
         )
     else:
         rating.upvoted = data["upvoted"]
-        rating.quality = data["quality"]
-        rating.difficulty = data["difficulty"]
+        rating.quality = data.get("quality")
+        rating.difficulty = data.get("difficulty")
         rating.save()
 
+    # update achievement attributes
     result = AchievementRating.objects.aggregate(
         avg=models.Avg("quality", filter=models.Q(achievement_id=achievement.id))
     )
-    if result is not None:
-        achievement.avg_quality_rating = result["avg"]
+    achievement.avg_quality_rating = None if result is None else result["avg"]
     result = AchievementRating.objects.aggregate(
         avg=models.Avg("difficulty", filter=models.Q(achievement_id=achievement.id))
     )
-    if result is not None:
-        achievement.avg_difficulty_rating = result["avg"]
+    achievement.avg_difficulty_rating = None if result is None else result["avg"]
     achievement.upvotes = AchievementRating.objects.filter(achievement_id=achievement.id, upvoted=True).count()
     achievement.save()
 
-    return success(rating.serialize())
+    return success(
+        {
+            "avg_difficulty_rating": achievement.avg_difficulty_rating,
+            "avg_quality_rating": achievement.avg_quality_rating,
+            "upvotes": achievement.upvotes,
+            "user_rating": rating.serialize(),
+        }
+    )
 
 
 @require_staff

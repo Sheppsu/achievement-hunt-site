@@ -176,6 +176,7 @@
 }
 
 .staff__achievement__footer {
+  height: 30px;
   margin-top: 5px;
 
   display: flex;
@@ -184,8 +185,8 @@
   gap: 5px;
 }
 
-.staff__achievement__footer__vote-container {
-  height: calc(100% - 8px);
+.staff__achievement__footer__item-container {
+  height: calc(100% - 12px);
 
   padding: 4px;
 
@@ -197,18 +198,81 @@
 
   border: solid var(--border-color) 2px;
   border-radius: 5px;
+
+  position: relative;
 }
 
-.staff__achievement__footer__vote-container:hover {
+.staff__achievement__footer__item-container:hover {
   cursor: pointer;
 }
 
-.staff__achievement__footer__vote-container.disabled:hover {
+.staff__achievement__footer__item-container.disabled:hover {
   cursor: default;
 }
 
+.staff__achievement__footer__rating-container {
+  padding: 10px;
+
+  top: 35px;
+  left: -50px;
+  position: absolute;
+
+  background-color: var(--site-background-color);
+  border: 1px white solid;
+  border-radius: 10px;
+
+  z-index: 2;
+}
+
+.staff__achievement__footer__rating-container:hover {
+  cursor: default;
+}
+
+.staff__achievement__footer__rating-container.hidden {
+  display: none;
+}
+
+.staff__rating-bar {
+  width: 280px;
+
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+  justify-content: center;
+  align-items: center;
+}
+
+.staff__rating-bar__square {
+  width: 20px;
+  height: 20px;
+
+  border: 1px solid var(--border-color);
+}
+
+.staff__rating-bar__square:hover {
+  cursor: pointer;
+}
+
+.staff__rating-bar__square.filled {
+  background-color: white;
+}
+
+.staff__rating-bar__square.unfill {
+  background-color: #ffb5b5;
+}
+
+.staff__rating-bar__square.fill {
+  background-color: #d1e8ff;
+}
+
+.staff__rating-bar__stat {
+  width: 40px;
+
+  text-align: center;
+}
+
 .staff__achievement__footer__tag {
-  height: calc(100% - 8px);
+  height: calc(100% - 12px);
 
   padding: 4px 8px;
 

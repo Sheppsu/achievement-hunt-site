@@ -11,7 +11,14 @@ import {
 } from "api/query.ts";
 import Button from "components/inputs/Button.tsx";
 import TextArea from "components/inputs/TextArea.tsx";
-import React, { useCallback, useContext, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import AchievementComment from "components/staff/AchievementComment.tsx";
 import { SessionContext } from "contexts/SessionContext.ts";
 import classNames from "classnames";
@@ -22,7 +29,9 @@ import {
   IoIosArrowDropup,
   IoIosCopy,
   IoIosExit,
+  IoIosFlame,
   IoIosSend,
+  IoIosStar,
 } from "react-icons/io";
 import { FaEdit, FaComment, FaCheck } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
@@ -32,12 +41,14 @@ import remarkGfm from "remark-gfm";
 import ActionMenu, { ActionInfo } from "components/common/ActionMenu.tsx";
 import TextInput from "components/inputs/TextInput.tsx";
 
-function VoteContainer({ achievement }: { achievement: StaffAchievementType }) {
-  const session = useContext(SessionContext);
-
+function VoteContainer({
+  achievement,
+  isCreator,
+}: {
+  achievement: StaffAchievementType;
+  isCreator: boolean;
+}) {
   const rate = useRateAchievement(achievement.id);
-  const isCreator =
-    achievement.creator !== null && achievement.creator.id === session.user!.id;
 
   const onClick = () => {
     rate.mutate(
@@ -60,7 +71,7 @@ function VoteContainer({ achievement }: { achievement: StaffAchievementType }) {
 
   return (
     <div
-      className={classNames("staff__achievement__footer__vote-container", {
+      className={classNames("staff__achievement__footer__item-container", {
         disabled: isCreator,
       })}
       onClick={isCreator ? undefined : onClick}
@@ -72,6 +83,240 @@ function VoteContainer({ achievement }: { achievement: StaffAchievementType }) {
       ) : (
         <BiUpArrow />
       )}
+    </div>
+  );
+}
+
+type RatingType = "difficulty" | "quality";
+
+function RateContainer({
+  achievement,
+  ratingType,
+}: {
+  achievement: StaffAchievementType;
+  ratingType: RatingType;
+}) {
+  const ratingBarRef = useRef<HTMLDivElement | null>(null);
+
+  const [ratingMenuOpen, setRatingMenuOpen] = useState(false);
+
+  const rate = useRateAchievement(achievement.id);
+
+  const [avgRating, myRating, icon] = useMemo(
+    () =>
+      ratingType === "difficulty"
+        ? [
+            achievement.avg_difficulty_rating,
+            achievement.user_rating?.difficulty ?? 0,
+            <IoIosFlame />,
+          ]
+        : [
+            achievement.avg_quality_rating,
+            achievement.user_rating?.quality ?? 0,
+            <IoIosStar />,
+          ],
+    [
+      achievement.avg_difficulty_rating,
+      achievement.avg_quality_rating,
+      achievement.user_rating?.difficulty,
+      achievement.user_rating?.quality,
+      ratingType,
+    ],
+  );
+  const title = useMemo(
+    () => ratingType.substring(0, 1).toUpperCase() + ratingType.substring(1),
+    [ratingType],
+  );
+
+  const updateRating = useCallback(
+    (rating: number) => {
+      if (rating === myRating) {
+        return;
+      }
+
+      const newRating = achievement.user_rating ?? {
+        upvoted: false,
+        difficulty: null,
+        quality: null,
+      };
+      newRating[ratingType] = rating;
+      rate.mutate(newRating, {
+        onSettled: () => rate.reset(),
+      });
+    },
+    [myRating, ratingType, rate, achievement.user_rating],
+  );
+
+  const squareSetFill = useCallback(
+    (square: HTMLDivElement) => {
+      const squareNum = parseInt(square.getAttribute("data-order")!);
+      square.className =
+        squareNum <= myRating
+          ? "staff__rating-bar__square filled"
+          : "staff__rating-bar__square";
+    },
+    [myRating],
+  );
+
+  const squareOnEnter = useCallback(
+    (evt: MouseEvent) => {
+      const square = evt.target as HTMLDivElement;
+      const squareNum = parseInt(square.getAttribute("data-order")!);
+      // set fill colors of all the squares
+      for (const child of square.parentElement!.children) {
+        const otherSquare = child as HTMLDivElement;
+        const otherSquareNum = parseInt(
+          otherSquare.getAttribute("data-order")!,
+        );
+        const isFilled = otherSquareNum <= myRating;
+        if (isFilled && otherSquareNum > squareNum) {
+          otherSquare.className = "staff__rating-bar__square unfill";
+        } else if (!isFilled && otherSquareNum <= squareNum) {
+          otherSquare.className = "staff__rating-bar__square fill";
+        } else {
+          squareSetFill(otherSquare);
+        }
+      }
+    },
+    [myRating, squareSetFill],
+  );
+
+  const squareOnClick = useCallback(
+    (evt: MouseEvent) => {
+      if (rate.isPending) {
+        return;
+      }
+
+      const square = evt.target as HTMLDivElement;
+      const squareNum = parseInt(square.getAttribute("data-order")!);
+      updateRating(squareNum);
+    },
+    [rate.isPending, updateRating],
+  );
+
+  const barOnLeave = useCallback(
+    (evt: MouseEvent) => {
+      const bar = evt.target as HTMLDivElement;
+      // reset fillings of squares
+      for (const child of bar.children) {
+        const square = child as HTMLDivElement;
+        squareSetFill(square);
+      }
+    },
+    [squareSetFill],
+  );
+
+  const setupRatingBar = useCallback(
+    (bar: HTMLDivElement) => {
+      bar.addEventListener("mouseleave", barOnLeave);
+
+      for (const child of bar.children) {
+        const square = child as HTMLDivElement;
+        square.addEventListener("mouseenter", squareOnEnter);
+        square.addEventListener("click", squareOnClick);
+        squareSetFill(square);
+      }
+    },
+    [squareSetFill, squareOnClick, barOnLeave],
+  );
+
+  const unsetupRatingBar = useCallback(
+    (bar: HTMLDivElement) => {
+      bar.removeEventListener("mouseleave", barOnLeave);
+
+      for (const child of bar.children) {
+        const square = child as HTMLDivElement;
+        square.removeEventListener("mouseenter", squareOnEnter);
+        square.removeEventListener("click", squareOnClick);
+      }
+    },
+    [squareOnEnter, squareOnClick, barOnLeave],
+  );
+
+  const onMenuOpenClick = useCallback(
+    (evt: React.MouseEvent) => {
+      if (
+        ratingBarRef.current === null ||
+        ratingBarRef.current!.contains(evt.target as Node)
+      ) {
+        return;
+      }
+      setRatingMenuOpen((v) => !v);
+    },
+    [ratingMenuOpen, setRatingMenuOpen],
+  );
+
+  // setup bar interaction
+  useEffect(() => {
+    if (ratingBarRef.current === null) {
+      return;
+    }
+
+    setupRatingBar(ratingBarRef.current);
+    return () => {
+      if (ratingBarRef.current !== null) {
+        unsetupRatingBar(ratingBarRef.current);
+      }
+    };
+  }, [ratingBarRef.current, unsetupRatingBar, setupRatingBar]);
+  // update square fillings when rating changes
+  useEffect(() => {
+    if (ratingBarRef.current === null) {
+      return;
+    }
+
+    for (const child of ratingBarRef.current!.children) {
+      squareSetFill(child as HTMLDivElement);
+    }
+  }, [ratingBarRef.current, squareSetFill]);
+  // close menu when clicking elsewhere
+  useEffect(() => {
+    const onClick = (evt: MouseEvent | TouchEvent) => {
+      if (
+        ratingMenuOpen &&
+        ratingBarRef.current &&
+        !ratingBarRef.current.parentElement!.parentElement!.contains(
+          evt.target as Node,
+        )
+      ) {
+        setRatingMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", onClick);
+    document.addEventListener("touchend", onClick);
+    return () => {
+      document.removeEventListener("mousedown", onClick);
+      document.removeEventListener("touchend", onClick);
+    };
+  }, [ratingMenuOpen, setRatingMenuOpen, ratingBarRef.current]);
+
+  return (
+    <div
+      className="staff__achievement__footer__item-container"
+      onClick={onMenuOpenClick}
+    >
+      {avgRating === null ? "" : Math.round(avgRating * 10) / 10}
+      {icon}
+      <div
+        className={classNames("staff__achievement__footer__rating-container", {
+          hidden: !ratingMenuOpen,
+        })}
+      >
+        <p>{title}</p>
+        <div className="staff__rating-bar" ref={ratingBarRef}>
+          <div className="staff__rating-bar__square" data-order="1"></div>
+          <div className="staff__rating-bar__square" data-order="2"></div>
+          <div className="staff__rating-bar__square" data-order="3"></div>
+          <div className="staff__rating-bar__square" data-order="4"></div>
+          <div className="staff__rating-bar__square" data-order="5"></div>
+          <div className="staff__rating-bar__square" data-order="6"></div>
+          <div className="staff__rating-bar__square" data-order="7"></div>
+          <div className="staff__rating-bar__square" data-order="8"></div>
+          <div className="staff__rating-bar__square" data-order="9"></div>
+          <div className="staff__rating-bar__square" data-order="10"></div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -121,6 +366,12 @@ export default function Achievement(props: AchievementProps) {
       .map((tag) => tag.trim().toLowerCase());
     return cleanTags.includes("password") && cleanTags.includes("playtestable");
   }, [achievement.tags]);
+  const isCreator = useMemo(
+    () =>
+      achievement.creator !== null &&
+      achievement.creator.id === session.user!.id,
+    [achievement.creator, session.user],
+  );
 
   const commentChannel = COMMENT_VIEWS.indexOf(commentView);
   const filteredComments = useMemo(
@@ -384,7 +635,7 @@ export default function Achievement(props: AchievementProps) {
             <TextInput
               name="guess"
               placeholder="Guess password"
-              autocomplete="off"
+              autoComplete="off"
             />
             <Button
               children="Submit"
@@ -422,7 +673,18 @@ export default function Achievement(props: AchievementProps) {
             </a>
           ))}
         <div className="staff__achievement__footer">
-          <VoteContainer achievement={achievement} />
+          <VoteContainer achievement={achievement} isCreator={isCreator} />
+          {isCreator ? (
+            ""
+          ) : (
+            <>
+              <RateContainer
+                achievement={achievement}
+                ratingType={"difficulty"}
+              />
+              <RateContainer achievement={achievement} ratingType={"quality"} />
+            </>
+          )}
           {parseTags(achievement.tags).map((tag) => (
             <div className="staff__achievement__footer__tag">{tag}</div>
           ))}

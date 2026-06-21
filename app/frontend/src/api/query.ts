@@ -546,20 +546,25 @@ export function useGetStaffAchievements(
   });
 }
 
+type RateAchievementReturnType = {
+  avg_difficulty_rating: number | null;
+  avg_quality_rating: number | null;
+  upvotes: number;
+  user_rating: AchievementRatingType;
+};
+
 export function useRateAchievement(
   achievementId: number,
-): SpecificUseMutationResult<AchievementRatingType> {
+): SpecificUseMutationResult<RateAchievementReturnType> {
   const queryClient = useContext(QueryClientContext);
 
-  function onRated(rating: AchievementRatingType) {
+  function onRated(result: RateAchievementReturnType) {
     const concatRating = (achievement: StaffAchievementType) => ({
       ...achievement,
-      user_rating: rating,
-      upvotes:
-        (achievement.user_rating ?? { upvoted: false }).upvoted !=
-        rating.upvoted
-          ? achievement.upvotes + (rating.upvoted ? 1 : -1)
-          : achievement.upvotes,
+      user_rating: result.user_rating,
+      avg_difficulty_rating: result.avg_difficulty_rating,
+      avg_quality_rating: result.avg_quality_rating,
+      upvotes: result.upvotes,
     });
 
     queryClient?.setQueryData(
