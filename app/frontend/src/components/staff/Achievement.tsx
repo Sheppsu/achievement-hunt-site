@@ -34,7 +34,7 @@ import {
   IoIosStar,
 } from "react-icons/io";
 import { FaEdit, FaComment, FaCheck } from "react-icons/fa";
-import { MdDelete } from "react-icons/md";
+import { MdDelete, MdOutlineClear } from "react-icons/md";
 import ViewSwitcher from "components/common/ViewSwitcher.tsx";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -92,9 +92,11 @@ type RatingType = "difficulty" | "quality";
 function RateContainer({
   achievement,
   ratingType,
+  isCreator,
 }: {
   achievement: StaffAchievementType;
   ratingType: RatingType;
+  isCreator: boolean;
 }) {
   const ratingBarRef = useRef<HTMLDivElement | null>(null);
 
@@ -139,7 +141,7 @@ function RateContainer({
         difficulty: null,
         quality: null,
       };
-      newRating[ratingType] = rating;
+      newRating[ratingType] = rating === 0 ? null : rating;
       rate.mutate(newRating, {
         onSettled: () => rate.reset(),
       });
@@ -237,13 +239,16 @@ function RateContainer({
     (evt: React.MouseEvent) => {
       if (
         ratingBarRef.current === null ||
-        ratingBarRef.current!.contains(evt.target as Node)
+        ratingBarRef.current!.parentElement!.parentElement!.contains(
+          evt.target as Node,
+        ) ||
+        isCreator
       ) {
         return;
       }
       setRatingMenuOpen((v) => !v);
     },
-    [ratingMenuOpen, setRatingMenuOpen],
+    [ratingMenuOpen, setRatingMenuOpen, isCreator],
   );
 
   // setup bar interaction
@@ -275,7 +280,7 @@ function RateContainer({
       if (
         ratingMenuOpen &&
         ratingBarRef.current &&
-        !ratingBarRef.current.parentElement!.parentElement!.contains(
+        !ratingBarRef.current.parentElement!.parentElement!.parentElement!.contains(
           evt.target as Node,
         )
       ) {
@@ -301,20 +306,31 @@ function RateContainer({
       <div
         className={classNames("staff__achievement__footer__rating-container", {
           hidden: !ratingMenuOpen,
+          disabled: isCreator,
         })}
       >
-        <p>{title}</p>
-        <div className="staff__rating-bar" ref={ratingBarRef}>
-          <div className="staff__rating-bar__square" data-order="1"></div>
-          <div className="staff__rating-bar__square" data-order="2"></div>
-          <div className="staff__rating-bar__square" data-order="3"></div>
-          <div className="staff__rating-bar__square" data-order="4"></div>
-          <div className="staff__rating-bar__square" data-order="5"></div>
-          <div className="staff__rating-bar__square" data-order="6"></div>
-          <div className="staff__rating-bar__square" data-order="7"></div>
-          <div className="staff__rating-bar__square" data-order="8"></div>
-          <div className="staff__rating-bar__square" data-order="9"></div>
-          <div className="staff__rating-bar__square" data-order="10"></div>
+        <p>{myRating === null ? title : `${title}: ${myRating}`}</p>
+        <div className="staff__rating-bar">
+          <div
+            className="staff__rating-bar__square-container"
+            ref={ratingBarRef}
+          >
+            <div className="staff__rating-bar__square" data-order="1"></div>
+            <div className="staff__rating-bar__square" data-order="2"></div>
+            <div className="staff__rating-bar__square" data-order="3"></div>
+            <div className="staff__rating-bar__square" data-order="4"></div>
+            <div className="staff__rating-bar__square" data-order="5"></div>
+            <div className="staff__rating-bar__square" data-order="6"></div>
+            <div className="staff__rating-bar__square" data-order="7"></div>
+            <div className="staff__rating-bar__square" data-order="8"></div>
+            <div className="staff__rating-bar__square" data-order="9"></div>
+            <div className="staff__rating-bar__square" data-order="10"></div>
+          </div>
+          <MdOutlineClear
+            className="staff__rating-bar__clear-btn"
+            size={32}
+            onClick={() => updateRating(0)}
+          />
         </div>
       </div>
     </div>
@@ -674,17 +690,16 @@ export default function Achievement(props: AchievementProps) {
           ))}
         <div className="staff__achievement__footer">
           <VoteContainer achievement={achievement} isCreator={isCreator} />
-          {isCreator ? (
-            ""
-          ) : (
-            <>
-              <RateContainer
-                achievement={achievement}
-                ratingType={"difficulty"}
-              />
-              <RateContainer achievement={achievement} ratingType={"quality"} />
-            </>
-          )}
+          <RateContainer
+            achievement={achievement}
+            ratingType={"difficulty"}
+            isCreator={isCreator}
+          />
+          <RateContainer
+            achievement={achievement}
+            ratingType={"quality"}
+            isCreator={isCreator}
+          />
           {parseTags(achievement.tags).map((tag) => (
             <div className="staff__achievement__footer__tag">{tag}</div>
           ))}

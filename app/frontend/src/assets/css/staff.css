@@ -233,13 +233,25 @@
 }
 
 .staff__rating-bar {
-  width: 280px;
+  width: 300px;
 
   display: flex;
   flex-direction: row;
   gap: 5px;
   justify-content: center;
   align-items: center;
+}
+
+.staff__rating-bar__square-container {
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+  justify-content: center;
+  align-items: center;
+}
+
+.staff__rating-bar__clear-btn:hover {
+  cursor: pointer;
 }
 
 .staff__rating-bar__square {
