@@ -87,17 +87,20 @@ function checkFilterCondition(
       return "completed" in achievement
         ? (achievement as CompletedAchievementType).completed
         : false;
-    case "upvoted":
+    case "upvoted": // staff page
       return (
-        (achievement as StaffAchievementType).user_rating?.upvoted ?? false
+        !(user!.id === achievement.creator?.id) &&
+        ((achievement as StaffAchievementType).user_rating?.upvoted ?? false)
       );
-    case "rated difficulty":
+    case "rated difficulty": // staff page
       return (
+        !(user!.id === achievement.creator?.id) &&
         ((achievement as StaffAchievementType).user_rating?.difficulty ?? 0) !==
-        0
+          0
       );
-    case "rated quality":
+    case "rated quality": // staff page
       return (
+        !(user!.id === achievement.creator?.id) &&
         ((achievement as StaffAchievementType).user_rating?.quality ?? 0) !== 0
       );
     default:
