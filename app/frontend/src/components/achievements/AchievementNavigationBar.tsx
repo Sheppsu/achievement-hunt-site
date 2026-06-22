@@ -76,6 +76,9 @@ export function getDefaultNav(
     ? [
         { label: "my achievements", active: false, value: false },
         { label: "solved", active: false, value: false },
+        { label: "upvoted", active: false, value: false },
+        { label: "rated difficulty", active: false, value: false },
+        { label: "rated quality", active: false, value: false },
       ]
     : [{ label: "completed", active: false, value: false }];
 

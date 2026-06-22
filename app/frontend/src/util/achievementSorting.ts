@@ -87,6 +87,19 @@ function checkFilterCondition(
       return "completed" in achievement
         ? (achievement as CompletedAchievementType).completed
         : false;
+    case "upvoted":
+      return (
+        (achievement as StaffAchievementType).user_rating?.upvoted ?? false
+      );
+    case "rated difficulty":
+      return (
+        ((achievement as StaffAchievementType).user_rating?.difficulty ?? 0) !==
+        0
+      );
+    case "rated quality":
+      return (
+        ((achievement as StaffAchievementType).user_rating?.quality ?? 0) !== 0
+      );
     default:
       throw new Error(`Invalid achievement filter: ${boolName}`);
   }
