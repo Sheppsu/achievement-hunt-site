@@ -221,6 +221,20 @@ function getGrouping(
         (a: StaffAchievementType, b: StaffAchievementType) =>
           getLastActive(a) - getLastActive(b),
       ];
+    case "difficulty":
+      return [
+        ["*"],
+        () => "values",
+        (a: StaffAchievementType, b: StaffAchievementType) =>
+          (a.avg_difficulty_rating ?? 0) - (b.avg_difficulty_rating ?? 0),
+      ];
+    case "quality":
+      return [
+        ["*"],
+        () => "values",
+        (a: StaffAchievementType, b: StaffAchievementType) =>
+          (a.avg_quality_rating ?? 0) - (b.avg_quality_rating ?? 0),
+      ];
     default:
       throw new Error(
         "unexpected sort type, was there a typo? missing a sort type?",
