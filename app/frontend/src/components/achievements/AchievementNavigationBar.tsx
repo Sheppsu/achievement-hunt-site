@@ -54,14 +54,14 @@ export function getDefaultNav(
         { label: "last active", active: true },
         { label: "creation time", active: false },
         { label: "votes", active: false },
+        { label: "difficulty", active: false },
+        { label: "quality", active: false },
       ]
     : [
         { label: "completions", active: true },
         { label: "player", active: false },
         { label: "date completed", active: false },
         { label: "release", active: false },
-        { label: "difficulty", active: false },
-        { label: "quality", active: false },
       ];
 
   const modes: NavItem[] = [
