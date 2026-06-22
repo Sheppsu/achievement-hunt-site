@@ -89,18 +89,18 @@ function checkFilterCondition(
         : false;
     case "upvoted": // staff page
       return (
-        !(user!.id === achievement.creator?.id) ||
+        user!.id === achievement.creator?.id ||
         ((achievement as StaffAchievementType).user_rating?.upvoted ?? false)
       );
     case "rated difficulty": // staff page
       return (
-        !(user!.id === achievement.creator?.id) ||
+        user!.id === achievement.creator?.id ||
         ((achievement as StaffAchievementType).user_rating?.difficulty ?? 0) !==
           0
       );
     case "rated quality": // staff page
       return (
-        !(user!.id === achievement.creator?.id) ||
+        user!.id === achievement.creator?.id ||
         ((achievement as StaffAchievementType).user_rating?.quality ?? 0) !== 0
       );
     default:
