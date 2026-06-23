@@ -95,15 +95,35 @@ function Header({
               <IoIosNotifications size={24} />
             </div>
           </div>
-          <NavLink to={iterationPath + "/teams"}>Dashboard</NavLink>
-          <NavLink to={iterationPath + "/achievements"}>Achievements</NavLink>
+          <NavLink
+            className="header__link--mobile"
+            to={iterationPath + "/teams"}
+          >
+            Dashboard
+          </NavLink>
+          <NavLink
+            className="header__link--mobile"
+            to={iterationPath + "/achievements"}
+          >
+            Achievements
+          </NavLink>
           {session.user?.is_achievement_creator || session.user?.is_admin ? (
-            <NavLink to={iterationPath + "/staff"}>Staff</NavLink>
+            <NavLink
+              className="header__link--mobile"
+              to={iterationPath + "/staff"}
+            >
+              Staff
+            </NavLink>
           ) : (
             ""
           )}
           {session.user?.is_admin ? (
-            <NavLink to={iterationPath + "/admin"}>Admin</NavLink>
+            <NavLink
+              className="header__link--mobile"
+              to={iterationPath + "/admin"}
+            >
+              Admin
+            </NavLink>
           ) : (
             ""
           )}

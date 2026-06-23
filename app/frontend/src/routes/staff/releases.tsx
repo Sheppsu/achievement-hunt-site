@@ -108,17 +108,15 @@ export default function ReleasesView({
           onClick={doCreateBatch}
         />
       </div>
-      <div className="staff-batches-listing-container">
-        <div className="staff-batches-listing">
-          {groupedBatches.sort(sortBatches).map(([batch, achievements], i) => (
-            <AchievementsBatch
-              title={`Batch ${i + 1}`}
-              batch={batch}
-              achievements={achievements}
-              setView={setView}
-            />
-          ))}
-        </div>
+      <div className="staff-batches-listing">
+        {groupedBatches.sort(sortBatches).map(([batch, achievements], i) => (
+          <AchievementsBatch
+            title={`Batch ${i + 1}`}
+            batch={batch}
+            achievements={achievements}
+            setView={setView}
+          />
+        ))}
       </div>
     </>
   );

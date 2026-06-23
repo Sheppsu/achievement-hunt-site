@@ -1,7 +1,8 @@
 import { StaffAchievementType } from "api/types/AchievementType.ts";
 import Achievement from "components/staff/Achievement.tsx";
 import { AchievementBatchType } from "api/types/AchievementBatchType.ts";
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { IoIosArrowDropdown, IoIosArrowDropup } from "react-icons/io";
 
 export default function AchievementsBatch({
   title,
@@ -16,15 +17,48 @@ export default function AchievementsBatch({
 }) {
   const [showAchievement, setShowAchievements] = useState(false);
 
+  const onClick = useCallback(() => {
+    setShowAchievements((v) => !v);
+  }, []);
+
   return (
     <div className="staff-batch">
-      <h1
-        className="staff-batch__title"
-        onClick={() => setShowAchievements((val) => !val)}
-      >
-        {title}
-      </h1>
-      <p>{new Date(Date.parse(batch.release_time)).toString()}</p>
+      <div className="staff-batch__banner">
+        <div className="staff-batch__heading-container">
+          <h1
+            className="staff-batch__title"
+            onClick={() => setShowAchievements((val) => !val)}
+          >
+            {title}
+          </h1>
+        </div>
+        <div className="staff-batch__divider"></div>
+        <div className="staff-batch__achievement-info">
+          <div className="staff-batch__achievements-list">
+            <p>Achievement 1</p>
+            <p>Achievement 2</p>
+            <p>Achievement 3</p>
+            <p>Achievement 4</p>
+            <p>Achievement 5</p>
+            <p className="staff-batch__time">
+              {new Date(Date.parse(batch.release_time)).toString()}
+            </p>
+          </div>
+        </div>
+        {showAchievement ? (
+          <IoIosArrowDropup
+            className="staff-batch__dropdown"
+            size={32}
+            onClick={onClick}
+          />
+        ) : (
+          <IoIosArrowDropdown
+            className="staff-batch__dropdown"
+            size={32}
+            onClick={onClick}
+          />
+        )}
+      </div>
       {showAchievement ? (
         <div className="staff-batch__achievements">
           {achievements.map((achievement) => (

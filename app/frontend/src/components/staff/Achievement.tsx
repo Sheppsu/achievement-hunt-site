@@ -495,18 +495,19 @@ export default function Achievement(props: AchievementProps) {
     } else if (batches === undefined) {
       content = <h1>Failed to load</h1>;
     } else {
-      const unreleasedBatches = batches.filter(
-        (b) => Date.parse(b.release_time) > Date.now(),
-      );
+      // const unreleasedBatches = batches.filter(
+      //   (b) => Date.parse(b.release_time) > Date.now(),
+      // );
       content = (
         <div className="staff-batch-move-container">
-          {unreleasedBatches
+          {batches
             .sort(
               (a, b) => Date.parse(a.release_time) - Date.parse(b.release_time),
             )
             .map((batch, i) => (
               <Button
-                children={`Batch ${i + 1 + batches.length - unreleasedBatches.length}`}
+                key={batch.id}
+                children={`Batch ${i + 1 + batches.length - batches.length}`}
                 onClick={() => doMoveToBatch(batch.id)}
               />
             ))}
@@ -652,6 +653,7 @@ export default function Achievement(props: AchievementProps) {
               name="guess"
               placeholder="Guess password"
               autoComplete="off"
+              className="staff__achievement__password-input"
             />
             <Button
               children="Submit"
