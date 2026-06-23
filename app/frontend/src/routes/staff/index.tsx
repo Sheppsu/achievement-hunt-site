@@ -22,7 +22,7 @@ import { EventContext } from "contexts/EventContext.ts";
 import { IoIosCopy, IoIosRefresh } from "react-icons/io";
 
 const VIEWS = ["achievements", "creation", "releases"] as const;
-const DEFAULT_VIEW = "releases";
+const DEFAULT_VIEW = "achievements";
 type ViewName = (typeof VIEWS)[number];
 type ViewType = {
   name: ViewName;
