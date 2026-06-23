@@ -492,6 +492,8 @@
 }
 
 .staff-batch__time {
+  padding-right: 37px;  /* Dropdown button */
+
   color: #cccccc;
   font-size: 16px;
 }

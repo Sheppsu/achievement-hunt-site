@@ -35,15 +35,13 @@ export default function AchievementsBatch({
         <div className="staff-batch__divider"></div>
         <div className="staff-batch__achievement-info">
           <div className="staff-batch__achievements-list">
-            <p>Achievement 1</p>
-            <p>Achievement 2</p>
-            <p>Achievement 3</p>
-            <p>Achievement 4</p>
-            <p>Achievement 5</p>
-            <p className="staff-batch__time">
-              {new Date(Date.parse(batch.release_time)).toString()}
-            </p>
+            {achievements.map((achievement) => (
+              <p key={achievement.id}>{achievement.name}</p>
+            ))}
           </div>
+          <p className="staff-batch__time">
+            {new Date(Date.parse(batch.release_time)).toString()}
+          </p>
         </div>
         {showAchievement ? (
           <IoIosArrowDropup
