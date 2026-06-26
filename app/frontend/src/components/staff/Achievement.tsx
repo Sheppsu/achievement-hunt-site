@@ -26,6 +26,7 @@ import { parseTags } from "util/helperFunctions.ts";
 import { PopupContext } from "contexts/PopupContext.ts";
 import { EventContext } from "contexts/EventContext.ts";
 import {
+  IoIosArrowDropdown,
   IoIosArrowDropup,
   IoIosCopy,
   IoIosExit,
@@ -521,6 +522,15 @@ export default function Achievement(props: AchievementProps) {
     });
   }, [batchesLoading, batches, doMoveToBatch, popupCtx]);
 
+  const doUnmoveAchievement = useCallback(() => {
+    moveAchievement.mutate(
+      { batch_id: null },
+      {
+        onSettled: () => moveAchievement.reset(),
+      },
+    );
+  }, []);
+
   const copyAchievementUrl = useCallback(() => {
     navigator.clipboard.writeText(achievementUrl).then(
       () => {
@@ -601,6 +611,13 @@ export default function Achievement(props: AchievementProps) {
       },
       {
         type: "button",
+        label: "Unmove",
+        icon: IoIosArrowDropdown,
+        onClick: doUnmoveAchievement,
+        hidden: !session.user!.is_admin || achievement.batch === null,
+      },
+      {
+        type: "button",
         label: achievement.staff_solved ? "Mark unsolved" : "Mark solved",
         icon: FaCheck,
         onClick: changeSolvedStatus,
@@ -620,6 +637,7 @@ export default function Achievement(props: AchievementProps) {
     [
       achievement,
       achievement.staff_solved,
+      achievement.batch,
       session.user,
       canEdit,
       onDeleteAchievement,

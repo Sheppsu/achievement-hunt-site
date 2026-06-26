@@ -1052,19 +1052,25 @@ export function useMoveAchievement(
   const queryClient = useContext(QueryClientContext);
 
   function onAchievementMoved(updatedAchievement: AchievementType) {
+    const processAchievements = (achievements: StaffAchievementType[]) => {
+      const newAchievements = [];
+
+      for (const achievement of achievements) {
+        if (achievement.id !== updatedAchievement.id) {
+          newAchievements.push(achievement);
+        }
+      }
+
+      return newAchievements;
+    };
+
     queryClient?.setQueryData(
       ["staff", "achievements", "?batch=0"],
-      (achievements: StaffAchievementType[]) => {
-        const newAchievements = [];
-
-        for (const achievement of achievements) {
-          if (achievement.id !== updatedAchievement.id) {
-            newAchievements.push(achievement);
-          }
-        }
-
-        return newAchievements;
-      },
+      processAchievements,
+    );
+    queryClient?.setQueryData(
+      ["staff", "achievements", "?batch=1"],
+      processAchievements,
     );
   }
 

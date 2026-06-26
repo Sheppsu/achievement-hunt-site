@@ -45,21 +45,27 @@ def create_batch(req, data, iteration):
 @accepts_json_data(
     DictionaryType(
         {
-            "batch_id": IntegerType(),
+            "batch_id": IntegerType(optional=True),
         }
     )
 )
 def change_achievement_batch(req, data, achievement):
-    batch = AchievementBatch.objects.filter(id=data["batch_id"]).first()
-    if batch is None:
-        return error("Invalid batch id")
+    if data["batch_id"] is None:
+        achievement.batch = None
+        achievement.save()
 
-    achievement.batch = batch
-    achievement.save()
+        discord_logger.submit_achievement(req, achievement, "unmoved")
+    else:
+        batch = AchievementBatch.objects.filter(id=data["batch_id"]).first()
+        if batch is None:
+            return error("Invalid batch id")
+
+        achievement.batch = batch
+        achievement.save()
+
+        discord_logger.submit_achievement(req, achievement, "moved")
 
     refresh_achievements_on_server()
-
-    discord_logger.submit_achievement(req, achievement, "moved")
 
     return success(achievement.serialize(includes=["batch"]))
 
