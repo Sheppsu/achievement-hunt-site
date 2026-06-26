@@ -238,8 +238,12 @@ def create_achievement(req, data, achievement=None):
     elif achievement.creator_id != req.user.id and not req.user.is_admin:
         return error("cannot edit an achievement that's not yours")
     else:
-        if achievement.batch_id is not None and not req.user.is_admin:
-            return error("only admins can edit achievements when the release is set")
+        if (
+            achievement.batch_id is not None
+            and achievement.batch.release_time >= datetime.now(tz=timezone.utc)
+            and not req.user.is_admin
+        ):
+            return error("only admins can edit achievements after release")
 
         achievement.name = data["name"]
         achievement.description = data["description"]
@@ -272,7 +276,7 @@ def create_achievement(req, data, achievement=None):
     return success(resp_data)
 
 
-@require_achievement(select=["creator"])
+@require_achievement(select=["creator", "batch"])
 def edit_achievement(req, achievement):
     return create_achievement(req, achievement=achievement)
 
