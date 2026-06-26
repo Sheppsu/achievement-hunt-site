@@ -58,6 +58,7 @@ type CompactAchievementPayloadType = {
   }[];
   solutionAlgorithm: SolutionAlgorithmData;
   algorithmEnabled: boolean;
+  change_note: string;
 };
 
 type AchievementPayloadType = Omit<CompactAchievementPayloadType, "tags"> & {
@@ -76,6 +77,7 @@ function makeDefaultPayload(): AchievementPayloadType {
     solutionAlgorithm: makeBlankSolutionAlgorithm(),
     algorithmEnabled: false,
     mode: "any",
+    change_note: "",
   };
 }
 
@@ -123,6 +125,7 @@ function makeAchievementPayload(
     solutionAlgorithm: achievement.solution_algorithm,
     algorithmEnabled: achievement.algorithm_enabled,
     mode,
+    change_note: "",
   };
 }
 
@@ -312,6 +315,7 @@ class CreationViewComponent extends React.Component<ViewProps> {
       beatmaps: payload.beatmaps,
       solution_algorithm: payload.solutionAlgorithm,
       algorithm_enabled: payload.algorithmEnabled,
+      change_note: payload.change_note,
     };
   }
 
@@ -418,6 +422,19 @@ class CreationViewComponent extends React.Component<ViewProps> {
               value={this.payload.solution}
               setValue={(value) => this.editAchievement("solution", value)}
             />
+            {this.payload.id !== null ? (
+              <TextArea
+                placeholder="Change note for this edit"
+                className="staff-creation__input"
+                value={this.payload.change_note}
+                setValue={(value) => {
+                  this.payload.change_note = value;
+                  this.forceUpdate();
+                }}
+              />
+            ) : (
+              ""
+            )}
             <Select
               isMulti
               name="tags"
