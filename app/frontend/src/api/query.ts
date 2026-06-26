@@ -566,25 +566,32 @@ export function useRateAchievement(
       avg_quality_rating: result.avg_quality_rating,
       upvotes: result.upvotes,
     });
+    const processAchievements = (
+      achievements: StaffAchievementType[] | undefined,
+    ) => {
+      if (achievements === undefined) return;
+
+      const newAchievements = [];
+
+      for (const achievement of achievements) {
+        if (achievement.id === achievementId) {
+          newAchievements.push(concatRating(achievement));
+          continue;
+        }
+
+        newAchievements.push(achievement);
+      }
+
+      return newAchievements;
+    };
 
     queryClient?.setQueryData(
       ["staff", "achievements", "?batch=0"],
-      (achievements: StaffAchievementType[] | undefined) => {
-        if (achievements === undefined) return;
-
-        const newAchievements = [];
-
-        for (const achievement of achievements) {
-          if (achievement.id === achievementId) {
-            newAchievements.push(concatRating(achievement));
-            continue;
-          }
-
-          newAchievements.push(achievement);
-        }
-
-        return newAchievements;
-      },
+      processAchievements,
+    );
+    queryClient?.setQueryData(
+      ["staff", "achievements", "?batch=1"],
+      processAchievements,
     );
 
     queryClient?.setQueryData(
