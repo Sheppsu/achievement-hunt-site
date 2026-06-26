@@ -45,7 +45,15 @@ export default function AchievementsBatch({
 
     const fulfillments = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     for (const achievement of achievements) {
-      for (let x = 1; x <= 10; x++) {
+      const lowerBound = Math.max(
+        1,
+        Math.ceil(achievement.avg_difficulty_rating! - 2),
+      );
+      const upperBound = Math.min(
+        10,
+        Math.floor(achievement.avg_difficulty_rating! + 2),
+      );
+      for (let x = lowerBound; x <= upperBound; x++) {
         fulfillments[x - 1] += Math.pow(
           0.5,
           Math.abs(x - achievement.avg_difficulty_rating!),
