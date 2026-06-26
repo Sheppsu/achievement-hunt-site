@@ -84,7 +84,7 @@ class DiscordLogger:
 
         self.submit_embeds(_create_error_embeds(req, exc), self.ERROR_WEBHOOK_URL)
 
-    def submit_achievement(self, req, achievement, action):
+    def submit_achievement(self, req, achievement, action, note=None):
         if self.STAFF_WEBHOOK_URL is None:
             _log.warning("Unable to log new achievement, STAFF_WEBHOOK_URL is None")
             return
@@ -106,6 +106,9 @@ class DiscordLogger:
             "author": _create_author_info(req.user),
             "timestamp": datetime.now(tz=timezone.utc).isoformat(),
         }
+
+        if note:
+            embed["fields"] = [{"name": "Change note", "value": note[:1024]}]
 
         self.submit_embeds([embed], self.STAFF_WEBHOOK_URL)
 

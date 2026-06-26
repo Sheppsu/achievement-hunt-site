@@ -161,6 +161,7 @@ type ViewProps = {
 class CreationViewComponent extends React.Component<ViewProps> {
   private payload: AchievementPayloadType;
   private timeoutId: number | null = null;
+  private changeNote = "";
   state = {
     saving: false,
   };
@@ -312,6 +313,7 @@ class CreationViewComponent extends React.Component<ViewProps> {
       beatmaps: payload.beatmaps,
       solution_algorithm: payload.solutionAlgorithm,
       algorithm_enabled: payload.algorithmEnabled,
+      change_note: this.changeNote.trim(),
     };
   }
 
@@ -418,6 +420,19 @@ class CreationViewComponent extends React.Component<ViewProps> {
               value={this.payload.solution}
               setValue={(value) => this.editAchievement("solution", value)}
             />
+            {this.payload.id !== null ? (
+              <TextArea
+                placeholder="Change note for this edit"
+                className="staff-creation__input"
+                value={this.changeNote}
+                setValue={(value) => {
+                  this.changeNote = value;
+                  this.forceUpdate();
+                }}
+              />
+            ) : (
+              ""
+            )}
             <Select
               isMulti
               name="tags"

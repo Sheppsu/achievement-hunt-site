@@ -201,6 +201,7 @@ def set_achievement_rating(req, data, achievement):
             "description": StringType(min_length=1, max_length=2048),
             "solution": StringType(max_length=2048),
             "tags": StringType(max_length=128),
+            "change_note": StringType(max_length=512, optional=True),
             "beatmaps": ListType(
                 DictionaryType({"id": IntegerType(), "hide": BoolType()}),
                 unique=True,
@@ -238,6 +239,8 @@ def create_achievement(req, data, achievement=None):
     elif achievement.creator_id != req.user.id and not req.user.is_admin:
         return error("cannot edit an achievement that's not yours")
     else:
+        if achievement.batch_id is not None and not data.get("change_note"):
+            return error("change note is required for batched achievements")
         if (
             achievement.batch_id is not None
             and achievement.batch.release_time <= datetime.now(tz=timezone.utc)
@@ -254,7 +257,7 @@ def create_achievement(req, data, achievement=None):
         achievement.algorithm_enabled = data["algorithm_enabled"]
         achievement.save()
 
-        discord_logger.submit_achievement(req, achievement, "edited")
+        discord_logger.submit_achievement(req, achievement, "edited", data.get("change_note"))
 
     comm.refresh_achievements_on_server()
 
