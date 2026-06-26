@@ -31,7 +31,7 @@ export default function AchievementsBatch({
 
   const showStats = useMemo(
     () =>
-      achievements.length > 1 &&
+      achievements.length > 0 &&
       achievements.every(
         (a) =>
           a.avg_quality_rating !== null && a.avg_difficulty_rating !== null,
