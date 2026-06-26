@@ -3,7 +3,7 @@ import classNames from "classnames";
 import Button from "components/inputs/Button.tsx";
 import TextInput from "components/inputs/TextInput.tsx";
 import { StateDispatch } from "contexts/StateContext.ts";
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { AppState } from "types/AppStateType.ts";
 import { parseTags, sortedConcat, toTitleCase } from "util/helperFunctions.ts";
 
@@ -172,10 +172,11 @@ export default function AchievementNavigationBar({
   achievements: AchievementType[] | undefined;
   isStaff: boolean;
 }) {
+  const searchFieldTimeoutRef = useRef<null | number>(null);
   const [searchField, setSearchField] = useState<string>("");
   const [resetting, setResetting] = useState<boolean>(false);
 
-  function refreshState() {
+  const refreshState = useCallback(() => {
     if (!achievements) return;
 
     dispatchState({
@@ -184,35 +185,48 @@ export default function AchievementNavigationBar({
     });
     dispatchState({ id: 6, achievementsSearchFilter: "" });
     setSearchField("");
-  }
+  }, [achievements, dispatchState, getDefaultNav, isStaff, setSearchField]);
 
-  function onItemClick(
-    label: keyof NavItems["rows"],
-    item: NavItem | BoolNavItem,
-  ) {
-    if (state === null || state.achievementsFilter === null) return;
+  const onItemClick = useCallback(
+    (label: keyof NavItems["rows"], item: NavItem | BoolNavItem) => {
+      if (state === null || state.achievementsFilter === null) return;
 
-    dispatchState({
-      id: 10,
-      label: label,
-      item: item.label,
-      multiSelect: label !== "sort",
-      active: item.active,
-      value: "value" in item ? item.value : undefined,
-    });
-  }
+      dispatchState({
+        id: 10,
+        label: label,
+        item: item.label,
+        multiSelect: label !== "sort",
+        active: item.active,
+        value: "value" in item ? item.value : undefined,
+      });
+    },
+    [state, state?.achievementsFilter, dispatchState],
+  );
 
-  function onLabelClick(label: keyof NavItems["rows"]) {
-    dispatchState({ id: 11, label });
-  }
+  const onLabelClick = useCallback(
+    (label: keyof NavItems["rows"]) => {
+      dispatchState({ id: 11, label });
+    },
+    [dispatchState],
+  );
 
-  function onSearchChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setSearchField(e.target.value);
-    dispatchState({
-      id: 6,
-      achievementsSearchFilter: e.target.value,
-    });
-  }
+  const onSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      // dispatch after 500ms of no change to prevent lag
+      if (searchFieldTimeoutRef.current !== null) {
+        clearTimeout(searchFieldTimeoutRef.current);
+      }
+      searchFieldTimeoutRef.current = setTimeout(() => {
+        dispatchState({
+          id: 6,
+          achievementsSearchFilter: e.target.value,
+        });
+      }, 500);
+
+      setSearchField(e.target.value);
+    },
+    [setSearchField, dispatchState],
+  );
 
   // reset navigator when switching pages (staff vs achievements)
   const isReady =
