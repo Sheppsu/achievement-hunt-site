@@ -240,7 +240,7 @@ def create_achievement(req, data, achievement=None):
     else:
         if (
             achievement.batch_id is not None
-            and achievement.batch.release_time >= datetime.now(tz=timezone.utc)
+            and achievement.batch.release_time <= datetime.now(tz=timezone.utc)
             and not req.user.is_admin
         ):
             return error("only admins can edit achievements after release")
