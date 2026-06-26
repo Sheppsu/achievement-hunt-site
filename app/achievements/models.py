@@ -153,7 +153,7 @@ class Achievement(SerializableModel):
     created_at = models.DateTimeField()
     last_edited_at = models.DateTimeField()
     batch = models.ForeignKey(AchievementBatch, on_delete=models.SET_NULL, null=True, default=None)
-    is_desc = models.BooleanField(default=True)
+    is_desc = models.BooleanField(default=True)  # for competition achievements
     completion_count = models.PositiveSmallIntegerField(default=0)
     worth_points = models.BooleanField(default=True)
     solution_algorithm = models.JSONField(default=dict)
@@ -162,6 +162,7 @@ class Achievement(SerializableModel):
     avg_quality_rating = models.FloatField(default=None, null=True)
     avg_difficulty_rating = models.FloatField(default=None, null=True)
     upvotes = models.PositiveSmallIntegerField(default=0)
+    solution_parts = models.PositiveSmallIntegerField(default=1)
 
     class Serialization:
         FIELDS = [
@@ -173,9 +174,7 @@ class Achievement(SerializableModel):
             "created_at",
             "last_edited_at",
             "worth_points",
-            "upvotes",
-            "avg_difficulty_rating",
-            "avg_quality_rating",
+            "solution_parts",
         ]
 
 
@@ -209,6 +208,8 @@ class AchievementCompletion(SerializableModel):
     time_completed = models.DateTimeField()
     placement = models.ForeignKey(AchievementCompletionPlacement, on_delete=models.CASCADE, null=True)
     time_placement = models.PositiveSmallIntegerField()
+    extra = models.JSONField(null=True, default=None)  # info like part completion
+    is_complete = models.BooleanField(default=True)  # whether all parts are complete
 
     class Meta:
         constraints = [

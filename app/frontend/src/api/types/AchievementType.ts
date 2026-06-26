@@ -20,6 +20,7 @@ export type AchievementType = {
   last_edited_at: string;
   batch: AchievementBatchType | null;
   worth_points: boolean;
+  solution_parts: number;
   solution?: string;
   creator?: { id: number; username: string } | null;
 };

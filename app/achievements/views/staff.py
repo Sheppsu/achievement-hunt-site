@@ -29,6 +29,9 @@ def serialize_full_achievement(req, achievement: Achievement):
             "solution_algorithm",
             "algorithm_enabled",
             "staff_solved",
+            "upvotes",
+            "avg_difficulty_rating",
+            "avg_quality_rating",
             SerializableField(
                 "user_rating", post_transform=lambda ratings: None if len(ratings) == 0 else ratings[0].serialize()
             ),
