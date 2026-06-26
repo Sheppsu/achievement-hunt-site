@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useCallback, useContext, useMemo, useState } from "react";
 import { SessionContext } from "contexts/SessionContext.ts";
 import {
   useCreateBatch,
@@ -12,6 +12,12 @@ import { Helmet } from "react-helmet";
 import classNames from "classnames";
 import { IoIosAddCircle } from "react-icons/io";
 import AchievementsBatch from "components/staff/AchievementsBatch.tsx";
+import AchievementNavigationBar from "components/achievements/AchievementNavigationBar.tsx";
+import {
+  useDispatchStateContext,
+  useStateContext,
+} from "contexts/StateContext.ts";
+import { getSortedAchievements } from "util/achievementSorting.ts";
 
 export default function ReleasesView({
   setView,
@@ -28,29 +34,54 @@ export default function ReleasesView({
   const [debounce, setDebounce] = useState(false);
 
   const dispatchEventMsg = useContext(EventContext);
+  const state = useStateContext();
+  const dispatchState = useDispatchStateContext();
 
-  if (achievementsLoading || batchesLoading) {
-    return <h1>Loading...</h1>;
-  }
-
-  if (achievements === undefined || batches == undefined) {
-    return <h1>Failed to load</h1>;
-  }
+  const sortedAchievements = useMemo(() => {
+    if (!achievements || state.achievementsFilter === null) {
+      return null;
+    }
+    return Object.entries(
+      getSortedAchievements(
+        achievements,
+        state.achievementsFilter,
+        state.achievementsSearchFilter,
+        false,
+        null,
+        session.user,
+      ),
+    )
+      .map(([key, a]) => a)
+      .flat();
+  }, [
+    achievements,
+    state.achievementsFilter,
+    state.achievementsSearchFilter,
+    session.user,
+  ]);
 
   // batch sorting/grouping
-  let groupedBatches: [AchievementBatchType, StaffAchievementType[]][] =
-    batches.map((b) => [b, []]);
+  let groupedBatches = useMemo(() => {
+    if (!sortedAchievements || !batches) {
+      return null;
+    }
 
-  for (const achievement of achievements) {
-    for (const batch of groupedBatches) {
-      if (batch[0].id == achievement.batch!.id) {
-        batch[1].push(achievement);
-        break;
+    const result: [AchievementBatchType, StaffAchievementType[]][] =
+      batches.map((b) => [b, []]);
+
+    for (const achievement of sortedAchievements) {
+      for (const batch of result) {
+        if (batch[0].id == achievement.batch!.id) {
+          batch[1].push(achievement);
+          break;
+        }
       }
     }
-  }
 
-  function doCreateBatch() {
+    return result;
+  }, [batches, sortedAchievements]);
+
+  const doCreateBatch = useCallback(() => {
     if (debounce) {
       return;
     }
@@ -77,13 +108,31 @@ export default function ReleasesView({
         },
       },
     );
+  }, [
+    debounce,
+    setDebounce,
+    batchDate,
+    setBatchDate,
+    createBatch,
+    dispatchEventMsg,
+  ]);
+
+  const sortBatches = useCallback(
+    (
+      a: [AchievementBatchType, StaffAchievementType[]],
+      b: [AchievementBatchType, StaffAchievementType[]],
+    ) => {
+      return Date.parse(a[0].release_time) - Date.parse(b[0].release_time);
+    },
+    [],
+  );
+
+  if (achievementsLoading || batchesLoading) {
+    return <h1>Loading...</h1>;
   }
 
-  function sortBatches(
-    a: [AchievementBatchType, StaffAchievementType[]],
-    b: [AchievementBatchType, StaffAchievementType[]],
-  ) {
-    return Date.parse(a[0].release_time) - Date.parse(b[0].release_time);
+  if (achievements === undefined || batches == undefined) {
+    return <h1>Failed to load</h1>;
   }
 
   return (
@@ -108,8 +157,14 @@ export default function ReleasesView({
           onClick={doCreateBatch}
         />
       </div>
+      <AchievementNavigationBar
+        state={state}
+        dispatchState={dispatchState}
+        achievements={achievements}
+        isStaff={true}
+      />
       <div className="staff-batches-listing">
-        {groupedBatches.sort(sortBatches).map(([batch, achievements], i) => (
+        {groupedBatches!.sort(sortBatches).map(([batch, achievements], i) => (
           <AchievementsBatch
             title={`Batch ${i + 1}`}
             batch={batch}

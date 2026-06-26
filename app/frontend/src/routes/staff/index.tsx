@@ -78,26 +78,14 @@ function AchievementsView({ setView }: { setView: (value: ViewType) => void }) {
   const session = useContext(SessionContext);
   const dispatchEventMsg = useContext(EventContext);
 
-  const filteredAchievements = useMemo(() => {
-    if (isLoading || achievements === undefined) {
-      return null;
-    }
-    if (state.showMyAchievements) {
-      return achievements.filter(
-        (a) => a.creator !== null && a.creator.id === session.user!.id,
-      );
-    }
-    return achievements;
-  }, [achievements, session.user, state.showMyAchievements, isLoading]);
-
   // don't want to refresh everytime achievements change (it's a bit disorienting)
   // so fixed sorting is fixed based on the achievements when sort was set
   const fixedSorting: [string, number[]][] | null = useMemo(() => {
-    if (filteredAchievements === null || state.achievementsFilter === null) {
+    if (!achievements || state.achievementsFilter === null) {
       return null;
     }
     const sortedAchievements = getSortedAchievements(
-      filteredAchievements,
+      achievements,
       state.achievementsFilter,
       state.achievementsSearchFilter,
       false,
@@ -125,13 +113,11 @@ function AchievementsView({ setView }: { setView: (value: ViewType) => void }) {
       fixedSorting.map(([label, ids]) => [
         label,
         ids
-          .map((id) =>
-            filteredAchievements!.filter((ach) => ach.id === id).pop(),
-          )
+          .map((id) => achievements!.filter((ach) => ach.id === id).pop())
           .filter((ach) => ach !== undefined),
       ]),
     );
-  }, [fixedSorting, filteredAchievements]);
+  }, [fixedSorting, achievements]);
 
   if (isLoading) {
     return <div>Loading...</div>;
