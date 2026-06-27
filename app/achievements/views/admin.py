@@ -11,6 +11,7 @@ from django.conf import settings
 from common.validation import *
 from .util import *
 from common.comm import refresh_achievements_on_server
+from .staff import serialize_full_achievement
 
 
 discord_logger = settings.DISCORD_LOGGER
@@ -67,7 +68,7 @@ def change_achievement_batch(req, data, achievement):
 
     refresh_achievements_on_server()
 
-    return success(achievement.serialize(includes=["batch"]))
+    return success(serialize_full_achievement(achievement))
 
 
 @require_admin

@@ -18,7 +18,7 @@ discord_logger = settings.DISCORD_LOGGER
 COMMENT_CHANNELS = ["General", "Solving"]
 
 
-def serialize_full_achievement(req, achievement: Achievement):
+def serialize_full_achievement(achievement: Achievement):
     return achievement.serialize(
         includes=[
             "comments__user",
@@ -67,7 +67,7 @@ def achievements(req, iteration):
 
     query = with_user_rating(req.user.id, query)
 
-    return success([serialize_full_achievement(req, achievement) for achievement in query.all()])
+    return success([serialize_full_achievement(achievement) for achievement in query.all()])
 
 
 @require_staff
@@ -78,7 +78,7 @@ def achievements(req, iteration):
     query_func=lambda req, query: with_user_rating(req.user.id, query),
 )
 def show_achievement(req, achievement):
-    return success(serialize_full_achievement(req, achievement))
+    return success(serialize_full_achievement(achievement))
 
 
 @require_staff

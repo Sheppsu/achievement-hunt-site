@@ -1048,10 +1048,10 @@ export function useCreateBatch(): SpecificUseMutationResult<AchievementBatchType
 
 export function useMoveAchievement(
   achievementId: number,
-): SpecificUseMutationResult<AchievementType> {
+): SpecificUseMutationResult<StaffAchievementType> {
   const queryClient = useContext(QueryClientContext);
 
-  function onAchievementMoved(updatedAchievement: AchievementType) {
+  function onAchievementMoved(updatedAchievement: StaffAchievementType) {
     const processAchievements = (achievements: StaffAchievementType[]) => {
       const newAchievements = [];
 
