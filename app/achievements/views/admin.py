@@ -43,7 +43,7 @@ def create_batch(req, data, iteration):
 @require_http_methods(["PATCH"])
 @require_admin
 @require_achievement(
-    select=["creator"],
+    select=["creator", "batch"],
     prefetch=["comments__user", "beatmaps__info"],
     query_func=lambda req, query: with_user_rating(req.user.id, query),
 )

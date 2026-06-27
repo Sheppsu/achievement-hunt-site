@@ -73,7 +73,7 @@ def achievements(req, iteration):
 @require_staff
 @require_GET
 @require_achievement(
-    select=["creator"],
+    select=["creator", "batch"],
     prefetch=["comments__user", "beatmaps__info"],
     query_func=lambda req, query: with_user_rating(req.user.id, query),
 )

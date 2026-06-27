@@ -1056,9 +1056,11 @@ export function useMoveAchievement(
       const newAchievements = [];
 
       for (const achievement of achievements) {
-        if (achievement.id !== updatedAchievement.id) {
-          newAchievements.push(updatedAchievement);
-        }
+        newAchievements.push(
+          achievement.id === updatedAchievement.id
+            ? updatedAchievement
+            : achievement,
+        );
       }
 
       return newAchievements;
