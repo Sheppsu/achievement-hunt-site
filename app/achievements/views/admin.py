@@ -11,7 +11,7 @@ from django.conf import settings
 from common.validation import *
 from .util import *
 from common.comm import refresh_achievements_on_server
-from .staff import serialize_full_achievement
+from .staff import serialize_full_achievement, with_user_rating
 
 
 discord_logger = settings.DISCORD_LOGGER
@@ -42,7 +42,11 @@ def create_batch(req, data, iteration):
 
 @require_http_methods(["PATCH"])
 @require_admin
-@require_achievement()
+@require_achievement(
+    select=["creator"],
+    prefetch=["comments__user", "beatmaps__info"],
+    query_func=lambda req, query: with_user_rating(req.user.id, query),
+)
 @accepts_json_data(
     DictionaryType(
         {
