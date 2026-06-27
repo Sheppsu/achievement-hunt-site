@@ -741,7 +741,7 @@ export default function Achievement(props: AchievementProps) {
         {filteredComments
           .sort((a, b) => Date.parse(a.posted_at) - Date.parse(b.posted_at))
           .map((comment, i) => (
-            <AchievementComment key={i} comment={comment} />
+            <AchievementComment key={comment.id} comment={comment} />
           ))}
         <TextArea
           className="staff__textarea"
