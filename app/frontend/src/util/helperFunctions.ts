@@ -205,7 +205,7 @@ export function parseMode(tags: string): keyof typeof MODE_MAP | "any" {
   for (const tag of cleanTags(tags)) {
     if (tag.startsWith("mode-")) {
       // @ts-ignore: type
-      return MODE_MAP[tag];
+      return tag;
     }
   }
 
