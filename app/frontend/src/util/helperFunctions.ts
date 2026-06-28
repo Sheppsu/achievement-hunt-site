@@ -168,7 +168,7 @@ export function* cleanTags(tags: string) {
   }
 }
 
-const modeMap: { [_k: string]: string } = {
+export const MODE_MAP = {
   "mode-o": "standard",
   "mode-t": "taiko",
   "mode-f": "catch",
@@ -180,7 +180,8 @@ export function parseTags(tags: string, includeMode: boolean = true): string[] {
   const filteredTags: string[] = [];
   for (let tag of cleanTags(tags)) {
     if (tag.startsWith("mode-")) {
-      mode = modeMap[tag];
+      // @ts-ignore: type
+      mode = MODE_MAP[tag];
       continue;
     }
 
@@ -200,11 +201,11 @@ export function parseTags(tags: string, includeMode: boolean = true): string[] {
   );
 }
 
-export function parseMode(tags: string): string {
+export function parseMode(tags: string): keyof typeof MODE_MAP | "any" {
   for (const tag of cleanTags(tags)) {
-    const mode = modeMap[tag];
-    if (mode !== undefined) {
-      return tag;
+    if (tag.startsWith("mode-")) {
+      // @ts-ignore: type
+      return MODE_MAP[tag];
     }
   }
 

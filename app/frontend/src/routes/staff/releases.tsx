@@ -18,6 +18,7 @@ import {
   useStateContext,
 } from "contexts/StateContext.ts";
 import { getSortedAchievements } from "util/achievementSorting.ts";
+import { parseMode, parseTags } from "util/helperFunctions.ts";
 
 export default function ReleasesView({
   setView,
@@ -59,6 +60,43 @@ export default function ReleasesView({
     state.achievementsSearchFilter,
     session.user,
   ]);
+  const modeCounts = useMemo(() => {
+    const counts = {
+      any: 0,
+      "mode-o": 0,
+      "mode-m": 0,
+      "mode-f": 0,
+      "mode-t": 0,
+    };
+
+    if (achievements) {
+      for (const achievement of achievements) {
+        counts[parseMode(achievement.tags)] += 1;
+      }
+    }
+
+    return counts;
+  }, [achievements]);
+  const tagCounts = useMemo(() => {
+    const counts = {
+      secret: 0,
+      competition: 0,
+      puzzle: 0,
+      password: 0,
+    };
+
+    if (achievements) {
+      for (const achievement of achievements) {
+        for (const tag of parseTags(achievement.tags, false)) {
+          if (tag in counts) {
+            counts[tag as keyof typeof counts] += 1;
+          }
+        }
+      }
+    }
+
+    return counts;
+  }, [achievements]);
 
   // batch sorting/grouping
   let groupedBatches = useMemo(() => {
@@ -141,6 +179,21 @@ export default function ReleasesView({
         <title>CTA - Staff Releases</title>
       </Helmet>
       <h1>{achievements.length} Achievements</h1>
+      <h1>Mode stats</h1>
+      <p>
+        Any: {modeCounts["any"]} | Standard: {modeCounts["mode-o"]} | Taiko:{" "}
+        {modeCounts["mode-t"]} | Catch: {modeCounts["mode-f"]} | Mania:{" "}
+        {modeCounts["mode-m"]}
+      </p>
+      <h1>Tag stats</h1>
+      <p>
+        {Object.entries(tagCounts)
+          .map(
+            ([tag, count]) =>
+              `${tag.substring(0, 1).toUpperCase()}${tag.substring(1)}: ${count}`,
+          )
+          .join(" | ")}
+      </p>
       <div
         className={classNames("batch-input-row", {
           hide: !session.user!.is_admin,
