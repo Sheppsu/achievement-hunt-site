@@ -545,6 +545,20 @@ export default function Achievement(props: AchievementProps) {
     );
   }, [achievementUrl]);
 
+  const copyAchievementId = useCallback(() => {
+    navigator.clipboard.writeText(achievement.id.toString()).then(
+      () => {
+        dispatchEventMsg({ type: "info", msg: "Copied!" });
+      },
+      () => {
+        dispatchEventMsg({
+          type: "error",
+          msg: "Failed to copy to clipboard...",
+        });
+      },
+    );
+  }, [achievement.id]);
+
   const changeSolvedStatus = useCallback(() => {
     if (markSolved.isPending) {
       return;
@@ -590,6 +604,13 @@ export default function Achievement(props: AchievementProps) {
         label: "Copy URL",
         icon: IoIosCopy,
         onClick: copyAchievementUrl,
+      },
+      {
+        type: "button",
+        label: "Copy ID",
+        icon: IoIosCopy,
+        onClick: copyAchievementId,
+        hidden: !session.user!.is_admin,
       },
       {
         type: "button",
