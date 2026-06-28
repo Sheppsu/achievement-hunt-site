@@ -175,6 +175,7 @@ export default function AchievementCreation(props: AchievementCreationProps) {
             Catch: "mode-f",
           }}
           onChange={(e: React.FormEvent<HTMLSelectElement>) => {
+            // @ts-ignore: type
             setAchievementMode(e.currentTarget.value);
           }}
           value={achievementMode}
