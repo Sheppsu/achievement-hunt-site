@@ -19,14 +19,12 @@ players = Player.objects.select_related("team", "user").filter(team__iteration_i
 
 
 def make_team(name: str):
-    while True:
-        try:
-            return Team.objects.create(name=name, anonymous_name=get_random_name(), iteration_id=iteration.id)
-        except Exception as e:
-            # for manual monitoring in case something weird is happening
-            print(f"Failed with team name {name} (probably anonymous name overlap)")
-            print(e)
-            time.sleep(0.5)
+    team = 1
+    anon_name = None
+    while team is not None:
+        anon_name = get_random_name()
+        team = Team.objects.filter(anonymous_name=anon_name, iteration_id=iteration.id).first()
+    return Team.objects.create(name=name, anonymous_name=anon_name, iteration_id=iteration.id)
 
 
 def make_nonfa_teams():
@@ -75,7 +73,7 @@ def fill_in_teams(leftover_regs, reg_type):
     return True
 
 
-def create_fa_teams(leftover_regs):
+def create_fa_teams(leftover_regs, prefix):
     print("Creating FA teams")
     possible_teams = math.ceil(len(leftover_regs) / 5)
     print(f"Possible teams: {possible_teams}")
@@ -83,11 +81,11 @@ def create_fa_teams(leftover_regs):
     print(f"Player per team: {players_per_team}")
     fa_teams = []
     for i in range(possible_teams):
-        team = make_team(f"FA Team {i + 1}")
+        team = make_team(f"{prefix} FA Team {i + 1}")
         fa_teams.append(team)
         for _ in range(players_per_team):
             if len(leftover_regs) == 0:
-                print("All regs have been assigned, quitting early")
+                print("All regs have been assigned")
                 return
 
             reg = leftover_regs.pop(random.randint(0, len(leftover_regs) - 1))
@@ -104,9 +102,9 @@ def create_fa_teams(leftover_regs):
 with transaction.atomic():
     casual_regs, competitive_regs = make_nonfa_teams()
     if fill_in_teams(casual_regs, 1):
-        create_fa_teams(casual_regs)
+        create_fa_teams(casual_regs, "Casual")
     if fill_in_teams(competitive_regs, 2):
-        create_fa_teams(competitive_regs)
+        create_fa_teams(competitive_regs, "Competitive")
 
     answer = input("Commit these changes? [y/n]: ").strip().lower()
     if answer == "y":
