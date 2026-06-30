@@ -151,7 +151,7 @@ def achievements(req, iteration):
 
         return success([achievement.serialize(includes, excludes) for achievement in query.all()])
 
-    def team_completion(c) -> bool:
+    def team_completion(c: AchievementCompletion) -> bool:
         return any((player.id == c.player_id for player in team.players.all())) if team is not None else False
 
     completion_prefetch.queryset = completion_prefetch.queryset.filter(

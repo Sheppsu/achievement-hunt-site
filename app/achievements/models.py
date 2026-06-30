@@ -154,7 +154,7 @@ class Achievement(SerializableModel):
     last_edited_at = models.DateTimeField()
     batch = models.ForeignKey(AchievementBatch, on_delete=models.SET_NULL, null=True, default=None)
     is_desc = models.BooleanField(default=True)  # for competition achievements
-    completion_count = models.PositiveSmallIntegerField(default=0)
+    completion_count = models.PositiveSmallIntegerField(default=0)  # updated periodically by server (on purpose)
     worth_points = models.BooleanField(default=True)
     solution_algorithm = models.JSONField(default=dict)
     algorithm_enabled = models.BooleanField(default=False)
