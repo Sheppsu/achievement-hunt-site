@@ -83,13 +83,13 @@ def create_fa_teams(leftover_regs, prefix):
     for i in range(possible_teams):
         team = make_team(f"{prefix} FA Team {i + 1}")
         fa_teams.append(team)
-        for _ in range(players_per_team):
+        for i in range(players_per_team):
             if len(leftover_regs) == 0:
                 print("All regs have been assigned")
                 return
 
             reg = leftover_regs.pop(random.randint(0, len(leftover_regs) - 1))
-            Player.objects.create(user_id=reg.user_id, team_id=team.id)
+            Player.objects.create(user_id=reg.user_id, team_id=team.id, team_admin=i == 0)
             print(f"Putting {reg.user.username} on team {team.name}")
 
     print("Assigning last of regs")
