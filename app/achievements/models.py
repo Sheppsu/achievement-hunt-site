@@ -175,6 +175,7 @@ class Achievement(SerializableModel):
             "last_edited_at",
             "worth_points",
             "solution_parts",
+            "avg_difficulty_rating",
         ]
 
 

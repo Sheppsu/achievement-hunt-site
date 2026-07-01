@@ -1,6 +1,7 @@
 import { AchievementCompletionType } from "api/types/AchievementCompletionType.ts";
 import {
   AchievementExtendedType,
+  OTHER_DESCRIPTIONS,
   TAG_DESCRIPTIONS,
 } from "api/types/AchievementType";
 import classNames from "classnames";
@@ -10,6 +11,7 @@ import { parseTags, toTitleCase } from "util/helperFunctions";
 import React, {
   MouseEventHandler,
   useCallback,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -19,6 +21,22 @@ import Button from "components/inputs/Button.tsx";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import TextInput from "components/inputs/TextInput.tsx";
+
+function getTagDescription(tag: string) {
+  const i = tag.indexOf(":");
+  if (i === -1) {
+    // @ts-ignore
+    return TAG_DESCRIPTIONS[tag] ?? "No description for this tag";
+  }
+  const key = tag.substring(0, i);
+  const value = tag.substring(i + 2);
+  // @ts-ignore
+  const description = OTHER_DESCRIPTIONS[key] ?? "No description for this tag";
+  if (typeof description === "string") {
+    return description;
+  }
+  return description[value];
+}
 
 export default function Achievement({
   achievement,
@@ -36,44 +54,56 @@ export default function Achievement({
   const completions = achievement.completions;
   const tags = useMemo(() => parseTags(achievement.tags), [achievement.tags]);
   const hasPasswordTag = useMemo(() => tags.includes("password"), [tags]);
+  const tagsWithExtra = useMemo(() => {
+    const extra = [`Completions: ${achievement.completion_count}`];
+    if (achievement.avg_difficulty_rating !== null) {
+      extra.push(
+        `Difficulty: ${Math.round(achievement.avg_difficulty_rating * 100) / 100}`,
+      );
+    }
+    return extra.concat(tags);
+  }, [achievement.completion_count, achievement.avg_difficulty_rating, tags]);
 
-  let infoCls = "achievement__container ";
-  if (completed == null) {
-    infoCls += "neutral";
-  } else if (completed) {
-    infoCls += "complete";
-  } else {
-    infoCls += "incomplete";
-  }
+  const infoCls = useMemo(() => {
+    if (completed === null) {
+      return "achievement__container neutral";
+    } else if (completed) {
+      return "achievement__container complete";
+    }
+    return "achievement__container incomplete";
+  }, [completed]);
 
-  const dropdownArrowProps = {
-    size: 36,
-    onClick: () => setShowCompletions((v) => !v),
-    className: "clickable",
-  };
+  const dropdownArrowProps = useMemo(
+    () => ({
+      size: 36,
+      onClick: () => setShowCompletions((v) => !v),
+      className: "clickable",
+    }),
+    [setShowCompletions],
+  );
 
-  const onTagClicked: MouseEventHandler<HTMLDivElement> = (evt) => {
-    if (popupRef.current === null) return;
+  const onTagClicked: MouseEventHandler<HTMLDivElement> = useCallback(
+    (evt) => {
+      if (popupRef.current === null) return;
 
-    const popup = popupRef.current;
-    const target = evt.target as HTMLDivElement;
+      const popup = popupRef.current;
+      const target = evt.target as HTMLDivElement;
 
-    popup.innerText =
-      // @ts-ignore
-      TAG_DESCRIPTIONS[target.innerText.toLowerCase()] ??
-      "No description for this tag";
-    popup.style.display = "block";
+      popup.innerText = getTagDescription(target.innerText.toLowerCase());
+      popup.style.display = "block";
 
-    const rect = target.getBoundingClientRect();
-    const centerX = (rect.left + rect.right) / 2;
-    const centerY = (rect.top + rect.bottom) / 2;
+      const rect = target.getBoundingClientRect();
+      const centerX = (rect.left + rect.right) / 2;
+      const centerY = (rect.top + rect.bottom) / 2;
 
-    const popupLeft = window.scrollX + centerX - 150;
-    const popupTop = window.scrollY + centerY - popup.offsetHeight - 40;
+      const popupLeft = window.scrollX + centerX - 150;
+      const popupTop = window.scrollY + centerY - popup.offsetHeight - 40;
 
-    popup.style.left = `${popupLeft}px`;
-    popup.style.top = `${popupTop}px`;
-  };
+      popup.style.left = `${popupLeft}px`;
+      popup.style.top = `${popupTop}px`;
+    },
+    [popupRef.current, TAG_DESCRIPTIONS],
+  );
 
   const onPasswordSubmitted = useCallback((e: React.SubmitEvent) => {
     e.preventDefault();
@@ -81,42 +111,57 @@ export default function Achievement({
     // TODO
   }, []);
 
-  document.addEventListener("click", (evt) => {
-    const popup = popupRef.current;
-    const target = evt.target as Node | HTMLElement | null;
-    if (
-      popup === null ||
-      target === null ||
-      ("classList" in target && target.classList.contains("achievement-tag")) ||
-      target == popup ||
-      popup.contains(target)
-    )
-      return;
+  useEffect(() => {
+    const onClick = (evt: PointerEvent) => {
+      const popup = popupRef.current;
+      const target = evt.target as Node | HTMLElement | null;
+      if (
+        popup === null ||
+        target === null ||
+        ("classList" in target &&
+          target.classList.contains("achievement-tag")) ||
+        target == popup ||
+        popup.contains(target)
+      )
+        return;
 
-    if (popup.style.display === "block") popup.style.display = "none";
-  });
+      if (popup.style.display === "block") popup.style.display = "none";
+    };
+
+    document.addEventListener("click", onClick);
+    return () => document.removeEventListener("click", onClick);
+  }, [popupRef.current]);
 
   // for CTA2 achievement
-  let dataAttributes = {};
-  if (achievement.id === 219) {
-    dataAttributes = {
-      "data-beatmap-id": 1138718,
-      "data-misses": 4,
-      "data-100s": 4,
-    };
-  }
+  const dataAttributes = useMemo(() => {
+    if (achievement.id === 219) {
+      return {
+        "data-beatmap-id": 1138718,
+        "data-misses": 4,
+        "data-100s": 4,
+      };
+    }
+    return {};
+  }, [achievement.id]);
 
-  const hasHiddenBeatmap = () => {
+  const hasHiddenBeatmap = useCallback(() => {
     for (const bm of achievement.beatmaps) {
       if (bm.hide) return true;
     }
     return false;
-  };
+  }, [achievement.beatmaps]);
 
-  const showSolutionBtn = achievement.solution || hasHiddenBeatmap();
+  const showSolutionBtn = useMemo(
+    () => achievement.solution || hasHiddenBeatmap(),
+    [achievement.solution, hasHiddenBeatmap],
+  );
 
-  let beatmapsToShow = achievement.beatmaps;
-  if (!showSolution) beatmapsToShow = beatmapsToShow.filter((b) => !b.hide);
+  const beatmapsToShow = useMemo(() => {
+    if (showSolution) {
+      return achievement.beatmaps;
+    }
+    return achievement.beatmaps.filter((b) => !b.hide);
+  }, [showSolution, achievement.beatmaps]);
 
   return (
     <>
@@ -138,8 +183,7 @@ export default function Achievement({
             </p>
             <div className="achievement__container__info__description">
               <Markdown remarkPlugins={[remarkGfm]}>
-                {`${achievement.completion_count} completions | ` +
-                  achievement.description}
+                {achievement.description}
               </Markdown>
               {showSolutionBtn && (
                 <>
@@ -189,7 +233,7 @@ export default function Achievement({
               </p>
             )}
             <div className="achievement__container__info__tags">
-              {tags.map((tag) => (
+              {tagsWithExtra.map((tag) => (
                 <div
                   key={tag}
                   className="achievement-tag clickable"

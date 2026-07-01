@@ -466,6 +466,7 @@ class CreationViewComponent extends React.Component<ViewProps> {
                   Taiko: "mode-t",
                   Mania: "mode-m",
                   Catch: "mode-f",
+                  Multiple: "mode-u",
                 }}
                 onChange={(e: React.FormEvent<HTMLSelectElement>) => {
                   this.editAchievement("mode", e.currentTarget.value);

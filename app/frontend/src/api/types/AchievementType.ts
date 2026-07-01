@@ -21,6 +21,7 @@ export type AchievementType = {
   batch: AchievementBatchType | null;
   worth_points: boolean;
   solution_parts: number;
+  avg_difficulty_rating: number | null;
   solution?: string;
   creator?: { id: number; username: string } | null;
 };
@@ -76,4 +77,22 @@ export const TAG_DESCRIPTIONS = {
     "Completing this achievement requires inputting the correct password. Find the input box on the achievement.",
   score:
     "Completing this achievement requires submitting at least one scores (may include failed scores).",
+};
+export const OTHER_DESCRIPTIONS = {
+  mode: {
+    any: "This achievement is completable in any game mode.",
+    standard:
+      "This achievement must be completed in standard or is related to the standard game mode.",
+    catch:
+      "This achievement must be completed in catch or is related to the catch game mode.",
+    taiko:
+      "This achievement must be completed in taiko or is related to the taiko game mode.",
+    mania:
+      "This achievement must be completed in mania or is related to the mania game mode.",
+    multiple:
+      "This achievement is possible in, or requires, multiple game modes, but not necessarily all of them.",
+  },
+  completions:
+    "This shows the number of teams that have completed the achievement. It updates randomly (by design), so it is not always up-to-date.",
+  difficulty: "This shows the average difficulty rated by the staff out of 10.",
 };

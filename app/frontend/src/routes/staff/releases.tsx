@@ -67,6 +67,7 @@ export default function ReleasesView({
       "mode-m": 0,
       "mode-f": 0,
       "mode-t": 0,
+      "mode-u": 0,
     };
 
     if (achievements) {
@@ -183,7 +184,7 @@ export default function ReleasesView({
       <p>
         Any: {modeCounts["any"]} | Standard: {modeCounts["mode-o"]} | Taiko:{" "}
         {modeCounts["mode-t"]} | Catch: {modeCounts["mode-f"]} | Mania:{" "}
-        {modeCounts["mode-m"]}
+        {modeCounts["mode-m"]} | Multiple: {modeCounts["mode-u"]}
       </p>
       <h1>Tag stats</h1>
       <p>

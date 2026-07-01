@@ -173,6 +173,7 @@ export const MODE_MAP = {
   "mode-t": "taiko",
   "mode-f": "catch",
   "mode-m": "mania",
+  "mode-u": "multiple",
 };
 
 export function parseTags(tags: string, includeMode: boolean = true): string[] {

@@ -728,7 +728,7 @@ export default function Achievement(props: AchievementProps) {
           ""
         )}
         {achievement.beatmaps
-          .filter((beatmap) => !beatmap.hide)
+          .filter((beatmap) => showSolution || !beatmap.hide)
           .map((beatmap) => (
             <a
               key={beatmap.info.id}
