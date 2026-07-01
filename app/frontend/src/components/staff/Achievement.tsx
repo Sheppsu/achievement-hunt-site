@@ -33,6 +33,7 @@ import {
   IoIosFlame,
   IoIosSend,
   IoIosStar,
+  IoMdEye,
 } from "react-icons/io";
 import { FaEdit, FaComment, FaCheck } from "react-icons/fa";
 import { MdDelete, MdOutlineClear } from "react-icons/md";
@@ -361,6 +362,9 @@ export default function Achievement(props: AchievementProps) {
   const [deleting, setDeleting] = useState(false);
   const [commentView, setCommentView] = useState<CommentView>("General");
   const [verifyingPwGuess, setVerifyingPwGuess] = useState(false);
+  const [showSolution, setShowSolution] = useState(
+    achievement.creator?.id == session.user?.id,
+  );
 
   const sendComment = useSendComment(achievement.id);
   const deleteAchievement = useDeleteAchievement(achievement.id);
@@ -647,6 +651,14 @@ export default function Achievement(props: AchievementProps) {
       { type: "divider" },
       {
         type: "button",
+        label: showSolution ? "Hide solution" : "Show solution",
+        icon: IoMdEye,
+        onClick: () => setShowSolution((v) => !v),
+        hidden: !achievement.staff_solved && !isCreator,
+      },
+      { type: "divider" },
+      {
+        type: "button",
         label: "Delete",
         icon: MdDelete,
         onClick: onDeleteAchievement,
@@ -666,6 +678,9 @@ export default function Achievement(props: AchievementProps) {
       doMoveAchievement,
       props.setView,
       copyAchievementUrl,
+      showSolution,
+      setShowSolution,
+      isCreator,
     ],
   );
 
@@ -700,6 +715,15 @@ export default function Achievement(props: AchievementProps) {
               unavailable={verifyingPwGuess}
             />
           </form>
+        ) : (
+          ""
+        )}
+        {showSolution ? (
+          <span className="staff__achievement__description-container solution">
+            <Markdown remarkPlugins={[remarkGfm]}>
+              {achievement.solution}
+            </Markdown>
+          </span>
         ) : (
           ""
         )}

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { IoIosMore } from "react-icons/io";
 import classNames from "classnames";
 import { splitProps } from "util/helperFunctions.ts";
@@ -104,7 +104,34 @@ export default function ActionMenu(props: ActionMenuProps) {
     };
   }, [setActionMenuOpen, actionMenuOpen]);
 
-  const [_, otherProps] = splitProps(props, elementDefaults, otherDefaults);
+  const [_, otherProps] = useMemo(
+    () => splitProps(props, elementDefaults, otherDefaults),
+    [props, elementDefaults, otherDefaults],
+  );
+
+  const menuElements = useMemo(
+    () =>
+      props.info.map((info, i) => {
+        // hide divider if nothing after it
+        if (info.type === "divider") {
+          const nextItems = props.info
+            .slice(i + 1)
+            .filter(
+              (item) =>
+                item.type === "divider" || ("hidden" in item && !item.hidden),
+            );
+          if (nextItems.length === 0 || nextItems[0].type === "divider") {
+            return createActionElement(
+              { ...info, hidden: true },
+              setActionMenuOpen,
+              i,
+            );
+          }
+        }
+        return createActionElement(info, setActionMenuOpen, i);
+      }),
+    [props.info, setActionMenuOpen, createActionElement],
+  );
 
   return (
     <>
@@ -125,22 +152,7 @@ export default function ActionMenu(props: ActionMenuProps) {
         )}
         ref={actionMenuRef}
       >
-        {props.info.map((info, i) => {
-          // hide divider if nothing after it
-          if (info.type === "divider") {
-            const nextItems = props.info
-              .slice(i + 1)
-              .filter((item) => "hidden" in item && !item.hidden);
-            if (nextItems.length === 0) {
-              return createActionElement(
-                { ...info, hidden: true },
-                setActionMenuOpen,
-                i,
-              );
-            }
-          }
-          return createActionElement(info, setActionMenuOpen, i);
-        })}
+        {menuElements}
       </div>
     </>
   );

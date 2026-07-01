@@ -105,7 +105,12 @@
 }
 
 .staff__achievement__description-container {
-  word-break: break-all;
+  word-break: break-word;
+  overflow-wrap: normal;
+}
+
+.staff__achievement__description-container.solution > p {
+  color: #f87d7d;
 }
 
 .staff__achievement__input-row {
