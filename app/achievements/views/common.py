@@ -347,7 +347,11 @@ def transfer_admin(req, data, iteration):
 
 
 @require_http_methods(["PATCH"])
-@accepts_json_data(DictionaryType({"name": StringType(min_length=1, max_length=32)}))
+@accepts_json_data(
+    DictionaryType(
+        {"name": StringType(min_length=1, max_length=32), "anonymous_name": StringType(min_length=1, max_length=64)}
+    )
+)
 @require_iteration_before_end
 @require_user
 def rename_team(req, data, iteration):
@@ -356,13 +360,19 @@ def rename_team(req, data, iteration):
         return error("not on a team or not admin")
 
     name = data["name"]
+    anonymous_name = data["anonymous_name"]
+    if not verify_name(anonymous_name):
+        return error("invalid anonymous name")
 
     try:
         team = player.team
         team.name = name
+        team.anonymous_name = anonymous_name
         team.save()
-    except:
-        return error("team name taken")
+    except Exception as e:
+        if "unique_iteration_team_name" in str(e):
+            return error("team name taken")
+        return error("anonymous team name taken")
 
     return success(team.serialize())
 

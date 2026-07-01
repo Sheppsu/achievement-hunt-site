@@ -158,7 +158,12 @@ export function useGetTeams(
   });
 }
 
-function onRenameTeam(teamData: TeamDataType, teamId: number, newName: string) {
+function onRenameTeam(
+  teamData: TeamDataType,
+  teamId: number,
+  newName: string,
+  newAnonName: string,
+) {
   const newTeams = [];
 
   for (const team of teamData.teams) {
@@ -166,6 +171,7 @@ function onRenameTeam(teamData: TeamDataType, teamId: number, newName: string) {
     if (team.id === teamId) {
       if ("name" in team) {
         team.name = newName;
+        team.anonymous_name = newAnonName;
       }
       newTeams.push(team);
       continue;
@@ -180,6 +186,7 @@ function onRenameTeam(teamData: TeamDataType, teamId: number, newName: string) {
 export function useRenameTeam(): SpecificUseMutationResult<{
   id: number;
   name: string;
+  anonymous_name: string;
 }> {
   const queryClient = useContext(QueryClientContext);
   const iteration = getIterationParams();
@@ -190,7 +197,7 @@ export function useRenameTeam(): SpecificUseMutationResult<{
         queryClient?.setQueryData(
           [...iteration, "teams"],
           (teamData: TeamDataType) =>
-            onRenameTeam(teamData, team.id, team.name),
+            onRenameTeam(teamData, team.id, team.name, team.anonymous_name),
         );
       },
     },

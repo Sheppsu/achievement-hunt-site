@@ -8,7 +8,7 @@ import {
   useSendTeamInvite,
   useTransferTeamAdmin,
 } from "api/query.ts";
-import React, { FormEvent, useContext, useState } from "react";
+import React, { FormEvent, useContext, useMemo, useState } from "react";
 import { AchievementPlayerType } from "api/types/AchievementPlayerType.ts";
 import {
   AchievementTeamExtendedType,
@@ -16,7 +16,6 @@ import {
 } from "api/types/AchievementTeamType.ts";
 import "assets/css/form.css";
 import "assets/css/team.css";
-import { SimplePromptPopup } from "components/popups/PopupContent.tsx";
 import { EventContext, EventDispatch } from "contexts/EventContext.ts";
 import { PopupContext, PopupContextType } from "contexts/PopupContext.ts";
 import { SessionContext } from "contexts/SessionContext.ts";
@@ -34,6 +33,56 @@ import { EventIterationType } from "api/types/EventIterationType.ts";
 import { calculateScore, parseMeaningfulTags } from "util/helperFunctions.ts";
 import classNames from "classnames";
 import Dropdown from "components/inputs/Dropdown.tsx";
+import { anonNameNouns, anonNameAdjectives } from "util/anonNames.ts";
+
+function NameChangePopup({
+  onSubmit,
+  defaultAnonAdjective,
+  defaultAnonNoun,
+  defaultName,
+}: {
+  onSubmit: (evt: FormEvent<HTMLFormElement>) => void;
+  defaultAnonAdjective: string;
+  defaultAnonNoun: string;
+  defaultName: string;
+}) {
+  // TODO: fix layout on mobile
+  const adjectives = useMemo(
+    () => Object.fromEntries(anonNameAdjectives.map((w) => [w, w])),
+    [],
+  );
+  const nouns = useMemo(
+    () => Object.fromEntries(anonNameNouns.map((w) => [w, w])),
+    [],
+  );
+
+  return (
+    <form onSubmit={onSubmit}>
+      <div className="form-container">
+        <div className="form-container__input">
+          <p>Team name: </p>
+          <TextInput name="team-name" defaultValue={defaultName} />
+        </div>
+        <div className="form-container__input">
+          <p>Anonymous name: </p>
+          <Dropdown
+            name="anon-name-adjective"
+            options={adjectives}
+            defaultValue={defaultAnonAdjective}
+          />
+          <Dropdown
+            name="anon-name-noun"
+            options={nouns}
+            defaultValue={defaultAnonNoun}
+          />
+        </div>
+        <div className="form-container__input center">
+          <Button type="submit" children="Submit" width="200px" />
+        </div>
+      </div>
+    </form>
+  );
+}
 
 export default function TeamCard({
   team,
@@ -65,8 +114,7 @@ export default function TeamCard({
 
   const { data: invites, isLoading: invitesLoading } =
     useGetTeamInvites(showInvites);
-  const { data: completions, isLoading: completionsLoading } =
-    useGetCompletions(iterationStarted);
+  const { data: completions } = useGetCompletions(iterationStarted);
   const renameTeam = useRenameTeam();
   const leaveTeam = useLeaveTeam();
   const sendTeamInvite = useSendTeamInvite();
@@ -137,11 +185,21 @@ export default function TeamCard({
     }
   }
 
+  const [anonNameAdjective, anonNameNoun] = useMemo(() => {
+    const split = team.anonymous_name.split(" ");
+    return [split[0], split[1]];
+  }, [team.anonymous_name]);
+
   const renameTeamPopup = () => {
     setPopup({
       title: "Rename Team",
       content: (
-        <SimplePromptPopup prompt="New team name" onSubmit={doRenameTeam} />
+        <NameChangePopup
+          onSubmit={doRenameTeam}
+          defaultAnonAdjective={anonNameAdjective}
+          defaultAnonNoun={anonNameNoun}
+          defaultName={team.name}
+        />
       ),
     });
   };
@@ -165,7 +223,10 @@ export default function TeamCard({
       return;
     }
 
-    const name = new FormData(evt.currentTarget).get("prompt-value") as string;
+    const data = new FormData(evt.currentTarget);
+    const name = data.get("team-name") as string;
+    const anonName =
+      data.get("anon-name-adjective") + " " + data.get("anon-name-noun");
     if (name.length < 1 || name.length > 32) {
       return dispatchEventMsg({
         type: "error",
@@ -176,12 +237,12 @@ export default function TeamCard({
     setDebounce(true);
 
     renameTeam.mutate(
-      { name },
+      { name, anonymous_name: anonName },
       {
         onSuccess: () => {
           dispatchEventMsg({
             type: "info",
-            msg: `Team ${team.name} successfully renamed to ${name}`,
+            msg: `Team ${team.name} successfully renamed to ${name} (${anonName})`,
           });
         },
         onSettled: () => {

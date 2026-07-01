@@ -10,6 +10,7 @@ type TextInputProps = {
   onInput?: (e: React.FormEvent<HTMLInputElement>) => void;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   autoComplete?: HTMLInputAutoCompleteAttribute;
+  defaultValue?: string;
 
   [_k: string]: any;
 };
