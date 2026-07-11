@@ -26,7 +26,8 @@ export default function TeamListingsCard({
         {teams.map((team, idx) => (
           <div key={idx}>
             <p className="card--teams__subtitle">
-              {team.name} ({team.anonymous_name}) - {team.points}pts
+              {team.name} ({team.anonymous_name}) - {team.points}pts (
+              {team.completions} completions)
             </p>
             <div className="card--teams__container players">
               {team.players

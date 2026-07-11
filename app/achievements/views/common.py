@@ -16,12 +16,14 @@ from datetime import datetime, timezone
 
 
 def serialize_team(team: Team):
-    return team.serialize(includes=["players__user"])
+    return team.serialize(includes=["players__user", "completions"])
 
 
 def select_teams(iteration_id, many=False, sort=False, **kwargs) -> list[Team] | Team | None:
-    teams = Team.objects.prefetch_related(models.Prefetch("players", Player.objects.select_related("user"))).filter(
-        iteration_id=iteration_id, **kwargs
+    teams = (
+        Team.objects.prefetch_related(models.Prefetch("players", Player.objects.select_related("user")))
+        .annotate(completions=models.Count("players__completions"))
+        .filter(iteration_id=iteration_id, **kwargs)
     )
     if sort:
         teams = teams.order_by("-points")
