@@ -166,6 +166,12 @@ p {
   gap: 8px;
 }
 
+.achievement__solution-container > p,
+.achievement__solution-container > ul,
+.achievement__solution-container > li {
+  color: #f87d7d;
+}
+
 .achievement__beatmap {
   width: calc(100% - 20px);
   padding: 10px;

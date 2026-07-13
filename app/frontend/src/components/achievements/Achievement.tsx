@@ -249,7 +249,7 @@ export default function Achievement({
                     onClick={() => setShowSolution(!showSolution)}
                   />
                   {showSolution && (
-                    <span style={{ color: "#ffc0c0" }}>
+                    <span className="achievement__solution-container">
                       <Markdown remarkPlugins={[remarkGfm]}>
                         {achievement.solution!}
                       </Markdown>
