@@ -166,6 +166,12 @@ p {
   gap: 8px;
 }
 
+.achievement__solution-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .achievement__solution-container > p,
 .achievement__solution-container > ul,
 .achievement__solution-container > li {
