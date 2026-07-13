@@ -177,6 +177,13 @@ export default function Credit() {
               >
                 nevqr
               </a>
+              <a
+                href="https://osu.ppy.sh/users/9890753"
+                target="_blank"
+                className="external-link staff"
+              >
+                SirShyLordy
+              </a>
             </div>
           </div>
           <div className="card no-scroll">
