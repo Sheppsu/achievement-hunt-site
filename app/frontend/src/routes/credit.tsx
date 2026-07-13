@@ -48,6 +48,20 @@ export default function Credit() {
               >
                 Sheppsu
               </a>
+              <a
+                href="https://osu.ppy.sh/users/17465623"
+                target="_blank"
+                className="external-link staff"
+              >
+                yandax
+              </a>
+              <a
+                href="https://osu.ppy.sh/users/14208558"
+                target="_blank"
+                className="external-link staff"
+              >
+                Alanko
+              </a>
             </div>
             <h1 className="staff-header">Achievement masterminds</h1>
             <div className="staff-container">
