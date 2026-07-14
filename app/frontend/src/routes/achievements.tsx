@@ -163,17 +163,19 @@ export default function AchievementCompletionPage() {
 
   useEffect(() => {
     if (nextBatchAt === null) {
-      if (iterationStart !== null) {
+      if (iterationStart !== null && !iterationEnded) {
         setNextBatchAt(getNextbatchAt);
       }
       return;
+    } else if (iterationEnded) {
+      setNextBatchAt(null);
     }
     const timeoutId = setTimeout(
       () => setNextBatchAt(getNextbatchAt),
       Math.max(nextBatchAt - Date.now(), 0) + 1000,
     );
     return () => clearTimeout(timeoutId);
-  }, [iterationStart, nextBatchAt, getNextbatchAt]);
+  }, [iterationStart, iterationEnded, nextBatchAt, getNextbatchAt]);
 
   const { data: teamData, isLoading: teamsLoading } = useGetTeams(showContent);
   const team = useMemo(
