@@ -158,7 +158,7 @@ export default function AchievementCompletionPage() {
     const interval = 16 * 60 * 60 * 1000;
     const nextBatch = Math.ceil((Date.now() - iterationStart) / interval);
     return iterationStart + interval * nextBatch;
-  }, [iterationStart]);
+  }, [iterationStart, iterationEnded]);
   const [nextBatchAt, setNextBatchAt] = useState<number | null>(null);
 
   useEffect(() => {
