@@ -6,6 +6,7 @@ import {
   AchievementCompletionType,
   AnonymousAchievementCompletionType,
 } from "api/types/AchievementCompletionType.ts";
+import { AchievementPlayerType } from "api/types/AchievementPlayerType.ts";
 
 export function toTitleCase(str: string) {
   switch (str) {
@@ -321,4 +322,23 @@ export function interweavingPush<T>(arr: T[], newItems: T[], join: T) {
       arr.push(join);
     }
   }
+}
+
+export function createTeamMaps(
+  teams: (AchievementTeamType | AchievementTeamExtendedType)[],
+): [
+  { [playerId: number]: AchievementPlayerType },
+  { [playerId: number]: AchievementTeamExtendedType },
+] {
+  const playersMap: { [playerId: number]: AchievementPlayerType } = {};
+  const teamsMap: { [playerId: number]: AchievementTeamExtendedType } = {};
+  for (const team of teams) {
+    if ("players" in team) {
+      for (const player of team.players) {
+        playersMap[player.id] = player;
+        teamsMap[player.id] = team;
+      }
+    }
+  }
+  return [playersMap, teamsMap];
 }

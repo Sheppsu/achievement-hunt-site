@@ -14,6 +14,7 @@ import { AppState } from "types/AppStateType.ts";
 import { getSortedAchievements } from "util/achievementSorting.ts";
 import {
   calculateScore,
+  createTeamMaps,
   getCompetitionScorings,
   getMyCompletion,
   getMyTeam,
@@ -99,17 +100,7 @@ export default function AchievementContainer({
       return [null, null];
     }
 
-    const playersMap: { [playerId: number]: AchievementPlayerType } = {};
-    const teamsMap: { [playerId: number]: AchievementTeamExtendedType } = {};
-    for (const team of teams) {
-      if ("players" in team) {
-        for (const player of team.players) {
-          playersMap[player.id] = player;
-          teamsMap[player.id] = team;
-        }
-      }
-    }
-    return [playersMap, teamsMap];
+    return createTeamMaps(teams);
   }, [teams]);
 
   const achievements = useMemo(() => {
@@ -173,8 +164,8 @@ export default function AchievementContainer({
                 achievement={achievement}
                 completed={achievement.completed}
                 points={achievement.points}
-                playersMap={playersMap!}
-                teamsMap={teamsMap!}
+                playersMap={playersMap ?? {}}
+                teamsMap={teamsMap ?? {}}
                 iterationEnded={iterationEnded}
                 competitionScorings={competitionScorings}
                 isScoreApproximated={achievement.isScoreApproximated}

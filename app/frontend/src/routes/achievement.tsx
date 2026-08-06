@@ -1,8 +1,10 @@
 import { Helmet } from "react-helmet";
 import Achievement from "../components/achievements/Achievement.tsx";
-import { useGetAchievement } from "api/query.ts";
+import { useGetAchievement, useGetTeams } from "api/query.ts";
 import { useParams } from "react-router-dom";
 import { NotFoundError } from "../errors/NotFoundError.ts";
+import { useMemo } from "react";
+import { createTeamMaps } from "util/helperFunctions.ts";
 
 export default function AchievementPage() {
   const params = useParams();
@@ -17,13 +19,23 @@ export default function AchievementPage() {
     throw new NotFoundError();
   }
 
-  const { data: achievement, isLoading } = useGetAchievement(achievementId);
+  const { data: achievement, isLoading: achievementLoading } =
+    useGetAchievement(achievementId);
+  const { data: teamData, isLoading: teamsLoading } = useGetTeams();
 
-  if (isLoading) {
+  const [playerMap, teamMap] = useMemo(() => {
+    if (!teamData) {
+      return [null, null];
+    }
+
+    return createTeamMaps(teamData.teams);
+  }, [teamData]);
+
+  if (achievementLoading || teamsLoading) {
     return <div>Loading...</div>;
   }
 
-  if (achievement === undefined) {
+  if (achievement === undefined || teamData === undefined) {
     return <div>Error loading achievement</div>;
   }
 
@@ -38,8 +50,8 @@ export default function AchievementPage() {
             achievement={achievement}
             completed="none"
             points={null}
-            teamsMap={{}}
-            playersMap={{}}
+            teamsMap={teamMap ?? {}}
+            playersMap={playerMap ?? {}}
             iterationEnded={true}
             competitionScorings={[]}
             isScoreApproximated={false}
