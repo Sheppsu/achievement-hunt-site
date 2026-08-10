@@ -22,11 +22,11 @@ import { useMemo } from "react";
 //       </div>
 
 function getTimeText(
-  timeFormat: "since-release" | "normal",
+  timeFormat: "since-release" | "normal" | "none",
   completedAt: string | null,
   releaseTime: string,
 ): string | null {
-  if (completedAt === null) {
+  if (completedAt === null || timeFormat === "none") {
     return null;
   }
 
@@ -51,7 +51,7 @@ function AchievementCompletionEntryPlayer({
 }: {
   releaseTime: string;
   player: AchievementPlayerType;
-  timeFormat: "since-release" | "normal";
+  timeFormat: "since-release" | "normal" | "none";
   part: string | null;
   value: number | null;
   timestamp: string;
@@ -74,7 +74,11 @@ function AchievementCompletionEntryPlayer({
         <p>
           <b>{player.user.username}</b>
         </p>
-        <p style={{ fontSize: "14px" }}>{timeText}</p>
+        {timeFormat === "none" ? (
+          ""
+        ) : (
+          <p style={{ fontSize: "14px" }}>{timeText}</p>
+        )}
       </div>
     </div>
   );
@@ -213,7 +217,7 @@ export default function AchievementCompletionEntry({
           key={`${p.player.id}-${p.part}`}
           releaseTime={releaseTime}
           player={p.player}
-          timeFormat={timeFormat}
+          timeFormat={players.length > 1 ? timeFormat : "none"}
           part={p.part}
           value={p.value}
           timestamp={p.timestamp}
