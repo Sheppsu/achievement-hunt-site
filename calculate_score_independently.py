@@ -75,7 +75,7 @@ def add_points(player_id, amount):
 
 
 c0 = -math.atanh(0.7)
-c1 = math.atanh(0.97)
+c1 = math.atanh(0.96)
 
 
 def calculate_a(x):
