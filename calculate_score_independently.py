@@ -140,8 +140,17 @@ for achievement in achievements:
 
 
 points_mismatch = []
-local_leaderboard = sorted(team_points.values(), key=lambda team: team["points"], reverse=True)
-site_leaderboard = sorted(teams, key=lambda team: team["points"], reverse=True)
+# order by local points
+team_ordering = [team["name"] for team in sorted(team_points.values(), key=lambda team: team["points"], reverse=True)]
+local_leaderboard = sorted(team_points.values(), key=lambda team: team_ordering.index(team["name"]))
+lb_teams = (
+    (team, idx) 
+    for team in teams 
+    if (
+        idx := next((i for i, name in enumerate(team_ordering) if name == team["name"]), None)
+    ) is not None
+)
+site_leaderboard = [item[0] for item in sorted(lb_teams, key=lambda item: item[1])]
 print("| %32s | %12s | %12s |" % ("Team", "Site points", "Local points"))
 print("|----------------------------------|--------------|--------------|")
 for site_team, local_team in zip(site_leaderboard, local_leaderboard):
@@ -150,7 +159,7 @@ for site_team, local_team in zip(site_leaderboard, local_leaderboard):
     if site_points != local_points:
         points_mismatch.append(local_team["name"])
     
-    print(f"| %32s | %12s | %12s |" % (local_team["name"], str(local_points), str(site_points)))
+    print(f"| %32s | %12s | %12s |" % (local_team["name"], str(site_points), str(local_points)))
 
 if len(points_mismatch) == 0:
     print("All points match")
